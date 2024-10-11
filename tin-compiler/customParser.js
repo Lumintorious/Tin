@@ -293,7 +293,7 @@ class Parser {
 		while (this.peek().tag !== 'PARENTHESIS_CLOSE') {
 			// Parse each parameter
 			// const param = this.parseParameter();
-			const param = this.parseExpression();
+			const param = this.parseParameter();
 			parameters.push(param);
 
 			// Check for a comma to separate parameters

@@ -68,27 +68,16 @@
         "tag": "Lambda",
         "params": [
           {
-            "tag": "Identifier",
-            "value": "x"
+            "tag": "Parameter",
+            "name": "x",
+            "type": null,
+            "defaultValue": null
           },
           {
-            "tag": "Cast",
-            "expression": {
-              "tag": "Identifier",
-              "value": "y"
-            },
-            "type": {
-              "tag": "IDENTIFIER",
-              "value": "Int",
-              "start": {
-                "line": 12,
-                "column": 14
-              },
-              "end": {
-                "line": 12,
-                "column": 17
-              }
-            }
+            "tag": "Parameter",
+            "name": "y",
+            "type": "Int",
+            "defaultValue": null
           }
         ],
         "block": {
