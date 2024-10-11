@@ -130,7 +130,7 @@ const PRECEDENCE = {
 	'|': 3,
 	'@': 2,
 	// ':': 1,
-	// '=': 0  // Assignment (right-associative)
+	'=': 0  // Assignment (right-associative)
 };
 
 
@@ -182,22 +182,7 @@ class Parser {
 
 
 
-		let left = this.parseExpression()
-		while (this.peek() && this.peek().value === "=") {
-			// Consume the operator
-			this.consume('OPERATOR');
-
-			// Parse the right-hand side with precedence rules (note: higher precedence for right-side)
-			const right = this.parseExpression();
-
-			// Combine into a binary expression
-			console.log(left)
-			left = new Definition(left.value, right, true, true, left.type.value);
-
-			// left = new BinaryExpression(left, operator, right);
-		}
-
-		return left;
+		return this.parseExpression();
 	}
 
 	parseApply(callee) {

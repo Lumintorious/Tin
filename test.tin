@@ -2,11 +2,10 @@ Cat = type
 	name: String
 	age: Int = 1
 
+
 Pokemon = type
 	damage: Int
 	health: Int
-
-
 
 add = (x, y: Int) -> 
 	q: Int = 1 + 2

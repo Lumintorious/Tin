@@ -81,11 +81,11 @@
               "tag": "IDENTIFIER",
               "value": "Int",
               "start": {
-                "line": 11,
+                "line": 12,
                 "column": 14
               },
               "end": {
-                "line": 11,
+                "line": 12,
                 "column": 17
               }
             }
