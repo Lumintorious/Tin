@@ -1,0 +1,22 @@
+Cat = type
+	name: String
+	age: Int = 1
+
+Pokemon = type
+	damage: Int
+	health: Int
+
+
+
+add = (x, y: Int) -> 
+	q: Int = 1 + 2
+	x + y
+
+myCat = Cat("Kitty",	12)
+
+if 1 < 2 then
+	print(32)
+else
+	print(44)
+
+print(myCat.name)

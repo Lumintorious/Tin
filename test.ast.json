@@ -1,0 +1,236 @@
+{
+  "tag": "Block",
+  "statements": [
+    {
+      "tag": "BinaryExpression",
+      "left": {
+        "tag": "Identifier",
+        "value": "Cat"
+      },
+      "operator": "=",
+      "right": {
+        "tag": "TypeDef",
+        "fieldDefs": [
+          {
+            "tag": "FieldDef",
+            "name": "name",
+            "type": "String",
+            "defaultValue": null,
+            "isTypeLevel": true
+          },
+          {
+            "tag": "FieldDef",
+            "name": "age",
+            "type": "Int",
+            "defaultValue": 1,
+            "isTypeLevel": true
+          }
+        ],
+        "isTypeLevel": true
+      }
+    },
+    {
+      "tag": "BinaryExpression",
+      "left": {
+        "tag": "Identifier",
+        "value": "Pokemon"
+      },
+      "operator": "=",
+      "right": {
+        "tag": "TypeDef",
+        "fieldDefs": [
+          {
+            "tag": "FieldDef",
+            "name": "damage",
+            "type": "Int",
+            "defaultValue": null,
+            "isTypeLevel": true
+          },
+          {
+            "tag": "FieldDef",
+            "name": "health",
+            "type": "Int",
+            "defaultValue": null,
+            "isTypeLevel": true
+          }
+        ],
+        "isTypeLevel": true
+      }
+    },
+    {
+      "tag": "BinaryExpression",
+      "left": {
+        "tag": "Identifier",
+        "value": "add"
+      },
+      "operator": "=",
+      "right": {
+        "tag": "Lambda",
+        "params": [
+          {
+            "tag": "Identifier",
+            "value": "x"
+          },
+          {
+            "tag": "Cast",
+            "expression": {
+              "tag": "Identifier",
+              "value": "y"
+            },
+            "type": {
+              "tag": "IDENTIFIER",
+              "value": "Int",
+              "start": {
+                "line": 11,
+                "column": 14
+              },
+              "end": {
+                "line": 11,
+                "column": 17
+              }
+            }
+          }
+        ],
+        "block": {
+          "tag": "Block",
+          "statements": [
+            {
+              "tag": "Definition",
+              "name": "q",
+              "value": {
+                "tag": "BinaryExpression",
+                "left": {
+                  "tag": "Literal",
+                  "type": "Number",
+                  "value": 1
+                },
+                "operator": "+",
+                "right": {
+                  "tag": "Literal",
+                  "type": "Number",
+                  "value": 2
+                }
+              },
+              "type": "Int"
+            },
+            {
+              "tag": "BinaryExpression",
+              "left": {
+                "tag": "Identifier",
+                "value": "x"
+              },
+              "operator": "+",
+              "right": {
+                "tag": "Identifier",
+                "value": "y"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tag": "BinaryExpression",
+      "left": {
+        "tag": "Identifier",
+        "value": "myCat"
+      },
+      "operator": "=",
+      "right": {
+        "tag": "Apply",
+        "callee": {
+          "tag": "Identifier",
+          "value": "Cat"
+        },
+        "args": [
+          {
+            "tag": "Literal",
+            "type": "String",
+            "value": "Kitty"
+          },
+          {
+            "tag": "Literal",
+            "type": "Number",
+            "value": 12
+          }
+        ]
+      }
+    },
+    {
+      "tag": "IfStatement",
+      "condition": {
+        "tag": "BinaryExpression",
+        "left": {
+          "tag": "Literal",
+          "type": "Number",
+          "value": 1
+        },
+        "operator": "<",
+        "right": {
+          "tag": "Literal",
+          "type": "Number",
+          "value": 2
+        }
+      },
+      "trueBranch": {
+        "tag": "Block",
+        "statements": [
+          {
+            "tag": "Apply",
+            "callee": {
+              "tag": "Identifier",
+              "value": "print"
+            },
+            "args": [
+              {
+                "tag": "Literal",
+                "type": "Number",
+                "value": 32
+              }
+            ]
+          }
+        ]
+      },
+      "falseBranch": {
+        "tag": "Block",
+        "statements": [
+          {
+            "tag": "Apply",
+            "callee": {
+              "tag": "Identifier",
+              "value": "print"
+            },
+            "args": [
+              {
+                "tag": "Literal",
+                "type": "Number",
+                "value": 44
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "tag": "Apply",
+      "callee": {
+        "tag": "Identifier",
+        "value": "print"
+      },
+      "args": [
+        {
+          "tag": "BinaryExpression",
+          "left": {
+            "tag": "Identifier",
+            "value": "myCat"
+          },
+          "operator": ".",
+          "right": {
+            "tag": "Identifier",
+            "value": "name"
+          }
+        }
+      ]
+    }
+  ]
+}
