@@ -1,4 +1,4 @@
-const { parseNewType } = require("./typeParser");
+const { parseNewType, LambdaType } = require("./typeParser");
 
 function testIs(tag, value) {
 	return (token) => {
@@ -12,12 +12,14 @@ function testIs(tag, value) {
 
 const applyableKeywords = ["return", "mutable"]
 
-class Definition {
-	constructor(name, value, isFirstDeclaration = true, isMutable = false, type) {
-		this.tag = 'Definition'; // tag of the AST node
-		this.name = name;          // Name of the variable
-		this.value = value;      // Lambda function associated with the definition
+class Assignment {
+	constructor(lhs, value, isDeclaration = true, type) {
+		this.tag = 'Assignment'; // tag of the AST node
+		this.lhs = lhs;          // Name of the variable
+		this.value = value;      // Lambda function associated with the Assignment
 		this.type = type
+		this.isDeclaration = isDeclaration;
+		this.isTypeLevel = lhs.tag === "Identifier" && lhs.value.charAt(0) === lhs.value.charAt(0).toUpperCase()
 	}
 }
 
@@ -104,6 +106,21 @@ class BinaryExpression {
 	}
 }
 
+class Optional {
+	constructor(expression) {
+		this.tag = "Optional";
+		this.expression = expression;
+	}
+}
+
+class Select {
+	constructor(owner, field) {
+		this.tag = 'Select';
+		this.owner = owner;
+		this.field = field;
+	}
+}
+
 class AppliedKeyword {
 	constructor(keyword, param) {
 		this.tag = "AppliedKeyword"
@@ -152,7 +169,7 @@ class Parser {
 	}
 
 	is(tokenValue) {
-		return this.peek().value === tokenValue;
+		return this.peek() && this.peek().value === tokenValue;
 	}
 
 	isA(tokentag) {
@@ -168,7 +185,7 @@ class Parser {
 		}
 
 		if (this.is("def") || this.is("let")) {
-			return this.parseDefinition();
+			return this.parseAssignment();
 		}
 
 		if (token.tag === "KEYWORD" && token.value === "print") {
@@ -186,7 +203,7 @@ class Parser {
 	}
 
 	parseApply(callee) {
-		this.consume('PARENS', '('); // Consume '('
+		const start = this.consume('PARENS', '('); // Consume '('
 		const args = [];
 
 		// Parse arguments (expressions)
@@ -204,35 +221,29 @@ class Parser {
 			}
 		}
 
-		this.consume('PARENS', ')'); // Consume ')'
+		const end = this.consume('PARENS', ')'); // Consume ')'
 
-		return new Apply(callee, args);  // Return a function application node
+		return new Apply(callee, args).fromTo(start, end);  // Return a function application node
 	}
 
-	parseDefinition() {
-		this.consume("KEYWORD", "def");
-		const name = this.consume("IDENTIFIER").value;
-		this.consume("OPERATOR", "=");
-		const lambda = this.parseExpression(); // Parse the lambda function
-		return new Definition(name, lambda);
-	}
 
-	parseExpression(precedence = 0) {
+	parseExpression(precedence = 0, stopAtEquals = false) {
+		const startPos = this.peek().start;
 		let left = this.parsePrimary();  // Parse the left-hand side (like a literal or identifier)
 
 		while (this.peek() && this.peek().tag === 'PARENS' && this.peek().value === '(') {
 			left = this.parseApply(left);
 		}
 
-
 		if (this.is(":")) {
 			this.consume(":");
-			const type = this.consume("IDENTIFIER");
-			left = new Cast(left, type);
+			// const type = this.consume("IDENTIFIER");
+			const type = this.parseExpression(-1, true);
+			left = new Cast(left, type).fromTo(startPos, this.peek().end);
 		}
 
 		// Continue parsing if we find a binary operator with the appropriate precedence
-		while (this.peek() && this.isBinaryOperator(this.peek())) {
+		while ((!stopAtEquals || !this.is("=")) && this.peek() && this.isBinaryOperator(this.peek())) {
 			const operator = this.peek().value;
 			const operatorPrecedence = PRECEDENCE[operator];
 
@@ -249,13 +260,32 @@ class Parser {
 
 			// Combine into a binary expression
 
-			if (operator === "=" && left.tag === "Cast" && left.expression.tag === "Identifier") {
-				console.log(left)
-				left = new Definition(left.expression.value, right, true, true, left.type.value);
+			if (operator === "=" && left.tag === "Select") {
+				left = new Assignment(left, right, false);
 				break;
 			}
 
-			left = new BinaryExpression(left, operator, right);
+			if (operator === "=" && left.tag === "Cast" && left.expression.tag === "Identifier") {
+				left = new Assignment(left.expression, right, true, left.type).fromTo(left.position.start, this.peek().end);
+				break;
+			}
+
+			if (operator === "=" && left.tag === "Identifier") {
+				left = new Assignment(left, right, true);
+				break;
+			}
+
+			if (operator === ".") {
+				left = new Select(left, right)
+			} else {
+				left = new BinaryExpression(left, operator, right);
+			}
+
+		}
+
+		if (this.peek() && this.peek().value === "?") {
+			this.consume("OPERATOR")
+			left = new Optional(left)
 		}
 
 		return left;
@@ -281,6 +311,16 @@ class Parser {
 		return params;
 	}
 
+	// If an Identifier or Cast, turn into Assignment with missing value or type
+	resolveAsAssignment(param) {
+		if (param.tag === "Cast") {
+			param = new Assignment(param.expression, undefined, true, param.type)
+		}
+		if (param.tag === "Identifier") {
+			param = new Assignment(param, undefined, true, undefined)
+		}
+		return param;
+	}
 
 	parseLambda() {
 		// Ensure we have the opening parenthesis for the parameters
@@ -293,7 +333,10 @@ class Parser {
 		while (this.peek().tag !== 'PARENTHESIS_CLOSE') {
 			// Parse each parameter
 			// const param = this.parseParameter();
-			const param = this.parseParameter();
+			let param = this.parseExpression();
+			param = this.resolveAsAssignment(param);
+			param.isDeclaration = false;
+
 			parameters.push(param);
 
 			// Check for a comma to separate parameters
@@ -310,18 +353,24 @@ class Parser {
 		const arrow = this.consume("OPERATOR")
 		if (arrow.value === "->") {
 			// Value Level
+			// Parse the body of the lambda (this could be another expression)
+			let body = this.parseExpression(); // You would need a parseExpression function
+			if (body.tag !== "Block") {
+				body = new Block([body])
+			}
+			return new Lambda(parameters, body)
 		} else if (arrow.value === "=>") {
 			// Type Level
+			let returnType = this.parseExpression(0, true);
+			if (returnType.isTypeLevel) {
+				this.createError("Expected type-level expression, got " + returnType.tag, arrow)
+			}
+			return new LambdaType(parameters, returnType)
 		} else {
 			this.createError("Expected -> or =>", token)
 		}
 
-		// Parse the body of the lambda (this could be another expression)
-		let body = this.parseExpression(); // You would need a parseExpression function
-		if (body.tag !== "Block") {
-			body = new Block([body])
-		}
-		return new Lambda(parameters, body)
+
 	}
 
 	parsePrintStatement() {
@@ -414,8 +463,14 @@ class Parser {
 		if (token.tag === 'STRING') {
 			return new Literal(String(token.value), "String");
 		}
+		if (token.value === "true" || token.value === "false") {
+			return new Literal(token.value, "Boolean")
+		}
+		if (token.value === "void") {
+			return new Literal(token.value, "Void")
+		}
 		if (token.tag === 'IDENTIFIER') {
-			return new Identifier(token.value);
+			return new Identifier(token.value).fromTo(token, token);
 		}
 
 		if (token.value === "type") {
@@ -447,7 +502,7 @@ class Parser {
 	}
 
 	omit(expectedTag) {
-		if (this.peek().tag === expectedTag) {
+		if (this.peek() && this.peek().tag === expectedTag) {
 			this.current++
 		}
 	}
@@ -495,6 +550,14 @@ class Parser {
 			`${message} at line ${token.start.line}, column ${token.start.column}, token = ${token.tag}`, e
 		);
 	}
+}
+
+Object.prototype.fromTo = function (startToken, endToken) {
+	this.position = {
+		start: startToken,
+		end: endToken
+	}
+	return this;
 }
 
 // Create a parser instance

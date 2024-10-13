@@ -4,8 +4,8 @@ class Lexer {
 		this.position = 0;
 		this.line = 1;
 		this.column = 1;
-		this.keywords = ['def', 'let', 'return', 'type', 'if', 'else', 'while', 'for', "mutable"];
-		this.operators = ['->', '=>', '&&', '=', '+', '*', '@', '/', '-', ':', ',', '.', '&', '|', '<', '>'];
+		this.keywords = ['def', 'let', 'return', 'type', 'if', 'else', 'while', 'for', "mutable", "true", "false", "void"];
+		this.operators = ['->', '=>', '&&', '=', '+', '*', '@', '/', '-', ':', ',', '.', '&', '|', '<', '>', '?'];
 		this.parens = ['(', '[', '{', '}', ']', ')']
 		this.indentStack = [0];  // To track indentation levels
 	}
@@ -203,7 +203,7 @@ class Lexer {
 		let start = this.position;
 		let startColumn = this.column;
 
-		while (/[a-zA-Z_]/.test(this.peek())) {
+		while (this.peek() !== undefined && /[a-zA-Z_]/.test(this.peek())) {
 			this.position++;
 			this.column++;
 		}

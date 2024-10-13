@@ -1,100 +1,15 @@
-IDENTIFIER   | Cat          |   1, 1    
-OPERATOR     | =            |   1, 5    
-KEYWORD      | type         |   1, 7    
 NEWLINE      |              |   1, 1    
-INDENT       | 4            |   2, 1    
-IDENTIFIER   | name         |   2, 2    
-OPERATOR     | :            |   2, 6    
-IDENTIFIER   | String       |   2, 8    
+IDENTIFIER   | x            |   2, 1    
+OPERATOR     | :            |   2, 2    
+IDENTIFIER   | String       |   2, 4    
+OPERATOR     | =            |   2, 11   
+STRING       | ss           |   2, 13   
 NEWLINE      |              |   2, 1    
-IDENTIFIER   | age          |   3, 2    
-OPERATOR     | :            |   3, 5    
-IDENTIFIER   | Int          |   3, 7    
-OPERATOR     | =            |   3, 11   
-NUMBER       | 1            |   3, 13   
 NEWLINE      |              |   3, 1    
-DEDENT       |              |   4, 1    
+IDENTIFIER   | print        |   4, 1    
+PARENS       | (            |   4, 6    
+IDENTIFIER   | x            |   4, 7    
+PARENS       | )            |   4, 8    
 NEWLINE      |              |   4, 1    
 NEWLINE      |              |   5, 1    
-IDENTIFIER   | Pokemon      |   6, 1    
-OPERATOR     | =            |   6, 9    
-KEYWORD      | type         |   6, 11   
-NEWLINE      |              |   6, 1    
-INDENT       | 4            |   7, 1    
-IDENTIFIER   | damage       |   7, 2    
-OPERATOR     | :            |   7, 8    
-IDENTIFIER   | Int          |   7, 10   
-NEWLINE      |              |   7, 1    
-IDENTIFIER   | health       |   8, 2    
-OPERATOR     | :            |   8, 8    
-IDENTIFIER   | Int          |   8, 10   
-NEWLINE      |              |   8, 1    
-DEDENT       |              |   9, 1    
-NEWLINE      |              |   9, 1    
-IDENTIFIER   | add          |  10, 1    
-OPERATOR     | =            |  10, 5    
-PARENS       | (            |  10, 7    
-IDENTIFIER   | x            |  10, 8    
-OPERATOR     | ,            |  10, 9    
-IDENTIFIER   | y            |  10, 11   
-OPERATOR     | :            |  10, 12   
-IDENTIFIER   | Int          |  10, 14   
-PARENS       | )            |  10, 17   
-OPERATOR     | ->           |  10, 19   
-NEWLINE      |              |  10, 1    
-INDENT       | 4            |  11, 1    
-IDENTIFIER   | q            |  11, 2    
-OPERATOR     | :            |  11, 3    
-IDENTIFIER   | Int          |  11, 5    
-OPERATOR     | =            |  11, 9    
-NUMBER       | 1            |  11, 11   
-OPERATOR     | +            |  11, 13   
-NUMBER       | 2            |  11, 15   
-NEWLINE      |              |  11, 1    
-IDENTIFIER   | x            |  12, 2    
-OPERATOR     | +            |  12, 4    
-IDENTIFIER   | y            |  12, 6    
-NEWLINE      |              |  12, 1    
-DEDENT       |              |  13, 1    
-NEWLINE      |              |  13, 1    
-IDENTIFIER   | myCat        |  14, 1    
-OPERATOR     | =            |  14, 7    
-IDENTIFIER   | Cat          |  14, 9    
-PARENS       | (            |  14, 12   
-STRING       | Kitty        |  14, 13   
-OPERATOR     | ,            |  14, 20   
-NUMBER       | 12           |  14, 22   
-PARENS       | )            |  14, 24   
-NEWLINE      |              |  14, 1    
-NEWLINE      |              |  15, 1    
-KEYWORD      | if           |  16, 1    
-NUMBER       | 1            |  16, 4    
-OPERATOR     | <            |  16, 6    
-NUMBER       | 2            |  16, 8    
-IDENTIFIER   | then         |  16, 10   
-NEWLINE      |              |  16, 1    
-INDENT       | 4            |  17, 1    
-IDENTIFIER   | print        |  17, 2    
-PARENS       | (            |  17, 7    
-NUMBER       | 32           |  17, 8    
-PARENS       | )            |  17, 10   
-NEWLINE      |              |  17, 1    
-DEDENT       |              |  18, 1    
-KEYWORD      | else         |  18, 1    
-NEWLINE      |              |  18, 1    
-INDENT       | 4            |  19, 1    
-IDENTIFIER   | print        |  19, 2    
-PARENS       | (            |  19, 7    
-NUMBER       | 44           |  19, 8    
-PARENS       | )            |  19, 10   
-NEWLINE      |              |  19, 1    
-DEDENT       |              |  20, 1    
-NEWLINE      |              |  20, 1    
-IDENTIFIER   | print        |  21, 1    
-PARENS       | (            |  21, 6    
-IDENTIFIER   | myCat        |  21, 7    
-OPERATOR     | .            |  21, 12   
-IDENTIFIER   | name         |  21, 13   
-PARENS       | )            |  21, 17   
-NEWLINE      |              |  21, 1    
 --undefined--

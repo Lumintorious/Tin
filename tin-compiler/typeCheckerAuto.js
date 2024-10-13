@@ -1,165 +1,201 @@
-function typeCheck(ast, typeDefinitions = {}) {
-	// Helper to check if a type is defined
-	const getType = (name) => typeDefinitions[name] || null;
-
-	// Helper to check type compatibility
-	const isTypeCompatible = (actualType, expectedType) => {
-		return actualType === expectedType || (expectedType === null); // Allow null for optional values
-	};
-
-	// Check if an expression has a type
-	function checkExpression(node) {
-		switch (node.tag) {
-			case 'Identifier':
-				return getType(node.value) ? node.value : null;
-
-			case 'Literal':
-				return node.type; // Return the type of the literal (e.g., "String", "Number")
-
-			case 'BinaryExpression':
-				const leftType = checkExpression(node.left);
-				const rightType = checkExpression(node.right);
-				// Assuming the result type is the left type for assignment
-				return leftType || rightType;
-
-			case 'Lambda':
-				// Check parameter default values as expressions
-				node.params.forEach((param) => {
-					if (param.defaultValue) {
-						checkExpression(param.defaultValue);
-					}
-				});
-				checkNode(node.block); // Check the block inside the lambda
-				return null; // Lambdas don't have a direct return type
-
-			case 'Apply':
-				const calleeType = checkExpression(node.callee);
-				// Return the type of the callee (function)
-				return calleeType;
-
-			case 'TypeDef':
-				return null; // Type definitions themselves don't have a type in this context
-
-			default:
-				throw new Error(`Unknown AST node type: '${node.tag}'.`);
-		}
+class TypeChecker {
+	constructor(symbolTable) {
+		this.symbolTable = symbolTable;
 	}
 
-	// Main function to iterate through the AST and validate types
-	function checkNode(node) {
-		switch (node.tag) {
-			case 'Block':
-				node.statements.forEach(checkNode);
+	check(astNode) {
+		switch (astNode.tag) {
+			case 'Assignment':
+				this.checkAssignment(astNode);
 				break;
-
-			case 'BinaryExpression':
-				// For assignment (e.g., x = TypeDef)
-				if (node.operator === '=') {
-					const varName = node.left.value;
-					const rightTypeDef = node.right;
-
-					if (rightTypeDef.tag === 'TypeDef') {
-						// Register type definition
-						typeDefinitions[varName] = rightTypeDef.fieldDefs.reduce((acc, field) => {
-							acc[field.name] = field.type;
-							return acc;
-						}, {});
-					} else {
-						const rightType = checkExpression(node.right);
-						const varType = getType(varName);
-						if (!varType) {
-							throw new Error(`Variable '${varName}' is not defined.`);
-						}
-						if (!isTypeCompatible(rightType, varType)) {
-							throw new Error(`Type mismatch: '${rightType}' is not compatible with '${varType}' for variable '${varName}'.`);
-						}
-					}
-				}
-				break;
-
-			case 'Lambda':
-				node.params.forEach((param) => {
-					if (param.type) {
-						if (!getType(param.type)) {
-							throw new Error(`Type '${param.type}' is not defined for parameter '${param.name}'.`);
-						}
-					}
-				});
-				checkNode(node.block); // Check the block inside the lambda
-				break;
-
-			case 'IfStatement':
-				const conditionType = checkExpression(node.condition);
-				if (conditionType !== 'Boolean') {
-					throw new Error(`Condition of if statement must be of type 'Boolean', but got '${conditionType}'.`);
-				}
-				checkNode(node.trueBranch);
-				checkNode(node.falseBranch);
-				break;
-
-			case 'Apply':
-				// Check if the function is defined
-				const functionName = node.callee.value;
-				const funcType = getType(functionName);
-				if (!funcType) {
-					throw new Error(`Function '${functionName}' is not defined.`);
-				}
-				// Check argument types
-				node.args.forEach((arg) => {
-					const argType = checkExpression(arg);
-					// Ensure argType matches the expected type
-					if (!isTypeCompatible(argType, funcType)) {
-						throw new Error(`Argument type '${argType}' is not compatible with expected type '${funcType}' for function '${functionName}'.`);
-					}
-				});
-				break;
-
-			case 'TypeDef':
-				// Register the type definition
-				const typeName = node.fieldDefs[0]?.name; // Assume first field is the type name
-				typeDefinitions[typeName] = {};
-				node.fieldDefs.forEach(field => {
-					typeDefinitions[typeName][field.name] = field.type;
-				});
-				break;
-
 			case 'Definition':
-				// Check variable definition without keywords
-				const defVarName = node.name; // Use the name field directly
-				const defValue = node.value;
-
-				// Check the right side expression for type compatibility
-				const definedType = checkExpression(defValue);
-
-				// Register the variable in typeDefinitions
-				if (node.type) {
-					// If a type is explicitly defined
-					typeDefinitions[defVarName] = node.type;
-				} else {
-					// Infer type from the value expression
-					typeDefinitions[defVarName] = definedType;
-				}
-
-				if (!definedType) {
-					throw new Error(`Type for variable '${defVarName}' could not be determined.`);
-				}
+				this.checkDefinition(astNode);
 				break;
-
+			case 'Lambda':
+				this.checkLambda(astNode);
+				break;
+			case 'IfStatement':
+				this.checkIfStatement(astNode);
+				break;
+			case 'BinaryExpression':
+				this.checkBinaryExpression(astNode);
+				break;
+			case 'Apply':
+				this.checkApply(astNode);
+				break;
+			case 'Literal':
+				this.checkLiteral(astNode);
+				break;
+			case 'Block':
+				this.checkBlock(astNode);
+				break;
+			case 'Group':
+				this.checkGroup(astNode);
+				break;
+			case 'Cast':
+				this.checkCast(astNode);
+				break;
+			case 'Identifier':
+				this.checkIdentifier(astNode);
+				break;
 			default:
-				throw new Error(`Unknown AST node type: '${node.tag}'.`);
+				console.warn(`No type check implemented for: ${astNode.tag}`);
 		}
 	}
 
-	// Check the entire AST starting from the root
-	checkNode(ast);
+	checkAssignment(node) {
+		console.log(`Checking assignment: ${node.lhs.value}`);
+
+		const assignedType = this.getExpressionType(node.value);
+		const expectedType = node.type || this.symbolTable.findSymbol(node.lhs.value)?.typeSymbol;
+
+		if (assignedType !== expectedType) {
+			console.error(`Type error: Cannot assign ${assignedType} to ${node.lhs.value}, expected ${expectedType}.`);
+		} else {
+			console.log(`Assignment is type correct for ${node.lhs.value}`);
+		}
+	}
+
+	checkDefinition(node) {
+		console.log(`Checking definition: ${node.name}`);
+		this.check(node.value); // Check the assigned value
+	}
+
+	checkLambda(node) {
+		console.log(`Checking lambda with params: ${node.params.map(p => p.name).join(', ')}`);
+		node.params.forEach(param => {
+			if (!this.isValidType(param.type)) {
+				console.error(`Parameter type error: ${param.name} has invalid type ${param.type}.`);
+			}
+		});
+		this.check(node.block); // Check the lambda's body (block)
+	}
+
+	checkIfStatement(node) {
+		console.log(`Checking if statement`);
+		const conditionType = this.getExpressionType(node.condition);
+		if (conditionType !== 'Boolean') {
+			console.error(`Type error: If statement condition must be Boolean, got ${conditionType}.`);
+		}
+
+		this.check(node.trueBranch);
+		if (node.falseBranch) {
+			this.check(node.falseBranch);
+		}
+	}
+
+	checkBinaryExpression(node) {
+		console.log(`Checking binary expression`);
+		const leftType = this.getExpressionType(node.left);
+		const rightType = this.getExpressionType(node.right);
+
+		if (leftType !== rightType) {
+			console.error(`Type error: Mismatched types ${leftType} and ${rightType} in binary expression.`);
+		}
+	}
+
+	checkApply(node) {
+		console.log(`Checking function application`);
+		const calleeType = this.getExpressionType(node.callee);
+
+		if (!calleeType || calleeType.tag !== 'Lambda') {
+			console.error(`Type error: ${node.callee.value} is not a function.`);
+			return;
+		}
+
+		const expectedParams = calleeType.params;
+		const appliedArgs = node.args;
+
+		if (expectedParams.length !== appliedArgs.length) {
+			console.error(`Type error: Function ${node.callee.value} expects ${expectedParams.length} arguments, but got ${appliedArgs.length}.`);
+			return;
+		}
+
+		for (let i = 0; i < appliedArgs.length; i++) {
+			const paramType = expectedParams[i].type;
+			const argType = this.getExpressionType(appliedArgs[i]);
+
+			if (paramType !== argType) {
+				console.error(`Type error: Argument ${i + 1} of ${node.callee.value} should be ${paramType}, but got ${argType}.`);
+			} else {
+				console.log(`Argument ${i + 1} of ${node.callee.value} is correct.`);
+			}
+		}
+	}
+
+	checkBlock(node) {
+		console.log(`Checking block with ${node.statements.length} statements`);
+		node.statements.forEach(statement => this.check(statement));
+	}
+
+	checkLiteral(node) {
+		console.log(`Checking literal: ${node.value}`);
+	}
+
+	checkGroup(node) {
+		console.log(`Checking grouped expression`);
+		this.check(node.value);
+	}
+
+	checkCast(node) {
+		console.log(`Checking cast`);
+		const expressionType = this.getExpressionType(node.expression);
+		if (!this.isValidType(node.type)) {
+			console.error(`Type error: Invalid cast to type ${node.type}`);
+		}
+	}
+
+	checkIdentifier(node) {
+		console.log(`Checking identifier: ${node.value}`);
+		const symbol = this.symbolTable.findSymbol(node.value);
+		if (!symbol) {
+			console.error(`Type error: Undefined identifier ${node.value}`);
+		}
+	}
+
+	// This function would extract the type from any expression
+	getExpressionType(expression) {
+		switch (expression.tag) {
+			case 'Literal':
+				return expression.type;
+			case 'Identifier':
+				const symbol = this.symbolTable.findSymbol(expression.value);
+				return symbol ? symbol.typeSymbol : null;
+			case 'Apply':
+				return this.getApplyReturnType(expression);
+			case 'BinaryExpression':
+				const leftType = this.getExpressionType(expression.left);
+				const rightType = this.getExpressionType(expression.right);
+				return leftType === rightType ? leftType : 'Unknown';
+			default:
+				return 'Unknown';
+		}
+	}
+
+	// This would handle getting the return type from an Apply expression
+	getApplyReturnType(applyExpression) {
+		const calleeType = this.getExpressionType(applyExpression.callee);
+		if (calleeType && calleeType.tag === 'Lambda') {
+			return calleeType.returnType;
+		}
+		return 'Unknown';
+	}
+
+	isValidType(type) {
+		const validTypes = ['Int', 'String', 'Boolean', 'Cat', 'Animal', /* etc */];
+		return validTypes.includes(type);
+	}
 }
 
-// Run type checking
-// try {
-// 	typeCheck(ast);
-// 	console.log("Type checking passed.");
-// } catch (error) {
-// 	console.error("Type checking failed:", error.message);
-// }
 
-module.exports.typeCheck = typeCheck
+// Initialize symbol table from AST
+//  const symbolTable = new SymbolTable();
+//  symbolTable.buildScope(ast);  // Assuming AST is available
+
+//  // Walk through symbols and type check
+//  const typeChecker = new TypeChecker(symbolTable);
+//  symbolTable.walkSymbols(symbol => {
+// 	typeChecker.checkSymbol(symbol);
+//  });
+
+module.exports.TypeChecker = TypeChecker

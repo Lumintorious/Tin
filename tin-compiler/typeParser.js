@@ -17,10 +17,10 @@ class FieldDef {
 }
 
 class LambdaType {
-	constructor(parameterTypes, resultType) {
+	constructor(parameterTypes, returnType) {
 		this.tag = "LambdaType"
 		this.parameterTypes = parameterTypes
-		this.resultType = resultType
+		this.returnType = returnType
 		this.isTypeLevel = true;
 	}
 }
@@ -46,7 +46,7 @@ function parseLambdaType(parser) {
 
 	parser.expect(')');  // Expect the closing parenthesis
 
-	// Expect the return type definition
+	// Expect the return type Assignment
 	parser.expect('OPERATOR', '=>'); // Expect '=>'
 
 	const returnType = parser.parseType();  // Parse the return type
@@ -76,7 +76,7 @@ function parseNewType(parser) {
 		}
 		if (token.tag === 'DEDENT') {
 			parser.consume('DEDENT');
-			break; // End of type definition block
+			break; // End of type Assignment block
 		}
 
 		if (token.tag === 'IDENTIFIER') {
@@ -93,14 +93,13 @@ function parseNewType(parser) {
 			let defaultValue = null;
 
 			// Check if there is a default value (expect '=' operator)
-			if (parser.peek().tag === 'OPERATOR' && parser.peek().value === '=') {
+			if (parser.peek() && parser.peek().tag === 'OPERATOR' && parser.peek().value === '=') {
 				parser.consume('OPERATOR', "=");
 
 				// Expect a literal value for the default
 				token = parser.parseExpression()
-				defaultValue = token.value;
+				defaultValue = token;
 			}
-
 			// Add field to the type node
 			fieldDefs.push(new FieldDef(
 				fieldName,
@@ -119,6 +118,7 @@ function parseNewType(parser) {
 module.exports = {
 	TypeDef,
 	FieldDef,
+	LambdaType,
 	parseNewType,
 	parseLambdaType
 }

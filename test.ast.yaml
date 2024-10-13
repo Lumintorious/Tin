@@ -1,0 +1,49 @@
+tag: Block
+statements:
+  - tag: Assignment
+    lhs:
+      tag: Identifier
+      value: x
+    value:
+      tag: Literal
+      type: String
+      value: ss
+    type:
+      tag: Identifier
+      value: String
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 2
+        column: 1
+      end:
+        line: 3
+        column: 1
+  - tag: Apply
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: Identifier
+        value: x
+    position:
+      start:
+        tag: PARENS
+        value: (
+        start:
+          line: 4
+          column: 6
+        end:
+          line: 4
+          column: 7
+      end:
+        tag: PARENS
+        value: )
+        start:
+          line: 4
+          column: 8
+        end:
+          line: 4
+          column: 9

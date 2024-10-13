@@ -8,7 +8,7 @@ function translateFile(fileStatementsBlock) {
 
 function createConstructor(typeDef) {
 	const parameters = "(" + typeDef.fieldDefs.map((param, i) => {
-		return "_p" + i
+		return `_p${i}${param.defaultValue ? (" = " + translate(param.defaultValue)) : ""}`
 	}) + ")"
 
 	return parameters + " => ({" + typeDef.fieldDefs.map((param, i) => {
@@ -17,6 +17,9 @@ function createConstructor(typeDef) {
 }
 
 function translate(term, args) {
+	if (term === undefined || term === null) {
+		return "undefined"
+	}
 	switch (term.tag) {
 		case "AppliedKeyword":
 			return `${term.keyword} (${translate(term.param)})`
@@ -26,20 +29,26 @@ function translate(term, args) {
 			return [...term.statements.map(st => translate(st)), ((args && args.returnLast) ? "return " : "") + `${translate(last)}`].join(";\n")
 		case "Group":
 			return `(${translate(term.value)})`
-		case "Definition":
-			return `const ${term.name} ${(term.type ? `/*${term.type}*/` : "")} = ${translate(term.value)}`
+		case "Select":
+			return `${translate(term.owner)}.${translate(term.field)}`
+		case "Assignment":
+			return `${term.isDeclaration ? "var " : ""}${translate(term.lhs)} ${(term.type ? `/*${translate(term.type)}*/` : (term.typeSymbol ? `/* ${term.typeSymbol.toString()} */` : ""))}${term.value ? ` = ${translate(term.value)}` : ""}`
 		case "Literal":
 			if (term.type === "String") {
 				return `"${term.value}"`
-			} else {
+			} else if (term.type === "Number" || term.type === "Boolean") {
 				return `${term.value}`
+			} else {
+				return 'null'
 			}
 		case "Cast":
 			return `(${translate(term.expression)}) /* as ${translate(term.type)} */`
 		case "Identifier":
 			return term.value
 		case "Lambda":
-			return `function(${term.params.map(p => p.name + (p.type ? `/*${p.type}*/` : "") + (p.defaultValue ? ` = ${translate(p.defaultValue)}` : "")).join(", ")}) {\n${translate(term.block, { returnLast: true })}\n}`
+			return `function(${term.params.map(p => translate(p)).join(", ")}) {\n${translate(term.block, { returnLast: true })}\n}`
+		case "LambdaType":
+			return `(${term.parameterTypes.map(t => translate(t)).join(", ")}) => ${translate(term.returnType)}`
 		case "IfStatement":
 			return `((${translate(term.condition)}) ? (${translate(term.trueBranch)}) : (${translate(term.falseBranch)})) `
 		case "BinaryExpression":
@@ -55,7 +64,7 @@ function translate(term, args) {
 		case "TypeDef":
 			return `TIN_TYPE("${randomUUID()}", ${createConstructor(term)}, {${term.fieldDefs.map(f => translate(f))}})`
 		case "FieldDef":
-			return `${term.name}: { type: ${term.type}, defaultValue: ${term.defaultValue} }`
+			return `${term.name}: { type: ${term.type}, defaultValue: ${translate(term.defaultValue)} }`
 		default:
 			return "(? " + term.tag + " ?)"
 	}
