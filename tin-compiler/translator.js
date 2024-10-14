@@ -26,7 +26,8 @@ function translate(term, args) {
 		case "Block":
 			let last;
 			last = term.statements.pop()
-			return [...term.statements.map(st => translate(st)), ((args && args.returnLast) ? "return " : "") + `${translate(last)}`].join(";\n")
+			const isAssignment = last.tag === "Assignment"
+			return [...term.statements.map(st => translate(st)), ((!isAssignment && args && args.returnLast) ? "return " : "") + `${translate(last)}`].join(";\n")
 		case "Group":
 			return `(${translate(term.value)})`
 		case "Select":
@@ -54,6 +55,12 @@ function translate(term, args) {
 		case "BinaryExpression":
 			if (term.operator === "=") {
 				return `const ${term.left.value} ${term.left.type ? ("/*" + term.left.type + "*/") : ""} = ${translate(term.right)}`
+			}
+			if (term.operator === "|") {
+				return translate({ tag: "Apply", callee: { tag: "Identifier", value: "_TIN_UNION_OBJECTS" }, args: [term.left, term.right] })
+			}
+			if (term.operator === "&") {
+				return translate({ tag: "Apply", callee: { tag: "Identifier", value: "_TIN_INTERSECT_OBJECTS" }, args: [term.left, term.right] })
 			}
 			if (!["+", "-", "*", "/", "&&", "||", "->", "<", ">", "<=", ">=", "."].includes(term.operator)) {
 				return translate(term.left) + '["' + term.operator + '"](' + translate(term.right) + ')'

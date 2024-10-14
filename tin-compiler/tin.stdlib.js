@@ -7,7 +7,18 @@ function TIN_TYPE(typeId, constructor, descriptor) {
 	constructor["|"] = () => {
 		return TIN_TYPE("", () => null, {})
 	}
+	constructor.toString = () => {
+		return descriptor.toString()
+	}
 	return constructor
+}
+
+_TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
+	return { ...obj1, ...obj2 }
+}
+
+_TIN_UNION_OBJECTS = function (obj1, obj2) {
+	return [obj1, obj2]
 }
 
 const Type = TIN_TYPE("", (i) => null, {})

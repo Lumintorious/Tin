@@ -1,0 +1,19 @@
+[X] Generic Types
+[ ] Generic Lambdas
+[X] Auto-constructors
+[X] Simple type-checking
+[ ] Handling 'this'
+[ ] Varargs
+[ ] Enums, how?
+[ ] Ignore empty lines
+[X] Does multiple dedent work?
+[ ] Fix ending without newline
+[ ] Fix ending without dedenting
+[ ] Checking if symbol exists does not work for lambda application
+[ ] 
+[ ] 
+[ ] 
+[ ] 
+[ ] 
+[ ] 
+[ ] 

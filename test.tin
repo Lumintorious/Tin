@@ -1,5 +1,28 @@
+Cat = type
+	name 		 :: String
+	livesLeft :: Number
 
-x: String = "ss"
+Robot = type
+	version  :: Number
+	material :: String
+	tier     :: Number
+	isFlying :: Boolean
 
+cat = Cat("Catty", 9)
+robo = Robot(1.2, "Iron", 3, false)
+
+x = if 1 < 2 then 3 else 4
+
+mechaCat = cat & robo
+
+print(mechaCat)
 print(x)
 
+# print(cat == robo)
+
+f = () ->
+	ff = () ->
+		fff = () ->
+			print("Hello")
+
+f()

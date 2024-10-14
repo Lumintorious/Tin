@@ -41,10 +41,11 @@ class IfStatement {
 }
 
 class Lambda {
-	constructor(params, block) {
+	constructor(params, block, isTypeLambda) {
 		this.tag = "Lambda"
 		this.params = params
 		this.block = block
+		this.isTypeLambda = isTypeLambda
 	}
 }
 
@@ -65,10 +66,11 @@ class Literal {
 }
 
 class Apply {
-	constructor(callee, args) {
+	constructor(callee, args, isTypeLambda) {
 		this.tag = "Apply"
 		this.callee = callee
 		this.args = args
+		this.isTypeLambda = isTypeLambda
 	}
 }
 
@@ -202,12 +204,12 @@ class Parser {
 		return this.parseExpression();
 	}
 
-	parseApply(callee) {
-		const start = this.consume('PARENS', '('); // Consume '('
+	parseApply(callee, isTypeLambda) {
+		const start = this.consume('PARENS', isTypeLambda ? '[' : '('); // Consume '('
 		const args = [];
 
 		// Parse arguments (expressions)
-		while (this.peek().value !== ')') {
+		while (this.peek().value !== (isTypeLambda ? ']' : ')')) {
 			this.omit("NEWLINE")
 			this.omit("INDENT")
 			this.omit("DEDENT")
@@ -221,9 +223,9 @@ class Parser {
 			}
 		}
 
-		const end = this.consume('PARENS', ')'); // Consume ')'
+		const end = this.consume('PARENS', isTypeLambda ? ']' : ')'); // Consume ')'
 
-		return new Apply(callee, args).fromTo(start, end);  // Return a function application node
+		return new Apply(callee, args, isTypeLambda).fromTo(start, end);  // Return a function application node
 	}
 
 
@@ -231,12 +233,17 @@ class Parser {
 		const startPos = this.peek().start;
 		let left = this.parsePrimary();  // Parse the left-hand side (like a literal or identifier)
 
+		while (this.peek() && this.peek().tag === 'PARENS' && this.peek().value === '[') {
+
+			left = this.parseApply(left, true);
+		}
+
 		while (this.peek() && this.peek().tag === 'PARENS' && this.peek().value === '(') {
 			left = this.parseApply(left);
 		}
 
-		if (this.is(":")) {
-			this.consume(":");
+		if (this.is("::")) {
+			this.consume("::");
 			// const type = this.consume("IDENTIFIER");
 			const type = this.parseExpression(-1, true);
 			left = new Cast(left, type).fromTo(startPos, this.peek().end);
@@ -300,7 +307,7 @@ class Parser {
 		const params = [];
 		while (this.peek().tag !== "OPERATOR" || this.peek().value !== ")") {
 			const paramName = this.consume("IDENTIFIER").value;
-			this.consume("OPERATOR", ":");
+			this.consume("OPERATOR", "::");
 			const paramtag = this.consume("IDENTIFIER").value;
 			params.push({ name: paramName, tag: paramtag });
 			if (this.peek().tag === "OPERATOR" && this.peek().value === ",") {
@@ -322,15 +329,17 @@ class Parser {
 		return param;
 	}
 
-	parseLambda() {
+	// TypeLamda = lambda that takes types and returns types [T] -> List[T]
+	// LambdaType = the type of a lambda that takes values and returns values (T) -> List[T]
+	parseLambda(isTypeLambda) {
 		// Ensure we have the opening parenthesis for the parameters
-		this.consume('PARENS', '('); // This should throw an error if not found
+		this.consume('PARENS', isTypeLambda ? '[' : '('); // This should throw an error if not found
 		let isTypeLevel = false;
 
 		const parameters = [];
 
 		// Parse parameters until we reach the closing parenthesis
-		while (this.peek().tag !== 'PARENTHESIS_CLOSE') {
+		while (this.peek().value !== ")" && this.peek().value !== "]") {
 			// Parse each parameter
 			// const param = this.parseParameter();
 			let param = this.parseExpression();
@@ -347,7 +356,7 @@ class Parser {
 			}
 		}
 
-		this.consume('PARENS', ')'); // Consume the closing parenthesis
+		this.consume('PARENS', isTypeLambda ? ']' : ')'); // Consume the closing parenthesis
 
 		// Now check for the arrow (-> / =>) indicating the function body
 		const arrow = this.consume("OPERATOR")
@@ -358,7 +367,7 @@ class Parser {
 			if (body.tag !== "Block") {
 				body = new Block([body])
 			}
-			return new Lambda(parameters, body)
+			return new Lambda(parameters, body, isTypeLambda)
 		} else if (arrow.value === "=>") {
 			// Type Level
 			let returnType = this.parseExpression(0, true);
@@ -367,7 +376,7 @@ class Parser {
 			}
 			return new LambdaType(parameters, returnType)
 		} else {
-			this.createError("Expected -> or =>", token)
+			this.createError("Expected -> or =>", this.peek())
 		}
 
 
@@ -483,6 +492,11 @@ class Parser {
 			return this.parseLambda(); // Handle lambda expressions
 		}
 
+		if (token.value === "[") {
+			this.current--;
+			return this.parseLambda(true); // Handle lambda expressions
+		}
+
 		if (token.tag === 'NEWLINE' && this.peek().tag === "INDENT") {
 			this.current--;
 			return this.parseBlock();  // Grouping with parentheses
@@ -498,6 +512,9 @@ class Parser {
 			return this.parseIfStatement();
 		}
 
+		if (token.value === ")") {
+			return new Identifier("WTF")
+		}
 		this.createError(`Unexpected token: ${token.value}`, token, new Error());
 	}
 
@@ -517,6 +534,7 @@ class Parser {
 			);
 		}
 		this.current++;
+		// console.log("Consumed " + token.value, "Peek: " + this.peek().value, new Error())
 		return token;
 	}
 
@@ -559,14 +577,5 @@ Object.prototype.fromTo = function (startToken, endToken) {
 	}
 	return this;
 }
-
-// Create a parser instance
-// const parser = new Parser(tokens);
-// try {
-// 	const ast = parser.parse();
-// 	console.log(JSON.stringify(ast, null, 2));
-// } catch (error) {
-// 	console.error(error.message);
-// }
 
 module.exports = { Parser }

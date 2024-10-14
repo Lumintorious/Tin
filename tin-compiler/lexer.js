@@ -5,7 +5,7 @@ class Lexer {
 		this.line = 1;
 		this.column = 1;
 		this.keywords = ['def', 'let', 'return', 'type', 'if', 'else', 'while', 'for', "mutable", "true", "false", "void"];
-		this.operators = ['->', '=>', '&&', '=', '+', '*', '@', '/', '-', ':', ',', '.', '&', '|', '<', '>', '?'];
+		this.operators = ['->', '=>', '&&', '::', '==', '=', '+', '*', '@', '/', '-', ':', ',', '.', '&', '|', '<', '>', '?'];
 		this.parens = ['(', '[', '{', '}', ']', ')']
 		this.indentStack = [0];  // To track indentation levels
 	}
@@ -20,6 +20,12 @@ class Lexer {
 			this.consumeComment();
 			char = this.peek();
 		}
+
+		// if (this.isEmptyLine()) {
+		// 	console.log(this.line)
+		// 	this.consumeNewline();
+		// 	return this.nextToken();
+		// }
 
 		if (char === '"') return this.lexString();
 
@@ -60,6 +66,21 @@ class Lexer {
 		}
 
 		throw new Error(`Unknown character at ${this.line}:${this.column}: '${char}'`);
+	}
+
+	isEmptyLine() {
+		const initialPos = this.position;
+		const initialCol = this.column;
+		let currentPos = this.position;
+		while (currentPos < this.input.length) {
+			const char = this.input[currentPos];
+			if (char === '\n') return true;  // Empty line if we reach newline without non-whitespace
+			if (!/\s/.test(char)) return false;  // Not an empty line if we encounter any non-whitespace
+			currentPos++;
+			this.column++
+		}
+		this.position = initialPos;
+		return false;  // End of input reached, so not an empty line
 	}
 
 	// Handle newlines and indentation levels
@@ -245,8 +266,8 @@ class Lexer {
 	}
 
 	// Helper to get the current character
-	peek() {
-		return this.input[this.position];
+	peek(i = 0) {
+		return this.input[this.position + i];
 	}
 }
 

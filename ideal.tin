@@ -1,0 +1,54 @@
+Right = type:
+	name: String
+	canRead: Boolean
+	canWrite: Boolean
+
+rights = Map(
+	("Admin", Right("Admin", true, true)),
+	("User",  Right("User" , true, false))
+)
+
+Iterator = [T] -> type:
+	next: () -> T?
+
+Iterable = [T] -> type:
+	iterator: () -> Iterator[T]
+
+Accesable = [T] -> type:
+	access: (Int) -> T?
+
+ListProps = [T] -> type:
+	element: T
+	nextNode: List[T]?
+
+List = [T] -> Accessable[T] & Iterable[T] & ListProps[T]
+
+accessableFromIterable = [T] -> (this: Iterable[T]) ->
+	Accesable((i) ->
+		it = this.iterator()
+		mutable index = 0
+		mutable now = it.next()
+		while now != void && index < i:
+			index = index + 1
+			now = it.next()
+		if index == i:
+			now
+	)
+
+List = [T] -> (elem: T) ->
+	prop = ListProps(elem, void)
+
+	iterator = () ->
+		mutable current = prop
+
+		Iterator(() ->
+			if prop.nextNode != void:
+				current = prop.nextNode
+				current.element
+			# void is returned otherwise
+		)
+	
+	iterable = Iterable(iterator)
+	accessable = accessableFromIterable(iterable)
+
+	iterable & accessable & prop

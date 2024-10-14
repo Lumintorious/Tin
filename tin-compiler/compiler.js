@@ -118,12 +118,13 @@ fs.readFile(inputFile, 'utf8', (err, data) => {
 			try {
 				const { SymbolTable } = require("./symbols")
 				const symbolTable = SymbolTable.fromAST(ast);
-				symbolTable.typeCheck(ast);
+				symbolTable.typeCheck(ast, symbolTable.outerScope);
 				symbolTable.errors.throwAll();
 				// console.log(symbolTable.lookupType("Cat"))
 				// console.log(symbolTable.typeSymbols)
 				// console.log(symbolTable.symbols)
 				// console.log(JSON.stringify(Object.fromEntries(symbolTable.symbols), null, 2))
+				// console.log(symbolTable.outerScope.lookup("Robot"))
 			} catch (e) {
 				console.error(e)
 			}
