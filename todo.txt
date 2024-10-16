@@ -1,5 +1,5 @@
 [X] Generic Types
-[ ] Generic Lambdas
+[X] Generic Lambdas
 [X] Auto-constructors
 [X] Simple type-checking
 [ ] Handling 'this'
@@ -10,8 +10,10 @@
 [ ] Fix ending without newline
 [ ] Fix ending without dedenting
 [ ] Checking if symbol exists does not work for lambda application
-[ ] 
-[ ] 
+[X] Make lambdas work with any callee, not just identifiers
+[X] Symbol usage before declaration
+[ ] Co-dependent symbols
+[ ] Make structs work with all types, not just identifiers
 [ ] 
 [ ] 
 [ ] 

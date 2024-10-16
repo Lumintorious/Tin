@@ -26,13 +26,9 @@ if (!inputFile.endsWith(".tin")) {
 function lexerPhase(data) {
 	const lexer = new Lexer(data);
 
-	let tokens = [];
-	let token;
-	while ((token = lexer.nextToken()) !== null) {
-		tokens.push(token)
-	}
 
-	return tokens;
+
+	return lexer.lexAllTokens();
 }
 
 function parserPhase(tokens) {
@@ -118,13 +114,18 @@ fs.readFile(inputFile, 'utf8', (err, data) => {
 			try {
 				const { SymbolTable } = require("./symbols")
 				const symbolTable = SymbolTable.fromAST(ast);
-				symbolTable.typeCheck(ast, symbolTable.outerScope);
+				symbolTable.typeCheck(ast, symbolTable.fileScope);
+				const symbolSummary = {};
+				symbolTable.fileScope.symbols.forEach((value, key) => {
+					symbolSummary[value.index] = key + " :: " + value.typeSymbol.toString()
+				})
+				symbolTable.fileScope.typeSymbols.forEach((value, key) => {
+					symbolSummary[value.index] = key + " :: " + value.toString()
+				})
+				fs.writeFile(process.argv[2] + ".symbols.yaml", objectToYAML(symbolSummary, ["fromTo"]), () => {
+					// require("./../" + process.argv[2] + ".out.js")
+				})
 				symbolTable.errors.throwAll();
-				// console.log(symbolTable.lookupType("Cat"))
-				// console.log(symbolTable.typeSymbols)
-				// console.log(symbolTable.symbols)
-				// console.log(JSON.stringify(Object.fromEntries(symbolTable.symbols), null, 2))
-				// console.log(symbolTable.outerScope.lookup("Robot"))
 			} catch (e) {
 				console.error(e)
 			}

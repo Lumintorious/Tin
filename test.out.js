@@ -25,25 +25,28 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
+const Array = TIN_TYPE("", (...args) => ({
+	length() {
+		return args.length;
+	},
+	at(index) {
+		return args[index]
+	}
+}), {})
 
 const print = (...args) => console.log(...args)
 const list = []
 
 // COMPILED TIN
 ;
-var Cat  = TIN_TYPE("7029c005-d634-4d02-b367-1914f7033a1f", (_p0,_p1) => ({name: _p0,livesLeft: _p1}), {name: { type: String, defaultValue: undefined },livesLeft: { type: Number, defaultValue: undefined }});
-var Robot  = TIN_TYPE("16f825db-c14a-4b36-8cd8-49c261b33668", (_p0,_p1,_p2,_p3) => ({version: _p0,material: _p1,tier: _p2,isFlying: _p3}), {version: { type: Number, defaultValue: undefined },material: { type: String, defaultValue: undefined },tier: { type: Number, defaultValue: undefined },isFlying: { type: Boolean, defaultValue: undefined }});
-var cat /* Cat */ = Cat("Catty", 9);
-var robo /* Robot */ = Robot(1.2, "Iron", 3, false);
-var x /* Unknown(undefined, undefined) */ = ((1 < 2) ? (3) : (4)) ;
-var mechaCat /* Cat & Robot */ = _TIN_INTERSECT_OBJECTS(cat, robo);
-print(mechaCat);
-print(x);
-var f /* () => Unknown(undefined, undefined) */ = function() {
-var ff  = function() {
-var fff  = function() {
-return print("Hello")
-}
-}
+var Person  = TIN_TYPE("ff3d6fae-e584-4890-86bb-ef5d26eea5e5", (_p0,_p1,_p2) => ({name: _p0,house: _p1,title: _p2}), {name: { type: String, defaultValue: undefined },house: { type: String, defaultValue: undefined },title: { type: String, defaultValue: undefined }});
+var robert /* Person */ = Person("Robert", "Baratheon", "King of the Seven Kingdoms");
+var hail /* (Person) => String */ = function(p /*Person*/) {
+return "Hail " + p.name + " of House " + p.house + ", " + p.title + "!"
 };
-f()
+var Self  = (T ) => T;
+var self /* [T] => (T) => T */ = (T ) => function(t /*T*/) {
+return t
+};
+var x /*Self(Number)*/ = 2;
+var typedSelf /* Number */ = self(Number)(2)

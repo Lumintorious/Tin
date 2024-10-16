@@ -67,7 +67,9 @@ function translate(term, args) {
 			}
 			return translate(term.left) + " " + term.operator + " " + translate(term.right)
 		case "Apply":
-			return translate(term.callee) + "(" + term.args.map(arg => translate(arg)).join(", ") + ")"
+			const open = term.takesVarargs ? "(Array([" : "("
+			const close = term.takesVarargs ? "]))" : ")"
+			return translate(term.callee) + open + term.args.map(arg => translate(arg)).join(", ") + close
 		case "TypeDef":
 			return `TIN_TYPE("${randomUUID()}", ${createConstructor(term)}, {${term.fieldDefs.map(f => translate(f))}})`
 		case "FieldDef":

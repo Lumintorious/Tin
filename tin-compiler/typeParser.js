@@ -79,6 +79,18 @@ function parseNewType(parser) {
 			break; // End of type Assignment block
 		}
 
+		// const assign = parser.parseExpression();
+		// console.log(assign)
+
+		// if (assign.tag === "Cast") {
+		// 	fieldDefs.push(new FieldDef(
+		// 		assign.expression.value,
+		// 		assign.type
+		// 	))
+		// }
+
+		// continue;
+
 		if (token.tag === 'IDENTIFIER') {
 			const fieldName = token.value;
 			let ident = parser.consume('IDENTIFIER');

@@ -8,22 +8,25 @@ rights = Map(
 	("User",  Right("User" , true, false))
 )
 
-Iterator = [T] -> type:
+Iterator = [T] => type:
 	next: () -> T?
 
-Iterable = [T] -> type:
-	iterator: () -> Iterator[T]
+Iterable = [T] => type:
+	iterator: () => Iterator[T]
 
-Accesable = [T] -> type:
-	access: (Int) -> T?
+Accesable = [T] => type:
+	access: (Int) => T?
 
-ListProps = [T] -> type:
+ListProps = [T] => type:
 	element: T
 	nextNode: List[T]?
 
-List = [T] -> Accessable[T] & Iterable[T] & ListProps[T]
+List = [T] => Accessable[T] & Iterable[T] & ListProps[T]
 
-accessableFromIterable = [T] -> (this: Iterable[T]) ->
+f = (i: Int) => Int ->
+	i + 1
+
+accessableFromIterable = [T] => (this: Iterable[T]) ->
 	Accesable((i) ->
 		it = this.iterator()
 		mutable index = 0

@@ -1,6 +1,9 @@
 class Type {
 	constructor(tag) {
 		this.tag = tag
+		if (tag === undefined) {
+			throw new Error("Found unknown type")
+		}
 	}
 
 	named(name) {
@@ -9,6 +12,9 @@ class Type {
 	}
 
 	isAssignableTo(other) {
+		if (!other) {
+			throw new Error("Found undefined type")
+		}
 		return this.extends(other) || other.isExtendedBy(this);
 	}
 
@@ -24,6 +30,11 @@ class Type {
 		return this.toString() === other.toString(); // Use string representation for equality check
 	}
 
+	located(start) {
+		this.location = start;
+		return this;
+	}
+
 	toString() {
 		return `Unknown(${this.tag}, ${this.type})`; // Base class
 	}
@@ -37,7 +48,7 @@ class AnyTypeClass extends Type {
 	extends(other) {
 		// Named types are assignable if they are equal (same name)
 		return other instanceof AnyTypeClass;
-	}
+	} Number
 
 	isExtendedBy() {
 		return true;
@@ -48,7 +59,7 @@ class AnyTypeClass extends Type {
 	}
 }
 
-const AnyType = new AnyTypeClass();
+const AnyType = new AnyTypeClass("Any");
 
 
 class NamedType extends Type {
@@ -63,9 +74,41 @@ class NamedType extends Type {
 	}
 
 	constructor(name) {
-		super();
-		this.tag = "NamedType";
+		super("NamedType");
 		this.name = name;
+	}
+
+	extends(other) {
+		// Named types are assignable if they are equal (same name)
+		return other instanceof NamedType && this.name === other.name;
+	}
+
+	isExtendedBy(other) {
+		return other instanceof NamedType && this.name === other.name;
+	}
+
+	toString() {
+		return this.name;
+	}
+}
+
+class VarargsType extends Type {
+	constructor(type) {
+		super("VarargsType");
+		this.type = type;
+	}
+
+	toString() {
+		return "..." + this.type.toString()
+	}
+}
+
+class GenericNamedType extends Type {
+	constructor(name, extendedType, superType) {
+		super("GenericNamedType");
+		this.name = name;
+		this.extendedType = extendedType;
+		this.superType = superType;
 	}
 
 	extends(other) {
@@ -105,11 +148,16 @@ class OptionalType extends Type {
 
 class LambdaType extends Type {
 	constructor(paramTypes, returnType, isGeneric) {
-		super();
-		this.tag = "LambdaType";
+		super("LambdaType");
+		paramTypes.forEach(p => {
+			if (p.tag === undefined) {
+				throw new Error("Empty type")
+			}
+		})
 		this.paramTypes = paramTypes;
 		this.returnType = returnType;
 		this.isGeneric = isGeneric;
+		this.isForwardReferenceable = true;
 	}
 
 	extends(other) {
@@ -136,22 +184,20 @@ class LambdaType extends Type {
 
 class TypeLambda extends Type {
 	constructor(paramTypes, returnType) {
-		super();
-		this.tag = "LambdaType";
+		super("TypeLambda");
 		this.paramTypes = paramTypes;
 		this.returnType = returnType;
 	}
 
 	toString() {
 		const paramsStr = this.paramTypes.map(t => t.toString()).join(', ');
-		return `[${paramsStr}] -> ${this.returnType ? this.returnType.toString() : "undefined"}`;
+		return `[${paramsStr}] => ${this.returnType ? this.returnType.toString() : "undefined"}`;
 	}
 }
 
 class AppliedGenericType extends Type {
 	constructor(callee, parameterTypes) {
-		super();
-		this.tag = "AppliedGenericType";
+		super("AppliedGenericType");
 		this.callee = callee;
 		this.parameterTypes = parameterTypes;
 	}
@@ -161,6 +207,7 @@ class AppliedGenericType extends Type {
 	}
 
 	isExtendedBy(other) {
+		// return true;
 		return this.resolved.isExtendedBy(other)
 	}
 
@@ -200,7 +247,7 @@ class BinaryOpType extends Type {
 
 class TypeDefType extends Type {
 	constructor(fields) {
-		super();
+		super("TypeDefType");
 	}
 
 	extends(other) {
@@ -214,8 +261,7 @@ class TypeDefType extends Type {
 
 class StructType extends Type {
 	constructor(fields) {
-		super();
-		this.tag = "StructType";
+		super("StructType");
 		this.fields = fields; // Array of { name, type } objects
 	}
 
@@ -230,7 +276,7 @@ class StructType extends Type {
 	}
 
 	toString() {
-		return this.name;
+		return this.name ?? `StructType(${this.fields.map(f => f.name)})`;
 	}
 }
 
@@ -241,15 +287,24 @@ class Symbol {
 		this.typeSymbol = typeSymbol;
 		this.ast = ast;
 	}
+
+	located(start) {
+		this.start = start;
+		return this;
+	}
 }
 
 
 class Scope {
+	static maxRuns = 1;
+
 	constructor(name, parent, symbols = new Map(), typeSymbols = new Map()) {
 		this.name = name;
 		this.parent = parent;
 		this.symbols = symbols;
 		this.typeSymbols = typeSymbols;
+		this.currentIndex = 0;
+		this.run = 0;
 	}
 
 	toString() {
@@ -269,18 +324,30 @@ class Scope {
 	// Define a new symbol in the current scope
 	declare(name, symbol) {
 		if (this.symbols.has(name)) {
-			throw new Error(`Symbol ${name} is already declared.`);
+			const existingSymbol = this.symbols.get(name)
+			if (existingSymbol.run == this.run) {
+				throw new Error(`Symbol ${name} is already declared.`);
+			} else {
+				symbol.run = this.run
+			}
+		}
+		symbol.run = this.run;
+		if (!symbol.index) {
+			symbol.index = this.currentIndex++;
 		}
 		this.symbols.set(name, symbol);
 	}
 
 	declareType(name, typeSymbol) {
-		if (typeSymbol.tag === "Identifier") {
-			throw new Error("Here")
-		}
 		if (this.typeSymbols.has(name)) {
-			throw new Error(`Symbol ${name} is already declared.`);
+			const existingSymbol = this.typeSymbols.get(name)
+			if (existingSymbol.run == this.run) {
+				throw new Error(`Symbol ${name} is already declared.`);
+			} else {
+				typeSymbol.run = this.run
+			}
 		}
+		typeSymbol.run = this.run;
 		if (typeSymbol.tag === "StructType") {
 			typeSymbol.name = name
 			const constructorSymbol = new Symbol(name, new LambdaType(typeSymbol.fields.map(f => f.type), typeSymbol).named(name))
@@ -294,6 +361,9 @@ class Scope {
 		}
 
 		typeSymbol.name = name;
+		if (!typeSymbol.index) {
+			typeSymbol.index = this.currentIndex++;
+		}
 		this.typeSymbols.set(name, typeSymbol);
 	}
 
@@ -304,7 +374,7 @@ class Scope {
 		} else if (this.parent) {
 			return this.parent.lookup(name);
 		}
-		throw new Error(`Symbol ${name} not found. ${[...this.symbols.keys()]}`);
+		throw new Error(`Symbol ${name} not found. ${[...this.symbols.keys()]}; Scope = ` + this.name);
 	}
 
 	lookupType(name) {
@@ -321,6 +391,7 @@ class Scope {
 class TypeInferencer {
 	constructor(symbolTable) {
 		this.symbolTable = symbolTable;
+		this.run = 0;
 	}
 
 	infer(node, scope) {
@@ -338,6 +409,9 @@ class TypeInferencer {
 				break;
 			case 'Lambda':
 				inferredType = this.inferLambda(node, scope);
+				break;
+			case 'LambdaType':
+				inferredType = this.inferLambdaType(node, scope);
 				break;
 			case 'Block':
 				inferredType = this.inferBlock(node, scope)
@@ -361,26 +435,54 @@ class TypeInferencer {
 
 	inferApply(node, scope) {
 		if (node.isTypeLambda) {
-			return this.infer(node.callee, scope).returnType;
+			let nodeCallee = node.callee;
+			if (node.callee.tag === "Identifier") {
+				nodeCallee = scope.lookup(node.callee.value);
+			}
+			if (nodeCallee.typeSymbol && nodeCallee.typeSymbol.tag === "TypeLambda") {
+				const actualParams = node.args.map(n => {
+					return this.translateTypeNodeToType(n, scope)
+				})
+				const genericParamsToFill = nodeCallee.typeSymbol.paramTypes
+				let params = {}
+				for (let i = 0; i <= actualParams.length; i++) {
+					const actual = actualParams[i]
+					const generic = genericParamsToFill[i]
+					if (!actual || !generic) {
+						continue;
+					}
+					params[generic.name] = actual;
+				}
+				const returnTypeGeneric = nodeCallee.typeSymbol.returnType
+				return this.resolveGenericTypes(returnTypeGeneric, params)
+			} else {
+				return this.infer(node.callee, scope).returnType;
+			}
 		} else {
 			if (node.callee.tag === "Identifier") {
 				const lookup = scope.lookup(node.callee.value);
 				return lookup.typeSymbol.returnType;
 			}
-			return this.infer(scope.lookup(node.callee.value), scope).returnType;
+			return this.infer(node.callee, scope).returnType;
 		}
 	}
 
 	inferSelect(node, scope) {
-		const ownerType = this.infer(node.owner, scope)
-		const fieldType = ownerType.fields.filter(f => f.name === node.field.value)[0].type
-		return fieldType;
+		let ownerType = this.infer(node.owner, scope)
+		if (ownerType.resolved !== undefined) {
+			ownerType = ownerType.resolved
+		}
+		const fields = ownerType.fields.filter(f => f.name === node.field.value)
+		if (!fields[0] || !fields[0].type) {
+			throw new Error(`Field '${node.field.value}' could not be found on '` + ownerType.toString() + "'")
+		}
+		return fields[0].type;
 	}
 
 	inferBlock(node, scope) {
 		// TO DO: change to find returns recursively
 		if (node.statements.length === 0) {
-			return new Type(node.tag, node.type);
+			return new Type();
 		}
 		return this.infer(node.statements[node.statements.length - 1], scope)
 	}
@@ -446,26 +548,47 @@ class TypeInferencer {
 		return new BinaryOpType(leftType, node.operator, rightType);
 	}
 
+	inferLambdaType(node, scope) {
+		const paramScope = new Scope("type-lambda-params", scope)
+		node.parameterTypes.forEach(p => {
+			paramScope.declareType(p.lhs.value, new GenericNamedType(p.lhs.value, p.value ?? AnyType))
+		})
+		const type = new TypeLambda(node.parameterTypes.map(p => this.translateTypeNodeToType(p.lhs, paramScope)), this.infer(node.returnType, paramScope))
+		return type
+	}
+
 	inferLambda(node, scope) {
-		const innerScope = new Scope("innerLambda", scope);
-		const paramTypes = node.params.map(param => {
-			let type
-			if (param.type) {
-				type = this.translateTypeNodeToType(param.type, scope);
-			} else if (param.defaultValue) {
-				type = this.typeInferencer.infer(param.defaultValue, scope);
-			} else if (node.isTypeLambda) {
-				type = new NamedType(param.lhs.value)
-			}
-			if (!type) {
-				type = new Type(node.tag, node.type);
-			}
+		const innerScope = node.innerScope ?? new Scope("innerLambda", scope);
+		innerScope.run = this.run;
+		let paramTypes = [];
+		if (node.params[0] && node.params[0].type && node.params[0].type.tag === "UnaryOperator" && node.params[0].type.operator === "...") {
+			const param = node.params[0]
+			const paramType = new AppliedGenericType(innerScope.lookupType("Array"), [this.translateTypeNodeToType(node.params[0].type.expression, scope)])
+			paramType.resolved = innerScope.lookup("Array").returnType
+			paramTypes = [paramType]
+			innerScope.declare(param.lhs.value, new Symbol(param.lhs.value, paramType, param))
+		} else {
+			paramTypes = node.params.map(param => {
+				let type
+				if (param.type) {
+					type = this.translateTypeNodeToType(param.type, innerScope);
+				} else if (param.defaultValue) {
+					type = this.typeInferencer.infer(param.defaultValue, innerScope);
+				} else if (node.isTypeLambda) {
+					type = new NamedType(param.lhs.value)
+				}
+				if (!type) {
+					throw new Error("Cannot tell type. Maybe you used : instead of ::")
+					type = new Type();
+				}
 
-			innerScope.declare(param.lhs.value, new Symbol(param.lhs.value, type, param))
+				innerScope.declare(param.lhs.value, new Symbol(param.lhs.value, type, param))
 
-			return type;
-			// throw new Error(`Missing type annotation or default value for parameter: ${param.name}`);
-		});
+				return type;
+				// throw new Error(`Missing type annotation or default value for parameter: ${param.name}`);
+			});
+		}
+
 		if (node.isTypeLambda && node.block.statements[0]) {
 			node.params.forEach(p => {
 				innerScope.declareType(p.lhs.value, new NamedType(p.lhs.value))
@@ -481,6 +604,10 @@ class TypeInferencer {
 		}
 	}
 
+	getGenericParamMapping(apply, scope) {
+
+	}
+
 	resolveGenericTypes(type, parameters = {}) {
 		switch (type.tag) {
 			case "NamedType":
@@ -489,8 +616,29 @@ class TypeInferencer {
 				} else {
 					return type;
 				}
+			case "GenericNamedType":
+				if (Object.keys(parameters).includes(type.name)) {
+					const name = parameters[type.name]
+					if (name.tag && name.tag === "Identifier") {
+						return new NamedType(name.value)
+					}
+					if (name.tag && name.tag === "NamedType") {
+						return name
+					} else {
+						return new NamedType(name)
+					}
+				} else {
+					return type;
+				}
 			case "AppliedGenericType":
 				return type;
+			case "LambdaType":
+				const resolvedParams = type.paramTypes.map(pt => {
+					return this.resolveGenericTypes(pt, parameters)
+				})
+				const returnType = this.resolveGenericTypes(type.returnType, parameters)
+				const result = new LambdaType(resolvedParams, returnType)
+				return result
 			default:
 				return type;
 		}
@@ -502,13 +650,28 @@ class TypeInferencer {
 				return scope.lookupType(node.value)
 			// return new NamedType(node.value);
 			case "Assignment":
-				return scope.lookupType(node.lhs.value)
-			// return new NamedType(node.lhs.value);
+				return new Type()
+			case "UnaryOperator":
+				if (node.operator === "...") {
+					return new VarargsType(this.translateTypeNodeToType(node.expression, scope))
+				} else {
+					throw new Error("Unexpected unary operator")
+				}
+			case "GenericNamedType":
+				return node;
 			case "LambdaType":
+				if (node.isTypeLevel) {
+					const innerScope = new Scope("inner-lambda-type", scope);
+					node.parameterTypes.forEach(p => innerScope.declareType(p.lhs.value, new GenericNamedType(p.lhs.value)))
+					const params = node.parameterTypes.map(p => this.translateTypeNodeToType(p.lhs, innerScope))
+					return new LambdaType(params, this.translateTypeNodeToType(node.returnType, innerScope), node.isTypeLambda)
+				}
 				return new LambdaType(node.parameterTypes.map(p => this.translateTypeNodeToType(p, scope)), this.translateTypeNodeToType(node.returnType, scope), node.isTypeLambda)
 			case 'Lambda':
 				// return new LambdaType(node.params.map(p => this.translateTypeNodeToType(p, scope/)))
-				const innerScope = new Scope("inner-lambda", scope)
+				const innerScope = node.innerScope ?? new Scope("inner-lambda", scope)
+				innerScope.run = this.run;
+				node.innerScope = innerScope;
 				innerScope.declareType("T", new NamedType("T"))
 				return new LambdaType(node.params.map(p => this.translateTypeNodeToType(p, innerScope)), this.translateTypeNodeToType(node.block.statements[0], innerScope), node.isTypeLambda)
 			case "TypeDef":
@@ -542,13 +705,12 @@ class TypeInferencer {
 			case "Optional":
 				return new OptionalType(this.translateTypeNodeToType(node.expression, scope))
 			default:
-				return new Type(node.tag, node.type);
+				return new Type();
 		}
 	}
 }
 
-// SYMBOL TABLE
-print = console.log
+
 
 class SymbolTable {
 	constructor(parent = null) {
@@ -556,6 +718,8 @@ class SymbolTable {
 		this.errors = new TypeErrorList()
 		this.typeInferencer = new TypeInferencer(this);
 		this.outerScope = new Scope("outer", null)
+		this.outerScope.run = 0;
+		this.run = 0;
 	}
 
 	typeCheck(node, scope) {
@@ -563,8 +727,13 @@ class SymbolTable {
 			case "Block":
 				node.statements.forEach(c => this.typeCheck.bind(this)(c, scope));
 				break;
+			case "Assignment":
+				this.typeCheck(node.value, scope)
+				break;
 			case "Apply":
 				this.typeCheckApply(node, scope);
+				break;
+			case "Lambda":
 				break;
 			default:
 			// DO NOTHING
@@ -572,56 +741,55 @@ class SymbolTable {
 	}
 
 	typeCheckApply(apply, scope) {
-		if (apply.callee.tag === "Identifier") {
-			const symbol = scope.lookup(apply.callee.value)
-			const args = apply.args;
+		let symbol = apply.callee.tag === "Identifier" ? scope.lookup(apply.callee.value) : this.typeInferencer.infer(apply.callee, scope)
+		// If a Type-Value Lambda [T] => value
+		if (apply.isTypeLambda) {
+			const applyType = this.typeInferencer.infer(apply, scope)
+			const callee = this.typeInferencer.infer(apply.callee, scope)
+			apply.args.forEach(arg => {
+				const translatedType = this.typeInferencer.translateTypeNodeToType(arg, scope)
+			})
+			return;
+		}
+
+		if ((symbol.typeSymbol.paramTypes[0].tag === "AppliedGenericType" && symbol.typeSymbol.paramTypes[0].callee.name === "Array")) {
+			const paramType = symbol.typeSymbol.paramTypes[0]
+			// paramType.resolved = this.typeInferencer.resolveGenericTypes(paramType)
+			const callee = paramType.callee
+			apply.takesVarargs = true;
+			if (callee && callee.tag === "LambdaType") {
+				// const actualParams = node.args
+				// const expectedParams = callee.paramTypes
+				// let params = {}
+				// expectedParams.forEach((p, i) => {
+				// 	params[p.name] = actualParams[i]
+				// })
+				const resolved = this.typeInferencer.resolveGenericTypes(callee.returnType, {})
+				paramType.resolved = resolved;
+			}
+
+		}
+		const callee = symbol.typeSymbol.paramTypes[0].callee
+		if (symbol.typeSymbol.paramTypes[0].tag === "VarargsType" || callee && callee.name === "Array") {
+			const expectedType = symbol.typeSymbol.paramTypes[0]
+			apply.takesVarargs = true;
+			apply.args.forEach((p, i) => {
+				const type = this.typeInferencer.infer(p, scope)
+				if (!type.isAssignableTo(expectedType)) {
+					this.errors.add(`Parameter ${i} of ${apply.callee.value}`, expectedType, type, apply.position, new Error())
+				}
+			})
+		} else {
 			apply.args.forEach((p, i) => {
 				const type = this.typeInferencer.infer(p, scope)
 				if (!type.isAssignableTo(symbol.typeSymbol.paramTypes[i])) {
-					this.errors.add(`Parameter ${i} of ${apply.callee.value}`, symbol.typeSymbol.paramTypes[i], type, apply.position)
+					// console.log(symbol.typeSymbol.paramTypes[i], type)
+					this.errors.add(`Parameter ${i} of ${apply.callee.value} (${apply.isTypeLambda ? "Type" : "Values"})`, symbol.typeSymbol.paramTypes[i], type, apply.position, new Error())
 				}
 			})
 		}
+
 	}
-
-	// Define a new symbol in the current scope
-	// declare(name, symbol) {
-	// 	if (this.symbols.has(name)) {
-	// 		throw new Error(`Symbol ${name} is already declared.`);
-	// 	}
-	// 	this.symbols.set(name, symbol);
-	// }
-
-	// declareType(name, typeSymbol) {
-	// 	if (this.typeSymbols.has(name)) {
-	// 		throw new Error(`Symbol ${name} is already declared.`);
-	// 	}
-	// 	if (typeSymbol.tag === "StructType") {
-	// 		typeSymbol.name = name
-	// 		const constructorSymbol = new Symbol(name, new LambdaType(typeSymbol.fields.map(f => f.type), typeSymbol))
-	// 		this.declare(name, constructorSymbol)
-	// 	}
-	// 	this.typeSymbols.set(name, typeSymbol);
-	// }
-
-	// // Lookup a symbol, check parent scope if not found
-	// lookup(name) {
-	// 	if (this.symbols.has(name)) {
-	// 		return this.symbols.get(name);
-	// 	} else if (this.parent) {
-	// 		return this.parent.lookup(name);
-	// 	}
-	// 	throw new Error(`Symbol ${name} not found. ${[...this.symbols.keys()]}`);
-	// }
-
-	// lookupType(name) {
-	// 	if (this.typeSymbols.has(name)) {
-	// 		return this.typeSymbols.get(name);
-	// 	} else if (this.parent) {
-	// 		return this.parent.lookupType(name);
-	// 	}
-	// 	throw new Error(`Type Symbol ${name} not found.`);
-	// }
 
 	// Build symbol table from AST
 	static fromAST(ast) {
@@ -630,8 +798,24 @@ class SymbolTable {
 		for (const t in NamedType.PRIMITIVE_TYPES) {
 			scope.typeSymbols.set(t, NamedType.PRIMITIVE_TYPES[t])
 		}
-		scope.symbols.set("print", new Symbol("print", new LambdaType([NamedType.PRIMITIVE_TYPES.Any], NamedType.PRIMITIVE_TYPES.Void), {}))
-		symbolTable.build(ast, scope);
+		scope.declare("print", new Symbol("print", new LambdaType([NamedType.PRIMITIVE_TYPES.Any], NamedType.PRIMITIVE_TYPES.Void), {}))
+		const innerArrayScope = new Scope("inner-array", scope)
+		innerArrayScope.declareType("T", new GenericNamedType("T"))
+		const arrayStruct = new StructType([{ name: "length", type: scope.lookupType("Number")/*new VarargsType(scope.lookupType("T"))*/ }])
+		scope.declareType("Array", new LambdaType(
+			[new GenericNamedType("T")],
+			arrayStruct,
+			true
+		))
+		const fileScope = new Scope("file - ", scope)
+		symbolTable.fileScope = fileScope;
+		fileScope.run = 0
+		symbolTable.build(ast, fileScope);
+		symbolTable.run = 1;
+		symbolTable.typeInferencer.run = 1;
+		symbolTable.outerScope.run = 1;
+		fileScope.run = 1;
+		symbolTable.build(ast, fileScope);
 		return symbolTable;
 	}
 
@@ -675,9 +859,9 @@ class SymbolTable {
 		}
 		if (node.isDeclaration) {
 			if (rhsType instanceof TypeDefType) {
-				scope.declareType(lhs.value, this.typeInferencer.translateTypeNodeToType(node.value, scope))
+				scope.declareType(lhs.value, this.typeInferencer.translateTypeNodeToType(node.value, scope).located(node.start))
 			} else {
-				scope.declare(lhs.value, symbol);
+				scope.declare(lhs.value, symbol.located(node.start));
 			}
 		}
 	}
@@ -688,13 +872,13 @@ class TypeErrorList {
 		this.errors = []
 	}
 
-	add(hint, expectedType, insertedType, position) {
-		this.errors.push({ hint, expectedType, insertedType, position })
+	add(hint, expectedType, insertedType, position, errorForStack) {
+		this.errors.push({ hint, expectedType, insertedType, position, errorForStack })
 	}
 
-	throwAll() {
+	throwAll(showStack = true) {
 		if (this.errors.length > 0) {
-			const message = "There are type errors:\n" + this.errors.map(e => `- ${e.hint}; Expected '${e.expectedType.toString()}', but got '${e.insertedType}' at line ${e.position.start.line}, column ${e.position.start.column} `).join("\n")
+			const message = "There are type errors:\n" + this.errors.map(e => `- ${e.hint}; Expected '${e.expectedType.toString()}', but got '${e.insertedType}' at line ${e.position.start.line}, column ${e.position.start.column} ${showStack && e.errorForStack ? e.errorForStack.stack.toString() : ""}`).join("\n")
 			console.error(message);
 			process.exit(-1)
 		}

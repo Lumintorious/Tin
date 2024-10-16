@@ -1,28 +1,17 @@
-Cat = type
-	name 		 :: String
-	livesLeft :: Number
+Person = type
+	name :: String
+	house :: String
+	title :: String
 
-Robot = type
-	version  :: Number
-	material :: String
-	tier     :: Number
-	isFlying :: Boolean
+robert = Person("Robert", "Baratheon", "King of the Seven Kingdoms")
+hail = (p :: Person) -> "Hail {p.name} of House {p.house}, {p.title}!"
 
-cat = Cat("Catty", 9)
-robo = Robot(1.2, "Iron", 3, false)
+Self = [T] => T
 
-x = if 1 < 2 then 3 else 4
+self = [T] => (t :: T) -> t
 
-mechaCat = cat & robo
+x :: Self[Number] = 2
 
-print(mechaCat)
-print(x)
+typedSelf = self[Number]
 
-# print(cat == robo)
-
-f = () ->
-	ff = () ->
-		fff = () ->
-			print("Hello")
-
-f()
+appliedSelf = typedSelf(2)

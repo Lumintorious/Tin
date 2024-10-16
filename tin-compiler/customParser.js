@@ -82,6 +82,14 @@ class Group {
 	}
 }
 
+class UnaryOperator {
+	constructor(operator, expression) {
+		this.tag = "UnaryOperator";
+		this.operator = operator;
+		this.expression = expression;
+	}
+}
+
 class Identifier {
 	constructor(value) {
 		this.tag = 'Identifier';     // tag of the AST node
@@ -209,7 +217,7 @@ class Parser {
 		const args = [];
 
 		// Parse arguments (expressions)
-		while (this.peek().value !== (isTypeLambda ? ']' : ')')) {
+		while (this.peek() && this.peek().value !== (isTypeLambda ? ']' : ')')) {
 			this.omit("NEWLINE")
 			this.omit("INDENT")
 			this.omit("DEDENT")
@@ -218,7 +226,7 @@ class Parser {
 			this.omit("NEWLINE")
 			this.omit("INDENT")
 			this.omit("DEDENT")
-			if (this.peek().value === ',') {
+			if (this.peek() && this.peek().value === ',') {
 				this.consume('OPERATOR', ',');
 			}
 		}
@@ -231,7 +239,15 @@ class Parser {
 
 	parseExpression(precedence = 0, stopAtEquals = false) {
 		const startPos = this.peek().start;
-		let left = this.parsePrimary();  // Parse the left-hand side (like a literal or identifier)
+		let left;  // Parse the left-hand side (like a literal or identifier)
+
+		if (this.peek() && this.peek().value === "...") {
+			this.consume("OPERATOR", "...")
+			left = this.parsePrimary();
+			left = new UnaryOperator("...", left);
+		} else {
+			left = this.parsePrimary();
+		}
 
 		while (this.peek() && this.peek().tag === 'PARENS' && this.peek().value === '[') {
 
@@ -262,13 +278,18 @@ class Parser {
 			// Consume the operator
 			this.consume('OPERATOR');
 
+			if (operator === "?") {
+				left = new Optional(left)
+				break
+			}
+
 			// Parse the right-hand side with precedence rules (note: higher precedence for right-side)
 			const right = this.parseExpression(operatorPrecedence + 1);
 
 			// Combine into a binary expression
 
 			if (operator === "=" && left.tag === "Select") {
-				left = new Assignment(left, right, false);
+				left = new Assignment(left, right, false).fromTo(left.position.start, this.peek().end);
 				break;
 			}
 
@@ -278,7 +299,7 @@ class Parser {
 			}
 
 			if (operator === "=" && left.tag === "Identifier") {
-				left = new Assignment(left, right, true);
+				left = new Assignment(left, right, true).fromTo(left.position.start, this.peek()?.end ?? '-1');
 				break;
 			}
 
@@ -321,10 +342,10 @@ class Parser {
 	// If an Identifier or Cast, turn into Assignment with missing value or type
 	resolveAsAssignment(param) {
 		if (param.tag === "Cast") {
-			param = new Assignment(param.expression, undefined, true, param.type)
+			param = new Assignment(param.expression, undefined, true, param.type).fromTo(param.position.start, this.peek().end)
 		}
 		if (param.tag === "Identifier") {
-			param = new Assignment(param, undefined, true, undefined)
+			param = new Assignment(param, undefined, true, undefined).fromTo(param.position.start, this.peek().end)
 		}
 		return param;
 	}
@@ -458,6 +479,10 @@ class Parser {
 		return new Block(statements)
 	}
 
+	parseString(token) {
+		return new Literal(String(token.value), "String");
+	}
+
 	// Parse primary expressions like literals or identifiers
 	parsePrimary() {
 		const token = this.consume();
@@ -470,7 +495,7 @@ class Parser {
 			return new Literal(Number(token.value), "Number");
 		}
 		if (token.tag === 'STRING') {
-			return new Literal(String(token.value), "String");
+			return this.parseString(token)
 		}
 		if (token.value === "true" || token.value === "false") {
 			return new Literal(token.value, "Boolean")

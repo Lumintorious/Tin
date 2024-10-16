@@ -1,129 +1,104 @@
-IDENTIFIER   | Cat          |   1, 1    
-OPERATOR     | =            |   1, 5    
-KEYWORD      | type         |   1, 7    
+IDENTIFIER   | Person       |   1, 1    
+OPERATOR     | =            |   1, 8    
+KEYWORD      | type         |   1, 10   
 NEWLINE      |              |   1, 1    
 INDENT       | 4            |   2, 1    
 IDENTIFIER   | name         |   2, 2    
-OPERATOR     | ::           |   2, 10   
-IDENTIFIER   | String       |   2, 13   
+OPERATOR     | ::           |   2, 7    
+IDENTIFIER   | String       |   2, 10   
 NEWLINE      |              |   2, 1    
-IDENTIFIER   | livesLeft    |   3, 2    
-OPERATOR     | ::           |   3, 12   
-IDENTIFIER   | Number       |   3, 15   
+IDENTIFIER   | house        |   3, 2    
+OPERATOR     | ::           |   3, 8    
+IDENTIFIER   | String       |   3, 11   
 NEWLINE      |              |   3, 1    
-DEDENT       |              |   4, 1    
+IDENTIFIER   | title        |   4, 2    
+OPERATOR     | ::           |   4, 8    
+IDENTIFIER   | String       |   4, 11   
 NEWLINE      |              |   4, 1    
-IDENTIFIER   | Robot        |   5, 1    
-OPERATOR     | =            |   5, 7    
-KEYWORD      | type         |   5, 9    
+DEDENT       |              |   5, 1    
 NEWLINE      |              |   5, 1    
-INDENT       | 4            |   6, 1    
-IDENTIFIER   | version      |   6, 2    
-OPERATOR     | ::           |   6, 11   
-IDENTIFIER   | Number       |   6, 14   
+IDENTIFIER   | robert       |   6, 1    
+OPERATOR     | =            |   6, 8    
+IDENTIFIER   | Person       |   6, 10   
+PARENS       | (            |   6, 16   
+STRING       | Robert       |   6, 17   
+OPERATOR     | ,            |   6, 25   
+STRING       | Baratheon    |   6, 27   
+OPERATOR     | ,            |   6, 38   
+STRING       | King of the Seven Kingdoms |   6, 40   
+PARENS       | )            |   6, 68   
 NEWLINE      |              |   6, 1    
-IDENTIFIER   | material     |   7, 2    
+IDENTIFIER   | hail         |   7, 1    
+OPERATOR     | =            |   7, 6    
+PARENS       | (            |   7, 8    
+IDENTIFIER   | p            |   7, 9    
 OPERATOR     | ::           |   7, 11   
-IDENTIFIER   | String       |   7, 14   
+IDENTIFIER   | Person       |   7, 14   
+PARENS       | )            |   7, 20   
+OPERATOR     | ->           |   7, 22   
+STRING       | Hail         |   7, 25   
+OPERATOR     | +            |   7, 25   
+IDENTIFIER   | p            |   7, 32   
+OPERATOR     | .            |   7, 33   
+IDENTIFIER   | name         |   7, 34   
+OPERATOR     | +            |   7, 25   
+STRING       |  of House    |   7, 25   
+OPERATOR     | +            |   7, 25   
+IDENTIFIER   | p            |   7, 50   
+OPERATOR     | .            |   7, 51   
+IDENTIFIER   | house        |   7, 52   
+OPERATOR     | +            |   7, 25   
+STRING       | ,            |   7, 25   
+OPERATOR     | +            |   7, 25   
+IDENTIFIER   | p            |   7, 61   
+OPERATOR     | .            |   7, 62   
+IDENTIFIER   | title        |   7, 63   
+OPERATOR     | +            |   7, 25   
+STRING       | !            |   7, 25   
 NEWLINE      |              |   7, 1    
-IDENTIFIER   | tier         |   8, 2    
-OPERATOR     | ::           |   8, 11   
-IDENTIFIER   | Number       |   8, 14   
 NEWLINE      |              |   8, 1    
-IDENTIFIER   | isFlying     |   9, 2    
-OPERATOR     | ::           |   9, 11   
-IDENTIFIER   | Boolean      |   9, 14   
+IDENTIFIER   | Self         |   9, 1    
+OPERATOR     | =            |   9, 6    
+PARENS       | [            |   9, 8    
+IDENTIFIER   | T            |   9, 9    
+PARENS       | ]            |   9, 10   
+OPERATOR     | =>           |   9, 12   
+IDENTIFIER   | T            |   9, 15   
 NEWLINE      |              |   9, 1    
-DEDENT       |              |  10, 1    
 NEWLINE      |              |  10, 1    
-IDENTIFIER   | cat          |  11, 1    
-OPERATOR     | =            |  11, 5    
-IDENTIFIER   | Cat          |  11, 7    
-PARENS       | (            |  11, 10   
-STRING       | Catty        |  11, 11   
-OPERATOR     | ,            |  11, 18   
-NUMBER       | 9            |  11, 20   
-PARENS       | )            |  11, 21   
+IDENTIFIER   | self         |  11, 1    
+OPERATOR     | =            |  11, 6    
+PARENS       | [            |  11, 8    
+IDENTIFIER   | T            |  11, 9    
+PARENS       | ]            |  11, 10   
+OPERATOR     | =>           |  11, 12   
+PARENS       | (            |  11, 15   
+IDENTIFIER   | t            |  11, 16   
+OPERATOR     | ::           |  11, 18   
+IDENTIFIER   | T            |  11, 21   
+PARENS       | )            |  11, 22   
+OPERATOR     | ->           |  11, 24   
+IDENTIFIER   | t            |  11, 27   
 NEWLINE      |              |  11, 1    
-IDENTIFIER   | robo         |  12, 1    
-OPERATOR     | =            |  12, 6    
-IDENTIFIER   | Robot        |  12, 8    
-PARENS       | (            |  12, 13   
-NUMBER       | 1            |  12, 14   
-OPERATOR     | .            |  12, 15   
-NUMBER       | 2            |  12, 16   
-OPERATOR     | ,            |  12, 17   
-STRING       | Iron         |  12, 19   
-OPERATOR     | ,            |  12, 25   
-NUMBER       | 3            |  12, 27   
-OPERATOR     | ,            |  12, 28   
-KEYWORD      | false        |  12, 30   
-PARENS       | )            |  12, 35   
 NEWLINE      |              |  12, 1    
+IDENTIFIER   | x            |  13, 1    
+OPERATOR     | ::           |  13, 3    
+IDENTIFIER   | Self         |  13, 6    
+PARENS       | [            |  13, 10   
+IDENTIFIER   | Number       |  13, 11   
+PARENS       | ]            |  13, 17   
+OPERATOR     | =            |  13, 19   
+NUMBER       | 2            |  13, 21   
 NEWLINE      |              |  13, 1    
-IDENTIFIER   | x            |  14, 1    
-OPERATOR     | =            |  14, 3    
-KEYWORD      | if           |  14, 5    
-NUMBER       | 1            |  14, 8    
-OPERATOR     | <            |  14, 10   
-NUMBER       | 2            |  14, 12   
-IDENTIFIER   | then         |  14, 14   
-NUMBER       | 3            |  14, 19   
-KEYWORD      | else         |  14, 21   
-NUMBER       | 4            |  14, 26   
 NEWLINE      |              |  14, 1    
+IDENTIFIER   | typedSelf    |  15, 1    
+OPERATOR     | =            |  15, 11   
+IDENTIFIER   | self         |  15, 13   
+PARENS       | [            |  15, 17   
+IDENTIFIER   | Number       |  15, 18   
+PARENS       | ]            |  15, 24   
+PARENS       | (            |  15, 25   
+NUMBER       | 2            |  15, 26   
+PARENS       | )            |  15, 27   
 NEWLINE      |              |  15, 1    
-IDENTIFIER   | mechaCat     |  16, 1    
-OPERATOR     | =            |  16, 10   
-IDENTIFIER   | cat          |  16, 12   
-OPERATOR     | &            |  16, 16   
-IDENTIFIER   | robo         |  16, 18   
-NEWLINE      |              |  16, 1    
-NEWLINE      |              |  17, 1    
-IDENTIFIER   | print        |  18, 1    
-PARENS       | (            |  18, 6    
-IDENTIFIER   | mechaCat     |  18, 7    
-PARENS       | )            |  18, 15   
-NEWLINE      |              |  18, 1    
-IDENTIFIER   | print        |  19, 1    
-PARENS       | (            |  19, 6    
-IDENTIFIER   | x            |  19, 7    
-PARENS       | )            |  19, 8    
-NEWLINE      |              |  19, 1    
-NEWLINE      |              |  20, 1    
-NEWLINE      |              |  21, 1    
-NEWLINE      |              |  22, 1    
-IDENTIFIER   | f            |  23, 1    
-OPERATOR     | =            |  23, 3    
-PARENS       | (            |  23, 5    
-PARENS       | )            |  23, 6    
-OPERATOR     | ->           |  23, 8    
-NEWLINE      |              |  23, 1    
-INDENT       | 4            |  24, 1    
-IDENTIFIER   | ff           |  24, 2    
-OPERATOR     | =            |  24, 5    
-PARENS       | (            |  24, 7    
-PARENS       | )            |  24, 8    
-OPERATOR     | ->           |  24, 10   
-NEWLINE      |              |  24, 1    
-INDENT       | 8            |  25, 1    
-IDENTIFIER   | fff          |  25, 3    
-OPERATOR     | =            |  25, 7    
-PARENS       | (            |  25, 9    
-PARENS       | )            |  25, 10   
-OPERATOR     | ->           |  25, 12   
-NEWLINE      |              |  25, 1    
-INDENT       | 12           |  26, 1    
-IDENTIFIER   | print        |  26, 4    
-PARENS       | (            |  26, 9    
-STRING       | Hello        |  26, 10   
-PARENS       | )            |  26, 17   
-NEWLINE      |              |  26, 1    
-DEDENT       |              |  27, 1    
-DEDENT       |              |  27, 1    
-DEDENT       |              |  27, 1    
-NEWLINE      |              |  27, 1    
-IDENTIFIER   | f            |  28, 1    
-PARENS       | (            |  28, 2    
-PARENS       | )            |  28, 3    
 --undefined--

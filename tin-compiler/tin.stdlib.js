@@ -25,6 +25,14 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
+const Array = TIN_TYPE("", (...args) => ({
+	length() {
+		return args.length;
+	},
+	at(index) {
+		return args[index]
+	}
+}), {})
 
 const print = (...args) => console.log(...args)
 const list = []

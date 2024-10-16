@@ -1,3 +1,19 @@
+class TokenPos {
+	constructor(start, end) {
+		this.start = start
+		this.end = end
+	}
+}
+
+class MultipleToken {
+	constructor(tokens = [], start, end) {
+		this.tag = "MULTIPLE_TOKENS";
+		this.tokens = tokens;
+		this.start = start;
+		this.end = end;
+	}
+}
+
 class Lexer {
 	constructor(input) {
 		this.input = input;
@@ -5,9 +21,24 @@ class Lexer {
 		this.line = 1;
 		this.column = 1;
 		this.keywords = ['def', 'let', 'return', 'type', 'if', 'else', 'while', 'for', "mutable", "true", "false", "void"];
-		this.operators = ['->', '=>', '&&', '::', '==', '=', '+', '*', '@', '/', '-', ':', ',', '.', '&', '|', '<', '>', '?'];
+		this.operators = ['...', '->', '=>', '&&', '::', '==', '=', '+', '*', '@', '/', '-', ':', ',', '.', '&', '|', '<', '>', '?'];
 		this.parens = ['(', '[', '{', '}', ']', ')']
 		this.indentStack = [0];  // To track indentation levels
+	}
+
+	lexAllTokens() {
+		let tokens = [];
+		let token;
+		while ((token = this.nextToken()) !== null) {
+			tokens.push(token);
+		}
+		return tokens.flatMap(t => {
+			if (t.tag === "MULTIPLE_TOKENS") {
+				return t.tokens;
+			} else {
+				return [t]
+			}
+		})
 	}
 
 	// Get next token
@@ -157,6 +188,7 @@ class Lexer {
 		this.column++;
 
 		let stringLiteral = '';
+		let parts = [];
 
 		while (this.position < this.input.length) {
 			const char = this.peek();
@@ -166,6 +198,39 @@ class Lexer {
 				this.position++;
 				this.column++;
 				break;
+			}
+
+			if (char === "{") {
+				parts.push({
+					tag: 'STRING',
+					value: stringLiteral,
+					start: { line: this.line, column: startColumn },
+					end: { line: this.line, column: this.column }
+				})
+				parts.push({
+					tag: 'OPERATOR',
+					value: "+",
+					start: { line: this.line, column: startColumn },
+					end: { line: this.line, column: this.column }
+				})
+				stringLiteral = ''
+				this.position++;
+				this.column++;
+				let innerChar = this.peek();
+				while (innerChar !== "}") {
+					let innerToken = this.nextToken();
+					parts.push(innerToken)
+					innerChar = this.peek()
+				}
+				parts.push({
+					tag: 'OPERATOR',
+					value: "+",
+					start: { line: this.line, column: startColumn },
+					end: { line: this.line, column: this.column }
+				})
+				this.position++;
+				this.column++;
+				continue;
 			}
 
 			// Handle escape characters
@@ -192,12 +257,14 @@ class Lexer {
 			this.column++;
 		}
 
-		return {
+		parts.push({
 			tag: 'STRING',
 			value: stringLiteral,
 			start: { line: this.line, column: startColumn },
 			end: { line: this.line, column: this.column }
-		};
+		});
+		return new MultipleToken(parts, { line: this.line, column: startColumn },
+			{ line: this.line, column: this.column });
 	}
 
 	// Tokenize numbers

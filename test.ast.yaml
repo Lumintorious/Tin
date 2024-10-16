@@ -3,7 +3,7 @@ statements:
   - tag: Assignment
     lhs:
       tag: Identifier
-      value: Cat
+      value: Person
     value:
       tag: TypeDef
       fieldDefs:
@@ -13,275 +13,389 @@ statements:
           defaultValue: null
           isTypeLevel: true
         - tag: FieldDef
-          name: livesLeft
-          type: Number
+          name: house
+          type: String
+          defaultValue: null
+          isTypeLevel: true
+        - tag: FieldDef
+          name: title
+          type: String
           defaultValue: null
           isTypeLevel: true
     isDeclaration: true
     isTypeLevel: true
+    position:
+      start:
+        tag: IDENTIFIER
+        value: Person
+        start:
+          line: 1
+          column: 1
+        end:
+          line: 1
+          column: 7
+      end:
+        line: 6
+        column: 1
   - tag: Assignment
     lhs:
       tag: Identifier
-      value: Robot
+      value: robert
     value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: version
-          type: Number
-          defaultValue: null
-          isTypeLevel: true
-        - tag: FieldDef
-          name: material
+      tag: Apply
+      callee:
+        tag: Identifier
+        value: Person
+      args:
+        - tag: Literal
           type: String
-          defaultValue: null
+          value: Robert
+        - tag: Literal
+          type: String
+          value: Baratheon
+        - tag: Literal
+          type: String
+          value: King of the Seven Kingdoms
+      isTypeLambda: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        tag: IDENTIFIER
+        value: robert
+        start:
+          line: 6
+          column: 1
+        end:
+          line: 6
+          column: 7
+      end:
+        line: 7
+        column: 1
+  - tag: Assignment
+    lhs:
+      tag: Identifier
+      value: hail
+    value:
+      tag: Lambda
+      params:
+        - tag: Assignment
+          lhs:
+            tag: Identifier
+            value: p
+          type:
+            tag: Identifier
+            value: Person
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 7
+              column: 9
+            end:
+              line: 7
+              column: 21
+      block:
+        tag: Block
+        statements:
+          - tag: BinaryExpression
+            left:
+              tag: BinaryExpression
+              left:
+                tag: BinaryExpression
+                left:
+                  tag: BinaryExpression
+                  left:
+                    tag: BinaryExpression
+                    left:
+                      tag: BinaryExpression
+                      left:
+                        tag: Literal
+                        type: String
+                        value: Hail 
+                      operator: +
+                      right:
+                        tag: Select
+                        owner:
+                          tag: Identifier
+                          value: p
+                        field:
+                          tag: Identifier
+                          value: name
+                    operator: +
+                    right:
+                      tag: Literal
+                      type: String
+                      value:  of House 
+                  operator: +
+                  right:
+                    tag: Select
+                    owner:
+                      tag: Identifier
+                      value: p
+                    field:
+                      tag: Identifier
+                      value: house
+                operator: +
+                right:
+                  tag: Literal
+                  type: String
+                  value: , 
+              operator: +
+              right:
+                tag: Select
+                owner:
+                  tag: Identifier
+                  value: p
+                field:
+                  tag: Identifier
+                  value: title
+            operator: +
+            right:
+              tag: Literal
+              type: String
+              value: !
+      isTypeLambda: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        tag: IDENTIFIER
+        value: hail
+        start:
+          line: 7
+          column: 1
+        end:
+          line: 7
+          column: 5
+      end:
+        line: 8
+        column: 1
+  - tag: Assignment
+    lhs:
+      tag: Identifier
+      value: Self
+    value:
+      tag: LambdaType
+      parameterTypes:
+        - tag: Assignment
+          lhs:
+            tag: Identifier
+            value: T
+          isDeclaration: false
           isTypeLevel: true
-        - tag: FieldDef
-          name: tier
-          type: Number
-          defaultValue: null
-          isTypeLevel: true
-        - tag: FieldDef
-          name: isFlying
-          type: Boolean
-          defaultValue: null
-          isTypeLevel: true
+          position:
+            start:
+              tag: IDENTIFIER
+              value: T
+              start:
+                line: 9
+                column: 9
+              end:
+                line: 9
+                column: 10
+            end:
+              line: 9
+              column: 11
+      returnType:
+        tag: Identifier
+        value: T
     isDeclaration: true
     isTypeLevel: true
+    position:
+      start:
+        tag: IDENTIFIER
+        value: Self
+        start:
+          line: 9
+          column: 1
+        end:
+          line: 9
+          column: 5
+      end:
+        line: 10
+        column: 1
   - tag: Assignment
     lhs:
       tag: Identifier
-      value: cat
+      value: self
     value:
-      tag: Apply
-      callee:
-        tag: Identifier
-        value: Cat
-      args:
-        - tag: Literal
-          type: String
-          value: Catty
-        - tag: Literal
-          type: Number
-          value: 9
-      isTypeLambda: undefined
+      tag: LambdaType
+      parameterTypes:
+        - tag: Assignment
+          lhs:
+            tag: Identifier
+            value: T
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              tag: IDENTIFIER
+              value: T
+              start:
+                line: 11
+                column: 9
+              end:
+                line: 11
+                column: 10
+            end:
+              line: 11
+              column: 11
+      returnType:
+        tag: Lambda
+        params:
+          - tag: Assignment
+            lhs:
+              tag: Identifier
+              value: t
+            type:
+              tag: Identifier
+              value: T
+            isDeclaration: false
+            isTypeLevel: false
+            position:
+              start:
+                line: 11
+                column: 16
+              end:
+                line: 11
+                column: 23
+        block:
+          tag: Block
+          statements:
+            - tag: Identifier
+              value: t
+              position:
+                start:
+                  tag: IDENTIFIER
+                  value: t
+                  start:
+                    line: 11
+                    column: 27
+                  end:
+                    line: 11
+                    column: 28
+                end:
+                  tag: IDENTIFIER
+                  value: t
+                  start:
+                    line: 11
+                    column: 27
+                  end:
+                    line: 11
+                    column: 28
+        isTypeLambda: undefined
     isDeclaration: true
     isTypeLevel: false
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: robo
-    value:
-      tag: Apply
-      callee:
-        tag: Identifier
-        value: Robot
-      args:
-        - tag: Select
-          owner:
-            tag: Literal
-            type: Number
-            value: 1
-          field:
-            tag: Literal
-            type: Number
-            value: 2
-        - tag: Literal
-          type: String
-          value: Iron
-        - tag: Literal
-          type: Number
-          value: 3
-        - tag: Literal
-          type: Boolean
-          value: false
-      isTypeLambda: undefined
-    isDeclaration: true
-    isTypeLevel: false
+    position:
+      start:
+        tag: IDENTIFIER
+        value: self
+        start:
+          line: 11
+          column: 1
+        end:
+          line: 11
+          column: 5
+      end:
+        line: 12
+        column: 1
   - tag: Assignment
     lhs:
       tag: Identifier
       value: x
     value:
-      tag: IfStatement
-      condition:
-        tag: BinaryExpression
-        left:
-          tag: Literal
-          type: Number
-          value: 1
-        operator: <
-        right:
-          tag: Literal
+      tag: Literal
+      type: Number
+      value: 2
+    type:
+      tag: Apply
+      callee:
+        tag: Identifier
+        value: Self
+      args:
+        - tag: Identifier
+          value: Number
+          position:
+            start:
+              tag: IDENTIFIER
+              value: Number
+              start:
+                line: 13
+                column: 11
+              end:
+                line: 13
+                column: 17
+            end:
+              tag: IDENTIFIER
+              value: Number
+              start:
+                line: 13
+                column: 11
+              end:
+                line: 13
+                column: 17
+      isTypeLambda: true
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 13
+        column: 1
+      end:
+        line: 14
+        column: 1
+  - tag: Assignment
+    lhs:
+      tag: Identifier
+      value: typedSelf
+    value:
+      tag: Apply
+      callee:
+        tag: Apply
+        callee:
+          tag: Identifier
+          value: self
+        args:
+          - tag: Identifier
+            value: Number
+            position:
+              start:
+                tag: IDENTIFIER
+                value: Number
+                start:
+                  line: 15
+                  column: 18
+                end:
+                  line: 15
+                  column: 24
+              end:
+                tag: IDENTIFIER
+                value: Number
+                start:
+                  line: 15
+                  column: 18
+                end:
+                  line: 15
+                  column: 24
+        isTypeLambda: true
+      args:
+        - tag: Literal
           type: Number
           value: 2
-      trueBranch:
-        tag: Literal
-        type: Number
-        value: 3
-      falseBranch:
-        tag: Literal
-        type: Number
-        value: 4
-    isDeclaration: true
-    isTypeLevel: false
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: mechaCat
-    value:
-      tag: BinaryExpression
-      left:
-        tag: Identifier
-        value: cat
-      operator: &
-      right:
-        tag: Identifier
-        value: robo
-    isDeclaration: true
-    isTypeLevel: false
-  - tag: Apply
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: Identifier
-        value: mechaCat
-    position:
-      start:
-        tag: PARENS
-        value: (
-        start:
-          line: 18
-          column: 6
-        end:
-          line: 18
-          column: 7
-      end:
-        tag: PARENS
-        value: )
-        start:
-          line: 18
-          column: 15
-        end:
-          line: 18
-          column: 16
-  - tag: Apply
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: Identifier
-        value: x
-    position:
-      start:
-        tag: PARENS
-        value: (
-        start:
-          line: 19
-          column: 6
-        end:
-          line: 19
-          column: 7
-      end:
-        tag: PARENS
-        value: )
-        start:
-          line: 19
-          column: 8
-        end:
-          line: 19
-          column: 9
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: f
-    value:
-      tag: Lambda
-      params:
-      block:
-        tag: Block
-        statements:
-          - tag: Assignment
-            lhs:
-              tag: Identifier
-              value: ff
-            value:
-              tag: Lambda
-              params:
-              block:
-                tag: Block
-                statements:
-                  - tag: Assignment
-                    lhs:
-                      tag: Identifier
-                      value: fff
-                    value:
-                      tag: Lambda
-                      params:
-                      block:
-                        tag: Block
-                        statements:
-                          - tag: Apply
-                            callee:
-                              tag: Identifier
-                              value: print
-                            args:
-                              0:
-                                tag: Literal
-                                type: String
-                                value: Hello
-                            position:
-                              start:
-                                tag: PARENS
-                                value: (
-                                start:
-                                  line: 26
-                                  column: 9
-                                end:
-                                  line: 26
-                                  column: 10
-                              end:
-                                tag: PARENS
-                                value: )
-                                start:
-                                  line: 26
-                                  column: 17
-                                end:
-                                  line: 26
-                                  column: 18
-                      isTypeLambda: undefined
-                    isDeclaration: true
-                    isTypeLevel: false
-              isTypeLambda: undefined
-            isDeclaration: true
-            isTypeLevel: false
       isTypeLambda: undefined
     isDeclaration: true
     isTypeLevel: false
-  - tag: Apply
-    callee:
-      tag: Identifier
-      value: f
-    args:
     position:
       start:
-        tag: PARENS
-        value: (
+        tag: IDENTIFIER
+        value: typedSelf
         start:
-          line: 28
-          column: 2
+          line: 15
+          column: 1
         end:
-          line: 28
-          column: 3
+          line: 15
+          column: 10
       end:
-        tag: PARENS
-        value: )
-        start:
-          line: 28
-          column: 3
-        end:
-          line: 28
-          column: 4
+        line: 16
+        column: 1

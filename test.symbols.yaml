@@ -1,0 +1,9 @@
+9: Person :: Person
+10: Person :: Person
+11: robert :: Person
+12: hail :: (Person) => String
+13: Self :: Self
+14: self :: [T] => (T) => T
+15: x :: Number
+16: typedSelf :: (Number) => Number
+17: appliedSelf :: Number
