@@ -12,6 +12,9 @@ self = [T] => (t :: T) -> t
 
 x :: Self[Number] = 2
 
+f = (i :: Int, j :: Int) => String ->
+	i + j
+
 typedSelf = self[Number]
 
 appliedSelf = typedSelf(2)

@@ -1,0 +1,22 @@
+{
+   "compilerOptions": {
+      "target": "ES6", // Specify ECMAScript target version
+      "module": "commonjs", // Specify module code generation
+      "strict": true, // Enable all strict type-checking options
+      "skipLibCheck": true, // Skip type checking of declaration files
+      "esModuleInterop": true, // Enables emit interoperability between CommonJS and ES Modules
+      "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
+      "outDir": "./dist", // Redirect output structure to the dist folder
+      "rootDir": "./tin-compiler-ts", // Specify the root directory of input files
+      "baseUrl": "./tin-compiler-ts", // Base directory to resolve non-relative module names
+      "paths": {
+         "*": ["node_modules/*", "*"] // Define module resolution for paths
+      },
+      "allowJs": true,
+      "declaration": true,
+      "emitDeclarationOnly": true
+   },
+   "include": [
+      "tin-compiler-ts/**/*.ts" // Include all TypeScript files in the src directory
+   ]
+}
