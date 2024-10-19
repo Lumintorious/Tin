@@ -3,7 +3,8 @@ import { Parser } from "./Parser";
 import fs from "node:fs";
 import { escape } from "node:querystring";
 import { translateFile } from "./translator.js";
-import { SymbolTable } from "./TypeInference";
+import { TypeChecker } from "./TypeChecker";
+import { exec } from "node:child_process";
 
 function tokenTablePrint(tokens: Token[]) {
    let str = "";
@@ -50,13 +51,13 @@ async function compile() {}
 function objectToYAML(obj: object, omitFields: string[] = [], indentLevel = 0) {
    const yaml: String[] = [];
 
-   function processObject(obj: object, indentLevel: number) {
+   function processObject(obj: { [_: string]: any }, indentLevel: number) {
       const indent = "  ".repeat(indentLevel);
 
       for (const key in obj) {
          if (omitFields.includes(key)) continue; // Skip omitted fields
 
-         const value = obj[key];
+         const value: any = obj[key];
 
          if (
             typeof value === "object" &&
@@ -138,17 +139,17 @@ fs.readFile(inputFile, "utf8", (err: any, data: string) => {
          process.argv[2] + ".ast.yaml",
          objectToYAML(ast, ["position", "fromTo", "isTypeLevel"]),
          () => {
+            const typeChecker = TypeChecker.fromAST(ast);
             try {
-               const { SymbolTable } = require("./symbols");
-               const symbolTable = SymbolTable.fromAST(ast);
-               symbolTable.typeCheck(ast, symbolTable.fileScope);
-               const symbolSummary = {};
-               symbolTable.fileScope.symbols.forEach((value, key) => {
-                  symbolSummary[value.index] =
+               typeChecker.typeCheck(ast, typeChecker.fileScope);
+               const symbolSummary: { [_: string]: string } = {};
+               typeChecker.fileScope.symbols.forEach((value, key) => {
+                  symbolSummary[value.index ?? -1] =
                      key + " :: " + value.typeSymbol.toString();
                });
-               symbolTable.fileScope.typeSymbols.forEach((value, key) => {
-                  symbolSummary[value.index] = key + " :: " + value.toString();
+               typeChecker.fileScope.typeSymbols.forEach((value, key) => {
+                  symbolSummary[value.index ?? -1] =
+                     key + " :: " + value.toString();
                });
                fs.writeFile(
                   process.argv[2] + ".symbols.yaml",
@@ -157,13 +158,22 @@ fs.readFile(inputFile, "utf8", (err: any, data: string) => {
                      // require("./../" + process.argv[2] + ".out.js")
                   }
                );
-               symbolTable.errors.throwAll();
+               typeChecker.errors.throwAll();
             } catch (e) {
                console.error(e);
             }
-            const translatedStr = translateFile(ast);
+            const translatedStr = translateFile(ast, typeChecker.fileScope);
             fs.writeFile(process.argv[2] + ".out.js", translatedStr, () => {
-               require("./../" + process.argv[2] + ".out.js");
+               if (process.argv.includes("--run")) {
+                  exec(
+                     "node " + process.argv[2] + ".out.js",
+                     (oops, out, err) => {
+                        console.log(out ? out : err);
+                     }
+                  );
+               } else {
+                  console.log("Compiler exit.");
+               }
             });
          }
       );

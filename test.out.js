@@ -13,11 +13,11 @@ function TIN_TYPE(typeId, constructor, descriptor) {
 	return constructor
 }
 
-_TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
+const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	return { ...obj1, ...obj2 }
 }
 
-_TIN_UNION_OBJECTS = function (obj1, obj2) {
+const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 	return [obj1, obj2]
 }
 
@@ -25,7 +25,7 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
-const Array = TIN_TYPE("", (...args) => ({
+const Array = TIN_TYPE("", (args) => ({
 	length() {
 		return args.length;
 	},
@@ -39,14 +39,14 @@ const list = []
 
 // COMPILED TIN
 ;
-var Person  = TIN_TYPE("ff3d6fae-e584-4890-86bb-ef5d26eea5e5", (_p0,_p1,_p2) => ({name: _p0,house: _p1,title: _p2}), {name: { type: String, defaultValue: undefined },house: { type: String, defaultValue: undefined },title: { type: String, defaultValue: undefined }});
-var robert /* Person */ = Person("Robert", "Baratheon", "King of the Seven Kingdoms");
-var hail /* (Person) => String */ = function(p /*Person*/) {
-return "Hail " + p.name + " of House " + p.house + ", " + p.title + "!"
+var Person/* ???*/ = TIN_TYPE("5bb433fb-0177-483b-b025-d1b2bf675bc7", (_p0,_p1,_p2) => ({name: _p0,house: _p1,title: _p2}), {name: { type: String, defaultValue: undefined },house: { type: String, defaultValue: undefined },title: { type: String, defaultValue: undefined }}); var makePerson = Person;;
+var robert/* Person*/ = makePerson("Robert", "Baratheon", "King of the Seven Kingdoms");
+var hail/* (Person) => String*/ = function(p/* Person*/) {
+return "Hails " + p.name + " of House " + p.house + ", " + p.title + "!"
 };
-var Self  = (T ) => T;
-var self /* [T] => (T) => T */ = (T ) => function(t /*T*/) {
-return t
+var addAll/* (Array[Number]) => Array[Number]*/ = function(xs/* Array[Number]*/) {
+return xs
 };
-var x /*Self(Number)*/ = 2;
-var typedSelf /* Number */ = self(Number)(2)
+var xs/* Array[Number]*/ = addAll(Array([1, 2, 3]));
+print(xs.length());
+print(hail(robert))

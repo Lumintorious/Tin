@@ -1,4 +1,5 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
+import { Symbol } from "./TypeChecker";
 const applyableKeywords = ["return", "mutable"];
 export class AstNode {
    readonly tag: string;
@@ -29,10 +30,11 @@ export class Statement extends AstNode {
 export class Assignment extends AstNode {
    lhs: Term;
    value?: Term;
-   type: any;
+   type?: Term;
+   symbol?: Symbol;
    isDeclaration: boolean;
    isTypeLevel?: boolean;
-   constructor(lhs: Term, value?: Term, isDeclaration = true, type = null) {
+   constructor(lhs: Term, value?: Term, isDeclaration = true, type?: Term) {
       super("Assignment"); // tag of the AST node
       this.lhs = lhs; // Name of the variable
       this.value = value; // Lambda function associated with the Assignment
@@ -122,6 +124,7 @@ export class Apply extends Term {
    callee: Term;
    args: Term[];
    isTypeLambda?: boolean;
+   takesVarargs?: boolean;
    constructor(callee: Term, args: Term[], isTypeLambda?: boolean) {
       super("Apply");
       this.callee = callee;
@@ -366,7 +369,7 @@ export class Parser {
          // Combine into a binary expression
 
          if (operator === "=" && left.tag === "Select") {
-            left = new Assignment(left, right, false, null).fromTo(
+            left = new Assignment(left, right, false).fromTo(
                left.position,
                this.peek().position
             );
@@ -389,7 +392,7 @@ export class Parser {
          }
 
          if (operator === "=" && left.tag === "Identifier") {
-            left = new Assignment(left, right, true, null).fromTo(
+            left = new Assignment(left, right, true).fromTo(
                left.position,
                this.peek()?.position ?? new CodePoint(-1, -1, -1)
             );
@@ -398,6 +401,13 @@ export class Parser {
 
          if (operator === "." && right instanceof Identifier) {
             left = new Select(left, right.value);
+         } else if (
+            operator === "." &&
+            right instanceof Apply &&
+            right.callee instanceof Identifier
+         ) {
+            const select = new Select(left, right.callee.value);
+            left = new Apply(select, right.args, right.isTypeLambda);
          } else {
             left = new BinaryExpression(left, operator, right);
          }
@@ -722,35 +732,6 @@ export class LambdaTypeTerm extends Term {
    }
 }
 
-// export function parseLambdaType(parser: Parser) {
-//    // Expect the opening parenthesis for parameters
-//    parser.expect("(");
-
-//    const params: Term[] = [];
-
-//    // Parse parameters until we hit a closing parenthesis
-//    while (parser.peek().tag !== "PARENS" || parser.peek().value !== ")") {
-//       const param = parser.parseParameterType();
-//       params.push(param);
-
-//       // Check for a comma to separate parameters
-//       if (parser.peek().tag === "OPERATOR" && parser.peek().value === ",") {
-//          parser.nextToken(); // Consume the comma
-//       } else {
-//          break; // Exit loop if no more parameters
-//       }
-//    }
-
-//    parser.expect(")"); // Expect the closing parenthesis
-
-//    // Expect the return type Assignment
-//    parser.expect("OPERATOR", "=>"); // Expect '=>'
-
-//    const returnType = parser.parseType(); // Parse the return type
-
-//    return new LambdaTypeTerm(params, returnType);
-// }
-
 export function parseNewType(parser: Parser): Term {
    let token: Token = parser.consume("KEYWORD");
    if (token.value !== "type") {
@@ -761,7 +742,7 @@ export function parseNewType(parser: Parser): Term {
 
    // Expect INDENT (start of type block)
    parser.consume("NEWLINE");
-   token = parser.consume("INDENT");
+   parser.consume("INDENT");
 
    let fieldDefs: FieldDef[] = [];
 
@@ -781,7 +762,7 @@ export function parseNewType(parser: Parser): Term {
          let ident = parser.consume("IDENTIFIER");
 
          // Expect a colon followed by the type of the field
-         parser.consume("OPERATOR");
+         parser.consume("OPERATOR", "::");
 
          // Expect the type of the field
          let type = parser.consume("IDENTIFIER");
@@ -804,6 +785,7 @@ export function parseNewType(parser: Parser): Term {
          fieldDefs.push(
             new FieldDef(fieldName, new Identifier(type.value), defaultValue)
          );
+         parser.consume("NEWLINE");
       } else {
          throw new Error(
             `Unexpected token: ${token.tag} at line ${token.position.start.line}, column ${token.position.start.column}`

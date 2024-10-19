@@ -48,6 +48,7 @@ class MultipleToken extends Token {
    constructor(tokens: Token[], position: TokenPos) {
       super(TokenTag.MULTIPLE_TOKENS, "", position);
       this.tokens = tokens;
+      this.position = position;
    }
 }
 
@@ -60,7 +61,7 @@ export class Lexer {
    operators: string[];
    parens: string[];
    indentStack: number[];
-   constructor(input) {
+   constructor(input: string) {
       this.input = input;
       this.position = 0;
       this.line = 1;
@@ -236,7 +237,7 @@ export class Lexer {
 
       if (indentLength < previousIndent) {
          this.indentStack.pop();
-         new Token(
+         return new Token(
             TokenTag.DEDENT,
             String(indentLength),
             new TokenPos(

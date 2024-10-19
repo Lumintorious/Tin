@@ -15,115 +15,90 @@ IDENTIFIER   | title        |   4, 2
 OPERATOR     | ::           |   4, 8    
 IDENTIFIER   | String       |   4, 11   
 NEWLINE      |              |   5, 1    
+DEDENT       | 0            |   5, 1    
 NEWLINE      |              |   6, 1    
 IDENTIFIER   | robert       |   6, 1    
 OPERATOR     | =            |   6, 8    
-IDENTIFIER   | Person       |   6, 10   
-PARENS       | (            |   6, 16   
-STRING       | Robert       |   6, 17   
-OPERATOR     | ,            |   6, 25   
-STRING       | Baratheon    |   6, 27   
-OPERATOR     | ,            |   6, 38   
-STRING       | King of the Seven Kingdoms |   6, 40   
-PARENS       | )            |   6, 68   
+IDENTIFIER   | makePerson   |   6, 10   
+PARENS       | (            |   6, 20   
+STRING       | Robert       |   6, 21   
+OPERATOR     | ,            |   6, 29   
+STRING       | Baratheon    |   6, 31   
+OPERATOR     | ,            |   6, 42   
+STRING       | King of the Seven Kingdoms |   6, 44   
+PARENS       | )            |   6, 72   
 NEWLINE      |              |   7, 1    
-IDENTIFIER   | hail         |   7, 1    
-OPERATOR     | =            |   7, 6    
-PARENS       | (            |   7, 8    
-IDENTIFIER   | p            |   7, 9    
-OPERATOR     | ::           |   7, 11   
-IDENTIFIER   | Person       |   7, 14   
-PARENS       | )            |   7, 20   
-OPERATOR     | ->           |   7, 22   
-STRING       | Hail         |   7, 25   
-OPERATOR     | +            |   7, 25   
-IDENTIFIER   | p            |   7, 32   
-OPERATOR     | .            |   7, 33   
-IDENTIFIER   | name         |   7, 34   
-OPERATOR     | +            |   7, 25   
-STRING       |  of House    |   7, 25   
-OPERATOR     | +            |   7, 25   
-IDENTIFIER   | p            |   7, 50   
-OPERATOR     | .            |   7, 51   
-IDENTIFIER   | house        |   7, 52   
-OPERATOR     | +            |   7, 25   
-STRING       | ,            |   7, 25   
-OPERATOR     | +            |   7, 25   
-IDENTIFIER   | p            |   7, 61   
-OPERATOR     | .            |   7, 62   
-IDENTIFIER   | title        |   7, 63   
-OPERATOR     | +            |   7, 25   
-STRING       | !            |   7, 25   
 NEWLINE      |              |   8, 1    
+IDENTIFIER   | hail         |   8, 1    
+OPERATOR     | =            |   8, 6    
+PARENS       | (            |   8, 8    
+IDENTIFIER   | p            |   8, 9    
+OPERATOR     | ::           |   8, 11   
+IDENTIFIER   | Person       |   8, 14   
+PARENS       | )            |   8, 20   
+OPERATOR     | ->           |   8, 22   
+STRING       | Hails        |   8, 25   
+OPERATOR     | +            |   8, 25   
+IDENTIFIER   | p            |   8, 33   
+OPERATOR     | .            |   8, 34   
+IDENTIFIER   | name         |   8, 35   
+OPERATOR     | +            |   8, 25   
+STRING       |  of House    |   8, 25   
+OPERATOR     | +            |   8, 25   
+IDENTIFIER   | p            |   8, 51   
+OPERATOR     | .            |   8, 52   
+IDENTIFIER   | house        |   8, 53   
+OPERATOR     | +            |   8, 25   
+STRING       | ,            |   8, 25   
+OPERATOR     | +            |   8, 25   
+IDENTIFIER   | p            |   8, 62   
+OPERATOR     | .            |   8, 63   
+IDENTIFIER   | title        |   8, 64   
+OPERATOR     | +            |   8, 25   
+STRING       | !            |   8, 25   
 NEWLINE      |              |   9, 1    
-IDENTIFIER   | Self         |   9, 1    
-OPERATOR     | =            |   9, 6    
-PARENS       | [            |   9, 8    
-IDENTIFIER   | T            |   9, 9    
-PARENS       | ]            |   9, 10   
-OPERATOR     | =>           |   9, 12   
-IDENTIFIER   | T            |   9, 15   
 NEWLINE      |              |  10, 1    
+IDENTIFIER   | addAll       |  10, 1    
+OPERATOR     | =            |  10, 8    
+PARENS       | (            |  10, 10   
+IDENTIFIER   | xs           |  10, 11   
+OPERATOR     | ::           |  10, 14   
+OPERATOR     | ...          |  10, 17   
+IDENTIFIER   | Number       |  10, 20   
+PARENS       | )            |  10, 26   
+OPERATOR     | ->           |  10, 28   
+IDENTIFIER   | xs           |  10, 31   
 NEWLINE      |              |  11, 1    
-IDENTIFIER   | self         |  11, 1    
-OPERATOR     | =            |  11, 6    
-PARENS       | [            |  11, 8    
-IDENTIFIER   | T            |  11, 9    
-PARENS       | ]            |  11, 10   
-OPERATOR     | =>           |  11, 12   
-PARENS       | (            |  11, 15   
-IDENTIFIER   | t            |  11, 16   
-OPERATOR     | ::           |  11, 18   
-IDENTIFIER   | T            |  11, 21   
-PARENS       | )            |  11, 22   
-OPERATOR     | ->           |  11, 24   
-IDENTIFIER   | t            |  11, 27   
 NEWLINE      |              |  12, 1    
+IDENTIFIER   | xs           |  12, 1    
+OPERATOR     | =            |  12, 4    
+IDENTIFIER   | addAll       |  12, 6    
+PARENS       | (            |  12, 12   
+NUMBER       | 1            |  12, 13   
+OPERATOR     | ,            |  12, 14   
+NUMBER       | 2            |  12, 16   
+OPERATOR     | ,            |  12, 17   
+NUMBER       | 3            |  12, 19   
+PARENS       | )            |  12, 20   
 NEWLINE      |              |  13, 1    
-IDENTIFIER   | x            |  13, 1    
-OPERATOR     | ::           |  13, 3    
-IDENTIFIER   | Self         |  13, 6    
-PARENS       | [            |  13, 10   
-IDENTIFIER   | Number       |  13, 11   
-PARENS       | ]            |  13, 17   
-OPERATOR     | =            |  13, 19   
-NUMBER       | 2            |  13, 21   
 NEWLINE      |              |  14, 1    
+IDENTIFIER   | print        |  14, 1    
+PARENS       | (            |  14, 6    
+IDENTIFIER   | xs           |  14, 7    
+OPERATOR     | .            |  14, 9    
+IDENTIFIER   | length       |  14, 10   
+PARENS       | (            |  14, 16   
+PARENS       | )            |  14, 17   
+PARENS       | )            |  14, 18   
 NEWLINE      |              |  15, 1    
-IDENTIFIER   | f            |  15, 1    
-OPERATOR     | =            |  15, 3    
-PARENS       | (            |  15, 5    
-IDENTIFIER   | i            |  15, 6    
-OPERATOR     | ::           |  15, 8    
-IDENTIFIER   | Int          |  15, 11   
-OPERATOR     | ,            |  15, 14   
-IDENTIFIER   | j            |  15, 16   
-OPERATOR     | ::           |  15, 18   
-IDENTIFIER   | Int          |  15, 21   
-PARENS       | )            |  15, 24   
-OPERATOR     | =>           |  15, 26   
-IDENTIFIER   | String       |  15, 29   
-OPERATOR     | ->           |  15, 36   
 NEWLINE      |              |  16, 1    
-INDENT       | 4            |  16, 1    
-IDENTIFIER   | i            |  16, 2    
-OPERATOR     | +            |  16, 4    
-IDENTIFIER   | j            |  16, 6    
+IDENTIFIER   | print        |  16, 1    
+PARENS       | (            |  16, 6    
+IDENTIFIER   | hail         |  16, 7    
+PARENS       | (            |  16, 11   
+IDENTIFIER   | robert       |  16, 12   
+PARENS       | )            |  16, 18   
+PARENS       | )            |  16, 19   
 NEWLINE      |              |  17, 1    
 NEWLINE      |              |  18, 1    
-IDENTIFIER   | typedSelf    |  18, 1    
-OPERATOR     | =            |  18, 11   
-IDENTIFIER   | self         |  18, 13   
-PARENS       | [            |  18, 17   
-IDENTIFIER   | Number       |  18, 18   
-PARENS       | ]            |  18, 24   
-NEWLINE      |              |  19, 1    
-NEWLINE      |              |  20, 1    
-IDENTIFIER   | appliedSelf  |  20, 1    
-OPERATOR     | =            |  20, 13   
-IDENTIFIER   | typedSelf    |  20, 15   
-PARENS       | (            |  20, 24   
-NUMBER       | 2            |  20, 25   
-PARENS       | )            |  20, 26   
-NEWLINE      |              |  21, 1    
 --undefined--

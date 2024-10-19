@@ -5,6 +5,8 @@
    "main": "./tin-compiler-ts/compiler.ts",
    "type": "module",
    "scripts": {
+      "oldDev": " npx tsx --watch tin-compiler-ts/compiler.ts test",
+      "dev": "nodemon --watch ./tin-compiler-ts/ --watch ./test.tin --exec npx tsx ./tin-compiler-ts/compiler.ts test --run",
       "test": "echo \"Error: no test specified\" && exit 1"
    },
    "author": "Lumintorious",

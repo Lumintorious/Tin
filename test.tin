@@ -3,18 +3,15 @@ Person = type
 	house :: String
 	title :: String
 
-robert = Person("Robert", "Baratheon", "King of the Seven Kingdoms")
-hail = (p :: Person) -> "Hail {p.name} of House {p.house}, {p.title}!"
+robert = makePerson("Robert", "Baratheon", "King of the Seven Kingdoms")
 
-Self = [T] => T
+hail = (p :: Person) -> "Hails {p.name} of House {p.house}, {p.title}!"
 
-self = [T] => (t :: T) -> t
+addAll = (xs :: ...Number) -> xs
 
-x :: Self[Number] = 2
+xs = addAll(1, 2, 3)
 
-f = (i :: Int, j :: Int) => String ->
-	i + j
+print(xs.length())
 
-typedSelf = self[Number]
+print(hail(robert))
 
-appliedSelf = typedSelf(2)

@@ -13,11 +13,11 @@ function TIN_TYPE(typeId, constructor, descriptor) {
 	return constructor
 }
 
-_TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
+const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	return { ...obj1, ...obj2 }
 }
 
-_TIN_UNION_OBJECTS = function (obj1, obj2) {
+const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 	return [obj1, obj2]
 }
 
@@ -25,7 +25,7 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
-const Array = TIN_TYPE("", (...args) => ({
+const Array = TIN_TYPE("", (args) => ({
 	length() {
 		return args.length;
 	},

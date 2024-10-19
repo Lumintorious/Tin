@@ -12,9 +12,7 @@
       "paths": {
          "*": ["node_modules/*", "*"] // Define module resolution for paths
       },
-      "allowJs": true,
-      "declaration": true,
-      "emitDeclarationOnly": true
+      "allowJs": true
    },
    "include": [
       "tin-compiler-ts/**/*.ts" // Include all TypeScript files in the src directory
