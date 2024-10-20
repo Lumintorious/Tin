@@ -1,6 +1,6 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./TypeChecker";
-const applyableKeywords = ["return", "mutable"];
+const applyableKeywords = ["return", "mutable", "change"];
 export class AstNode {
    readonly tag: string;
    position?: TokenPos;
@@ -37,7 +37,7 @@ export class Assignment extends AstNode {
    constructor(lhs: Term, value?: Term, isDeclaration = true, type?: Term) {
       super("Assignment"); // tag of the AST node
       this.lhs = lhs; // Name of the variable
-      this.value = value; // Lambda function associated with the Assignment
+      this.value = value; // RoundValueToValueLambda function associated with the Assignment
       this.type = type;
       this.isDeclaration = isDeclaration;
       if (lhs instanceof Identifier) {
@@ -79,15 +79,69 @@ export class IfStatement extends Term {
    }
 }
 
-export class Lambda extends Term {
+export class WhileLoop extends Term {
+   start?: Term;
+   condition: Term;
+   eachLoop?: Term;
+   action: Term;
+   constructor(
+      start: Term | undefined,
+      condition: Term,
+      eachLoop: Term | undefined,
+      action: Term
+   ) {
+      super("WhileLoop");
+      this.start = start;
+      this.condition = condition;
+      this.eachLoop = eachLoop;
+      this.action = action;
+   }
+}
+
+// (i: Number) -> i + 1
+export class RoundValueToValueLambda extends Term {
    params: Term[];
    block: Block;
    isTypeLambda?: boolean;
-   constructor(params: Term[], block: Block, isTypeLambda?: boolean) {
-      super("Lambda");
+   constructor(params: Term[], block: Block) {
+      super("RoundValueToValueLambda");
       this.params = params;
       this.block = block;
-      this.isTypeLambda = isTypeLambda;
+   }
+}
+
+// (Number) => String
+export class RoundTypeToTypeLambda extends Term {
+   parameterTypes: Term[];
+   returnType: Term;
+   constructor(parameterTypes: Term[], returnType: Term) {
+      super("RoundTypeToTypeLambda");
+      this.parameterTypes = parameterTypes;
+      this.returnType = returnType;
+      this.isTypeLevel = true;
+   }
+}
+
+// [T] -> 1 + 2
+export class SquareTypeToValueLambda extends Term {
+   parameterTypes: Term[];
+   block: Term;
+   constructor(parameterTypes: Term[], block: Term) {
+      super("SquareTypeToValueLambda");
+      this.parameterTypes = parameterTypes;
+      this.block = block;
+   }
+}
+
+// [T] => List[T]
+export class SquareTypeToTypeLambda extends Term {
+   parameterTypes: Term[];
+   returnType: Term;
+   constructor(parameterTypes: Term[], returnType: Term) {
+      super("SquareTypeToTypeLambda");
+      this.parameterTypes = parameterTypes;
+      this.returnType = returnType;
+      this.isTypeLevel = true;
    }
 }
 
@@ -120,16 +174,24 @@ export class Literal extends Term {
 }
 
 // callee(args, args, args)
-export class Apply extends Term {
+export class RoundApply extends Term {
    callee: Term;
    args: Term[];
-   isTypeLambda?: boolean;
    takesVarargs?: boolean;
-   constructor(callee: Term, args: Term[], isTypeLambda?: boolean) {
-      super("Apply");
+   constructor(callee: Term, args: Term[]) {
+      super("RoundApply");
       this.callee = callee;
       this.args = args;
-      this.isTypeLambda = isTypeLambda;
+   }
+}
+
+export class SquareApply extends Term {
+   callee: Term;
+   typeArgs: Term[];
+   constructor(callee: Term, typeArgs: Term[]) {
+      super("SquareApply");
+      this.callee = callee;
+      this.typeArgs = typeArgs;
    }
 }
 
@@ -214,6 +276,16 @@ export class AppliedKeyword extends Term {
    }
 }
 
+export class Change extends Term {
+   lhs: Term;
+   value: Term;
+   constructor(lhs: Term, value: Term) {
+      super("Change");
+      this.lhs = lhs;
+      this.value = value;
+   }
+}
+
 const PRECEDENCE: { [_: string]: number } = {
    ".": 100, // Field access
    "*": 10, // Multiplication
@@ -279,12 +351,12 @@ export class Parser {
       return this.parseExpression();
    }
 
-   parseApply(callee: Term, isTypeLambda?: boolean) {
-      const start = this.consume("PARENS", isTypeLambda ? "[" : "("); // Consume '('
+   parseApply(callee: Term, isSquare?: boolean) {
+      const start = this.consume("PARENS", isSquare ? "[" : "("); // Consume '('
       const args: Term[] = [];
 
       // Parse arguments (expressions)
-      while (this.peek() && this.peek().value !== (isTypeLambda ? "]" : ")")) {
+      while (this.peek() && this.peek().value !== (isSquare ? "]" : ")")) {
          this.omit("NEWLINE");
          this.omit("INDENT");
          this.omit("DEDENT");
@@ -298,12 +370,13 @@ export class Parser {
          }
       }
 
-      const end = this.consume("PARENS", isTypeLambda ? "]" : ")"); // Consume ')'
+      const end = this.consume("PARENS", isSquare ? "]" : ")");
 
-      return new Apply(callee, args, isTypeLambda).fromTo(
-         start.position,
-         end.position
-      ); // Return a function application node
+      const result = isSquare
+         ? new SquareApply(callee, args)
+         : new RoundApply(callee, args);
+
+      return result.fromTo(start.position, end.position); // Return a function application node
    }
 
    parseExpression(precedence = 0, stopAtEquals = false) {
@@ -403,11 +476,18 @@ export class Parser {
             left = new Select(left, right.value);
          } else if (
             operator === "." &&
-            right instanceof Apply &&
+            right instanceof RoundApply &&
             right.callee instanceof Identifier
          ) {
             const select = new Select(left, right.callee.value);
-            left = new Apply(select, right.args, right.isTypeLambda);
+            left = new RoundApply(select, right.args);
+         } else if (
+            operator === "." &&
+            right instanceof SquareApply &&
+            right.callee instanceof Identifier
+         ) {
+            const select = new Select(left, right.callee.value);
+            left = new SquareApply(select, right.typeArgs);
          } else {
             left = new BinaryExpression(left, operator, right);
          }
@@ -461,10 +541,10 @@ export class Parser {
    }
 
    // TypeLamda = lambda that takes types and returns types [T] -> List[T]
-   // LambdaType = the type of a lambda that takes values and returns values (T) -> List[T]
-   parseLambda(isTypeLambda?: boolean): Lambda | LambdaTypeTerm {
+   // RoundValueToValueLambdaType = the type of a lambda that takes values and returns values (T) -> List[T]
+   parseRoundValueToValueLambda(isSquare?: boolean): Term {
       // Ensure we have the opening parenthesis for the parameters
-      this.consume("PARENS", isTypeLambda ? "[" : "("); // This should throw an error if not found
+      this.consume("PARENS", isSquare ? "[" : "("); // This should throw an error if not found
       let isTypeLevel = false;
 
       const parameters: Assignment[] = [];
@@ -489,7 +569,7 @@ export class Parser {
          }
       }
 
-      this.consume("PARENS", isTypeLambda ? "]" : ")"); // Consume the closing parenthesis
+      this.consume("PARENS", isSquare ? "]" : ")"); // Consume the closing parenthesis
 
       // Now check for the arrow (-> / =>) indicating the function body
       const arrow = this.consume("OPERATOR");
@@ -503,7 +583,11 @@ export class Parser {
          } else {
             block = new Block([body]);
          }
-         return new Lambda(parameters, block, isTypeLambda);
+         if (isSquare) {
+            return new SquareTypeToValueLambda(parameters, block);
+         } else {
+            return new RoundValueToValueLambda(parameters, block);
+         }
       } else if (arrow.value === "=>") {
          // Type Level
          let returnType = this.parseExpression(0, true);
@@ -513,9 +597,33 @@ export class Parser {
                arrow
             );
          }
-         return new LambdaTypeTerm(parameters, returnType);
+         if (isSquare) {
+            return new SquareTypeToTypeLambda(parameters, returnType);
+         } else {
+            return new RoundTypeToTypeLambda(parameters, returnType);
+         }
       } else {
          return this.createError("Expected -> or =>", this.peek());
+      }
+   }
+
+   parseWhileLoop() {
+      this.consume("KEYWORD", "while");
+      const firstPart = this.parseExpression();
+      let secondPart = undefined;
+      let thirdPart = undefined;
+      if (this.is(";")) {
+         this.consume("OPERATOR", ";");
+         secondPart = this.parseExpression();
+         this.consume("OPERATOR", ";");
+         thirdPart = this.parseExpression();
+      }
+      this.consume("KEYWORD", "do");
+      const action = this.parseExpression();
+      if (secondPart !== undefined && thirdPart !== undefined) {
+         return new WhileLoop(firstPart, secondPart, thirdPart, action);
+      } else {
+         return new WhileLoop(undefined, firstPart, undefined, action);
       }
    }
 
@@ -563,10 +671,16 @@ export class Parser {
 
    parseAppliedKeyword() {
       const keyword = this.consume("KEYWORD");
-      return new AppliedKeyword(
-         keyword.value,
-         new Identifier(this.consume("IDENTIFIER").value)
-      );
+      const expression = this.parseExpression();
+      if (
+         expression instanceof Assignment &&
+         expression.value &&
+         keyword.value === "change"
+      ) {
+         return new Change(expression.lhs, expression.value);
+      } else {
+         throw new Error("'change' can only be applied on assignments");
+      }
    }
 
    parseBlock() {
@@ -633,12 +747,12 @@ export class Parser {
 
       if (token.value === "(") {
          this.current--;
-         return this.parseLambda(); // Handle lambda expressions
+         return this.parseRoundValueToValueLambda(); // Handle lambda expressions
       }
 
       if (token.value === "[") {
          this.current--;
-         return this.parseLambda(true); // Handle lambda expressions
+         return this.parseRoundValueToValueLambda(true); // Handle lambda expressions
       }
 
       if (token.tag === "NEWLINE" && this.peek().tag === "INDENT") {
@@ -649,6 +763,11 @@ export class Parser {
       if (token.tag === "PARENS" && token.value === "{") {
          this.current--;
          return this.parseGrouping(); // Grouping with parentheses
+      }
+
+      if (token.value === "while") {
+         this.current--;
+         return this.parseWhileLoop();
       }
 
       if (token.value === "if") {
@@ -716,18 +835,6 @@ export class FieldDef extends AstNode {
       this.name = name;
       this.type = type;
       this.defaultValue = defaultValue;
-      this.isTypeLevel = true;
-   }
-}
-
-// (Int) => String
-export class LambdaTypeTerm extends Term {
-   parameterTypes: Term[];
-   returnType: Term;
-   constructor(parameterTypes: Term[], returnType: Term) {
-      super("LambdaType");
-      this.parameterTypes = parameterTypes;
-      this.returnType = returnType;
       this.isTypeLevel = true;
    }
 }

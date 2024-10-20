@@ -11,8 +11,8 @@ class TypeChecker {
 			case 'Definition':
 				this.checkDefinition(astNode);
 				break;
-			case 'Lambda':
-				this.checkLambda(astNode);
+			case 'RoundValueToValueLambda':
+				this.checkRoundValueToValueLambda(astNode);
 				break;
 			case 'IfStatement':
 				this.checkIfStatement(astNode);
@@ -20,7 +20,7 @@ class TypeChecker {
 			case 'BinaryExpression':
 				this.checkBinaryExpression(astNode);
 				break;
-			case 'Apply':
+			case 'RoundApply':
 				this.checkApply(astNode);
 				break;
 			case 'Literal':
@@ -61,7 +61,7 @@ class TypeChecker {
 		this.check(node.value); // Check the assigned value
 	}
 
-	checkLambda(node) {
+	checkRoundValueToValueLambda(node) {
 		console.log(`Checking lambda with params: ${node.params.map(p => p.name).join(', ')}`);
 		node.params.forEach(param => {
 			if (!this.isValidType(param.type)) {
@@ -98,7 +98,7 @@ class TypeChecker {
 		console.log(`Checking function application`);
 		const calleeType = this.getExpressionType(node.callee);
 
-		if (!calleeType || calleeType.tag !== 'Lambda') {
+		if (!calleeType || calleeType.tag !== 'RoundValueToValueLambda') {
 			console.error(`Type error: ${node.callee.value} is not a function.`);
 			return;
 		}
@@ -161,7 +161,7 @@ class TypeChecker {
 			case 'Identifier':
 				const symbol = this.symbolTable.findSymbol(expression.value);
 				return symbol ? symbol.typeSymbol : null;
-			case 'Apply':
+			case 'RoundApply':
 				return this.getApplyReturnType(expression);
 			case 'BinaryExpression':
 				const leftType = this.getExpressionType(expression.left);
@@ -172,10 +172,10 @@ class TypeChecker {
 		}
 	}
 
-	// This would handle getting the return type from an Apply expression
+	// This would handle getting the return type from an RoundApply expression
 	getApplyReturnType(applyExpression) {
 		const calleeType = this.getExpressionType(applyExpression.callee);
-		if (calleeType && calleeType.tag === 'Lambda') {
+		if (calleeType && calleeType.tag === 'RoundValueToValueLambda') {
 			return calleeType.returnType;
 		}
 		return 'Unknown';

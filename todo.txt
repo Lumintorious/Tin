@@ -1,5 +1,5 @@
 [X] Generic Types
-[X] Generic Lambdas
+[X] Generic RoundValueToValueLambdas
 [X] Auto-constructors
 [X] Simple type-checking
 [ ] Handling 'this'

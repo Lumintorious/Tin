@@ -33,7 +33,7 @@ class NamedType extends Type {
 	}
 }
 
-class LambdaType extends Type {
+class RoundValueToValueLambdaType extends Type {
 	constructor(paramTypes, returnType) {
 		super();
 		this.paramTypes = paramTypes;
@@ -41,7 +41,7 @@ class LambdaType extends Type {
 	}
 
 	isAssignableTo(other) {
-		if (!(other instanceof LambdaType)) return false;
+		if (!(other instanceof RoundValueToValueLambdaType)) return false;
 
 		// Check if parameter types are contravariant
 		const paramCheck = this.paramTypes.length === other.paramTypes.length &&

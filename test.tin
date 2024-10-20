@@ -1,17 +1,31 @@
-Person = type
+#apply = [T] -> (thing :: T, func :: (T) => T) -> func(thing)
+
+newArr = (nums :: ...Number) -> nums
+addOne = (i :: Number) -> i + 1
+
+#x = apply[Number](12, addOne)
+
+#print(x)
+print(newArr(1, 2, 3))
+
+Cat = type
 	name :: String
-	house :: String
-	title :: String
 
-robert = makePerson("Robert", "Baratheon", "King of the Seven Kingdoms")
+Robot = type
+	version :: Number
 
-hail = (p :: Person) -> "Hails {p.name} of House {p.house}, {p.title}!"
+Robocat = Cat & Robot
 
-addAll = (xs :: ...Number) -> xs
+makeRoboKitty = (name :: String, version :: Number) ->
+	makeCat(name) & makeRobot(version)
 
-xs = addAll(1, 2, 3)
+print(makeRoboKitty("Kitkat", 1.2))
 
-print(xs.length())
-
-print(hail(robert))
+sumOf = (things :: ...Number) ->
+	sum = 0
+	while i = 0 ; i < things.length() ; change i = i + 1 do
+		change sum = sum + things.at(i)
+	sum
+	
+print(sumOf(1, 2, 3, 4))
 

@@ -31,22 +31,43 @@ const Array = TIN_TYPE("", (args) => ({
 	},
 	at(index) {
 		return args[index]
+	},
+	toString() {
+		const parts = args.map(x => JSON.stringify(x)).join(", ")
+		return "Array(" + parts + ")"
 	}
 }), {})
 
-const print = (...args) => console.log(...args)
+const print = (...args) => {
+	if (args[0].hasOwnProperty("toString")) {
+		console.log(args.toString())
+	} else {
+		console.log(...args)
+	}
+}
 const list = []
 
 // COMPILED TIN
 ;
-var Person/* ???*/ = TIN_TYPE("5bb433fb-0177-483b-b025-d1b2bf675bc7", (_p0,_p1,_p2) => ({name: _p0,house: _p1,title: _p2}), {name: { type: String, defaultValue: undefined },house: { type: String, defaultValue: undefined },title: { type: String, defaultValue: undefined }}); var makePerson = Person;;
-var robert/* Person*/ = makePerson("Robert", "Baratheon", "King of the Seven Kingdoms");
-var hail/* (Person) => String*/ = function(p/* Person*/) {
-return "Hails " + p.name + " of House " + p.house + ", " + p.title + "!"
+var newArr/* (Array[Number]) => ...Number*/ = function(nums) {
+return nums
 };
-var addAll/* (Array[Number]) => Array[Number]*/ = function(xs/* Array[Number]*/) {
-return xs
+var addOne/* (Number) => Number*/ = function(i) {
+return i + 1
 };
-var xs/* Array[Number]*/ = addAll(Array([1, 2, 3]));
-print(xs.length());
-print(hail(robert))
+print(newArr(Array([1, 2, 3])));
+var Cat = TIN_TYPE("16afb3a7-c1f6-4ab5-ba0e-543c4b6770f4", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeCat = Cat;;
+var Robot = TIN_TYPE("25591619-3bf4-460a-acb3-1c658965d5d0", (_p0) => ({version: _p0}), {version: { type: Number, defaultValue: undefined }}); var makeRobot = Robot;;
+var Robocat = _TIN_INTERSECT_OBJECTS(Cat, Robot);
+var makeRoboKitty/* (String, Number) => Cat & Robot*/ = function(name, version) {
+return _TIN_INTERSECT_OBJECTS(makeCat(name), makeRobot(version))
+};
+print(makeRoboKitty("Kitkat", 1.2));
+var sumOf/* (Array[Number]) => Number*/ = function(things) {
+var sum/* Number*/ = 0;
+for (var i/* ???*/ = 0;i < things.length();i = i + 1) {
+ sum = sum + things.at(i) 
+};
+return sum
+};
+print(sumOf(Array([1, 2, 3, 4])))

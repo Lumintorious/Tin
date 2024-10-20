@@ -1,6 +1,0 @@
-6: makePerson :: makePerson
-7: Person :: Person
-8: robert :: Person
-9: hail :: (Person) => String
-10: addAll :: (Array[Number]) => Array[Number]
-11: xs :: Array[Number]

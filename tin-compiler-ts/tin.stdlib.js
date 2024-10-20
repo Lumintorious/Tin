@@ -31,10 +31,20 @@ const Array = TIN_TYPE("", (args) => ({
 	},
 	at(index) {
 		return args[index]
+	},
+	toString() {
+		const parts = args.map(x => JSON.stringify(x)).join(", ")
+		return "Array(" + parts + ")"
 	}
 }), {})
 
-const print = (...args) => console.log(...args)
+const print = (...args) => {
+	if (args[0].hasOwnProperty("toString")) {
+		console.log(args.toString())
+	} else {
+		console.log(...args)
+	}
+}
 const list = []
 
 // COMPILED TIN

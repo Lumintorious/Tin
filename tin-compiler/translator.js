@@ -46,9 +46,9 @@ function translate(term, args) {
 			return `(${translate(term.expression)}) /* as ${translate(term.type)} */`
 		case "Identifier":
 			return term.value
-		case "Lambda":
+		case "RoundValueToValueLambda":
 			return `function(${term.params.map(p => translate(p)).join(", ")}) {\n${translate(term.block, { returnLast: true })}\n}`
-		case "LambdaType":
+		case "RoundTypeToTypeLambda":
 			return `(${term.parameterTypes.map(t => translate(t)).join(", ")}) => ${translate(term.returnType)}`
 		case "IfStatement":
 			return `((${translate(term.condition)}) ? (${translate(term.trueBranch)}) : (${translate(term.falseBranch)})) `
@@ -57,16 +57,16 @@ function translate(term, args) {
 				return `const ${term.left.value} ${term.left.type ? ("/*" + term.left.type + "*/") : ""} = ${translate(term.right)}`
 			}
 			if (term.operator === "|") {
-				return translate({ tag: "Apply", callee: { tag: "Identifier", value: "_TIN_UNION_OBJECTS" }, args: [term.left, term.right] })
+				return translate({ tag: "RoundApply", callee: { tag: "Identifier", value: "_TIN_UNION_OBJECTS" }, args: [term.left, term.right] })
 			}
 			if (term.operator === "&") {
-				return translate({ tag: "Apply", callee: { tag: "Identifier", value: "_TIN_INTERSECT_OBJECTS" }, args: [term.left, term.right] })
+				return translate({ tag: "RoundApply", callee: { tag: "Identifier", value: "_TIN_INTERSECT_OBJECTS" }, args: [term.left, term.right] })
 			}
 			if (!["+", "-", "*", "/", "&&", "||", "->", "<", ">", "<=", ">=", "."].includes(term.operator)) {
 				return translate(term.left) + '["' + term.operator + '"](' + translate(term.right) + ')'
 			}
 			return translate(term.left) + " " + term.operator + " " + translate(term.right)
-		case "Apply":
+		case "RoundApply":
 			const open = term.takesVarargs ? "(Array([" : "("
 			const close = term.takesVarargs ? "]))" : ")"
 			return translate(term.callee) + open + term.args.map(arg => translate(arg)).join(", ") + close

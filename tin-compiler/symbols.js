@@ -146,9 +146,9 @@ class OptionalType extends Type {
 	}
 }
 
-class LambdaType extends Type {
+class RoundValueToValueLambdaType extends Type {
 	constructor(paramTypes, returnType, isGeneric) {
-		super("LambdaType");
+		super("RoundTypeToTypeLambda");
 		paramTypes.forEach(p => {
 			if (p.tag === undefined) {
 				throw new Error("Empty type")
@@ -161,7 +161,7 @@ class LambdaType extends Type {
 	}
 
 	extends(other) {
-		if (!(other instanceof LambdaType)) return false;
+		if (!(other instanceof RoundValueToValueLambdaType)) return false;
 
 		// Check if parameter types are contravariant
 		const paramCheck = this.paramTypes.length === other.paramTypes.length &&
@@ -182,9 +182,9 @@ class LambdaType extends Type {
 	}
 }
 
-class TypeLambda extends Type {
+class TypeRoundValueToValueLambda extends Type {
 	constructor(paramTypes, returnType) {
-		super("TypeLambda");
+		super("TypeRoundValueToValueLambda");
 		this.paramTypes = paramTypes;
 		this.returnType = returnType;
 	}
@@ -350,13 +350,13 @@ class Scope {
 		typeSymbol.run = this.run;
 		if (typeSymbol.tag === "StructType") {
 			typeSymbol.name = name
-			const constructorSymbol = new Symbol(name, new LambdaType(typeSymbol.fields.map(f => f.type), typeSymbol).named(name))
+			const constructorSymbol = new Symbol(name, new RoundValueToValueLambdaType(typeSymbol.fields.map(f => f.type), typeSymbol).named(name))
 			this.declare(name, constructorSymbol)
 		}
-		if (typeSymbol.tag === "LambdaType" && typeSymbol.returnType instanceof StructType) {
+		if (typeSymbol.tag === "RoundTypeToTypeLambda" && typeSymbol.returnType instanceof StructType) {
 			typeSymbol.name = name
 			const structTypeSymbol = typeSymbol.returnType
-			const constructorSymbol = new Symbol(name, new LambdaType(structTypeSymbol.fields.map(f => f.type), typeSymbol).named(name))
+			const constructorSymbol = new Symbol(name, new RoundValueToValueLambdaType(structTypeSymbol.fields.map(f => f.type), typeSymbol).named(name))
 			this.declare(name, constructorSymbol)
 		}
 
@@ -407,11 +407,11 @@ class TypeInferencer {
 				inferredType = this.inferBinaryExpression(node, scope);
 				break;
 				break;
-			case 'Lambda':
-				inferredType = this.inferLambda(node, scope);
+			case 'RoundValueToValueLambda':
+				inferredType = this.inferRoundValueToValueLambda(node, scope);
 				break;
-			case 'LambdaType':
-				inferredType = this.inferLambdaType(node, scope);
+			case 'RoundValueToValueLambdaType':
+				inferredType = this.inferRoundValueToValueLambdaType(node, scope);
 				break;
 			case 'Block':
 				inferredType = this.inferBlock(node, scope)
@@ -419,7 +419,7 @@ class TypeInferencer {
 			case 'TypeDef':
 				inferredType = new TypeDefType();
 				break;
-			case "Apply":
+			case "RoundApply":
 				inferredType = this.inferApply(node, scope);
 				break;
 			// Add more cases for other AST nodes as needed
@@ -434,12 +434,12 @@ class TypeInferencer {
 	}
 
 	inferApply(node, scope) {
-		if (node.isTypeLambda) {
+		if (node.isTypeRoundValueToValueLambda) {
 			let nodeCallee = node.callee;
 			if (node.callee.tag === "Identifier") {
 				nodeCallee = scope.lookup(node.callee.value);
 			}
-			if (nodeCallee.typeSymbol && nodeCallee.typeSymbol.tag === "TypeLambda") {
+			if (nodeCallee.typeSymbol && nodeCallee.typeSymbol.tag === "TypeRoundValueToValueLambda") {
 				const actualParams = node.args.map(n => {
 					return this.translateTypeNodeToType(n, scope)
 				})
@@ -548,17 +548,17 @@ class TypeInferencer {
 		return new BinaryOpType(leftType, node.operator, rightType);
 	}
 
-	inferLambdaType(node, scope) {
+	inferRoundValueToValueLambdaType(node, scope) {
 		const paramScope = new Scope("type-lambda-params", scope)
 		node.parameterTypes.forEach(p => {
 			paramScope.declareType(p.lhs.value, new GenericNamedType(p.lhs.value, p.value ?? AnyType))
 		})
-		const type = new TypeLambda(node.parameterTypes.map(p => this.translateTypeNodeToType(p.lhs, paramScope)), this.infer(node.returnType, paramScope))
+		const type = new TypeRoundValueToValueLambda(node.parameterTypes.map(p => this.translateTypeNodeToType(p.lhs, paramScope)), this.infer(node.returnType, paramScope))
 		return type
 	}
 
-	inferLambda(node, scope) {
-		const innerScope = node.innerScope ?? new Scope("innerLambda", scope);
+	inferRoundValueToValueLambda(node, scope) {
+		const innerScope = node.innerScope ?? new Scope("innerRoundValueToValueLambda", scope);
 		innerScope.run = this.run;
 		let paramTypes = [];
 		if (node.params[0] && node.params[0].type && node.params[0].type.tag === "UnaryOperator" && node.params[0].type.operator === "...") {
@@ -574,7 +574,7 @@ class TypeInferencer {
 					type = this.translateTypeNodeToType(param.type, innerScope);
 				} else if (param.defaultValue) {
 					type = this.typeInferencer.infer(param.defaultValue, innerScope);
-				} else if (node.isTypeLambda) {
+				} else if (node.isTypeRoundValueToValueLambda) {
 					type = new NamedType(param.lhs.value)
 				}
 				if (!type) {
@@ -589,17 +589,17 @@ class TypeInferencer {
 			});
 		}
 
-		if (node.isTypeLambda && node.block.statements[0]) {
+		if (node.isTypeRoundValueToValueLambda && node.block.statements[0]) {
 			node.params.forEach(p => {
 				innerScope.declareType(p.lhs.value, new NamedType(p.lhs.value))
 			});
 			const returnType = this.translateTypeNodeToType(node.block.statements[0], innerScope)
-			const lambdaType = new LambdaType(paramTypes, returnType, true);
+			const lambdaType = new RoundValueToValueLambdaType(paramTypes, returnType, true);
 			return lambdaType;
 		} else {
 			node.block.scope = innerScope;
 			const returnType = this.infer(node.block, innerScope);
-			const lambdaType = new LambdaType(paramTypes, returnType);
+			const lambdaType = new RoundValueToValueLambdaType(paramTypes, returnType);
 			return lambdaType;
 		}
 	}
@@ -632,12 +632,12 @@ class TypeInferencer {
 				}
 			case "AppliedGenericType":
 				return type;
-			case "LambdaType":
+			case "RoundTypeToTypeLambda":
 				const resolvedParams = type.paramTypes.map(pt => {
 					return this.resolveGenericTypes(pt, parameters)
 				})
 				const returnType = this.resolveGenericTypes(type.returnType, parameters)
-				const result = new LambdaType(resolvedParams, returnType)
+				const result = new RoundValueToValueLambdaType(resolvedParams, returnType)
 				return result
 			default:
 				return type;
@@ -659,35 +659,35 @@ class TypeInferencer {
 				}
 			case "GenericNamedType":
 				return node;
-			case "LambdaType":
+			case "RoundTypeToTypeLambda":
 				if (node.isTypeLevel) {
 					const innerScope = new Scope("inner-lambda-type", scope);
 					node.parameterTypes.forEach(p => innerScope.declareType(p.lhs.value, new GenericNamedType(p.lhs.value)))
 					const params = node.parameterTypes.map(p => this.translateTypeNodeToType(p.lhs, innerScope))
-					return new LambdaType(params, this.translateTypeNodeToType(node.returnType, innerScope), node.isTypeLambda)
+					return new RoundValueToValueLambdaType(params, this.translateTypeNodeToType(node.returnType, innerScope), node.isTypeRoundValueToValueLambda)
 				}
-				return new LambdaType(node.parameterTypes.map(p => this.translateTypeNodeToType(p, scope)), this.translateTypeNodeToType(node.returnType, scope), node.isTypeLambda)
-			case 'Lambda':
-				// return new LambdaType(node.params.map(p => this.translateTypeNodeToType(p, scope/)))
+				return new RoundValueToValueLambdaType(node.parameterTypes.map(p => this.translateTypeNodeToType(p, scope)), this.translateTypeNodeToType(node.returnType, scope), node.isTypeRoundValueToValueLambda)
+			case 'RoundValueToValueLambda':
+				// return new RoundValueToValueLambdaType(node.params.map(p => this.translateTypeNodeToType(p, scope/)))
 				const innerScope = node.innerScope ?? new Scope("inner-lambda", scope)
 				innerScope.run = this.run;
 				node.innerScope = innerScope;
 				innerScope.declareType("T", new NamedType("T"))
-				return new LambdaType(node.params.map(p => this.translateTypeNodeToType(p, innerScope)), this.translateTypeNodeToType(node.block.statements[0], innerScope), node.isTypeLambda)
+				return new RoundValueToValueLambdaType(node.params.map(p => this.translateTypeNodeToType(p, innerScope)), this.translateTypeNodeToType(node.block.statements[0], innerScope), node.isTypeRoundValueToValueLambda)
 			case "TypeDef":
 				const fieldTypes = node.fieldDefs.map(f => {
 					return { name: f.name, type: scope.lookupType(f.type) }
 					// return { name: f.name, type: new NamedType(f.type) }
 				})
 				return new StructType(fieldTypes);
-			case "Apply":
-				if (node.isTypeLambda) {
+			case "RoundApply":
+				if (node.isTypeRoundValueToValueLambda) {
 					const applied = new AppliedGenericType(this.translateTypeNodeToType(node.callee, scope), node.args.map(arg => this.translateTypeNodeToType(arg, scope)))
 					let callee = node.callee;
 					if (callee.tag === "Identifier") {
 						callee = scope.lookupType(callee.value);
 					}
-					if (callee && callee.tag === "LambdaType") {
+					if (callee && callee.tag === "RoundTypeToTypeLambda") {
 						const actualParams = node.args
 						const expectedParams = callee.paramTypes
 						let params = {}
@@ -699,7 +699,7 @@ class TypeInferencer {
 					}
 					return applied;
 				}
-				throw new Error("Was type apply, but not isTypeLambda.")
+				throw new Error("Was type apply, but not isTypeRoundValueToValueLambda.")
 			case "BinaryExpression":
 				return new BinaryOpType(this.translateTypeNodeToType(node.left, scope), node.operator, this.translateTypeNodeToType(node.right, scope))
 			case "Optional":
@@ -730,10 +730,10 @@ class SymbolTable {
 			case "Assignment":
 				this.typeCheck(node.value, scope)
 				break;
-			case "Apply":
+			case "RoundApply":
 				this.typeCheckApply(node, scope);
 				break;
-			case "Lambda":
+			case "RoundValueToValueLambda":
 				break;
 			default:
 			// DO NOTHING
@@ -742,8 +742,8 @@ class SymbolTable {
 
 	typeCheckApply(apply, scope) {
 		let symbol = apply.callee.tag === "Identifier" ? scope.lookup(apply.callee.value) : this.typeInferencer.infer(apply.callee, scope)
-		// If a Type-Value Lambda [T] => value
-		if (apply.isTypeLambda) {
+		// If a Type-Value RoundValueToValueLambda [T] => value
+		if (apply.isTypeRoundValueToValueLambda) {
 			const applyType = this.typeInferencer.infer(apply, scope)
 			const callee = this.typeInferencer.infer(apply.callee, scope)
 			apply.args.forEach(arg => {
@@ -757,7 +757,7 @@ class SymbolTable {
 			// paramType.resolved = this.typeInferencer.resolveGenericTypes(paramType)
 			const callee = paramType.callee
 			apply.takesVarargs = true;
-			if (callee && callee.tag === "LambdaType") {
+			if (callee && callee.tag === "RoundTypeToTypeLambda") {
 				// const actualParams = node.args
 				// const expectedParams = callee.paramTypes
 				// let params = {}
@@ -784,7 +784,7 @@ class SymbolTable {
 				const type = this.typeInferencer.infer(p, scope)
 				if (!type.isAssignableTo(symbol.typeSymbol.paramTypes[i])) {
 					// console.log(symbol.typeSymbol.paramTypes[i], type)
-					this.errors.add(`Parameter ${i} of ${apply.callee.value} (${apply.isTypeLambda ? "Type" : "Values"})`, symbol.typeSymbol.paramTypes[i], type, apply.position, new Error())
+					this.errors.add(`Parameter ${i} of ${apply.callee.value} (${apply.isTypeRoundValueToValueLambda ? "Type" : "Values"})`, symbol.typeSymbol.paramTypes[i], type, apply.position, new Error())
 				}
 			})
 		}
@@ -798,11 +798,11 @@ class SymbolTable {
 		for (const t in NamedType.PRIMITIVE_TYPES) {
 			scope.typeSymbols.set(t, NamedType.PRIMITIVE_TYPES[t])
 		}
-		scope.declare("print", new Symbol("print", new LambdaType([NamedType.PRIMITIVE_TYPES.Any], NamedType.PRIMITIVE_TYPES.Void), {}))
+		scope.declare("print", new Symbol("print", new RoundValueToValueLambdaType([NamedType.PRIMITIVE_TYPES.Any], NamedType.PRIMITIVE_TYPES.Void), {}))
 		const innerArrayScope = new Scope("inner-array", scope)
 		innerArrayScope.declareType("T", new GenericNamedType("T"))
 		const arrayStruct = new StructType([{ name: "length", type: scope.lookupType("Number")/*new VarargsType(scope.lookupType("T"))*/ }])
-		scope.declareType("Array", new LambdaType(
+		scope.declareType("Array", new RoundValueToValueLambdaType(
 			[new GenericNamedType("T")],
 			arrayStruct,
 			true
@@ -843,7 +843,7 @@ class SymbolTable {
 		const lhs = node.lhs;
 		const rhsType = this.typeInferencer.infer(node.value, scope);
 		if (node.isTypeLevel && node.lhs.value) {
-			if (node.value.tag === 'Lambda' && !node.value.isTypeLambda) {
+			if (node.value.tag === 'RoundValueToValueLambda' && !node.value.isTypeRoundValueToValueLambda) {
 				scope.declareType(node.lhs.value, this.typeInferencer.infer(node.value, scope))
 			} else {
 				scope.declareType(node.lhs.value, this.typeInferencer.translateTypeNodeToType(node.value, scope))

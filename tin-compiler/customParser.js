@@ -1,4 +1,4 @@
-const { parseNewType, LambdaType } = require("./typeParser");
+const { parseNewType, RoundValueToValueLambdaType } = require("./typeParser");
 
 function testIs(tag, value) {
 	return (token) => {
@@ -16,7 +16,7 @@ class Assignment {
 	constructor(lhs, value, isDeclaration = true, type) {
 		this.tag = 'Assignment'; // tag of the AST node
 		this.lhs = lhs;          // Name of the variable
-		this.value = value;      // Lambda function associated with the Assignment
+		this.value = value;      // RoundValueToValueLambda function associated with the Assignment
 		this.type = type
 		this.isDeclaration = isDeclaration;
 		this.isTypeLevel = lhs.tag === "Identifier" && lhs.value.charAt(0) === lhs.value.charAt(0).toUpperCase()
@@ -40,12 +40,12 @@ class IfStatement {
 	}
 }
 
-class Lambda {
-	constructor(params, block, isTypeLambda) {
-		this.tag = "Lambda"
+class RoundValueToValueLambda {
+	constructor(params, block, isTypeRoundValueToValueLambda) {
+		this.tag = "RoundValueToValueLambda"
 		this.params = params
 		this.block = block
-		this.isTypeLambda = isTypeLambda
+		this.isTypeRoundValueToValueLambda = isTypeRoundValueToValueLambda
 	}
 }
 
@@ -65,12 +65,12 @@ class Literal {
 	}
 }
 
-class Apply {
-	constructor(callee, args, isTypeLambda) {
-		this.tag = "Apply"
+class RoundApply {
+	constructor(callee, args, isTypeRoundValueToValueLambda) {
+		this.tag = "RoundApply"
 		this.callee = callee
 		this.args = args
-		this.isTypeLambda = isTypeLambda
+		this.isTypeRoundValueToValueLambda = isTypeRoundValueToValueLambda
 	}
 }
 
@@ -212,12 +212,12 @@ class Parser {
 		return this.parseExpression();
 	}
 
-	parseApply(callee, isTypeLambda) {
-		const start = this.consume('PARENS', isTypeLambda ? '[' : '('); // Consume '('
+	parseApply(callee, isTypeRoundValueToValueLambda) {
+		const start = this.consume('PARENS', isTypeRoundValueToValueLambda ? '[' : '('); // Consume '('
 		const args = [];
 
 		// Parse arguments (expressions)
-		while (this.peek() && this.peek().value !== (isTypeLambda ? ']' : ')')) {
+		while (this.peek() && this.peek().value !== (isTypeRoundValueToValueLambda ? ']' : ')')) {
 			this.omit("NEWLINE")
 			this.omit("INDENT")
 			this.omit("DEDENT")
@@ -231,9 +231,9 @@ class Parser {
 			}
 		}
 
-		const end = this.consume('PARENS', isTypeLambda ? ']' : ')'); // Consume ')'
+		const end = this.consume('PARENS', isTypeRoundValueToValueLambda ? ']' : ')'); // Consume ')'
 
-		return new Apply(callee, args, isTypeLambda).fromTo(start, end);  // Return a function application node
+		return new RoundApply(callee, args, isTypeRoundValueToValueLambda).fromTo(start, end);  // Return a function application node
 	}
 
 
@@ -351,10 +351,10 @@ class Parser {
 	}
 
 	// TypeLamda = lambda that takes types and returns types [T] -> List[T]
-	// LambdaType = the type of a lambda that takes values and returns values (T) -> List[T]
-	parseLambda(isTypeLambda) {
+	// RoundValueToValueLambdaType = the type of a lambda that takes values and returns values (T) -> List[T]
+	parseRoundValueToValueLambda(isTypeRoundValueToValueLambda) {
 		// Ensure we have the opening parenthesis for the parameters
-		this.consume('PARENS', isTypeLambda ? '[' : '('); // This should throw an error if not found
+		this.consume('PARENS', isTypeRoundValueToValueLambda ? '[' : '('); // This should throw an error if not found
 		let isTypeLevel = false;
 
 		const parameters = [];
@@ -377,7 +377,7 @@ class Parser {
 			}
 		}
 
-		this.consume('PARENS', isTypeLambda ? ']' : ')'); // Consume the closing parenthesis
+		this.consume('PARENS', isTypeRoundValueToValueLambda ? ']' : ')'); // Consume the closing parenthesis
 
 		// Now check for the arrow (-> / =>) indicating the function body
 		const arrow = this.consume("OPERATOR")
@@ -388,14 +388,14 @@ class Parser {
 			if (body.tag !== "Block") {
 				body = new Block([body])
 			}
-			return new Lambda(parameters, body, isTypeLambda)
+			return new RoundValueToValueLambda(parameters, body, isTypeRoundValueToValueLambda)
 		} else if (arrow.value === "=>") {
 			// Type Level
 			let returnType = this.parseExpression(0, true);
 			if (returnType.isTypeLevel) {
 				this.createError("Expected type-level expression, got " + returnType.tag, arrow)
 			}
-			return new LambdaType(parameters, returnType)
+			return new RoundValueToValueLambdaType(parameters, returnType)
 		} else {
 			this.createError("Expected -> or =>", this.peek())
 		}
@@ -514,12 +514,12 @@ class Parser {
 
 		if (token.value === "(") {
 			this.current--;
-			return this.parseLambda(); // Handle lambda expressions
+			return this.parseRoundValueToValueLambda(); // Handle lambda expressions
 		}
 
 		if (token.value === "[") {
 			this.current--;
-			return this.parseLambda(true); // Handle lambda expressions
+			return this.parseRoundValueToValueLambda(true); // Handle lambda expressions
 		}
 
 		if (token.tag === 'NEWLINE' && this.peek().tag === "INDENT") {

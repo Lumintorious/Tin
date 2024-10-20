@@ -74,11 +74,13 @@ export class Lexer {
          "if",
          "else",
          "while",
+         "do",
          "for",
          "mutable",
          "true",
          "false",
          "void",
+         "change",
       ];
       this.operators = [
          "...",
@@ -94,6 +96,7 @@ export class Lexer {
          "/",
          "-",
          ":",
+         ";",
          ",",
          ".",
          "&",
@@ -377,7 +380,7 @@ export class Lexer {
       let start = this.position;
       let startColumn = this.column;
 
-      while (/\d/.test(this.peek())) {
+      while (/(\d|\.)/.test(this.peek())) {
          this.position++;
          this.column++;
       }

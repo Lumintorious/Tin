@@ -16,16 +16,16 @@ class FieldDef {
 	}
 }
 
-class LambdaType {
+class RoundValueToValueLambdaType {
 	constructor(parameterTypes, returnType) {
-		this.tag = "LambdaType"
+		this.tag = "RoundTypeToTypeLambda"
 		this.parameterTypes = parameterTypes
 		this.returnType = returnType
 		this.isTypeLevel = true;
 	}
 }
 
-function parseLambdaType(parser) {
+function parseRoundValueToValueLambdaType(parser) {
 	// Expect the opening parenthesis for parameters
 	parser.expect('(');
 
@@ -51,7 +51,7 @@ function parseLambdaType(parser) {
 
 	const returnType = parser.parseType();  // Parse the return type
 
-	return new LambdaType(params, returnType);
+	return new RoundValueToValueLambdaType(params, returnType);
 }
 
 
@@ -130,7 +130,7 @@ function parseNewType(parser) {
 module.exports = {
 	TypeDef,
 	FieldDef,
-	LambdaType,
+	RoundValueToValueLambdaType,
 	parseNewType,
-	parseLambdaType
+	parseRoundValueToValueLambdaType
 }
