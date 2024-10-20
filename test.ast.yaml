@@ -3,56 +3,99 @@ statements:
   - tag: Assignment
     lhs:
       tag: Identifier
-      value: newArr
+      value: apply
     value:
-      tag: RoundValueToValueLambda
-      params:
+      tag: SquareTypeToValueLambda
+      parameterTypes:
         - tag: Assignment
           lhs:
             tag: Identifier
-            value: nums
-          type:
-            tag: UnaryOperator
-            operator: ...
-            expression:
-              tag: Identifier
-              value: Number
+            value: T
           isDeclaration: false
-          isTypeLevel: false
+          isTypeLevel: true
           position:
             start:
-              line: 3
-              column: 11
-              absolute: 79
+              line: 1
+              column: 10
+              absolute: 10
             end:
-              line: 3
-              column: 29
-              absolute: 93
+              line: 1
+              column: 12
+              absolute: 11
       block:
         tag: Block
         statements:
-          - tag: Identifier
-            value: nums
-            position:
-              start:
-                line: 3
-                column: 33
-                absolute: 101
-              end:
-                line: 3
-                column: 37
-                absolute: 101
+          - tag: RoundValueToValueLambda
+            params:
+              0:
+                tag: Assignment
+                lhs:
+                  tag: Identifier
+                  value: thing
+                value: undefined
+                type:
+                  tag: Identifier
+                  value: T
+                isDeclaration: false
+              1:
+                tag: Assignment
+                lhs:
+                  tag: Identifier
+                  value: func
+                value: undefined
+                type:
+                  tag: RoundTypeToTypeLambda
+                  parameterTypes:
+                    - tag: Assignment
+                      lhs:
+                        tag: Identifier
+                        value: T
+                      isDeclaration: false
+                      isTypeLevel: true
+                      position:
+                        start:
+                          line: 1
+                          column: 38
+                          absolute: 38
+                        end:
+                          line: 1
+                          column: 40
+                          absolute: 39
+                  returnType:
+                    tag: Identifier
+                    value: T
+                isDeclaration: false
+            block:
+              tag: Block
+              statements:
+                - tag: RoundApply
+                  callee:
+                    tag: Identifier
+                    value: func
+                  args:
+                    0:
+                      tag: Identifier
+                      value: thing
+                  position:
+                    start:
+                      line: 1
+                      column: 54
+                      absolute: 54
+                    end:
+                      line: 1
+                      column: 61
+                      absolute: 60
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 3
+        line: 1
         column: 1
-        absolute: 71
+        absolute: 5
       end:
-        line: 4
+        line: 2
         column: 1
-        absolute: 103
+        absolute: 62
   - tag: Assignment
     lhs:
       tag: Identifier
@@ -71,13 +114,13 @@ statements:
           isTypeLevel: false
           position:
             start:
-              line: 4
+              line: 3
               column: 11
-              absolute: 114
+              absolute: 75
             end:
-              line: 4
+              line: 3
               column: 23
-              absolute: 125
+              absolute: 86
       block:
         tag: Block
         statements:
@@ -94,42 +137,79 @@ statements:
     isTypeLevel: false
     position:
       start:
+        line: 3
+        column: 1
+        absolute: 70
+      end:
         line: 4
         column: 1
-        absolute: 109
-      end:
+        absolute: 97
+  - tag: Assignment
+    lhs:
+      tag: Identifier
+      value: x
+    value:
+      tag: RoundApply
+      callee:
+        tag: SquareApply
+        callee:
+          tag: Identifier
+          value: apply
+        typeArgs:
+          - tag: Identifier
+            value: Number
+            position:
+              start:
+                line: 5
+                column: 11
+                absolute: 115
+              end:
+                line: 5
+                column: 17
+                absolute: 115
+      args:
+        - tag: Literal
+          type: Number
+          value: 12
+        - tag: Identifier
+          value: addOne
+          position:
+            start:
+              line: 5
+              column: 23
+              absolute: 127
+            end:
+              line: 5
+              column: 29
+              absolute: 127
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
         line: 5
         column: 1
-        absolute: 136
+        absolute: 100
+      end:
+        line: 6
+        column: 1
+        absolute: 130
   - tag: RoundApply
     callee:
       tag: Identifier
       value: print
     args:
       0:
-        tag: RoundApply
-        callee:
-          tag: Identifier
-          value: newArr
-        args:
-          - tag: Literal
-            type: Number
-            value: 1
-          - tag: Literal
-            type: Number
-            value: 2
-          - tag: Literal
-            type: Number
-            value: 3
+        tag: Identifier
+        value: x
     position:
       start:
-        line: 9
+        line: 7
         column: 6
-        absolute: 189
+        absolute: 138
       end:
-        line: 9
-        column: 23
-        absolute: 205
+        line: 7
+        column: 9
+        absolute: 140
   - tag: Assignment
     lhs:
       tag: Identifier
@@ -147,13 +227,13 @@ statements:
     isTypeLevel: true
     position:
       start:
-        line: 11
+        line: 9
         column: 1
-        absolute: 212
+        absolute: 147
       end:
-        line: 14
+        line: 12
         column: 1
-        absolute: 240
+        absolute: 175
   - tag: Assignment
     lhs:
       tag: Identifier
@@ -171,13 +251,13 @@ statements:
     isTypeLevel: true
     position:
       start:
-        line: 14
+        line: 12
         column: 1
-        absolute: 245
+        absolute: 180
       end:
-        line: 17
+        line: 15
         column: 1
-        absolute: 276
+        absolute: 211
   - tag: Assignment
     lhs:
       tag: Identifier
@@ -195,13 +275,13 @@ statements:
     isTypeLevel: true
     position:
       start:
-        line: 17
+        line: 15
         column: 1
-        absolute: 283
+        absolute: 218
       end:
-        line: 18
+        line: 16
         column: 1
-        absolute: 299
+        absolute: 234
   - tag: Assignment
     lhs:
       tag: Identifier
@@ -220,13 +300,13 @@ statements:
           isTypeLevel: false
           position:
             start:
-              line: 19
+              line: 17
               column: 18
-              absolute: 322
+              absolute: 257
             end:
-              line: 19
+              line: 17
               column: 33
-              absolute: 333
+              absolute: 268
         - tag: Assignment
           lhs:
             tag: Identifier
@@ -238,13 +318,13 @@ statements:
           isTypeLevel: false
           position:
             start:
-              line: 19
+              line: 17
               column: 34
-              absolute: 341
+              absolute: 276
             end:
-              line: 19
+              line: 17
               column: 52
-              absolute: 352
+              absolute: 287
       block:
         tag: Block
         statements:
@@ -259,13 +339,13 @@ statements:
                   value: name
                   position:
                     start:
-                      line: 20
+                      line: 18
                       column: 10
-                      absolute: 370
+                      absolute: 305
                     end:
-                      line: 20
+                      line: 18
                       column: 14
-                      absolute: 370
+                      absolute: 305
             operator: &
             right:
               tag: RoundApply
@@ -277,24 +357,24 @@ statements:
                   value: version
                   position:
                     start:
-                      line: 20
+                      line: 18
                       column: 28
-                      absolute: 391
+                      absolute: 326
                     end:
-                      line: 20
+                      line: 18
                       column: 35
-                      absolute: 391
+                      absolute: 326
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 19
+        line: 17
         column: 1
-        absolute: 314
+        absolute: 249
       end:
-        line: 22
+        line: 20
         column: 1
-        absolute: 396
+        absolute: 331
   - tag: RoundApply
     callee:
       tag: Identifier
@@ -314,13 +394,13 @@ statements:
             value: 1.2
     position:
       start:
-        line: 22
+        line: 20
         column: 6
-        absolute: 402
+        absolute: 337
       end:
-        line: 22
+        line: 20
         column: 36
-        absolute: 431
+        absolute: 366
   - tag: Assignment
     lhs:
       tag: Identifier
@@ -342,13 +422,13 @@ statements:
           isTypeLevel: false
           position:
             start:
-              line: 24
+              line: 22
               column: 10
-              absolute: 450
+              absolute: 385
             end:
-              line: 24
+              line: 22
               column: 30
-              absolute: 464
+              absolute: 399
       block:
         tag: Block
         statements:
@@ -364,13 +444,13 @@ statements:
             isTypeLevel: false
             position:
               start:
-                line: 25
+                line: 23
                 column: 2
-                absolute: 473
+                absolute: 408
               end:
-                line: 26
+                line: 24
                 column: 1
-                absolute: 479
+                absolute: 414
           - tag: WhileLoop
             start:
               tag: Assignment
@@ -439,35 +519,35 @@ statements:
                           value: i
                           position:
                             start:
-                              line: 27
+                              line: 25
                               column: 32
-                              absolute: 569
+                              absolute: 504
                             end:
-                              line: 27
+                              line: 25
                               column: 33
-                              absolute: 569
+                              absolute: 504
           - tag: Identifier
             value: sum
             position:
               start:
-                line: 28
+                line: 26
                 column: 2
-                absolute: 576
+                absolute: 511
               end:
-                line: 28
+                line: 26
                 column: 5
-                absolute: 576
+                absolute: 511
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 24
+        line: 22
         column: 1
-        absolute: 440
+        absolute: 375
       end:
-        line: 30
+        line: 28
         column: 6
-        absolute: 586
+        absolute: 521
   - tag: RoundApply
     callee:
       tag: Identifier
@@ -493,10 +573,10 @@ statements:
             value: 4
     position:
       start:
-        line: 30
+        line: 28
         column: 6
-        absolute: 587
+        absolute: 522
       end:
-        line: 30
+        line: 28
         column: 25
-        absolute: 605
+        absolute: 540

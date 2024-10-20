@@ -49,15 +49,18 @@ const list = []
 
 // COMPILED TIN
 ;
-var newArr/* (Array[Number]) => ...Number*/ = function(nums) {
-return nums
+var apply/* [T] => (T, (T) => T) => T*/ = function(T) {
+return function(thing, func) {
+return func(thing)
+}
 };
 var addOne/* (Number) => Number*/ = function(i) {
 return i + 1
 };
-print(newArr(Array([1, 2, 3])));
-var Cat = TIN_TYPE("16afb3a7-c1f6-4ab5-ba0e-543c4b6770f4", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeCat = Cat;;
-var Robot = TIN_TYPE("25591619-3bf4-460a-acb3-1c658965d5d0", (_p0) => ({version: _p0}), {version: { type: Number, defaultValue: undefined }}); var makeRobot = Robot;;
+var x/* Number*/ = apply.call('Type', Number)(12, addOne);
+print(x);
+var Cat = TIN_TYPE("0a349a58-08a0-4956-8b2e-510fd2d88252", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeCat = Cat;;
+var Robot = TIN_TYPE("d9bb1d3f-3301-45ff-8796-491ab7274bdc", (_p0) => ({version: _p0}), {version: { type: Number, defaultValue: undefined }}); var makeRobot = Robot;;
 var Robocat = _TIN_INTERSECT_OBJECTS(Cat, Robot);
 var makeRoboKitty/* (String, Number) => Cat & Robot*/ = function(name, version) {
 return _TIN_INTERSECT_OBJECTS(makeCat(name), makeRobot(version))

@@ -1,12 +1,10 @@
-#apply = [T] -> (thing :: T, func :: (T) => T) -> func(thing)
+apply = [T] -> (thing :: T, func :: (T) => T) -> func(thing)
 
-newArr = (nums :: ...Number) -> nums
 addOne = (i :: Number) -> i + 1
 
-#x = apply[Number](12, addOne)
+x = apply[Number](12, addOne)
 
-#print(x)
-print(newArr(1, 2, 3))
+print(x)
 
 Cat = type
 	name :: String

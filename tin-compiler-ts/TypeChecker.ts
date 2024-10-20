@@ -753,9 +753,10 @@ export class TypeChecker {
       node: SquareTypeToValueLambda,
       scope: Scope
    ): Type {
+      const innerScope = scope.innerScopeOf(node);
       return new SquareTypeToValueLambdaType(
          node.parameterTypes.map((p) => {
-            const paramType = this.translateTypeNodeToType(p, scope);
+            const paramType = this.translateTypeNodeToType(p, innerScope);
             if (paramType instanceof GenericNamedType) {
                return paramType;
             } else {
@@ -764,7 +765,7 @@ export class TypeChecker {
                );
             }
          }),
-         this.infer(node.block, scope)
+         this.infer(node.block, innerScope)
       );
    }
 
