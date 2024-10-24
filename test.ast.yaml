@@ -1,216 +1,7 @@
 tag: Block
 statements:
   - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: apply
-    value:
-      tag: SquareTypeToValueLambda
-      parameterTypes:
-        - tag: Assignment
-          lhs:
-            tag: Identifier
-            value: T
-          isDeclaration: false
-          isTypeLevel: true
-          position:
-            start:
-              line: 1
-              column: 10
-              absolute: 10
-            end:
-              line: 1
-              column: 12
-              absolute: 11
-      block:
-        tag: Block
-        statements:
-          - tag: RoundValueToValueLambda
-            params:
-              0:
-                tag: Assignment
-                lhs:
-                  tag: Identifier
-                  value: thing
-                value: undefined
-                type:
-                  tag: Identifier
-                  value: T
-                isDeclaration: false
-              1:
-                tag: Assignment
-                lhs:
-                  tag: Identifier
-                  value: func
-                value: undefined
-                type:
-                  tag: RoundTypeToTypeLambda
-                  parameterTypes:
-                    - tag: Assignment
-                      lhs:
-                        tag: Identifier
-                        value: T
-                      isDeclaration: false
-                      isTypeLevel: true
-                      position:
-                        start:
-                          line: 1
-                          column: 38
-                          absolute: 38
-                        end:
-                          line: 1
-                          column: 40
-                          absolute: 39
-                  returnType:
-                    tag: Identifier
-                    value: T
-                isDeclaration: false
-            block:
-              tag: Block
-              statements:
-                - tag: RoundApply
-                  callee:
-                    tag: Identifier
-                    value: func
-                  args:
-                    0:
-                      tag: Identifier
-                      value: thing
-                  position:
-                    start:
-                      line: 1
-                      column: 54
-                      absolute: 54
-                    end:
-                      line: 1
-                      column: 61
-                      absolute: 60
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 1
-        column: 1
-        absolute: 5
-      end:
-        line: 2
-        column: 1
-        absolute: 62
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: addOne
-    value:
-      tag: RoundValueToValueLambda
-      params:
-        - tag: Assignment
-          lhs:
-            tag: Identifier
-            value: i
-          type:
-            tag: Identifier
-            value: Number
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 3
-              column: 11
-              absolute: 75
-            end:
-              line: 3
-              column: 23
-              absolute: 86
-      block:
-        tag: Block
-        statements:
-          - tag: BinaryExpression
-            left:
-              tag: Identifier
-              value: i
-            operator: +
-            right:
-              tag: Literal
-              type: Number
-              value: 1
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 3
-        column: 1
-        absolute: 70
-      end:
-        line: 4
-        column: 1
-        absolute: 97
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: x
-    value:
-      tag: RoundApply
-      callee:
-        tag: SquareApply
-        callee:
-          tag: Identifier
-          value: apply
-        typeArgs:
-          - tag: Identifier
-            value: Number
-            position:
-              start:
-                line: 5
-                column: 11
-                absolute: 115
-              end:
-                line: 5
-                column: 17
-                absolute: 115
-      args:
-        - tag: Literal
-          type: Number
-          value: 12
-        - tag: Identifier
-          value: addOne
-          position:
-            start:
-              line: 5
-              column: 23
-              absolute: 127
-            end:
-              line: 5
-              column: 29
-              absolute: 127
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 5
-        column: 1
-        absolute: 100
-      end:
-        line: 6
-        column: 1
-        absolute: 130
-  - tag: RoundApply
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: Identifier
-        value: x
-    position:
-      start:
-        line: 7
-        column: 6
-        absolute: 138
-      end:
-        line: 7
-        column: 9
-        absolute: 140
-  - tag: Assignment
+    isMutable: false
     lhs:
       tag: Identifier
       value: Cat
@@ -227,356 +18,82 @@ statements:
     isTypeLevel: true
     position:
       start:
-        line: 9
+        line: 1
         column: 1
-        absolute: 147
+        absolute: 3
       end:
-        line: 12
+        line: 7
         column: 1
-        absolute: 175
+        absolute: 30
   - tag: Assignment
+    isMutable: false
     lhs:
       tag: Identifier
-      value: Robot
+      value: Dog
     value:
       tag: TypeDef
       fieldDefs:
         - tag: FieldDef
-          name: version
+          name: name
           type:
             tag: Identifier
-            value: Number
+            value: String
           isTypeLevel: true
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
-        line: 12
+        line: 7
         column: 1
-        absolute: 180
+        absolute: 33
       end:
-        line: 15
+        line: 13
         column: 1
-        absolute: 211
+        absolute: 60
   - tag: Assignment
+    isMutable: false
     lhs:
       tag: Identifier
-      value: Robocat
+      value: cat
     value:
-      tag: BinaryExpression
-      left:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      callee:
         tag: Identifier
         value: Cat
-      operator: &
-      right:
-        tag: Identifier
-        value: Robot
+      args:
+        - tag: Literal
+          type: String
+          value: Hisss
+    type:
+      tag: Identifier
+      value: Any
     isDeclaration: true
-    isTypeLevel: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 13
+        column: 1
+        absolute: 63
+      end:
+        line: 15
+        column: 1
+        absolute: 85
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: Identifier
+        value: cat
     position:
       start:
         line: 15
-        column: 1
-        absolute: 218
-      end:
-        line: 16
-        column: 1
-        absolute: 234
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: makeRoboKitty
-    value:
-      tag: RoundValueToValueLambda
-      params:
-        - tag: Assignment
-          lhs:
-            tag: Identifier
-            value: name
-          type:
-            tag: Identifier
-            value: String
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 17
-              column: 18
-              absolute: 257
-            end:
-              line: 17
-              column: 33
-              absolute: 268
-        - tag: Assignment
-          lhs:
-            tag: Identifier
-            value: version
-          type:
-            tag: Identifier
-            value: Number
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 17
-              column: 34
-              absolute: 276
-            end:
-              line: 17
-              column: 52
-              absolute: 287
-      block:
-        tag: Block
-        statements:
-          - tag: BinaryExpression
-            left:
-              tag: RoundApply
-              callee:
-                tag: Identifier
-                value: makeCat
-              args:
-                - tag: Identifier
-                  value: name
-                  position:
-                    start:
-                      line: 18
-                      column: 10
-                      absolute: 305
-                    end:
-                      line: 18
-                      column: 14
-                      absolute: 305
-            operator: &
-            right:
-              tag: RoundApply
-              callee:
-                tag: Identifier
-                value: makeRobot
-              args:
-                - tag: Identifier
-                  value: version
-                  position:
-                    start:
-                      line: 18
-                      column: 28
-                      absolute: 326
-                    end:
-                      line: 18
-                      column: 35
-                      absolute: 326
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 17
-        column: 1
-        absolute: 249
-      end:
-        line: 20
-        column: 1
-        absolute: 331
-  - tag: RoundApply
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: RoundApply
-        callee:
-          tag: Identifier
-          value: makeRoboKitty
-        args:
-          - tag: Literal
-            type: String
-            value: Kitkat
-          - tag: Literal
-            type: Number
-            value: 1.2
-    position:
-      start:
-        line: 20
         column: 6
-        absolute: 337
+        absolute: 91
       end:
-        line: 20
-        column: 36
-        absolute: 366
-  - tag: Assignment
-    lhs:
-      tag: Identifier
-      value: sumOf
-    value:
-      tag: RoundValueToValueLambda
-      params:
-        - tag: Assignment
-          lhs:
-            tag: Identifier
-            value: things
-          type:
-            tag: UnaryOperator
-            operator: ...
-            expression:
-              tag: Identifier
-              value: Number
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 22
-              column: 10
-              absolute: 385
-            end:
-              line: 22
-              column: 30
-              absolute: 399
-      block:
-        tag: Block
-        statements:
-          - tag: Assignment
-            lhs:
-              tag: Identifier
-              value: sum
-            value:
-              tag: Literal
-              type: Number
-              value: 0
-            isDeclaration: true
-            isTypeLevel: false
-            position:
-              start:
-                line: 23
-                column: 2
-                absolute: 408
-              end:
-                line: 24
-                column: 1
-                absolute: 414
-          - tag: WhileLoop
-            start:
-              tag: Assignment
-              lhs:
-                tag: Identifier
-                value: i
-              value:
-                tag: Literal
-                type: Number
-                value: 0
-              type: undefined
-              isDeclaration: true
-            condition:
-              tag: BinaryExpression
-              left:
-                tag: Identifier
-                value: i
-              operator: <
-              right:
-                tag: RoundApply
-                callee:
-                  tag: Select
-                  owner:
-                    tag: Identifier
-                    value: things
-                  field: length
-                args:
-            eachLoop:
-              tag: Change
-              lhs:
-                tag: Identifier
-                value: i
-              value:
-                tag: BinaryExpression
-                left:
-                  tag: Identifier
-                  value: i
-                operator: +
-                right:
-                  tag: Literal
-                  type: Number
-                  value: 1
-            action:
-              tag: Block
-              statements:
-                - tag: Change
-                  lhs:
-                    tag: Identifier
-                    value: sum
-                  value:
-                    tag: BinaryExpression
-                    left:
-                      tag: Identifier
-                      value: sum
-                    operator: +
-                    right:
-                      tag: RoundApply
-                      callee:
-                        tag: Select
-                        owner:
-                          tag: Identifier
-                          value: things
-                        field: at
-                      args:
-                        - tag: Identifier
-                          value: i
-                          position:
-                            start:
-                              line: 25
-                              column: 32
-                              absolute: 504
-                            end:
-                              line: 25
-                              column: 33
-                              absolute: 504
-          - tag: Identifier
-            value: sum
-            position:
-              start:
-                line: 26
-                column: 2
-                absolute: 511
-              end:
-                line: 26
-                column: 5
-                absolute: 511
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 22
-        column: 1
-        absolute: 375
-      end:
-        line: 28
-        column: 6
-        absolute: 521
-  - tag: RoundApply
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: RoundApply
-        callee:
-          tag: Identifier
-          value: sumOf
-        args:
-          - tag: Literal
-            type: Number
-            value: 1
-          - tag: Literal
-            type: Number
-            value: 2
-          - tag: Literal
-            type: Number
-            value: 3
-          - tag: Literal
-            type: Number
-            value: 4
-    position:
-      start:
-        line: 28
-        column: 6
-        absolute: 522
-      end:
-        line: 28
-        column: 25
-        absolute: 540
+        line: 15
+        column: 11
+        absolute: 95

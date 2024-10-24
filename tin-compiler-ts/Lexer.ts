@@ -68,22 +68,27 @@ export class Lexer {
       this.column = 1;
       this.keywords = [
          "def",
+         "make",
          "let",
          "return",
          "type",
+         "data",
          "if",
          "else",
          "while",
          "do",
          "for",
-         "mutable",
          "true",
          "false",
          "void",
-         "change",
+         "set",
+         "mut",
       ];
       this.operators = [
          "...",
+         "??",
+         "?:",
+         "?.",
          "->",
          "=>",
          "&&",
@@ -124,18 +129,42 @@ export class Lexer {
       });
    }
 
+   pruneEmptyLines() {
+      let extraIndex = 0;
+      let lastNewlinePosition = 0;
+      let addedLines = 0;
+      while (true) {
+         const char = this.peek(extraIndex);
+         if (char === undefined) {
+            break;
+         } else if (char === "\n") {
+            lastNewlinePosition = extraIndex;
+            addedLines++;
+         } else if (char === "\t" || char === " ") {
+         } else {
+            break;
+         }
+         extraIndex++;
+      }
+      this.position += lastNewlinePosition;
+      this.line += addedLines;
+      this.column = 0;
+   }
+
    // Get next token
    nextToken(): Token | null {
       if (this.position >= this.input.length) return null;
 
       let char = this.peek();
 
+      if (char === "\n") {
+         this.pruneEmptyLines();
+      }
+
       if (char === "#") {
          this.consumeComment();
          char = this.peek();
       }
-
-      if (char === '"') return this.lexString();
 
       if (char === "\n") {
          return this.consumeNewline();
@@ -145,6 +174,8 @@ export class Lexer {
          const indentToken = this.handleIndentation();
          if (indentToken) return indentToken;
       }
+
+      if (char === '"') return this.lexString();
 
       // Skip whitespaces but track line and column numbers
       if (/\s/.test(char)) {
@@ -214,7 +245,7 @@ export class Lexer {
    }
 
    // Handle indentation and dedentation
-   handleIndentation() {
+   handleIndentation(): Token | null {
       let indentLength = 0;
 
       // Count spaces or tabs for indentation
@@ -224,7 +255,7 @@ export class Lexer {
          this.column++;
       }
 
-      const previousIndent = this.indentStack[this.indentStack.length - 1];
+      let previousIndent = this.indentStack[this.indentStack.length - 1];
 
       if (indentLength > previousIndent) {
          this.indentStack.push(indentLength);
@@ -239,10 +270,10 @@ export class Lexer {
       }
 
       if (indentLength < previousIndent) {
-         this.indentStack.pop();
+         const len = this.indentStack.pop();
          return new Token(
             TokenTag.DEDENT,
-            String(indentLength),
+            String(len),
             new TokenPos(
                new CodePoint(this.line, 1, this.position),
                new CodePoint(this.line, this.column, this.position)

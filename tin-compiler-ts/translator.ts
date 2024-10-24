@@ -10,7 +10,6 @@ import {
    Select,
    Literal,
    Cast,
-   Identifier,
    RoundValueToValueLambda,
    RoundTypeToTypeLambda,
    IfStatement,
@@ -21,8 +20,15 @@ import {
    SquareTypeToTypeLambda,
 } from "./Parser";
 import { Scope } from "TypeChecker";
-import { WhileLoop, SquareTypeToValueLambda, Change } from "./Parser";
+import {
+   WhileLoop,
+   SquareTypeToValueLambda,
+   Change,
+   DataDef,
+   Optional,
+} from "./Parser";
 import { getConstructorName } from "./TypeChecker";
+import { Make, Identifier, TypeCheck } from "./Parser";
 
 export function translateFile(fileStatementsBlock: Block, scope: Scope) {
    const requisites = fs.readFileSync("./tin-compiler-ts/tin.stdlib.js");
@@ -79,7 +85,16 @@ function translate(
 
       // Select
    } else if (term instanceof Select) {
-      return `${translate(term.owner, scope)}.${term.field}`;
+      const operator = term.ammortized ? "?." : ".";
+      return `${translate(term.owner, scope)}${operator}${term.field}`;
+
+      // Make
+   } else if (term instanceof Make) {
+      if (term.type instanceof Identifier) {
+         return term.type.value;
+      } else {
+         throw new Error("Can only use make with a named type. eg. 'Cat'");
+      }
 
       // SquareTypeToValueLambda
    } else if (term instanceof SquareTypeToValueLambda) {
@@ -111,10 +126,22 @@ function translate(
          }
       }
       const constructorName = getConstructorName(lhs);
-      const declareConstructor =
-         term.value instanceof TypeDef
-            ? `; var ${constructorName} = ${lhs};`
-            : "";
+      let declareConstructor = "";
+      if (term.value instanceof TypeDef) {
+         declareConstructor = `; var ${constructorName} = ${lhs};`;
+      } else if (
+         term.value instanceof SquareTypeToTypeLambda &&
+         term.value.returnType instanceof TypeDef
+      ) {
+         const surrogateFunc = new SquareTypeToValueLambda(
+            term.value.parameterTypes,
+            new Block([new SquareApply(term.lhs, term.value.parameterTypes)])
+         );
+         declareConstructor = `; var ${constructorName} = ${translate(
+            surrogateFunc,
+            scope
+         )};`;
+      }
       return keyword + lhs + type + value + declareConstructor;
 
       // Literal
@@ -197,6 +224,7 @@ function translate(
       const open = takesVarargs ? "(Array([" : "(";
       const close = takesVarargs ? "]))" : ")";
       return (
+         (term.calledInsteadOfSquare ? "() =>" : "") +
          translate(term.callee, scope) +
          open +
          term.args.map((arg) => translate(arg, scope)).join(", ") +
@@ -219,6 +247,12 @@ function translate(
          scope
       )}, {${term.fieldDefs.map((f) => translate(f, scope))}})`;
 
+      // DataDef
+   } else if (term instanceof DataDef) {
+      return `{${term.fieldDefs.map(
+         (f) => `${f.name}: ${translate(f.defaultValue, scope)}`
+      )}}`;
+
       // FieldDef
    } else if (term instanceof FieldDef) {
       return `${term.name}: { type: ${translate(
@@ -226,6 +260,19 @@ function translate(
          scope
       )}, defaultValue: ${translate(term.defaultValue, scope)} }`;
 
+      // Optional
+   } else if (term instanceof Optional) {
+      if (term.expression.isTypeLevel || !term.doubleQuestionMark) {
+         return translate(term.expression, scope);
+      } else {
+         return `(${translate(term.expression, scope)} !== undefined)`;
+      }
+      // TypeCheck
+   } else if (term instanceof TypeCheck) {
+      return `${translate(term.type, scope)}.__is_child(${translate(
+         term.term,
+         scope
+      )}) `;
       // Undefined
    } else {
       return "(? " + term.tag + " ?)";
@@ -263,6 +310,13 @@ function translateBinaryExpression(
          scope
       );
    }
+   if (term.operator === "?:") {
+      return `${translate(term.left, scope)} ?? ${translate(
+         term.right,
+         scope
+      )}`;
+   }
+
    if (
       ![
          "+",
@@ -276,6 +330,7 @@ function translateBinaryExpression(
          ">",
          "<=",
          ">=",
+         "==",
          ".",
       ].includes(term.operator)
    ) {

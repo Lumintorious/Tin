@@ -1,4 +1,9 @@
-function TIN_TYPE(typeId, constructor, descriptor) {
+function TIN_TYPE(typeId, constructorRaw, descriptor) {
+	const constructor = (...args) => {
+		const result = constructorRaw(...args)
+		result.__tin_typeIds = [typeId]
+		return result;
+	}
 	constructor._tinFields = descriptor;
 	constructor._tinTypeId = typeId;
 	constructor["&"] = () => {
@@ -10,16 +15,23 @@ function TIN_TYPE(typeId, constructor, descriptor) {
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
-	return constructor
+	constructor.__is_child = (obj) =>
+		obj.__tin_typeIds.includes(typeId)
+
+	return constructor;
 }
 
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
-	return { ...obj1, ...obj2 }
+	const result = { ...obj1, ...obj2 }
+	result.__tin_typeIds = [...(obj1.__tin_typeIds ?? []), ... (obj2.__tin_typeIds ?? [])]
+	return result
 }
 
 const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 	return [obj1, obj2]
 }
+
+const nothing = undefined;
 
 const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
@@ -38,39 +50,39 @@ const Array = TIN_TYPE("", (args) => ({
 	}
 }), {})
 
-const print = (...args) => {
-	if (args[0].hasOwnProperty("toString")) {
-		console.log(args.toString())
-	} else {
-		console.log(...args)
+function makeString(obj) {
+	if (obj === null) return 'null';
+	if (typeof obj === 'undefined') return 'undefined';
+	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
+	if (typeof obj === 'number') return obj.toString();
+	if (typeof obj === 'string') return obj;
+
+	if (typeof obj === 'object') {
+		let result = 'data(';
+		for (let key in obj) {
+			if (obj.hasOwnProperty(key)) {
+				if (typeof obj[key] === "function" || key.startsWith("__")) {
+					continue
+				}
+				result += makeString(key) + '=' + makeString(obj[key]) + ',';
+			}
+		}
+		if (result.length > 1) {
+			result = result.slice(0, -1); // Remove trailing comma and space
+		}
+		return result + ')';
 	}
+
+	return ''; // For other types like functions, symbols, etc.
 }
-const list = []
+
+const print = (arg) => {
+	console.log(makeString(arg))
+}
 
 // COMPILED TIN
 ;
-var apply/* [T] => (T, (T) => T) => T*/ = function(T) {
-return function(thing, func) {
-return func(thing)
-}
-};
-var addOne/* (Number) => Number*/ = function(i) {
-return i + 1
-};
-var x/* Number*/ = apply.call('Type', Number)(12, addOne);
-print(x);
-var Cat = TIN_TYPE("0a349a58-08a0-4956-8b2e-510fd2d88252", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeCat = Cat;;
-var Robot = TIN_TYPE("d9bb1d3f-3301-45ff-8796-491ab7274bdc", (_p0) => ({version: _p0}), {version: { type: Number, defaultValue: undefined }}); var makeRobot = Robot;;
-var Robocat = _TIN_INTERSECT_OBJECTS(Cat, Robot);
-var makeRoboKitty/* (String, Number) => Cat & Robot*/ = function(name, version) {
-return _TIN_INTERSECT_OBJECTS(makeCat(name), makeRobot(version))
-};
-print(makeRoboKitty("Kitkat", 1.2));
-var sumOf/* (Array[Number]) => Number*/ = function(things) {
-var sum/* Number*/ = 0;
-for (var i/* ???*/ = 0;i < things.length();i = i + 1) {
- sum = sum + things.at(i) 
-};
-return sum
-};
-print(sumOf(Array([1, 2, 3, 4])))
+var Cat = TIN_TYPE("45a92f55-1e01-4b65-b5ea-4316070c335c", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeCat = Cat;;
+var Dog = TIN_TYPE("c935e517-e742-44cd-98d6-b2a94085ab68", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeDog = Dog;;
+var cat/* Any*/ = Cat("Hisss");
+print(cat)

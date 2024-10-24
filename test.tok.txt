@@ -1,194 +1,39 @@
-IDENTIFIER   | apply        |   1, 1    
-OPERATOR     | =            |   1, 7    
-PARENS       | [            |   1, 9    
-IDENTIFIER   | T            |   1, 10   
-PARENS       | ]            |   1, 11   
-OPERATOR     | ->           |   1, 13   
-PARENS       | (            |   1, 16   
-IDENTIFIER   | thing        |   1, 17   
-OPERATOR     | ::           |   1, 23   
-IDENTIFIER   | T            |   1, 26   
-OPERATOR     | ,            |   1, 27   
-IDENTIFIER   | func         |   1, 29   
-OPERATOR     | ::           |   1, 34   
-PARENS       | (            |   1, 37   
-IDENTIFIER   | T            |   1, 38   
-PARENS       | )            |   1, 39   
-OPERATOR     | =>           |   1, 41   
-IDENTIFIER   | T            |   1, 44   
-PARENS       | )            |   1, 45   
-OPERATOR     | ->           |   1, 47   
-IDENTIFIER   | func         |   1, 50   
-PARENS       | (            |   1, 54   
-IDENTIFIER   | thing        |   1, 55   
-PARENS       | )            |   1, 60   
-NEWLINE      |              |   2, 1    
+IDENTIFIER   | Cat          |   1, 1    
+OPERATOR     | =            |   1, 5    
+KEYWORD      | type         |   1, 7    
+OPERATOR     | :            |   1, 11   
 NEWLINE      |              |   3, 1    
-IDENTIFIER   | addOne       |   3, 1    
-OPERATOR     | =            |   3, 8    
-PARENS       | (            |   3, 10   
-IDENTIFIER   | i            |   3, 11   
-OPERATOR     | ::           |   3, 13   
-IDENTIFIER   | Number       |   3, 16   
-PARENS       | )            |   3, 22   
-OPERATOR     | ->           |   3, 24   
-IDENTIFIER   | i            |   3, 27   
-OPERATOR     | +            |   3, 29   
-NUMBER       | 1            |   3, 31   
-NEWLINE      |              |   4, 1    
+INDENT       | 4            |   3, 1    
+IDENTIFIER   | name         |   3, 2    
+OPERATOR     | :            |   3, 6    
+IDENTIFIER   | String       |   3, 8    
 NEWLINE      |              |   5, 1    
-IDENTIFIER   | x            |   5, 1    
-OPERATOR     | =            |   5, 3    
-IDENTIFIER   | apply        |   5, 5    
-PARENS       | [            |   5, 10   
-IDENTIFIER   | Number       |   5, 11   
-PARENS       | ]            |   5, 17   
-PARENS       | (            |   5, 18   
-NUMBER       | 12           |   5, 19   
-OPERATOR     | ,            |   5, 21   
-IDENTIFIER   | addOne       |   5, 23   
-PARENS       | )            |   5, 29   
-NEWLINE      |              |   6, 1    
+DEDENT       | 4            |   5, 1    
 NEWLINE      |              |   7, 1    
-IDENTIFIER   | print        |   7, 1    
-PARENS       | (            |   7, 6    
-IDENTIFIER   | x            |   7, 7    
-PARENS       | )            |   7, 8    
-NEWLINE      |              |   8, 1    
+IDENTIFIER   | Dog          |   7, 1    
+OPERATOR     | =            |   7, 5    
+KEYWORD      | type         |   7, 7    
+OPERATOR     | :            |   7, 11   
 NEWLINE      |              |   9, 1    
-IDENTIFIER   | Cat          |   9, 1    
-OPERATOR     | =            |   9, 5    
-KEYWORD      | type         |   9, 7    
-NEWLINE      |              |  10, 1    
-INDENT       | 4            |  10, 1    
-IDENTIFIER   | name         |  10, 2    
-OPERATOR     | ::           |  10, 7    
-IDENTIFIER   | String       |  10, 10   
+INDENT       | 4            |   9, 1    
+IDENTIFIER   | name         |   9, 2    
+OPERATOR     | :            |   9, 6    
+IDENTIFIER   | String       |   9, 8    
 NEWLINE      |              |  11, 1    
-DEDENT       | 0            |  11, 1    
-NEWLINE      |              |  12, 1    
-IDENTIFIER   | Robot        |  12, 1    
-OPERATOR     | =            |  12, 7    
-KEYWORD      | type         |  12, 9    
+DEDENT       | 4            |  11, 1    
 NEWLINE      |              |  13, 1    
-INDENT       | 4            |  13, 1    
-IDENTIFIER   | version      |  13, 2    
-OPERATOR     | ::           |  13, 10   
-IDENTIFIER   | Number       |  13, 13   
-NEWLINE      |              |  14, 1    
-DEDENT       | 0            |  14, 1    
+IDENTIFIER   | cat          |  13, 1    
+OPERATOR     | :            |  13, 4    
+IDENTIFIER   | Any          |  13, 6    
+OPERATOR     | =            |  13, 10   
+IDENTIFIER   | Cat          |  13, 12   
+PARENS       | (            |  13, 15   
+STRING       | Hisss        |  13, 16   
+PARENS       | )            |  13, 23   
 NEWLINE      |              |  15, 1    
-IDENTIFIER   | Robocat      |  15, 1    
-OPERATOR     | =            |  15, 9    
-IDENTIFIER   | Cat          |  15, 11   
-OPERATOR     | &            |  15, 15   
-IDENTIFIER   | Robot        |  15, 17   
-NEWLINE      |              |  16, 1    
+IDENTIFIER   | print        |  15, 1    
+PARENS       | (            |  15, 6    
+IDENTIFIER   | cat          |  15, 7    
+PARENS       | )            |  15, 10   
 NEWLINE      |              |  17, 1    
-IDENTIFIER   | makeRoboKitty |  17, 1    
-OPERATOR     | =            |  17, 15   
-PARENS       | (            |  17, 17   
-IDENTIFIER   | name         |  17, 18   
-OPERATOR     | ::           |  17, 23   
-IDENTIFIER   | String       |  17, 26   
-OPERATOR     | ,            |  17, 32   
-IDENTIFIER   | version      |  17, 34   
-OPERATOR     | ::           |  17, 42   
-IDENTIFIER   | Number       |  17, 45   
-PARENS       | )            |  17, 51   
-OPERATOR     | ->           |  17, 53   
-NEWLINE      |              |  18, 1    
-INDENT       | 4            |  18, 1    
-IDENTIFIER   | makeCat      |  18, 2    
-PARENS       | (            |  18, 9    
-IDENTIFIER   | name         |  18, 10   
-PARENS       | )            |  18, 14   
-OPERATOR     | &            |  18, 16   
-IDENTIFIER   | makeRobot    |  18, 18   
-PARENS       | (            |  18, 27   
-IDENTIFIER   | version      |  18, 28   
-PARENS       | )            |  18, 35   
-NEWLINE      |              |  19, 1    
-DEDENT       | 0            |  19, 1    
-NEWLINE      |              |  20, 1    
-IDENTIFIER   | print        |  20, 1    
-PARENS       | (            |  20, 6    
-IDENTIFIER   | makeRoboKitty |  20, 7    
-PARENS       | (            |  20, 20   
-STRING       | Kitkat       |  20, 21   
-OPERATOR     | ,            |  20, 29   
-NUMBER       | 1.2          |  20, 31   
-PARENS       | )            |  20, 34   
-PARENS       | )            |  20, 35   
-NEWLINE      |              |  21, 1    
-NEWLINE      |              |  22, 1    
-IDENTIFIER   | sumOf        |  22, 1    
-OPERATOR     | =            |  22, 7    
-PARENS       | (            |  22, 9    
-IDENTIFIER   | things       |  22, 10   
-OPERATOR     | ::           |  22, 17   
-OPERATOR     | ...          |  22, 20   
-IDENTIFIER   | Number       |  22, 23   
-PARENS       | )            |  22, 29   
-OPERATOR     | ->           |  22, 31   
-NEWLINE      |              |  23, 1    
-INDENT       | 4            |  23, 1    
-IDENTIFIER   | sum          |  23, 2    
-OPERATOR     | =            |  23, 6    
-NUMBER       | 0            |  23, 8    
-NEWLINE      |              |  24, 1    
-KEYWORD      | while        |  24, 2    
-IDENTIFIER   | i            |  24, 8    
-OPERATOR     | =            |  24, 10   
-NUMBER       | 0            |  24, 12   
-OPERATOR     | ;            |  24, 14   
-IDENTIFIER   | i            |  24, 16   
-OPERATOR     | <            |  24, 18   
-IDENTIFIER   | things       |  24, 20   
-OPERATOR     | .            |  24, 26   
-IDENTIFIER   | length       |  24, 27   
-PARENS       | (            |  24, 33   
-PARENS       | )            |  24, 34   
-OPERATOR     | ;            |  24, 36   
-KEYWORD      | change       |  24, 38   
-IDENTIFIER   | i            |  24, 45   
-OPERATOR     | =            |  24, 47   
-IDENTIFIER   | i            |  24, 49   
-OPERATOR     | +            |  24, 51   
-NUMBER       | 1            |  24, 53   
-KEYWORD      | do           |  24, 55   
-NEWLINE      |              |  25, 1    
-INDENT       | 8            |  25, 1    
-KEYWORD      | change       |  25, 3    
-IDENTIFIER   | sum          |  25, 10   
-OPERATOR     | =            |  25, 14   
-IDENTIFIER   | sum          |  25, 16   
-OPERATOR     | +            |  25, 20   
-IDENTIFIER   | things       |  25, 22   
-OPERATOR     | .            |  25, 28   
-IDENTIFIER   | at           |  25, 29   
-PARENS       | (            |  25, 31   
-IDENTIFIER   | i            |  25, 32   
-PARENS       | )            |  25, 33   
-NEWLINE      |              |  26, 1    
-DEDENT       | 4            |  26, 1    
-IDENTIFIER   | sum          |  26, 2    
-NEWLINE      |              |  27, 1    
-NEWLINE      |              |  28, 1    
-DEDENT       | 0            |  28, 1    
-IDENTIFIER   | print        |  28, 1    
-PARENS       | (            |  28, 6    
-IDENTIFIER   | sumOf        |  28, 7    
-PARENS       | (            |  28, 12   
-NUMBER       | 1            |  28, 13   
-OPERATOR     | ,            |  28, 14   
-NUMBER       | 2            |  28, 16   
-OPERATOR     | ,            |  28, 17   
-NUMBER       | 3            |  28, 19   
-OPERATOR     | ,            |  28, 20   
-NUMBER       | 4            |  28, 22   
-PARENS       | )            |  28, 23   
-PARENS       | )            |  28, 24   
-NEWLINE      |              |  29, 1    
-NEWLINE      |              |  30, 1    
 --undefined--

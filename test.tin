@@ -1,29 +1,8 @@
-apply = [T] -> (thing :: T, func :: (T) => T) -> func(thing)
+Cat = type:
+	name: String
 
-addOne = (i :: Number) -> i + 1
+Dog = type:
+	name: String
 
-x = apply[Number](12, addOne)
-
-print(x)
-
-Cat = type
-	name :: String
-
-Robot = type
-	version :: Number
-
-Robocat = Cat & Robot
-
-makeRoboKitty = (name :: String, version :: Number) ->
-	makeCat(name) & makeRobot(version)
-
-print(makeRoboKitty("Kitkat", 1.2))
-
-sumOf = (things :: ...Number) ->
-	sum = 0
-	while i = 0 ; i < things.length() ; change i = i + 1 do
-		change sum = sum + things.at(i)
-	sum
-	
-print(sumOf(1, 2, 3, 4))
-
+cat: Any = Cat("Hisss")
+print(cat)

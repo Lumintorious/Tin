@@ -1,6 +1,6 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./TypeChecker";
-const applyableKeywords = ["return", "mutable", "change"];
+const applyableKeywords = ["return", "mut", "set", "make"];
 export class AstNode {
    readonly tag: string;
    position?: TokenPos;
@@ -33,6 +33,7 @@ export class Assignment extends AstNode {
    type?: Term;
    symbol?: Symbol;
    isDeclaration: boolean;
+   isMutable: boolean = false;
    isTypeLevel?: boolean;
    constructor(lhs: Term, value?: Term, isDeclaration = true, type?: Term) {
       super("Assignment"); // tag of the AST node
@@ -56,6 +57,12 @@ export class Term extends Statement {
       super(tag);
    }
 }
+
+// export class Tuple extends Term {
+// 	constructor() {
+//       super("Tuple");
+//    }
+// }
 
 export class Cast extends Term {
    expression: Term;
@@ -102,11 +109,13 @@ export class WhileLoop extends Term {
 export class RoundValueToValueLambda extends Term {
    params: Term[];
    block: Block;
+   explicitType?: Term;
    isTypeLambda?: boolean;
-   constructor(params: Term[], block: Block) {
+   constructor(params: Term[], block: Block, explicitType?: Term) {
       super("RoundValueToValueLambda");
       this.params = params;
       this.block = block;
+      this.explicitType = explicitType;
    }
 }
 
@@ -178,6 +187,7 @@ export class RoundApply extends Term {
    callee: Term;
    args: Term[];
    takesVarargs?: boolean;
+   calledInsteadOfSquare: boolean = false;
    constructor(callee: Term, args: Term[]) {
       super("RoundApply");
       this.callee = callee;
@@ -250,19 +260,33 @@ export class BinaryExpression extends Term {
 
 export class Optional extends Term {
    expression: Term;
-   constructor(expression: Term) {
+   doubleQuestionMark: boolean = false;
+   constructor(expression: Term, doubleQuestionMark: boolean = false) {
       super("Optional");
       this.expression = expression;
+      this.doubleQuestionMark = doubleQuestionMark;
    }
 }
 
 export class Select extends Term {
    owner: Term;
    field: string;
-   constructor(owner: Term, field: string) {
+   ammortized: boolean = false; // if its x?.blabla
+   constructor(owner: Term, field: string, ammortized: boolean = false) {
       super("Select");
       this.owner = owner;
       this.field = field;
+      this.ammortized = ammortized;
+   }
+}
+
+export class TypeCheck extends Term {
+   term: Term;
+   type: Term;
+   constructor(term: Term, type: Term) {
+      super("TypeCheck");
+      this.term = term;
+      this.type = type;
    }
 }
 
@@ -286,8 +310,19 @@ export class Change extends Term {
    }
 }
 
+export class Make extends Term {
+   type: Term;
+   constructor(type: Term) {
+      super("Make");
+      this.type = type;
+   }
+}
+
 const PRECEDENCE: { [_: string]: number } = {
+   "::": 140, // Type Check
+   "?:": 110, // Walrus
    ".": 100, // Field access
+   "?.": 100, // Field access
    "*": 10, // Multiplication
    "/": 10, // Division
    "+": 9, // Addition
@@ -407,8 +442,8 @@ export class Parser {
          left = this.parseApply(left);
       }
 
-      if (this.is("::")) {
-         this.consume("::");
+      if (this.is(":")) {
+         this.consume(":");
          // const type = this.consume("IDENTIFIER");
          const type = this.parseExpression(-1, true);
          left = new Cast(left, type).fromTo(startPos, this.peek().position);
@@ -435,9 +470,19 @@ export class Parser {
             left = new Optional(left);
             break;
          }
+         if (operator === "??") {
+            left = new Optional(left, true);
+            break;
+         }
+
+         let right;
+         // if (operator === "&" && this.peek().value === "{") {
+         //    right = parseObject(this);
+         // } else {
+         right = this.parseExpression(operatorPrecedence + 1);
+         // }
 
          // Parse the right-hand side with precedence rules (note: higher precedence for right-side)
-         const right = this.parseExpression(operatorPrecedence + 1);
 
          // Combine into a binary expression
 
@@ -474,6 +519,15 @@ export class Parser {
 
          if (operator === "." && right instanceof Identifier) {
             left = new Select(left, right.value);
+         } else if (operator === "?." && right instanceof Identifier) {
+            left = new Select(left, right.value, true);
+         } else if (
+            operator === "?." &&
+            right instanceof RoundApply &&
+            right.callee instanceof Identifier
+         ) {
+            const select = new Select(left, right.callee.value, true);
+            left = new RoundApply(select, right.args);
          } else if (
             operator === "." &&
             right instanceof RoundApply &&
@@ -488,6 +542,16 @@ export class Parser {
          ) {
             const select = new Select(left, right.callee.value);
             left = new SquareApply(select, right.typeArgs);
+         } else if (
+            operator === "?." &&
+            right instanceof SquareApply &&
+            right.callee instanceof Identifier
+         ) {
+            const select = new Select(left, right.callee.value, true);
+            left = new SquareApply(select, right.typeArgs);
+         } else if (operator === "::" && right) {
+            const typeCheck = new TypeCheck(left, right);
+            left = typeCheck;
          } else {
             left = new BinaryExpression(left, operator, right);
          }
@@ -496,6 +560,9 @@ export class Parser {
       if (this.peek() && this.peek().value === "?") {
          this.consume("OPERATOR");
          left = new Optional(left);
+      } else if (this.peek() && this.peek().value === "??") {
+         this.consume("OPERATOR");
+         left = new Optional(left, true);
       }
 
       return left;
@@ -505,21 +572,6 @@ export class Parser {
    isBinaryOperator(token: Token) {
       return token.tag === "OPERATOR" && PRECEDENCE.hasOwnProperty(token.value);
    }
-
-   // parseParameters() {
-   //    const params: Parameter[] = [];
-   //    while (this.peek().tag !== "OPERATOR" || this.peek().value !== ")") {
-   //       const paramName = this.consume("IDENTIFIER").value;
-   //       this.consume("OPERATOR", "::");
-   //       const paramtag = this.consume("IDENTIFIER").value;
-   //       params.push(new Parameter( paramName, paramtag, null);
-   //       if (this.peek().tag === "OPERATOR" && this.peek().value === ",") {
-   //          this.consume("OPERATOR", ",");
-   //       }
-   //    }
-   //    this.consume("OPERATOR", ")");
-   //    return params;
-   // }
 
    // If an Identifier or Cast, turn into Assignment with missing value or type
    resolveAsAssignment(param: Term): Term {
@@ -572,11 +624,19 @@ export class Parser {
       this.consume("PARENS", isSquare ? "]" : ")"); // Consume the closing parenthesis
 
       // Now check for the arrow (-> / =>) indicating the function body
-      const arrow = this.consume("OPERATOR");
-      if (arrow.value === "->") {
+      let specifiedType;
+      if (this.peek().value === ":") {
+         this.consume("OPERATOR", ":");
+         specifiedType = this.parseExpression();
+      }
+
+      const arrow = this.consume("OPERATOR", "->");
+      let body = this.parseExpression();
+      const givesType = body.isTypeLevel; // arrow.value === "=>";
+      if (!givesType) {
          // Value Level
          // Parse the body of the lambda (this could be another expression)
-         let body = this.parseExpression(); // You would need a parseExpression function
+         // You would need a parseExpression function
          let block: Block;
          if (body instanceof Block) {
             block = body;
@@ -586,25 +646,30 @@ export class Parser {
          if (isSquare) {
             return new SquareTypeToValueLambda(parameters, block);
          } else {
-            return new RoundValueToValueLambda(parameters, block);
-         }
-      } else if (arrow.value === "=>") {
-         // Type Level
-         let returnType = this.parseExpression(0, true);
-         if (returnType.isTypeLevel) {
-            this.createError(
-               "Expected type-level expression, got " + returnType.tag,
-               arrow
+            return new RoundValueToValueLambda(
+               parameters,
+               block,
+               specifiedType
             );
          }
+      } else {
+         // Type Level
+         let returnType = body;
+         // if (!returnType.isTypeLevel) {
+         //    this.createError(
+         //       "Expected type-level expression, got " + returnType.tag,
+         //       arrow
+         //    );
+         // }
          if (isSquare) {
             return new SquareTypeToTypeLambda(parameters, returnType);
          } else {
             return new RoundTypeToTypeLambda(parameters, returnType);
          }
-      } else {
-         return this.createError("Expected -> or =>", this.peek());
       }
+      //  else {
+      //    return this.createError("Expected -> or =>", this.peek());
+      // }
    }
 
    parseWhileLoop() {
@@ -630,7 +695,7 @@ export class Parser {
    parseIfStatement() {
       this.consume("KEYWORD", "if");
       const condition = this.parseExpression();
-      this.consume("KEYWORD", "then");
+      this.consume("OPERATOR", ",");
       const trueBranch = this.parseExpression();
       let falseBranch: Term;
       if (this.is("else")) {
@@ -642,32 +707,12 @@ export class Parser {
       return new IfStatement(condition, trueBranch, falseBranch);
    }
 
-   parseGrouping() {
-      this.consume("PARENS", "{"); // Consume '('
-      const expr = this.parseExpression();
-      this.consume("PARENS", "}"); // Consume ')'
-      return new Group(expr);
-   }
-
-   parseParameter(): Parameter {
-      const identifierToken = this.consume("IDENTIFIER"); // Expecting the identifier
-      let type: string | undefined;
-      let defaultValue: Term | undefined;
-
-      // Check for type annotation (e.g., : tag)
-      if (this.peek().tag === "OPERATOR" && this.peek().value === ":") {
-         this.consume("OPERATOR", ":"); // Consume the colon
-         const typeToken = this.consume("IDENTIFIER"); // Expecting the tag identifier
-         type = typeToken.value; // Store the tag
-      }
-
-      if (this.peek().tag === "OPERATOR" && this.peek().value === "=") {
-         this.consume("OPERATOR", "="); // Consume the colon
-         defaultValue = this.parseExpression(); // Expecting the tag identifier
-      }
-
-      return new Parameter(identifierToken.value, type, defaultValue);
-   }
+   // parseGrouping() {
+   //    this.consume("PARENS", "{"); // Consume '('
+   //    const expr = this.parseExpression();
+   //    this.consume("PARENS", "}"); // Consume ')'
+   //    return new Group(expr);
+   // }
 
    parseAppliedKeyword() {
       const keyword = this.consume("KEYWORD");
@@ -675,9 +720,16 @@ export class Parser {
       if (
          expression instanceof Assignment &&
          expression.value &&
-         keyword.value === "change"
+         keyword.value === "set"
       ) {
          return new Change(expression.lhs, expression.value);
+      } else if (keyword.value === "make") {
+         return new Make(expression);
+      } else if (keyword.value === "return") {
+         return expression;
+      } else if (expression instanceof Assignment && keyword.value === "mut") {
+         expression.isMutable = true;
+         return expression;
       } else {
          throw new Error("'change' can only be applied on assignments");
       }
@@ -693,6 +745,9 @@ export class Parser {
       while (true) {
          const token = this.peek();
 
+         if (token === undefined) {
+            break;
+         }
          // Check if we reach a DEDENT token
          if (token.tag === "DEDENT") {
             this.consume("DEDENT"); // Exit the block
@@ -745,6 +800,11 @@ export class Parser {
          return parseNewType(this);
       }
 
+      if (token.value === "data") {
+         this.current--;
+         return parseNewData(this);
+      }
+
       if (token.value === "(") {
          this.current--;
          return this.parseRoundValueToValueLambda(); // Handle lambda expressions
@@ -760,10 +820,10 @@ export class Parser {
          return this.parseBlock(); // Grouping with parentheses
       }
 
-      if (token.tag === "PARENS" && token.value === "{") {
-         this.current--;
-         return this.parseGrouping(); // Grouping with parentheses
-      }
+      // if (token.tag === "PARENS" && token.value === "{") {
+      //    this.current--;
+      //    return this.parseGrouping(); // Grouping with parentheses
+      // }
 
       if (token.value === "while") {
          this.current--;
@@ -790,13 +850,16 @@ export class Parser {
    consume(expectedtag?: string, expectedValue?: string) {
       const token = this.peek();
       if (
-         expectedtag &&
-         expectedtag !== token.tag &&
-         expectedValue &&
-         token.value !== expectedValue
+         token === undefined ||
+         (expectedtag &&
+            expectedtag !== token.tag &&
+            expectedValue &&
+            token.value !== expectedValue)
       ) {
          throw this.createError(
-            `Expected '${expectedValue}', but got '${token.value}'`,
+            `Expected '${expectedValue}', but got '${
+               token ? token.value : "undefined"
+            }'`,
             token
          );
       }
@@ -826,11 +889,20 @@ export class TypeDef extends Term {
    }
 }
 
+export class DataDef extends Term {
+   fieldDefs: FieldDef[];
+   constructor(fieldDefs: FieldDef[]) {
+      super("TypeDef");
+      this.fieldDefs = fieldDefs;
+      this.isTypeLevel = true;
+   }
+}
+
 export class FieldDef extends AstNode {
    name: string;
-   type: Term;
+   type?: Term;
    defaultValue?: Term;
-   constructor(name: string, type: Term, defaultValue?: Term) {
+   constructor(name: string, type?: Term, defaultValue?: Term) {
       super("FieldDef");
       this.name = name;
       this.type = type;
@@ -846,6 +918,25 @@ export function parseNewType(parser: Parser): Term {
          `Expected 'type', but got '${token.value}' at line ${token.position.start.line}, column ${token.position.start.column}`
       );
    }
+   const object = parseObject(parser);
+
+   return new TypeDef(object.fieldDefs);
+}
+
+export function parseNewData(parser: Parser): Term {
+   let token: Token = parser.consume("KEYWORD");
+   if (token.value !== "data") {
+      throw new Error(
+         `Expected 'data', but got '${token.value}' at line ${token.position.start.line}, column ${token.position.start.column}`
+      );
+   }
+   const object = parseObject(parser);
+
+   return new DataDef(object.fieldDefs);
+}
+
+export function parseObject(parser: Parser): DataDef {
+   let token = parser.consume("OPERATOR", ":");
 
    // Expect INDENT (start of type block)
    parser.consume("NEWLINE");
@@ -864,41 +955,25 @@ export function parseNewType(parser: Parser): Term {
          break; // End of type Assignment block
       }
 
-      if (token.tag === "IDENTIFIER") {
-         const fieldName = token.value;
-         let ident = parser.consume("IDENTIFIER");
-
-         // Expect a colon followed by the type of the field
-         parser.consume("OPERATOR", "::");
-
-         // Expect the type of the field
-         let type = parser.consume("IDENTIFIER");
-
-         const fieldType = token.value;
-         let defaultValue: Term | undefined = undefined;
-
-         // Check if there is a default value (expect '=' operator)
-         if (
-            parser.peek() &&
-            parser.peek().tag === "OPERATOR" &&
-            parser.peek().value === "="
-         ) {
-            parser.consume("OPERATOR", "=");
-
-            // Expect a literal value for the default
-            defaultValue = parser.parseExpression();
-         }
-         // Add field to the type node
-         fieldDefs.push(
-            new FieldDef(fieldName, new Identifier(type.value), defaultValue)
-         );
-         parser.consume("NEWLINE");
+      // if (token.tag === "IDENTIFIER") {
+      const expr = parser.parseExpression();
+      if (expr instanceof Cast && expr.expression instanceof Identifier) {
+         fieldDefs.push(new FieldDef(expr.expression.value, expr.type));
+      } else if (expr instanceof Assignment && expr.lhs instanceof Identifier) {
+         fieldDefs.push(new FieldDef(expr.lhs.value, expr.type, expr.value));
       } else {
-         throw new Error(
-            `Unexpected token: ${token.tag} at line ${token.position.start.line}, column ${token.position.start.column}`
-         );
+         console.log(expr);
+         throw new Error("Malformed syntax at new object");
       }
+      parser.omit("NEWLINE");
+      // } else {
+      //    throw new Error(
+      //       `Unexpected token: ${token.tag} at line ${token.position.start.line}, column ${token.position.start.column}`
+      //    );
+      // }
    }
 
-   return new TypeDef(fieldDefs);
+   // parser.consume("PARENS", "}");
+
+   return new DataDef(fieldDefs);
 }
