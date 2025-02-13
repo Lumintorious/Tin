@@ -168,13 +168,14 @@ export class Literal extends Term {
    static NUMBER = "Number";
    static BOOLEAN = "Boolean";
    static VOID = "Boolean";
+   static ANY = "Any";
 
    value: String | Number | Boolean;
-   type: "String" | "Number" | "Boolean" | "Void";
+   type: "String" | "Number" | "Boolean" | "Void" | "Any";
 
    constructor(
       value: String | Number | Boolean,
-      type: "String" | "Number" | "Boolean" | "Void"
+      type: "String" | "Number" | "Boolean" | "Void" | "Any"
    ) {
       super("Literal"); // tag of the AST node
       this.type = type;
@@ -632,7 +633,7 @@ export class Parser {
 
       const arrow = this.consume("OPERATOR", "->");
       let body = this.parseExpression();
-      const givesType = body.isTypeLevel; // arrow.value === "=>";
+      const givesType = body.isTypeLevel || arrow.value === "=>"; // arrow.value === "=>";
       if (!givesType) {
          // Value Level
          // Parse the body of the lambda (this could be another expression)
@@ -781,6 +782,9 @@ export class Parser {
       }
       if (token.tag === "STRING") {
          return this.parseString(token);
+      }
+      if (token.value === "external") {
+         return new Literal("", "Any");
       }
       if (token.value === "true" || token.value === "false") {
          return new Literal(token.value, "Boolean");

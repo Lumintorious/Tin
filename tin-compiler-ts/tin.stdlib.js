@@ -50,6 +50,12 @@ const Array = TIN_TYPE("", (args) => ({
 	}
 }), {})
 
+function getRandomInt(min, max) {
+	const minCeiled = Math.ceil(min);
+	const maxFloored = Math.floor(max);
+	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+}
+
 function makeString(obj) {
 	if (obj === null) return 'null';
 	if (typeof obj === 'undefined') return 'undefined';

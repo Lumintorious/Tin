@@ -4,6 +4,8 @@
 [X] Simple type-checking
 [ ] Handling 'this'
 [ ] Varargs
+[ ] Varargs issues when returning
+[ ] Array type
 [ ] Enums, how?
 [ ] Ignore empty lines
 [X] Does multiple dedent work?

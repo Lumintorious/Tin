@@ -110,6 +110,13 @@ function translate(
 
       // Assignment
    } else if (term instanceof Assignment) {
+      if (
+         term.value instanceof Literal &&
+         term.value.value === "" &&
+         term.value.type === "Any"
+      ) {
+         return "";
+      }
       const keyword = term.isDeclaration ? "var " : "";
       const lhs = translate(term.lhs, scope);
       const value = term.value ? " = " + translate(term.value, scope) : "";
@@ -128,7 +135,7 @@ function translate(
       const constructorName = getConstructorName(lhs);
       let declareConstructor = "";
       if (term.value instanceof TypeDef) {
-         declareConstructor = `; var ${constructorName} = ${lhs};`;
+         declareConstructor = ""; //`; var ${constructorName} = ${lhs};`;
       } else if (
          term.value instanceof SquareTypeToTypeLambda &&
          term.value.returnType instanceof TypeDef
@@ -137,10 +144,11 @@ function translate(
             term.value.parameterTypes,
             new Block([new SquareApply(term.lhs, term.value.parameterTypes)])
          );
-         declareConstructor = `; var ${constructorName} = ${translate(
-            surrogateFunc,
-            scope
-         )};`;
+         declareConstructor = "";
+         // `; var ${constructorName} = ${translate(
+         //    surrogateFunc,
+         //    scope
+         // )};`;
       }
       return keyword + lhs + type + value + declareConstructor;
 

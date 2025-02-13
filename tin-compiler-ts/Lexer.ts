@@ -83,6 +83,7 @@ export class Lexer {
          "void",
          "set",
          "mut",
+         "external",
       ];
       this.operators = [
          "...",

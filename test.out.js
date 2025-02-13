@@ -50,6 +50,12 @@ const Array = TIN_TYPE("", (args) => ({
 	}
 }), {})
 
+function getRandomInt(min, max) {
+	const minCeiled = Math.ceil(min);
+	const maxFloored = Math.floor(max);
+	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+}
+
 function makeString(obj) {
 	if (obj === null) return 'null';
 	if (typeof obj === 'undefined') return 'undefined';
@@ -82,7 +88,5 @@ const print = (arg) => {
 
 // COMPILED TIN
 ;
-var Cat = TIN_TYPE("45a92f55-1e01-4b65-b5ea-4316070c335c", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeCat = Cat;;
-var Dog = TIN_TYPE("c935e517-e742-44cd-98d6-b2a94085ab68", (_p0) => ({name: _p0}), {name: { type: String, defaultValue: undefined }}); var makeDog = Dog;;
-var cat/* Any*/ = Cat("Hisss");
-print(cat)
+var Generic = /* [] */(T) => String;
+var x/* Generic[Number]*/ = ""

@@ -4,96 +4,74 @@ statements:
     isMutable: false
     lhs:
       tag: Identifier
-      value: Cat
+      value: Generic
     value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: name
-          type:
+      tag: SquareTypeToTypeLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          lhs:
             tag: Identifier
-            value: String
+            value: T
+          isDeclaration: false
           isTypeLevel: true
+          position:
+            start:
+              line: 1
+              column: 12
+              absolute: 12
+            end:
+              line: 1
+              column: 14
+              absolute: 13
+      returnType:
+        tag: Identifier
+        value: String
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
         line: 1
         column: 1
-        absolute: 3
+        absolute: 7
       end:
-        line: 7
+        line: 3
         column: 1
-        absolute: 30
+        absolute: 25
   - tag: Assignment
     isMutable: false
     lhs:
       tag: Identifier
-      value: Dog
+      value: x
     value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: name
-          type:
-            tag: Identifier
-            value: String
-          isTypeLevel: true
-    isDeclaration: true
-    isTypeLevel: true
-    position:
-      start:
-        line: 7
-        column: 1
-        absolute: 33
-      end:
-        line: 13
-        column: 1
-        absolute: 60
-  - tag: Assignment
-    isMutable: false
-    lhs:
-      tag: Identifier
-      value: cat
-    value:
-      tag: RoundApply
-      calledInsteadOfSquare: false
+      tag: Literal
+      type: String
+      value: 
+    type:
+      tag: SquareApply
       callee:
         tag: Identifier
-        value: Cat
-      args:
-        - tag: Literal
-          type: String
-          value: Hisss
-    type:
-      tag: Identifier
-      value: Any
+        value: Generic
+      typeArgs:
+        - tag: Identifier
+          value: Number
+          position:
+            start:
+              line: 5
+              column: 12
+              absolute: 44
+            end:
+              line: 5
+              column: 18
+              absolute: 44
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 13
+        line: 5
         column: 1
-        absolute: 63
+        absolute: 28
       end:
-        line: 15
+        line: 7
         column: 1
-        absolute: 85
-  - tag: RoundApply
-    calledInsteadOfSquare: false
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: Identifier
-        value: cat
-    position:
-      start:
-        line: 15
-        column: 6
-        absolute: 91
-      end:
-        line: 15
-        column: 11
-        absolute: 95
+        absolute: 52
