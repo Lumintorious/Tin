@@ -50,18 +50,18 @@ export class Type {
       return this;
    }
 
-   isAssignableTo(other: Type) {
+   isAssignableTo(other: Type, scope: Scope) {
       if (!other) {
          throw new Error("Found undefined type");
       }
-      return this.extends(other) || other.isExtendedBy(this);
+      return this.extends(other, scope) || other.isExtendedBy(this, scope);
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       return false; // By default, types are not assignable to each other unless overridden
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       return false;
    }
 
@@ -86,11 +86,11 @@ export class AnyTypeClass extends Type {
       super("Any");
    }
 
-   isAssignableTo(other: Type): boolean {
+   isAssignableTo(other: Type, scope: Scope): boolean {
       return true;
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       // Named types are assignable if they are equal (same name)
       return other instanceof AnyTypeClass;
    }
@@ -133,12 +133,12 @@ export class NamedType extends Type {
       this.name = name;
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       // Named types are assignable if they are equal (same name)
       return other instanceof NamedType && this.name === other.name;
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       return (
          (other instanceof NamedType && this.name === other.name) ||
          (other.name !== undefined && other.name === this.name)
@@ -159,14 +159,14 @@ export class LiteralType extends Type {
       this.type = type;
    }
 
-   extends(other: Type) {
-      return this.type.extends(other);
+   extends(other: Type, scope: Scope) {
+      return this.type.extends(other, scope);
    }
 
-   isExtendedBy(other: Type): boolean {
+   isExtendedBy(other: Type, scope: Scope): boolean {
       return (
          other instanceof LiteralType &&
-         other.type.extends(this.type) &&
+         other.type.extends(this.type, scope) &&
          other.value === this.value
       );
    }
@@ -199,12 +199,12 @@ export class GenericNamedType extends Type {
       this.superType = superType;
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       // Named types are assignable if they are equal (same name)
       return other instanceof NamedType && this.name === other.name;
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       return other instanceof NamedType && this.name === other.name;
    }
 
@@ -220,16 +220,17 @@ export class OptionalType extends Type {
       this.type = type;
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       // Named types are assignable if they are equal (same name)
       return (
-         this.type.extends(other) || other === NamedType.PRIMITIVE_TYPES.Nothing
+         this.type.extends(other, scope) ||
+         other === NamedType.PRIMITIVE_TYPES.Nothing
       );
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       return (
-         other.isAssignableTo(this.type) ||
+         other.isAssignableTo(this.type, scope) ||
          other === NamedType.PRIMITIVE_TYPES.Nothing
       );
    }
@@ -257,22 +258,25 @@ export class RoundValueToValueLambdaType extends Type {
       this.isForwardReferenceable = true;
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       if (!(other instanceof RoundValueToValueLambdaType)) return false;
       // Check if parameter types are contravariant
       const paramCheck =
          this.paramTypes.length === other.paramTypes.length &&
          this.paramTypes.every((paramType, index) =>
-            other.paramTypes[index].isAssignableTo(paramType)
+            other.paramTypes[index].isAssignableTo(paramType, scope)
          );
 
       // Return type must be covariant
-      const returnCheck = this.returnType.isAssignableTo(other.returnType);
+      const returnCheck = this.returnType.isAssignableTo(
+         other.returnType,
+         scope
+      );
 
       return paramCheck && returnCheck;
    }
 
-   isExtendedBy(other: Type): boolean {
+   isExtendedBy(other: Type, scope: Scope): boolean {
       return false;
    }
 
@@ -348,9 +352,9 @@ export class AppliedGenericType extends Type {
       this.parameterTypes = parameterTypes;
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       if (this.resolved) {
-         return this.resolved.extends(other);
+         return this.resolved.extends(other, scope);
       } else if (other instanceof AppliedGenericType) {
          let areAllParamsEqual = true;
          if (this.parameterTypes.length !== other.parameterTypes.length) {
@@ -359,7 +363,8 @@ export class AppliedGenericType extends Type {
             for (let i = 0; i < this.parameterTypes.length; i++) {
                if (
                   !this.parameterTypes[i].isAssignableTo(
-                     other.parameterTypes[i]
+                     other.parameterTypes[i],
+                     scope
                   )
                ) {
                   areAllParamsEqual = false;
@@ -367,16 +372,17 @@ export class AppliedGenericType extends Type {
                }
             }
          }
-         return areAllParamsEqual && this.callee.extends(other.callee);
+         return areAllParamsEqual && this.callee.extends(other.callee, scope);
       } else {
          return false;
       }
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       if (this.resolved) {
          return (
-            this.resolved.isExtendedBy(other) || other.extends(this.resolved)
+            this.resolved.isExtendedBy(other, scope) ||
+            other.extends(this.resolved, scope)
          );
       } else {
          return false;
@@ -402,44 +408,49 @@ export class BinaryOpType extends Type {
       this.right = right;
    }
 
-   isAssignableTo(other: Type): boolean {
+   isAssignableTo(other: Type, scope: Scope): boolean {
       if (
          this.operator === "&" &&
          other instanceof BinaryOpType &&
          other.operator === "&"
       ) {
          return (
-            (this.left.isExtendedBy(other.left) &&
-               this.right.isExtendedBy(other.right)) ||
-            (this.right.isExtendedBy(other.left) &&
-               this.left.isExtendedBy(other.right))
+            (this.left.isExtendedBy(other.left, scope) &&
+               this.right.isExtendedBy(other.right, scope)) ||
+            (this.right.isExtendedBy(other.left, scope) &&
+               this.left.isExtendedBy(other.right, scope))
          );
       } else if (this.operator === "&") {
-         return this.left.isExtendedBy(other) || this.right.isExtendedBy(other);
+         return (
+            this.left.isExtendedBy(other, scope) ||
+            this.right.isExtendedBy(other, scope)
+         );
       } else if (
          this.operator === "|" &&
          other instanceof BinaryOpType &&
          other.operator === "|"
       ) {
          return (
-            this.left.extends(other.left) ||
-            this.right.extends(other.right) ||
-            this.right.extends(other.left) ||
-            this.left.extends(other.right)
+            this.left.extends(other.left, scope) ||
+            this.right.extends(other.right, scope) ||
+            this.right.extends(other.left, scope) ||
+            this.left.extends(other.right, scope)
          );
       } else if (this.operator === "|") {
          return (
-            this.left.isAssignableTo(other) || this.right.isAssignableTo(other)
+            this.left.isAssignableTo(other, scope) ||
+            this.right.isAssignableTo(other, scope)
          );
       } else {
-         return super.isAssignableTo(other);
+         return super.isAssignableTo(other, scope);
       }
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       if (this.operator === "&") {
          return (
-            other.isAssignableTo(this.left) && other.isAssignableTo(this.right)
+            other.isAssignableTo(this.left, scope) &&
+            other.isAssignableTo(this.right, scope)
          );
       }
       if (
@@ -448,32 +459,35 @@ export class BinaryOpType extends Type {
          other.operator === "|"
       ) {
          return (
-            this.left.isExtendedBy(other.left) ||
-            this.right.isExtendedBy(other.right) ||
-            this.right.isExtendedBy(other.left) ||
-            this.left.isExtendedBy(other.right)
+            this.left.isExtendedBy(other.left, scope) ||
+            this.right.isExtendedBy(other.right, scope) ||
+            this.right.isExtendedBy(other.left, scope) ||
+            this.left.isExtendedBy(other.right, scope)
          );
       } else if (this.operator === "|") {
-         return other.extends(this.left) || other.extends(this.right);
+         return (
+            other.extends(this.left, scope) || other.extends(this.right, scope)
+         );
       }
       return false;
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       if (
          this.operator === "|" &&
          other instanceof BinaryOpType &&
          other.operator === "|"
       ) {
          return (
-            this.left.isExtendedBy(other.left) ||
-            this.right.isExtendedBy(other.right) ||
-            this.right.isExtendedBy(other.left) ||
-            this.left.isExtendedBy(other.right)
+            this.left.isExtendedBy(other.left, scope) ||
+            this.right.isExtendedBy(other.right, scope) ||
+            this.right.isExtendedBy(other.left, scope) ||
+            this.left.isExtendedBy(other.right, scope)
          );
       } else if (this.operator === "|") {
          return (
-            other.isAssignableTo(this.left) || other.isAssignableTo(this.right)
+            other.isAssignableTo(this.left, scope) ||
+            other.isAssignableTo(this.right, scope)
          );
       }
       return false;
@@ -493,19 +507,20 @@ export class StructType extends Type {
       this.fields = fields; // Array of { name, type } objects
    }
 
-   extends(other: Type) {
+   extends(other: Type, scope: Scope) {
       if (!(other instanceof StructType)) return false;
 
       // Check if every field in this type exists in the other and is assignable
       return this.fields.every((field) => {
          const otherField = other.fields.find((f) => f.name === field.name);
          return (
-            otherField && field.typeSymbol.isAssignableTo(otherField.typeSymbol)
+            otherField &&
+            field.typeSymbol.isAssignableTo(otherField.typeSymbol, scope)
          );
       });
    }
 
-   isExtendedBy(other: Type) {
+   isExtendedBy(other: Type, scope: Scope) {
       if (!(other instanceof StructType)) return false;
 
       // Check if every field in this type exists in the other and is assignable
@@ -513,7 +528,7 @@ export class StructType extends Type {
          const otherField = other.fields.find((f) => f.name === field.name);
          return (
             otherField !== undefined &&
-            field.typeSymbol.isAssignableTo(otherField.typeSymbol)
+            field.typeSymbol.isAssignableTo(otherField.typeSymbol, scope)
          );
       });
    }
@@ -777,8 +792,8 @@ export class TypeChecker {
       this.fileScope = new Scope("File", this.outerScope);
    }
 
-   deduceCommonType(type1: Type, type2: Type): Type {
-      if (type1.isAssignableTo(type2)) {
+   deduceCommonType(type1: Type, type2: Type, scope: Scope): Type {
+      if (type1.isAssignableTo(type2, scope)) {
          return type2;
       }
       return new BinaryOpType(type1, "|", type2);
@@ -894,7 +909,7 @@ export class TypeChecker {
       if (node.falseBranch !== undefined) {
          falseBranchType = this.infer(node.falseBranch, innerScope);
       }
-      return this.deduceCommonType(trueBranchType, falseBranchType);
+      return this.deduceCommonType(trueBranchType, falseBranchType, scope);
    }
 
    inferTypeDef(node: TypeDef, scope: Scope): Type {
@@ -1124,9 +1139,9 @@ export class TypeChecker {
                rightField.typeSymbol,
                scope
             );
-            if (rightType.isAssignableTo(leftType)) {
+            if (rightType.isAssignableTo(leftType, scope)) {
                commonFields.push(leftField);
-            } else if (leftType.isAssignableTo(rightType)) {
+            } else if (leftType.isAssignableTo(rightType, scope)) {
                commonFields.push(rightField);
             }
          }
@@ -1183,21 +1198,28 @@ export class TypeChecker {
       if (node.operator === "?:") {
          const realLeftType =
             leftType instanceof OptionalType ? leftType.type : leftType;
-         return this.deduceCommonType(leftType, rightType);
+         return this.deduceCommonType(leftType, rightType, scope);
       }
-      if (leftType.isAssignableTo(Number) && rightType.isAssignableTo(Number)) {
+      if (
+         (leftType.isAssignableTo(Number, scope) &&
+            rightType.isAssignableTo(Number, scope),
+         scope)
+      ) {
          const entry = this.DEFINED_OPERATIONS.NumberNumberNumber;
          if (entry.includes(node.operator)) {
             return Number;
          }
       }
-      if (leftType.isAssignableTo(Number) && rightType.isAssignableTo(Number)) {
+      if (
+         leftType.isAssignableTo(Number, scope) &&
+         rightType.isAssignableTo(Number, scope)
+      ) {
          const entry = this.DEFINED_OPERATIONS.NumberNumberBoolean;
          if (entry.includes(node.operator)) {
             return Boolean;
          }
       }
-      if (leftType.isAssignableTo(String)) {
+      if (leftType.isAssignableTo(String, scope)) {
          const entry = this.DEFINED_OPERATIONS.StringAnyString;
          if (entry.includes(node.operator)) {
             return String;
@@ -1379,7 +1401,7 @@ export class TypeChecker {
                node.explicitType,
                innerScope
             );
-            if (!returnType.isAssignableTo(explicitType)) {
+            if (!returnType.isAssignableTo(explicitType, scope)) {
                this.errors.add(
                   `Return type of lambda`,
                   explicitType,
@@ -1753,7 +1775,7 @@ export class TypeChecker {
             const expectedType = params[0].parameterTypes[0];
             apply.args.forEach((p, i) => {
                const gottenType = this.infer(p, scope);
-               if (!gottenType.isAssignableTo(expectedType)) {
+               if (!gottenType.isAssignableTo(expectedType, scope)) {
                   this.errors.add(
                      `Parameter ${i} of ${
                         apply.callee instanceof Identifier
@@ -1776,7 +1798,8 @@ export class TypeChecker {
                const type = this.resolveNamedType(this.infer(p, scope), scope);
                if (
                   !type.isAssignableTo(
-                     this.resolveNamedType(typeSymbol.paramTypes[i], scope)
+                     this.resolveNamedType(typeSymbol.paramTypes[i], scope),
+                     scope
                   )
                ) {
                   this.errors.add(
@@ -1990,7 +2013,12 @@ export class TypeChecker {
          if (nodeType instanceof AppliedGenericType) {
             this.resolveAppliedGenericTypes(nodeType, scope);
          }
-         if (!rhsType.isAssignableTo(this.resolveNamedType(nodeType, scope))) {
+         if (
+            !rhsType.isAssignableTo(
+               this.resolveNamedType(nodeType, scope),
+               scope
+            )
+         ) {
             this.errors.add(
                `Assignment of ${
                   node.lhs instanceof Identifier ? node.lhs.value : "term"
