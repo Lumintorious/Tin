@@ -37,8 +37,9 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
-const Array = TIN_TYPE("", (args) => ({
+const Array = (T) => TIN_TYPE("", (args) => ({
 	length() {
+		console.log("called")
 		return args.length;
 	},
 	at(index) {
@@ -57,8 +58,8 @@ function getRandomInt(min, max) {
 }
 
 function makeString(obj) {
-	if (obj === null) return 'null';
-	if (typeof obj === 'undefined') return 'undefined';
+	if (obj === null) return 'nothing';
+	if (typeof obj === 'undefined') return 'nothing';
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
@@ -86,7 +87,39 @@ const print = (arg) => {
 	console.log(makeString(arg))
 }
 
+const debug = (...args) => {
+	console.log(...args)
+}
+
 // COMPILED TIN
 ;
-var Generic = /* [] */(T) => String;
-var x/* Generic[Number]*/ = ""
+var ListHead = /* [] */(T) => TIN_TYPE("a2b3bb4a-a34b-470d-b4b8-cf50126ba30d", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
+var List = /* [] */(T) => ListHead.call('Type', T);
+var s/* String*/ = "Hello";
+var listOf/* [T] => (Array[T]) => List[T]*/ = function(T) {
+return function(arr) {
+var i/* Number*/ = arr.length();
+var list/* List[T]*/ = nothing;
+while (i > 0) {
+ i = i - 1;
+list = ListHead.call('Type', T)(arr.at(i), list) 
+};
+return list
+}
+};
+var mkString/* [T] => (List[T]) => String*/ = function(T) {
+return function(originalList) {
+var list/* List[T]*/ = originalList;
+var string/* String*/ = "";
+while (list != nothing) {
+ print("Hey");
+var comma/*  | , */ = ((string == "") ? ("") : (", ")) ;
+string = "" + string + "" + comma + "" + list.value + "";
+list = list.rest 
+};
+return string
+}
+};
+var head/* List[Number]*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3]));
+var r/* String*/ = mkString.call('Type', String)(head);
+print(r)

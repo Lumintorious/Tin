@@ -1,0 +1,59 @@
+# Declarations, constant
+v = 1
+vv: Number = 1.1
+s = "string, can be spliced like {v}"
+
+# Variables
+mutable m = 0 # Declaration
+set m = 1 # Setting
+
+# Operations
+x = 1 + 2
+y = 12 / 3
+
+# Primitives
+number: Number = 1
+string: String = "str"
+boolean: Boolean = false
+empty: Nothing = nothing # keyword
+any: Any = "str"
+
+# Maybe
+maybeEmpty: Number? = nothing
+maybeFull: Number? = 10
+
+# Printing
+print("Hello World")
+
+# Functions
+f = (n: Number) -> n + 1
+ff = (n: Number) ->
+	n + 2
+
+# If
+if v > 0 then
+	print("Works")
+else
+	print("Doesn't work")
+
+ifelse: Number = if v > 0 then 1 else 2 # resolved as expression
+
+# While
+i = 0
+while i < 3 do
+	print(i)
+
+# Data
+Cat = type:
+	name: String
+	age: Number = 1
+
+Mech = type:
+	material: String
+	version: Number
+
+# Constructing
+kitty = Cat("Kitty", 1)
+mech = Mech("Iodized Steel", 3.0)
+
+# Intersection types

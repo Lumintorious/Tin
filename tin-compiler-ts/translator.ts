@@ -229,7 +229,7 @@ function translate(
       // RoundApply
    } else if (term instanceof RoundApply) {
       const takesVarargs = term.takesVarargs;
-      const open = takesVarargs ? "(Array([" : "(";
+      const open = takesVarargs ? "(Array(0)([" : "(";
       const close = takesVarargs ? "]))" : ")";
       return (
          (term.calledInsteadOfSquare ? "() =>" : "") +
@@ -250,10 +250,9 @@ function translate(
 
       // TypeDef
    } else if (term instanceof TypeDef) {
-      return `TIN_TYPE("${randomUUID()}", ${createConstructor(
-         term,
-         scope
-      )}, {${term.fieldDefs.map((f) => translate(f, scope))}})`;
+      return `TIN_TYPE("${randomUUID()}", ${createConstructor(term, scope)}, {${
+         /*term.fieldDefs.map((f) => translate(f, scope))*/ ""
+      }})`;
 
       // DataDef
    } else if (term instanceof DataDef) {
@@ -339,6 +338,7 @@ function translateBinaryExpression(
          "<=",
          ">=",
          "==",
+         "!=",
          ".",
       ].includes(term.operator)
    ) {

@@ -37,8 +37,9 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
-const Array = TIN_TYPE("", (args) => ({
+const Array = (T) => TIN_TYPE("", (args) => ({
 	length() {
+		console.log("called")
 		return args.length;
 	},
 	at(index) {
@@ -57,8 +58,8 @@ function getRandomInt(min, max) {
 }
 
 function makeString(obj) {
-	if (obj === null) return 'null';
-	if (typeof obj === 'undefined') return 'undefined';
+	if (obj === null) return 'nothing';
+	if (typeof obj === 'undefined') return 'nothing';
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
@@ -84,6 +85,10 @@ function makeString(obj) {
 
 const print = (arg) => {
 	console.log(makeString(arg))
+}
+
+const debug = (...args) => {
+	console.log(...args)
 }
 
 // COMPILED TIN

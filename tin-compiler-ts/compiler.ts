@@ -164,11 +164,15 @@ fs.readFile(inputFile, "utf8", (err: any, data: string) => {
             }
             const translatedStr = translateFile(ast, typeChecker.fileScope);
             fs.writeFile(process.argv[2] + ".out.js", translatedStr, () => {
+               console.log(
+                  "==================== Compiled! ===================="
+               );
                if (process.argv.includes("--run")) {
                   exec(
                      "node " + process.argv[2] + ".out.js",
                      (oops, out, err) => {
                         console.log(out ? out : err);
+                        console.log(err);
                      }
                   );
                } else {

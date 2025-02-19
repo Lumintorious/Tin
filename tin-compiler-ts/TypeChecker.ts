@@ -6,7 +6,7 @@ import {
    Make,
    TypeCheck,
 } from "./Parser";
-import { SquareTypeToTypeLambda, parseNewData, Cast } from "./Parser";
+import { SquareTypeToTypeLambda, Cast } from "./Parser";
 import {
    Block,
    Assignment,
@@ -81,6 +81,12 @@ export class Type {
    }
 }
 
+export class UncheckedType extends Type {
+   constructor() {
+      super("Unchecked");
+   }
+}
+
 export class AnyTypeClass extends Type {
    constructor() {
       super("Any");
@@ -131,6 +137,37 @@ export class NamedType extends Type {
    constructor(name: string) {
       super("NamedType");
       this.name = name;
+   }
+
+   isPrimitive() {
+      return Object.keys(NamedType.PRIMITIVE_TYPES).includes(this.name);
+   }
+
+   isAssignableTo(other: Type, scope: Scope): boolean {
+      if (this.name === "Nothing") {
+         return true;
+      }
+      const realType = scope.lookupType(this.name);
+      if (realType instanceof NamedType) {
+         if (super.isAssignableTo(other, scope)) {
+            return true;
+         }
+         if (
+            this.name === other.name &&
+            Object.keys(NamedType.PRIMITIVE_TYPES).includes(this.name)
+         ) {
+            return true;
+         }
+         console.error(
+            "Attempted to check NamedType backed by a Named Type (recursion) " +
+               this.toString() +
+               " vs. " +
+               other.toString()
+         );
+         return false;
+      }
+      realType.name = this.name;
+      return realType.isAssignableTo(other, scope);
    }
 
    extends(other: Type, scope: Scope) {
@@ -220,6 +257,14 @@ export class OptionalType extends Type {
       this.type = type;
    }
 
+   isAssignableTo(other: Type, scope: Scope): boolean {
+      return (
+         this.type.isAssignableTo(other, scope) ||
+         this.extends(other, scope) ||
+         other.isExtendedBy(this, scope)
+      );
+   }
+
    extends(other: Type, scope: Scope) {
       // Named types are assignable if they are equal (same name)
       return (
@@ -230,7 +275,7 @@ export class OptionalType extends Type {
 
    isExtendedBy(other: Type, scope: Scope) {
       return (
-         other.isAssignableTo(this.type, scope) ||
+         this.type.isExtendedBy(other, scope) ||
          other === NamedType.PRIMITIVE_TYPES.Nothing
       );
    }
@@ -353,9 +398,19 @@ export class AppliedGenericType extends Type {
    }
 
    extends(other: Type, scope: Scope) {
+      if (!this.resolved) {
+         this.resolved = scope.resolveAppliedGenericTypes(this);
+      }
       if (this.resolved) {
          return this.resolved.extends(other, scope);
       } else if (other instanceof AppliedGenericType) {
+         if (
+            scope
+               .resolveAppliedGenericTypes(this)
+               .extends(scope.resolveAppliedGenericTypes(other), scope)
+         ) {
+            return true;
+         }
          let areAllParamsEqual = true;
          if (this.parameterTypes.length !== other.parameterTypes.length) {
             areAllParamsEqual = false;
@@ -379,11 +434,18 @@ export class AppliedGenericType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope) {
-      if (this.resolved) {
-         return (
-            this.resolved.isExtendedBy(other, scope) ||
-            other.extends(this.resolved, scope)
-         );
+      if (!this.resolved) {
+         this.resolved = scope.resolveAppliedGenericTypes(this);
+      }
+      if (
+         other instanceof AppliedGenericType &&
+         this.callee.name === other.callee?.name &&
+         this.callee.name !== undefined &&
+         scope.lookup(this.callee.name) !== undefined
+      ) {
+         return true;
+      } else if (this.resolved) {
+         return this.resolved.isExtendedBy(other, scope);
       } else {
          return false;
       }
@@ -562,6 +624,22 @@ export class Symbol {
       }
       return this;
    }
+
+   // Used to change all fields so the reference doesn't change
+   // Happens only when filling in an UncheckedType symbol
+   rewriteFrom(template: Symbol) {
+      if (!(template.typeSymbol instanceof UncheckedType)) {
+         throw new Error(
+            "Attempted to rewrite a checked type symbol. Only unchecked type symbols from run 0 can be rewritten in run 1."
+         );
+      }
+      this.name = template.name;
+      this.typeSymbol = template.typeSymbol;
+      this.ast = template.ast;
+      this.run = template.run;
+      this.position = template.position;
+      this.index = template.index;
+   }
 }
 
 export class Scope {
@@ -578,6 +656,16 @@ export class Scope {
    constructor(name: string, parent?: Scope) {
       this.name = name;
       this.parent = parent;
+      if (parent) {
+         this.run = parent.run;
+      }
+   }
+
+   setRun(runNumber: number) {
+      this.run = runNumber;
+      this.childrenByAst.forEach((v) => {
+         v.setRun(runNumber);
+      });
    }
 
    innerScopeOf(astNode: AstNode) {
@@ -586,6 +674,7 @@ export class Scope {
          return child;
       } else {
          const child = new Scope(astNode.tag, this);
+         child.run = this.run;
          this.childrenByAst.set(astNode, child);
          return child;
       }
@@ -617,7 +706,10 @@ export class Scope {
    declare(name: string, symbol: Symbol, redeclare: boolean = false) {
       if (this.symbols.has(name)) {
          const existingSymbol = this.symbols.get(name);
-         if (existingSymbol && existingSymbol.run == this.run) {
+         if (existingSymbol?.typeSymbol instanceof UncheckedType) {
+            existingSymbol.rewriteFrom(symbol);
+            return;
+         } else if (existingSymbol && existingSymbol.run == this.run) {
             if (!redeclare) {
                throw new Error(`Symbol ${name} is already declared.`);
             }
@@ -629,14 +721,7 @@ export class Scope {
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
       }
-      console.log(
-         "DECLARING {" +
-            name +
-            " :: " +
-            symbol.typeSymbol.toString() +
-            "} @ " +
-            this.toPath()
-      );
+      console.log("" + name + " :: " + symbol.typeSymbol.toString());
       this.symbols.set(name, symbol);
       if (symbol.ast) {
          this.symbolsByAst.set(symbol.ast, symbol);
@@ -656,19 +741,8 @@ export class Scope {
          }
       }
       typeSymbol.run = this.run;
-      // Declare struct constructor
-      // if (typeSymbol.tag === "StructType" && typeSymbol instanceof StructType) {
-      //    typeSymbol.name = name;
-      //    const constructorName = getConstructorName(name);
-      //    const constructorSymbol = new Symbol(
-      //       constructorName,
-      //       new RoundValueToValueLambdaType(
-      //          typeSymbol.fields.map((f) => f.typeSymbol),
-      //          typeSymbol
-      //       ).named(constructorName)
-      //    );
-      //    this.declare(constructorName, constructorSymbol);
-      // }
+      // [T] => type:
+      //   value: T
       if (
          typeSymbol instanceof SquareTypeToTypeLambdaType &&
          typeSymbol.returnType instanceof StructType
@@ -685,13 +759,11 @@ export class Scope {
                      new NamedType(name),
                      typeSymbol.paramTypes
                   )
-               ).named(constructorName)
+               )
             )
          );
          this.declare(constructorName, constructorSymbol);
-      }
-
-      if (
+      } else if (
          typeSymbol instanceof RoundValueToValueLambdaType &&
          typeSymbol.returnType instanceof StructType
       ) {
@@ -718,7 +790,7 @@ export class Scope {
    // Lookup a symbol, check parent scope if not found
    lookup(name: string, scopeName: string = ""): Symbol {
       if (this.symbols.has(name)) {
-         return this.symbols.get(name) as any;
+         return this.symbols.get(name) as Symbol;
       } else if (this.parent) {
          return this.parent.lookup(name, this.name + "." + scopeName);
       }
@@ -778,6 +850,116 @@ export class Scope {
          ]}; Scope = ` + this.name
       );
    }
+
+   resolveNamedType(type: Type) {
+      if (type instanceof NamedType) {
+         const realType = this.lookupType(type.name);
+         realType.name = type.name;
+         return realType;
+      } else {
+         return type;
+      }
+   }
+
+   resolveAppliedGenericTypes(type: Type) {
+      if (!(type instanceof AppliedGenericType)) {
+         return type;
+      }
+      const typeCallee = this.resolveNamedType(type.callee);
+      if (!(typeCallee instanceof SquareTypeToTypeLambdaType)) {
+         throw new Error(
+            "Attempted to apply generic parameters to non type lambda. Was " +
+               typeCallee.toString()
+         );
+      }
+      const calledArgs = type.parameterTypes;
+      const expectedArgs = typeCallee.paramTypes;
+      const params: { [_: string]: Type } = {};
+      for (let i = 0; i < calledArgs.length; i++) {
+         params[expectedArgs[i].name] = calledArgs[i];
+      }
+      type.resolved = this.resolveGenericTypes(typeCallee.returnType, params);
+      return type.resolved;
+   }
+
+   resolveGenericTypes(
+      type: Type,
+      parameters: { [genericName: string]: Type } = {}
+   ): Type {
+      switch (type.tag) {
+         case "NamedType":
+            if (type.name && Object.keys(parameters).includes(type.name)) {
+               const param = parameters[type.name];
+               if (param instanceof Identifier) {
+                  return new NamedType(param.value);
+               } else {
+                  return param;
+               }
+            } else {
+               return type;
+            }
+         case "GenericNamedType":
+            if (type.name && Object.keys(parameters).includes(type.name)) {
+               const param = parameters[type.name];
+               if (param instanceof Identifier) {
+                  return new NamedType(param.value);
+               } else {
+                  return param;
+               }
+            } else {
+               return type;
+            }
+         case "AppliedGenericType":
+            if (type instanceof AppliedGenericType) {
+               const callee = this.resolveGenericTypes(type.callee, parameters);
+               const params = type.parameterTypes.map((p) =>
+                  this.resolveGenericTypes(p, parameters)
+               );
+               return new AppliedGenericType(callee, params);
+            }
+            return type;
+         case "RoundValueToValueLambdaType":
+            const lambdaType = type as RoundValueToValueLambdaType;
+            const resolvedParams = lambdaType.paramTypes.map((pt) => {
+               return this.resolveGenericTypes(pt, parameters);
+            });
+            const returnType = this.resolveGenericTypes(
+               lambdaType.returnType,
+               parameters
+            );
+            const result = new RoundValueToValueLambdaType(
+               resolvedParams,
+               returnType
+            );
+            return result;
+         case "StructType":
+            if (!(type instanceof StructType)) {
+               throw new Error("What the hell??");
+            }
+            const mappedFields = type.fields.map((f) => {
+               return new Symbol(
+                  f.name,
+                  this.resolveGenericTypes(f.typeSymbol, parameters)
+               );
+            });
+            return new StructType(mappedFields);
+         case "OptionalType":
+            const optionalType = type as OptionalType;
+            const newInnerType = this.resolveGenericTypes(
+               optionalType.type,
+               parameters
+            );
+            return new OptionalType(newInnerType);
+         case "LiteralType":
+            return type;
+         default:
+            throw new Error(
+               "Can't handle type " +
+                  type.toString() +
+                  " when resolving generic named types."
+            );
+      }
+   }
 }
 
 // TYPE INFERENCER
@@ -812,9 +994,8 @@ export class TypeChecker {
          //    inferredType = this.inferWhileLoop(node as WhileLoop, scope);
          //    break;
          case "Make":
-            const type = this.resolveNamedType(
-               this.translateTypeNodeToType((node as Make).type, scope),
-               scope
+            const type = scope.resolveNamedType(
+               this.translateTypeNodeToType((node as Make).type, scope)
             );
             if (!(type instanceof StructType)) {
                throw new Error("Was not struct type");
@@ -888,6 +1069,9 @@ export class TypeChecker {
                (node as Cast).type,
                scope
             );
+            break;
+         case "WhileLoop":
+            inferredType = NamedType.PRIMITIVE_TYPES.Nothing;
             break;
          default:
             throw new Error(
@@ -969,6 +1153,24 @@ export class TypeChecker {
    buildWhileLoop(node: WhileLoop, scope: Scope) {
       const innerScope = scope.innerScopeOf(node);
       this.build(node.condition, innerScope);
+      if (
+         node.condition instanceof BinaryExpression &&
+         node.condition.operator === "!=" &&
+         node.condition.left instanceof Identifier &&
+         node.condition.right instanceof Identifier &&
+         node.condition.right.value === "nothing"
+      ) {
+         const leftType = this.resolveFully(
+            this.infer(node.condition.left, scope),
+            scope
+         );
+         if (leftType instanceof OptionalType) {
+            innerScope.declare(
+               node.condition.left.value,
+               new Symbol(node.condition.left.value, leftType.type)
+            );
+         }
+      }
       if (node.start) {
          this.build(node.start, innerScope);
       }
@@ -979,22 +1181,17 @@ export class TypeChecker {
    }
 
    inferSquareApply(node: SquareApply, scope: Scope): Type {
-      const calleeType = this.infer(node.callee, scope);
+      // const calleeType = this.infer(node.callee, scope);
+      let calleeType;
+      try {
+         calleeType = this.infer(node.callee, scope);
+      } catch (e) {
+         calleeType = NamedType.PRIMITIVE_TYPES.Type;
+      }
       // For future, check if calleeType is Type, only then go into Generic[Type] building
-      if (calleeType instanceof SquareTypeToValueLambdaType) {
-         const calledArgs = node.typeArgs.map((t) =>
-            this.translateTypeNodeToType(t, scope)
-         );
-         const expectedArgs = calleeType.paramTypes;
-         const params: { [_: string]: Type } = {};
-         for (let i = 0; i < calledArgs.length; i++) {
-            params[expectedArgs[i].name] = calledArgs[i];
-         }
-         return this.resolveGenericTypes(calleeType.returnType, params);
-      } else if (calleeType.toString() == "Type") {
-         const calleeAsType = this.resolveNamedType(
-            this.translateTypeNodeToType(node.callee, scope),
-            scope
+      if (calleeType.toString() == "Type") {
+         const calleeAsType = scope.resolveNamedType(
+            this.translateTypeNodeToType(node.callee, scope)
          );
          if (calleeAsType instanceof SquareTypeToTypeLambdaType) {
             const actualParams = node.typeArgs.map((t) =>
@@ -1007,8 +1204,18 @@ export class TypeChecker {
                   params[p.name] = actualParams[i];
                }
             });
-            return this.resolveGenericTypes(calleeAsType.returnType, params);
+            return scope.resolveGenericTypes(calleeAsType.returnType, params);
          }
+      } else if (calleeType instanceof SquareTypeToValueLambdaType) {
+         const calledArgs = node.typeArgs.map((t) =>
+            this.translateTypeNodeToType(t, scope)
+         );
+         const expectedArgs = calleeType.paramTypes;
+         const params: { [_: string]: Type } = {};
+         for (let i = 0; i < calledArgs.length; i++) {
+            params[expectedArgs[i].name] = calledArgs[i];
+         }
+         return scope.resolveGenericTypes(calleeType.returnType, params);
       }
 
       throw new Error(
@@ -1026,27 +1233,20 @@ export class TypeChecker {
    // func(12, "Something")
    // = Number
    inferRoundApply(node: RoundApply, scope: Scope): Type {
-      const calleeType = this.resolveNamedType(
-         this.infer(node.callee, scope),
-         scope
-      );
+      const calleeType = scope.resolveNamedType(this.infer(node.callee, scope));
       if (
          node.callee instanceof Identifier &&
          this.isCapitalized(node.callee.value)
       ) {
-         const type = this.resolveNamedType(
-            this.translateTypeNodeToType(node.callee, scope),
-            scope
+         const type = scope.resolveNamedType(
+            this.translateTypeNodeToType(node.callee, scope)
          );
          if (type instanceof StructType) {
             return type;
-            // return new RoundValueToValueLambdaType(
-            //    type.fields.map((f) => f.typeSymbol),
-            //    type
-            // );
          } else {
             throw new Error(
-               "Cannot call constructor function for non struct-type"
+               "Cannot call constructor function for non struct-type. Was " +
+                  type.toString()
             );
          }
       } else if (calleeType instanceof RoundValueToValueLambdaType) {
@@ -1063,7 +1263,7 @@ export class TypeChecker {
             scope,
             mappings
          );
-         const inferredType = this.resolveGenericTypes(
+         const inferredType = scope.resolveGenericTypes(
             calleeType.returnType.returnType,
             mappings
          );
@@ -1113,10 +1313,7 @@ export class TypeChecker {
 
    getAllKnownFields(type: Type, scope: Scope): Symbol[] {
       if (type instanceof NamedType) {
-         return this.getAllKnownFields(
-            this.resolveNamedType(type, scope),
-            scope
-         );
+         return this.getAllKnownFields(scope.resolveNamedType(type), scope);
       }
       if (type instanceof StructType) {
          return type.fields;
@@ -1134,11 +1331,8 @@ export class TypeChecker {
                (f) => f.name === leftField.name
             );
             if (rightField === undefined) continue;
-            const leftType = this.resolveNamedType(leftField.typeSymbol, scope);
-            const rightType = this.resolveNamedType(
-               rightField.typeSymbol,
-               scope
-            );
+            const leftType = scope.resolveNamedType(leftField.typeSymbol);
+            const rightType = scope.resolveNamedType(rightField.typeSymbol);
             if (rightType.isAssignableTo(leftType, scope)) {
                commonFields.push(leftField);
             } else if (leftType.isAssignableTo(rightType, scope)) {
@@ -1171,11 +1365,12 @@ export class TypeChecker {
    }
 
    inferIdentifier(node: Identifier, scope: Scope) {
-      if (node.value.charAt(0) === node.value.charAt(0).toUpperCase()) {
-         return NamedType.PRIMITIVE_TYPES.Type;
-      }
       const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
+
       if (!symbol) {
+         if (node.value.charAt(0) === node.value.charAt(0).toUpperCase()) {
+            return NamedType.PRIMITIVE_TYPES.Type;
+         }
          throw new Error(`Undefined identifier: ${node.value}`);
       }
       return symbol.typeSymbol;
@@ -1195,6 +1390,12 @@ export class TypeChecker {
       const Number = scope.lookupType("Number");
       const String = scope.lookupType("String");
       const Boolean = scope.lookupType("Boolean");
+      if (leftType.isAssignableTo(String, scope)) {
+         const entry = this.DEFINED_OPERATIONS.StringAnyString;
+         if (entry.includes(node.operator)) {
+            return String;
+         }
+      }
       if (node.operator === "?:") {
          const realLeftType =
             leftType instanceof OptionalType ? leftType.type : leftType;
@@ -1217,12 +1418,6 @@ export class TypeChecker {
          const entry = this.DEFINED_OPERATIONS.NumberNumberBoolean;
          if (entry.includes(node.operator)) {
             return Boolean;
-         }
-      }
-      if (leftType.isAssignableTo(String, scope)) {
-         const entry = this.DEFINED_OPERATIONS.StringAnyString;
-         if (entry.includes(node.operator)) {
-            return String;
          }
       }
 
@@ -1436,7 +1631,7 @@ export class TypeChecker {
                params[p.name] = actualParams[i];
             }
          });
-         const resolved = this.resolveGenericTypes(callee.returnType, params);
+         const resolved = scope.resolveGenericTypes(callee.returnType, params);
          type.resolved = resolved;
          return type.resolved;
       }
@@ -1449,87 +1644,11 @@ export class TypeChecker {
                params[p.name] = actualParams[i];
             }
          });
-         const resolved = this.resolveGenericTypes(callee.returnType, params);
+         const resolved = scope.resolveGenericTypes(callee.returnType, params);
          type.resolved = resolved;
          return type.resolved;
       }
       throw new Error("Could not resolve generic type " + type.toString());
-   }
-
-   resolveAppliedGenericTypes(type: Type, scope: Scope) {
-      if (!(type instanceof AppliedGenericType)) {
-         return type;
-      }
-      const typeCallee = this.resolveNamedType(type.callee, scope);
-      if (!(typeCallee instanceof SquareTypeToTypeLambdaType)) {
-         throw new Error(
-            "Attempted to apply generic parameters to non type lambda. Was " +
-               typeCallee.toString()
-         );
-      }
-      const calledArgs = type.parameterTypes;
-      const expectedArgs = typeCallee.paramTypes;
-      const params: { [_: string]: Type } = {};
-      for (let i = 0; i < calledArgs.length; i++) {
-         params[expectedArgs[i].name] = calledArgs[i];
-      }
-      type.resolved = this.resolveGenericTypes(typeCallee.returnType, params);
-      return type.resolved;
-   }
-
-   resolveGenericTypes(
-      type: Type,
-      parameters: { [genericName: string]: Type } = {}
-   ): Type {
-      switch (type.tag) {
-         case "NamedType":
-            if (type.name && Object.keys(parameters).includes(type.name)) {
-               const param = parameters[type.name];
-               if (param instanceof Identifier) {
-                  return new NamedType(param.value);
-               } else {
-                  return param;
-               }
-            } else {
-               return type;
-            }
-         case "GenericNamedType":
-            if (type.name && Object.keys(parameters).includes(type.name)) {
-               const param = parameters[type.name];
-               if (param instanceof Identifier) {
-                  return new NamedType(param.value);
-               } else {
-                  return param;
-               }
-            } else {
-               return type;
-            }
-         case "AppliedGenericType":
-            if (type instanceof AppliedGenericType) {
-               const callee = this.resolveGenericTypes(type.callee, parameters);
-               const params = type.parameterTypes.map((p) =>
-                  this.resolveGenericTypes(p, parameters)
-               );
-               return new AppliedGenericType(callee, params);
-            }
-            return type;
-         case "RoundValueToValueLambdaType":
-            const lambdaType = type as RoundValueToValueLambdaType;
-            const resolvedParams = lambdaType.paramTypes.map((pt) => {
-               return this.resolveGenericTypes(pt, parameters);
-            });
-            const returnType = this.resolveGenericTypes(
-               lambdaType.returnType,
-               parameters
-            );
-            const result = new RoundValueToValueLambdaType(
-               resolvedParams,
-               returnType
-            );
-            return result;
-         default:
-            return type;
-      }
    }
 
    translateTypeNodeToType(node: AstNode, scope: Scope): Type {
@@ -1743,9 +1862,8 @@ export class TypeChecker {
          apply.callee instanceof Identifier &&
          this.isCapitalized(apply.callee.value)
       ) {
-         const type = this.resolveNamedType(
-            this.translateTypeNodeToType(apply.callee, scope),
-            scope
+         const type = scope.resolveNamedType(
+            this.translateTypeNodeToType(apply.callee, scope)
          );
          if (type instanceof StructType) {
             typeSymbol = new RoundValueToValueLambdaType(
@@ -1773,35 +1891,47 @@ export class TypeChecker {
             params[0].callee.name === "Array"
          ) {
             const expectedType = params[0].parameterTypes[0];
-            apply.args.forEach((p, i) => {
-               const gottenType = this.infer(p, scope);
-               if (!gottenType.isAssignableTo(expectedType, scope)) {
-                  this.errors.add(
-                     `Parameter ${i} of ${
-                        apply.callee instanceof Identifier
-                           ? apply.callee.value
-                           : "Anonymous function"
-                     }`,
-                     expectedType,
-                     gottenType,
-                     apply.position,
-                     new Error()
-                  );
-               }
-            });
-            apply.takesVarargs = true;
+            const firstArgType = () =>
+               scope.resolveAppliedGenericTypes(
+                  this.infer(apply.args[0], scope)
+               );
+            if (
+               apply.args.length > 0 &&
+               firstArgType().isAssignableTo(
+                  scope.resolveAppliedGenericTypes(params[0]),
+                  scope
+               )
+            ) {
+               // It's ok, array expected, array gotten
+            } else {
+               apply.args.forEach((p, i) => {
+                  const gottenType = this.infer(p, scope);
+                  if (!gottenType.isAssignableTo(expectedType, scope)) {
+                     this.errors.add(
+                        `Parameter ${i} of ${
+                           apply.callee instanceof Identifier
+                              ? apply.callee.value
+                              : "Anonymous function"
+                        }`,
+                        expectedType,
+                        gottenType,
+                        apply.position,
+                        new Error()
+                     );
+                  }
+               });
+               apply.takesVarargs = true;
+            }
          } else {
             apply.args.forEach((p, i) => {
                if (!(typeSymbol instanceof RoundValueToValueLambdaType)) {
                   return;
                }
-               const type = this.resolveNamedType(this.infer(p, scope), scope);
-               if (
-                  !type.isAssignableTo(
-                     this.resolveNamedType(typeSymbol.paramTypes[i], scope),
-                     scope
-                  )
-               ) {
+               const type = scope.resolveNamedType(this.infer(p, scope));
+               const expectedType = scope.resolveNamedType(
+                  typeSymbol.paramTypes[i]
+               );
+               if (!type.isAssignableTo(expectedType, scope)) {
                   this.errors.add(
                      `Parameter ${i} of ${
                         apply.callee instanceof Identifier
@@ -1839,6 +1969,17 @@ export class TypeChecker {
             new RoundValueToValueLambda([], new Block([]))
          )
       );
+      languageScope.declare(
+         "debug",
+         new Symbol(
+            "debug",
+            new RoundValueToValueLambdaType(
+               [NamedType.PRIMITIVE_TYPES.Any],
+               NamedType.PRIMITIVE_TYPES.Nothing
+            ),
+            new RoundValueToValueLambda([], new Block([]))
+         )
+      );
       const innerArrayScope = new Scope("inner-array", languageScope);
       innerArrayScope.declareType("T", new GenericNamedType("T"));
       const arrayStruct = new StructType([
@@ -1865,6 +2006,27 @@ export class TypeChecker {
          )
       );
       languageScope.declare(
+         "Array",
+         new Symbol(
+            "Array",
+            new SquareTypeToValueLambdaType(
+               [new GenericNamedType("T")],
+               new RoundValueToValueLambdaType(
+                  [
+                     new AppliedGenericType(new NamedType("Array"), [
+                        new GenericNamedType("T"),
+                     ]),
+                  ],
+                  new AppliedGenericType(new NamedType("Array"), [
+                     new GenericNamedType("T"),
+                  ]),
+                  true
+               )
+            )
+         ),
+         true
+      );
+      languageScope.declare(
          "nothing",
          new Symbol(
             "nothing",
@@ -1877,17 +2039,24 @@ export class TypeChecker {
       fileScope.run = 0;
       typeChecker.build(ast, fileScope);
       typeChecker.run = 1;
-      typeChecker.outerScope.run = 1;
-      fileScope.run = 1;
+      typeChecker.outerScope.setRun(1);
+      typeChecker.fileScope.setRun(1); // Recursive
       typeChecker.build(ast, fileScope);
       return typeChecker;
    }
 
-   resolveNamedType(type: Type, scope: Scope) {
+   resolveFully(type: Type, scope: Scope): Type {
       if (type instanceof NamedType) {
-         const realType = scope.lookupType(type.name);
-         realType.name = type.name;
-         return realType;
+         if (type.isPrimitive()) {
+            return type;
+         } else {
+            return this.resolveFully(scope.resolveNamedType(type), scope);
+         }
+      } else if (type instanceof AppliedGenericType) {
+         return this.resolveFully(
+            scope.resolveAppliedGenericTypes(type),
+            scope
+         );
       } else {
          return type;
       }
@@ -1908,11 +2077,27 @@ export class TypeChecker {
          this.buildSquareTypeToValueLambda(node, scope);
       } else if (node instanceof WhileLoop) {
          this.buildWhileLoop(node, scope);
-      } else if (node instanceof TypeDef) {
-         this.buildStruct(node, scope);
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node);
          const trueScope = innerScope.innerScopeOf(node.trueBranch);
+         if (
+            node.condition instanceof BinaryExpression &&
+            node.condition.operator === "!=" &&
+            node.condition.left instanceof Identifier &&
+            node.condition.right instanceof Identifier &&
+            node.condition.right.value === "nothing"
+         ) {
+            const leftType = this.resolveFully(
+               this.infer(node.condition.left, scope),
+               scope
+            );
+            if (leftType instanceof OptionalType) {
+               trueScope.declare(
+                  node.condition.left.value,
+                  new Symbol(node.condition.left.value, leftType.type)
+               );
+            }
+         }
          if (
             node.condition instanceof TypeCheck &&
             node.condition.term instanceof Identifier
@@ -1937,17 +2122,6 @@ export class TypeChecker {
             this.build(node.falseBranch, innerScope);
          }
       }
-   }
-
-   buildStruct(node: TypeDef, scope: Scope) {
-      // const fieldSymbols = node.fieldDefs.map((field) => {
-      //    return new Symbol(
-      //       field.name,
-      //       this.translateTypeNodeToType(field.type, scope),
-      //       field
-      //    );
-      // });
-      // scope.declareType(new StructType(fieldSymbols))
    }
 
    buildRoundValueToValueLambda(node: RoundValueToValueLambda, scope: Scope) {
@@ -2004,21 +2178,18 @@ export class TypeChecker {
       this.build(node.value, scope);
       let rhsType = this.infer(node.value, scope);
       if (!node.type) {
+         if (rhsType instanceof LiteralType) {
+            rhsType = rhsType.type;
+         }
          scope.mapAst(node, rhsType ? rhsType : new Type());
       } else {
-         let nodeType = this.resolveNamedType(
-            this.translateTypeNodeToType(node.type, scope),
-            scope
+         let nodeType = scope.resolveNamedType(
+            this.translateTypeNodeToType(node.type, scope)
          );
          if (nodeType instanceof AppliedGenericType) {
-            this.resolveAppliedGenericTypes(nodeType, scope);
+            scope.resolveAppliedGenericTypes(nodeType);
          }
-         if (
-            !rhsType.isAssignableTo(
-               this.resolveNamedType(nodeType, scope),
-               scope
-            )
-         ) {
+         if (!rhsType.isAssignableTo(scope.resolveNamedType(nodeType), scope)) {
             this.errors.add(
                `Assignment of ${
                   node.lhs instanceof Identifier ? node.lhs.value : "term"
@@ -2029,7 +2200,7 @@ export class TypeChecker {
                new Error()
             );
          } else {
-            rhsType = this.resolveNamedType(nodeType, scope);
+            rhsType = scope.resolveNamedType(nodeType);
          }
       }
       if (

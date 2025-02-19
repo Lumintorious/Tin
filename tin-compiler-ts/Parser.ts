@@ -632,7 +632,7 @@ export class Parser {
       }
 
       const arrow = this.consume("OPERATOR", "->");
-      let body = this.parseExpression();
+      let body = this.parseExpression(undefined, true);
       const givesType = body.isTypeLevel || arrow.value === "=>"; // arrow.value === "=>";
       if (!givesType) {
          // Value Level
@@ -656,21 +656,12 @@ export class Parser {
       } else {
          // Type Level
          let returnType = body;
-         // if (!returnType.isTypeLevel) {
-         //    this.createError(
-         //       "Expected type-level expression, got " + returnType.tag,
-         //       arrow
-         //    );
-         // }
          if (isSquare) {
             return new SquareTypeToTypeLambda(parameters, returnType);
          } else {
             return new RoundTypeToTypeLambda(parameters, returnType);
          }
       }
-      //  else {
-      //    return this.createError("Expected -> or =>", this.peek());
-      // }
    }
 
    parseWhileLoop() {
