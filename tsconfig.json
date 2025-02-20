@@ -7,12 +7,14 @@
       "esModuleInterop": true, // Enables emit interoperability between CommonJS and ES Modules
       "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
       "outDir": "./dist", // Redirect output structure to the dist folder
-      "rootDir": "./tin-compiler-ts", // Specify the root directory of input files
-      "baseUrl": "./tin-compiler-ts", // Base directory to resolve non-relative module names
+      // "rootDir": "./tin-compiler-ts", // Specify the root directory of input files
+      "baseUrl": ".", // Base directory to resolve non-relative module names
       "paths": {
-         "*": ["node_modules/*", "*"] // Define module resolution for paths
+         "@out/*": ["tin-out/*"],
+         "*": ["node_modules/*", "*"] // Define module resolution for paths,
       },
-      "allowJs": true
+      "allowJs": true,
+      "lib": ["ES2024"]
    },
    "include": [
       "tin-compiler-ts/**/*.ts" // Include all TypeScript files in the src directory

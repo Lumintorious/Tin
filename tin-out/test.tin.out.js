@@ -108,16 +108,20 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-import * as module2 from "./imports.tin.out.js";Object.entries(module2).forEach(([key, value]) => {
+import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-import * as module3 from "./liarsDice.tin.out.js";Object.entries(module3).forEach(([key, value]) => {
+import * as module2 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\refinements.tin.out.js";Object.entries(module2).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var myList/* ListHead[Number]?*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3, 4]));
-export var iter/* Iterable[Number]*/ = makeIterable.call('Type', Number)(function() {
-return listIterator.call('Type', Number)(myList)
-});
-iter.forEach(function(t) {
-return print(t)
-})
+export var myList/* ListHead[Number]? & Iterable[Number]*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3, 4]));
+print(myList.mkString(",", "[", "]"));
+export var Cat = TIN_TYPE("87c5cdf8-4e5f-44db-8f65-c716fb7456b5", (_p0,_p1) => ({name: _p0,age: _p1}), {});
+export var cat/* Cat?*/ = Cat("C", 1);
+export var age/* Number?*/ = cat?.age;
+print(cat);
+export var num/* Number & NonZero?*/ = checkNonZero(3);
+export var divide/* (Number, Number & NonZero) => Number*/ = function(numerator, denominator) {
+return numerator / denominator
+};
+((num != nothing) ? (divide(6, num)) : (null)) 

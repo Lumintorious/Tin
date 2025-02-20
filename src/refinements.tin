@@ -1,2 +1,9 @@
 Positive = type
 Negative = type
+NonZero  = type
+
+checkNonZero = (n: Number) ->
+	if n == 0,
+		nothing
+	else
+		n: Number & NonZero

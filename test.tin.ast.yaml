@@ -1,0 +1,89 @@
+tag: Block
+statements:
+  - tag: Import
+    path: collections/List
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: myList
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      callee:
+        tag: SquareApply
+        callee:
+          tag: Identifier
+          value: listOf
+        typeArgs:
+          - tag: Identifier
+            value: Number
+            position:
+              start:
+                line: 5
+                column: 17
+                absolute: 49
+              end:
+                line: 5
+                column: 23
+                absolute: 49
+      args:
+        - tag: Literal
+          type: Number
+          value: 1
+        - tag: Literal
+          type: Number
+          value: 2
+        - tag: Literal
+          type: Number
+          value: 3
+        - tag: Literal
+          type: Number
+          value: 4
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 5
+        column: 1
+        absolute: 33
+      end:
+        line: 7
+        column: 1
+        absolute: 64
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        callee:
+          tag: Select
+          ammortized: false
+          owner:
+            tag: Identifier
+            value: myList
+          field: mkString
+        args:
+          - tag: Literal
+            type: String
+            value: ,
+          - tag: Literal
+            type: String
+            value: [
+          - tag: Literal
+            type: String
+            value: ]
+    position:
+      start:
+        line: 9
+        column: 6
+        absolute: 72
+      end:
+        line: 9
+        column: 38
+        absolute: 103

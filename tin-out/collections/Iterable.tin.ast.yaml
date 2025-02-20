@@ -1,0 +1,790 @@
+tag: Block
+statements:
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Iterator
+    value:
+      tag: SquareTypeToTypeLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: T
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 1
+              column: 13
+              absolute: 13
+            end:
+              line: 1
+              column: 15
+              absolute: 14
+      returnType:
+        tag: TypeDef
+        fieldDefs:
+          - tag: FieldDef
+            name: next
+            type:
+              tag: RoundTypeToTypeLambda
+              parameterTypes:
+              returnType:
+                tag: Optional
+                doubleQuestionMark: false
+                expression:
+                  tag: Identifier
+                  value: T
+            isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 1
+        column: 1
+        absolute: 8
+      end:
+        line: 7
+        column: 1
+        absolute: 44
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Iterable
+    value:
+      tag: SquareTypeToTypeLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: T
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 7
+              column: 13
+              absolute: 57
+            end:
+              line: 7
+              column: 15
+              absolute: 58
+      returnType:
+        tag: TypeDef
+        fieldDefs:
+          - tag: FieldDef
+            name: forEach
+            type:
+              tag: RoundTypeToTypeLambda
+              parameterTypes:
+                - tag: RoundTypeToTypeLambda
+                  parameterTypes:
+                    0:
+                      tag: Assignment
+                      isMutable: false
+                      isParameter: true
+                      lhs:
+                        tag: Identifier
+                        value: T
+                      value: undefined
+                      type: undefined
+                      isDeclaration: false
+                  returnType:
+                    tag: Identifier
+                    value: Nothing
+                  isTypeLevel: true
+              returnType:
+                tag: Identifier
+                value: Nothing
+            isTypeLevel: true
+          - tag: FieldDef
+            name: mkString
+            type:
+              tag: RoundTypeToTypeLambda
+              parameterTypes:
+                - tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    tag: Identifier
+                    value: String
+                  isDeclaration: false
+                  isTypeLevel: true
+                  position:
+                    start:
+                      line: 11
+                      column: 13
+                      absolute: 126
+                    end:
+                      line: 11
+                      column: 20
+                      absolute: 127
+                - tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    tag: Identifier
+                    value: String
+                  isDeclaration: false
+                  isTypeLevel: true
+                  position:
+                    start:
+                      line: 11
+                      column: 21
+                      absolute: 134
+                    end:
+                      line: 11
+                      column: 28
+                      absolute: 135
+                - tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    tag: Identifier
+                    value: String
+                  isDeclaration: false
+                  isTypeLevel: true
+                  position:
+                    start:
+                      line: 11
+                      column: 29
+                      absolute: 142
+                    end:
+                      line: 11
+                      column: 36
+                      absolute: 143
+              returnType:
+                tag: Identifier
+                value: String
+            isTypeLevel: true
+          - tag: FieldDef
+            name: getIterator
+            type:
+              tag: RoundTypeToTypeLambda
+              parameterTypes:
+              returnType:
+                tag: SquareApply
+                callee:
+                  tag: Identifier
+                  value: Iterator
+                typeArgs:
+                  - tag: Identifier
+                    value: T
+                    position:
+                      start:
+                        line: 13
+                        column: 30
+                        absolute: 185
+                      end:
+                        line: 13
+                        column: 31
+                        absolute: 185
+            isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 7
+        column: 1
+        absolute: 52
+      end:
+        line: 17
+        column: 1
+        absolute: 190
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: makeIterable
+    value:
+      tag: SquareTypeToValueLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: T
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 17
+              column: 17
+              absolute: 207
+            end:
+              line: 17
+              column: 19
+              absolute: 208
+      block:
+        tag: Block
+        statements:
+          - tag: RoundValueToValueLambda
+            params:
+              0:
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  tag: Identifier
+                  value: getIterator
+                value: undefined
+                type:
+                  tag: RoundTypeToTypeLambda
+                  parameterTypes:
+                  returnType:
+                    tag: SquareApply
+                    callee:
+                      tag: Identifier
+                      value: Iterator
+                    typeArgs:
+                      - tag: Identifier
+                        value: T
+                        position:
+                          start:
+                            line: 17
+                            column: 52
+                            absolute: 242
+                          end:
+                            line: 17
+                            column: 53
+                            absolute: 242
+                isDeclaration: false
+            block:
+              tag: Block
+              statements:
+                - tag: Assignment
+                  isMutable: false
+                  isParameter: false
+                  lhs:
+                    tag: Identifier
+                    value: forEach
+                  value:
+                    tag: RoundValueToValueLambda
+                    params:
+                      - tag: Assignment
+                        isMutable: false
+                        isParameter: true
+                        lhs:
+                          tag: Identifier
+                          value: fn
+                        type:
+                          tag: RoundTypeToTypeLambda
+                          parameterTypes:
+                            - tag: Assignment
+                              isMutable: false
+                              isParameter: true
+                              lhs:
+                                tag: Identifier
+                                value: T
+                              isDeclaration: false
+                              isTypeLevel: true
+                              position:
+                                start:
+                                  line: 19
+                                  column: 18
+                                  absolute: 267
+                                end:
+                                  line: 19
+                                  column: 20
+                                  absolute: 268
+                          returnType:
+                            tag: Identifier
+                            value: Nothing
+                        isDeclaration: false
+                        isTypeLevel: false
+                        position:
+                          start:
+                            line: 19
+                            column: 13
+                            absolute: 263
+                          end:
+                            line: 19
+                            column: 32
+                            absolute: 280
+                    block:
+                      tag: Block
+                      statements:
+                        - tag: Assignment
+                          isMutable: false
+                          isParameter: false
+                          lhs:
+                            tag: Identifier
+                            value: iterator
+                          value:
+                            tag: RoundApply
+                            calledInsteadOfSquare: false
+                            callee:
+                              tag: Identifier
+                              value: getIterator
+                            args:
+                          isDeclaration: true
+                          isTypeLevel: false
+                          position:
+                            start:
+                              line: 21
+                              column: 3
+                              absolute: 295
+                            end:
+                              line: 23
+                              column: 1
+                              absolute: 313
+                        - tag: Assignment
+                          isMutable: false
+                          isParameter: false
+                          lhs:
+                            tag: Identifier
+                            value: current
+                          value:
+                            tag: RoundApply
+                            calledInsteadOfSquare: false
+                            callee:
+                              tag: Select
+                              ammortized: false
+                              owner:
+                                tag: Identifier
+                                value: iterator
+                              field: next
+                            args:
+                          isDeclaration: true
+                          isTypeLevel: false
+                          position:
+                            start:
+                              line: 23
+                              column: 3
+                              absolute: 322
+                            end:
+                              line: 25
+                              column: 1
+                              absolute: 342
+                        - tag: WhileLoop
+                          condition:
+                            tag: BinaryExpression
+                            left:
+                              tag: Identifier
+                              value: current
+                            operator: !=
+                            right:
+                              tag: Identifier
+                              value: nothing
+                          action:
+                            tag: Block
+                            statements:
+                              - tag: RoundApply
+                                calledInsteadOfSquare: false
+                                callee:
+                                  tag: Identifier
+                                  value: fn
+                                args:
+                                  0:
+                                    tag: Identifier
+                                    value: current
+                                position:
+                                  start:
+                                    line: 27
+                                    column: 6
+                                    absolute: 379
+                                  end:
+                                    line: 27
+                                    column: 15
+                                    absolute: 387
+                              - tag: Assignment
+                                isMutable: false
+                                isParameter: false
+                                lhs:
+                                  tag: Identifier
+                                  value: current
+                                value:
+                                  tag: RoundApply
+                                  calledInsteadOfSquare: false
+                                  callee:
+                                    tag: Select
+                                    ammortized: false
+                                    owner:
+                                      tag: Identifier
+                                      value: iterator
+                                    field: next
+                                  args:
+                                isDeclaration: true
+                                isTypeLevel: false
+                                position:
+                                  start:
+                                    line: 29
+                                    column: 4
+                                    absolute: 399
+                                  end:
+                                    line: 31
+                                    column: 1
+                                    absolute: 419
+                    explicitType: undefined
+                  isDeclaration: true
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 19
+                      column: 2
+                      absolute: 257
+                    end:
+                      line: 31
+                      column: 10
+                      absolute: 428
+                - tag: Assignment
+                  isMutable: false
+                  isParameter: false
+                  lhs:
+                    tag: Identifier
+                    value: mkString
+                  value:
+                    tag: RoundValueToValueLambda
+                    params:
+                      - tag: Assignment
+                        isMutable: false
+                        isParameter: true
+                        lhs:
+                          tag: Identifier
+                          value: separator
+                        value:
+                          tag: Literal
+                          type: String
+                          value: , 
+                        type:
+                          tag: Identifier
+                          value: String
+                        isDeclaration: false
+                        isTypeLevel: false
+                        position:
+                          start:
+                            line: 31
+                            column: 14
+                            absolute: 441
+                          end:
+                            line: 31
+                            column: 39
+                            absolute: 457
+                      - tag: Assignment
+                        isMutable: false
+                        isParameter: true
+                        lhs:
+                          tag: Identifier
+                          value: left
+                        value:
+                          tag: Literal
+                          type: String
+                          value: 
+                        type:
+                          tag: Identifier
+                          value: String
+                        isDeclaration: false
+                        isTypeLevel: false
+                        position:
+                          start:
+                            line: 31
+                            column: 40
+                            absolute: 462
+                          end:
+                            line: 31
+                            column: 58
+                            absolute: 476
+                      - tag: Assignment
+                        isMutable: false
+                        isParameter: true
+                        lhs:
+                          tag: Identifier
+                          value: right
+                        value:
+                          tag: Literal
+                          type: String
+                          value: 
+                        type:
+                          tag: Identifier
+                          value: String
+                        isDeclaration: false
+                        isTypeLevel: false
+                        position:
+                          start:
+                            line: 31
+                            column: 59
+                            absolute: 482
+                          end:
+                            line: 31
+                            column: 78
+                            absolute: 496
+                    block:
+                      tag: Block
+                      statements:
+                        - tag: Assignment
+                          isMutable: false
+                          isParameter: false
+                          lhs:
+                            tag: Identifier
+                            value: string
+                          value:
+                            tag: Literal
+                            type: String
+                            value: 
+                          isDeclaration: true
+                          isTypeLevel: false
+                          position:
+                            start:
+                              line: 33
+                              column: 3
+                              absolute: 509
+                            end:
+                              line: 35
+                              column: 1
+                              absolute: 516
+                        - tag: Assignment
+                          isMutable: false
+                          isParameter: false
+                          lhs:
+                            tag: Identifier
+                            value: fn
+                          value:
+                            tag: RoundValueToValueLambda
+                            params:
+                              - tag: Assignment
+                                isMutable: false
+                                isParameter: true
+                                lhs:
+                                  tag: Identifier
+                                  value: t
+                                type:
+                                  tag: Identifier
+                                  value: T
+                                isDeclaration: false
+                                isTypeLevel: false
+                                position:
+                                  start:
+                                    line: 35
+                                    column: 9
+                                    absolute: 525
+                                  end:
+                                    line: 35
+                                    column: 14
+                                    absolute: 529
+                            block:
+                              tag: Block
+                              statements:
+                                - tag: Assignment
+                                  isMutable: false
+                                  isParameter: false
+                                  lhs:
+                                    tag: Identifier
+                                    value: comma
+                                  value:
+                                    tag: IfStatement
+                                    condition:
+                                      tag: BinaryExpression
+                                      left:
+                                        tag: Identifier
+                                        value: string
+                                      operator: ==
+                                      right:
+                                        tag: Literal
+                                        type: String
+                                        value: 
+                                    trueBranch:
+                                      tag: Literal
+                                      type: String
+                                      value: 
+                                    falseBranch:
+                                      tag: Identifier
+                                      value: separator
+                                  isDeclaration: true
+                                  isTypeLevel: false
+                                  position:
+                                    start:
+                                      line: 37
+                                      column: 4
+                                      absolute: 542
+                                    end:
+                                      line: 39
+                                      column: 1
+                                      absolute: 581
+                                - tag: Change
+                                  lhs:
+                                    tag: Identifier
+                                    value: string
+                                  value:
+                                    tag: BinaryExpression
+                                    left:
+                                      tag: BinaryExpression
+                                      left:
+                                        tag: BinaryExpression
+                                        left:
+                                          tag: BinaryExpression
+                                          left:
+                                            tag: BinaryExpression
+                                            left:
+                                              tag: BinaryExpression
+                                              left:
+                                                tag: Literal
+                                                type: String
+                                                value: 
+                                              operator: +
+                                              right:
+                                                tag: Identifier
+                                                value: string
+                                            operator: +
+                                            right:
+                                              tag: Literal
+                                              type: String
+                                              value: 
+                                          operator: +
+                                          right:
+                                            tag: Identifier
+                                            value: comma
+                                        operator: +
+                                        right:
+                                          tag: Literal
+                                          type: String
+                                          value: 
+                                      operator: +
+                                      right:
+                                        tag: Identifier
+                                        value: t
+                                    operator: +
+                                    right:
+                                      tag: Literal
+                                      type: String
+                                      value: 
+                            explicitType: undefined
+                          isDeclaration: true
+                          isTypeLevel: false
+                          position:
+                            start:
+                              line: 35
+                              column: 3
+                              absolute: 520
+                            end:
+                              line: 41
+                              column: 10
+                              absolute: 628
+                        - tag: RoundApply
+                          calledInsteadOfSquare: false
+                          callee:
+                            tag: Identifier
+                            value: forEach
+                          args:
+                            0:
+                              tag: Identifier
+                              value: fn
+                          position:
+                            start:
+                              line: 41
+                              column: 10
+                              absolute: 629
+                            end:
+                              line: 41
+                              column: 14
+                              absolute: 632
+                        - tag: BinaryExpression
+                          left:
+                            tag: BinaryExpression
+                            left:
+                              tag: BinaryExpression
+                              left:
+                                tag: BinaryExpression
+                                left:
+                                  tag: BinaryExpression
+                                  left:
+                                    tag: BinaryExpression
+                                    left:
+                                      tag: Literal
+                                      type: String
+                                      value: 
+                                    operator: +
+                                    right:
+                                      tag: Identifier
+                                      value: left
+                                  operator: +
+                                  right:
+                                    tag: Literal
+                                    type: String
+                                    value: 
+                                operator: +
+                                right:
+                                  tag: Identifier
+                                  value: string
+                              operator: +
+                              right:
+                                tag: Literal
+                                type: String
+                                value: 
+                            operator: +
+                            right:
+                              tag: Identifier
+                              value: right
+                          operator: +
+                          right:
+                            tag: Literal
+                            type: String
+                            value: 
+                    explicitType: undefined
+                  isDeclaration: true
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 31
+                      column: 2
+                      absolute: 428
+                    end:
+                      line: 45
+                      column: 10
+                      absolute: 670
+                - tag: RoundApply
+                  calledInsteadOfSquare: false
+                  callee:
+                    tag: SquareApply
+                    callee:
+                      tag: Identifier
+                      value: Iterable
+                    typeArgs:
+                      - tag: Identifier
+                        value: T
+                        position:
+                          start:
+                            line: 45
+                            column: 11
+                            absolute: 672
+                          end:
+                            line: 45
+                            column: 12
+                            absolute: 672
+                  args:
+                    0:
+                      tag: Identifier
+                      value: forEach
+                    1:
+                      tag: Identifier
+                      value: mkString
+                    2:
+                      tag: Identifier
+                      value: getIterator
+                  position:
+                    start:
+                      line: 45
+                      column: 13
+                      absolute: 674
+                    end:
+                      line: 45
+                      column: 45
+                      absolute: 705
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 17
+        column: 1
+        absolute: 202
+      end: undefined

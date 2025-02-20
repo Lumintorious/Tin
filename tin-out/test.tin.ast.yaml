@@ -1,9 +1,9 @@
 tag: Block
 statements:
   - tag: Import
-    path: imports
+    path: collections/List
   - tag: Import
-    path: liarsDice
+    path: refinements
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -23,13 +23,13 @@ statements:
             value: Number
             position:
               start:
-                line: 11
+                line: 7
                 column: 17
-                absolute: 110
+                absolute: 69
               end:
-                line: 11
+                line: 7
                 column: 23
-                absolute: 110
+                absolute: 69
       args:
         - tag: Literal
           type: Number
@@ -47,140 +47,299 @@ statements:
     isTypeLevel: false
     position:
       start:
-        line: 11
+        line: 7
         column: 1
-        absolute: 94
+        absolute: 53
       end:
-        line: 13
+        line: 9
         column: 1
-        absolute: 125
+        absolute: 84
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        callee:
+          tag: Select
+          ammortized: false
+          owner:
+            tag: Identifier
+            value: myList
+          field: mkString
+        args:
+          - tag: Literal
+            type: String
+            value: ,
+          - tag: Literal
+            type: String
+            value: [
+          - tag: Literal
+            type: String
+            value: ]
+    position:
+      start:
+        line: 9
+        column: 6
+        absolute: 90
+      end:
+        line: 9
+        column: 38
+        absolute: 121
   - tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
       tag: Identifier
-      value: iter
+      value: Cat
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: name
+          type:
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+        - tag: FieldDef
+          name: age
+          type:
+            tag: Identifier
+            value: Number
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 13
+        column: 1
+        absolute: 128
+      end:
+        line: 21
+        column: 1
+        absolute: 169
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: cat
     value:
       tag: RoundApply
       calledInsteadOfSquare: false
       callee:
-        tag: SquareApply
-        callee:
-          tag: Identifier
-          value: makeIterable
-        typeArgs:
-          - tag: Identifier
-            value: Number
-            position:
-              start:
-                line: 15
-                column: 21
-                absolute: 153
-              end:
-                line: 15
-                column: 27
-                absolute: 153
+        tag: Identifier
+        value: Cat
       args:
-        - tag: RoundValueToValueLambda
-          params:
-          block:
-            tag: Block
-            statements:
-              - tag: RoundApply
-                calledInsteadOfSquare: false
-                callee:
-                  tag: SquareApply
-                  callee:
-                    tag: Identifier
-                    value: listIterator
-                  typeArgs:
-                    - tag: Identifier
-                      value: Number
-                      position:
-                        start:
-                          line: 15
-                          column: 48
-                          absolute: 180
-                        end:
-                          line: 15
-                          column: 54
-                          absolute: 180
-                args:
-                  0:
-                    tag: Identifier
-                    value: myList
-                position:
-                  start:
-                    line: 15
-                    column: 55
-                    absolute: 182
-                  end:
-                    line: 15
-                    column: 63
-                    absolute: 189
+        - tag: Literal
+          type: String
+          value: C
+        - tag: Literal
+          type: Number
+          value: 1
+    type:
+      tag: Optional
+      doubleQuestionMark: false
+      expression:
+        tag: Identifier
+        value: Cat
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 15
+        line: 21
         column: 1
-        absolute: 131
+        absolute: 172
       end:
-        line: 17
+        line: 23
         column: 1
-        absolute: 192
+        absolute: 194
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: age
+    value:
+      tag: Select
+      ammortized: true
+      owner:
+        tag: Identifier
+        value: cat
+      field: age
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 23
+        column: 1
+        absolute: 197
+      end:
+        line: 25
+        column: 1
+        absolute: 210
   - tag: RoundApply
     calledInsteadOfSquare: false
     callee:
-      tag: Select
-      ammortized: false
-      owner:
-        tag: Identifier
-        value: iter
-      field: forEach
+      tag: Identifier
+      value: print
     args:
       0:
-        tag: RoundValueToValueLambda
-        params:
-          - tag: Assignment
-            isMutable: false
-            isParameter: true
-            lhs:
-              tag: Identifier
-              value: t
-            type:
+        tag: Identifier
+        value: cat
+    position:
+      start:
+        line: 25
+        column: 6
+        absolute: 216
+      end:
+        line: 25
+        column: 11
+        absolute: 220
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: num
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      callee:
+        tag: Identifier
+        value: checkNonZero
+      args:
+        - tag: Literal
+          type: Number
+          value: 3
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 29
+        column: 1
+        absolute: 227
+      end:
+        line: 31
+        column: 1
+        absolute: 247
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: divide
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: numerator
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 31
+              column: 11
+              absolute: 266
+            end:
+              line: 31
+              column: 29
+              absolute: 275
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: denominator
+          type:
+            tag: BinaryExpression
+            left:
               tag: Identifier
               value: Number
-            isDeclaration: false
-            isTypeLevel: false
-            position:
-              start:
-                line: 19
-                column: 15
-                absolute: 209
-              end:
-                line: 19
-                column: 25
-                absolute: 218
-        block:
-          tag: Block
-          statements:
-            - tag: RoundApply
-              calledInsteadOfSquare: false
-              callee:
-                tag: Identifier
-                value: print
-              args:
-                0:
-                  tag: Identifier
-                  value: t
-              position:
-                start:
-                  line: 19
-                  column: 34
-                  absolute: 228
-                end:
-                  line: 19
-                  column: 37
-                  absolute: 230
-        explicitType: undefined
+            operator: &
+            right:
+              tag: Identifier
+              value: NonZero
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 31
+              column: 30
+              absolute: 287
+            end:
+              line: 31
+              column: 60
+              absolute: 306
+      block:
+        tag: Block
+        statements:
+          - tag: BinaryExpression
+            left:
+              tag: Identifier
+              value: numerator
+            operator: /
+            right:
+              tag: Identifier
+              value: denominator
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 31
+        column: 1
+        absolute: 253
+      end:
+        line: 33
+        column: 1
+        absolute: 335
+  - tag: IfStatement
+    condition:
+      tag: BinaryExpression
+      left:
+        tag: Identifier
+        value: num
+      operator: !=
+      right:
+        tag: Identifier
+        value: nothing
+    trueBranch:
+      tag: Block
+      statements:
+        - tag: RoundApply
+          calledInsteadOfSquare: false
+          callee:
+            tag: Identifier
+            value: divide
+          args:
+            0:
+              tag: Literal
+              type: Number
+              value: 6
+            1:
+              tag: Identifier
+              value: num
+          position:
+            start:
+              line: 35
+              column: 8
+              absolute: 363
+            end:
+              line: 35
+              column: 16
+              absolute: 370
+    falseBranch:
+      tag: Literal
+      type: Void
+      value: null

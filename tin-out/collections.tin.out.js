@@ -108,22 +108,10 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("f2f237c0-385c-4acd-9524-00939c288c04", (_p0) => ({next: _p0}), {});
-export var Iterable = /* [] */(T) => TIN_TYPE("28ccdc01-f4c7-403f-88f7-ba68e21e415b", (_p0) => ({forEach: _p0}), {});
-export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
-return function(getIterator) {
-var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {
-var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator.next();
-while (current != nothing) {
- fn(current);
-current = iterator.next() 
-}
-};
-return Iterable.call('Type', T)(forEach)
-}
-};
-export var ListHead = /* [] */(T) => TIN_TYPE("5b8e1818-11fc-4c6d-9507-db47257c959d", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
+import * as module0 from "./collections/Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+export var ListHead = /* [] */(T) => TIN_TYPE("c8f0bcbc-d879-4ee5-b106-c170fd107ef0", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)));
 export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
 return function(list) {
@@ -137,7 +125,7 @@ var thing/* () => T | Nothing*/ = nextF;
 return Iterator.call('Type', T)(nextF)
 }
 };
-export var listOf/* [T] => (Array[T]) => ListHead[T]?*/ = function(T) {
+export var listOf/* [T] => (Array[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
 return function(arr) {
 var i/* Number*/ = arr.length();
 var list/* ListHead[T]?*/ = nothing;
@@ -145,7 +133,21 @@ while (i > 0) {
  i = i - 1;
 list = ListHead.call('Type', T)(arr.at(i), list) 
 };
-return list
+return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(function() {
+return listIterator.call('Type', T)(list)
+}))
+}
+};
+export var listFromIterator/* [T] => (() => Iterator[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
+return function(getIterator) {
+var list/* ListHead[T]?*/ = nothing;
+var iterator/* Iterator[T]*/ = getIterator();
+var current/* T?*/ = iterator.next();
+while (current != nothing) {
+ list = ListHead.call('Type', T)(current, list);
+current = current.next() 
+};
+return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(getIterator))
 }
 };
 export var mkString/* [T] => (ListHead[T]?, String, String, String) => String*/ = function(T) {

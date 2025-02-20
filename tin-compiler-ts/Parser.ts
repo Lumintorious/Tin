@@ -381,13 +381,30 @@ export class Parser {
       return this.peek().tag === tokentag;
    }
 
+   parseImportString(): string {
+      let str = "";
+      while (this.peek().tag !== "NEWLINE") {
+         const token = this.consume();
+         if (token.tag === "IDENTIFIER") {
+            str += token.value;
+            continue;
+         }
+         if (token.value === "/") {
+            str += "/";
+            continue;
+         }
+         throw new Error("Expected import string, but got " + token.tag);
+      }
+      return str;
+   }
+
    parseStatement(): Statement | null {
       let token = this.peek();
 
       if (token.tag === "KEYWORD" && token.value === "import") {
          this.consume();
-         const path = this.parseString(this.consume());
-         return new Import(path.value as string);
+         const path = this.parseImportString();
+         return new Import(path as string);
       }
 
       if (token.tag === "INDENT" || token.tag === "DEDENT") {

@@ -1,0 +1,24 @@
+Iterator = [T] => type:
+	next: () => T?
+
+Iterable = [T] => type:
+	forEach: ((T) => Nothing) => Nothing
+	mkString: (String, String, String) => String
+	getIterator: () => Iterator[T]
+
+makeIterable = [T] -> (getIterator: () => Iterator[T]) ->
+	forEach = (fn: (T) => Nothing) ->
+		iterator = getIterator()
+		current = iterator.next()
+		while current != nothing do
+			fn(current)
+			current = iterator.next()
+	mkString = (separator: String = ", ", left: String = "", right: String = "") ->
+		string = ""
+		fn = (t: T) ->
+			comma = if string == "", "" else separator
+			set string = "{string}{comma}{t}"
+		forEach(fn)
+		"{left}{string}{right}"
+	Iterable[T](forEach, mkString, getIterator)
+	

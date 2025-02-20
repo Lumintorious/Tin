@@ -108,59 +108,44 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-import * as module0 from "./collections.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
+import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-import * as module1 from "./refinements.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
-			globalThis[key] = value;
-	  });;
-;
-export var Roll = _TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(1, 2), 3), 4), 5), 6);
-export var dicePerPlayer/* Number*/ = 5;
-export var Cup = TIN_TYPE("7994abc2-225f-4ede-8d8b-36c93215d229", (_p0) => ({dice: _p0}), {});
-export var rollDice/* () => Roll*/ = function() {
-return (getRandomInt(1, 7)) /* as Roll */
+export var ListHead = /* [] */(T) => TIN_TYPE("c0132669-fb1d-4b33-b7d0-99de495c1525", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
+export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)));
+export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
+return function(list) {
+var currentList/* ListHead[T]?*/ = list;
+var nextF/* () => T?*/ = function() {
+return ((currentList != nothing) ? ((function(){var result/* T*/ = currentList.value;
+currentList = currentList.rest;
+return result})()) : (nothing)) 
 };
-export var rollCup/* () => Cup*/ = function() {
-return Cup(Array(0)([rollDice(), rollDice(), rollDice(), rollDice(), rollDice()]))
+return Iterator.call('Type', T)(nextF)
+}
 };
-export var binomialCoefficient/* (Number, Number) => Number*/ = function(n, k) {
-return ((k > n) ? (0) : ((function(){var coefficient/* Number*/ = 1;
-var i/* Number*/ = 0;
-while (i < k) {
- coefficient = coefficient * (n - i) / (i + 1);
-i = i + 1 
+export var listOf/* [T] => (Array[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
+return function(arr) {
+var i/* Number*/ = arr.length();
+var list/* ListHead[T]?*/ = nothing;
+while (i > 0) {
+ i = i - 1;
+list = ListHead.call('Type', T)(arr.at(i), list) 
 };
-return coefficient})())) 
+return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(function() {
+return listIterator.call('Type', T)(list)
+}))
+}
 };
-export var binomialProbability/* (Number, Number, Number) => Number*/ = function(k, n, p) {
-var pComplement/* Number*/ = 1 - p;
-var nMinusK/* Number*/ = n - k;
-var coefficient/* Number*/ = binomialCoefficient(n, k);
-return coefficient * (p ** k) * (pComplement ** nMinusK)
+export var listFromIterator/* [T] => (() => Iterator[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
+return function(getIterator) {
+var list/* ListHead[T]?*/ = nothing;
+var iterator/* Iterator[T]*/ = getIterator();
+var current/* T?*/ = iterator.next();
+while (current != nothing) {
+ list = ListHead.call('Type', T)(current, list);
+current = current.next() 
 };
-export var getFaceCount/* (Number, Cup) => Number*/ = function(bidFace, cup) {
-var i/* Number*/ = 0;
-var count/* Number*/ = 0;
-while (i < cup.dice.length()) {
- ((cup.dice.at(i) == bidFace) ? (count = count + 1) : (null)) ;
-i = i + 1 
-};
-return count
-};
-export var bidProbability/* (Number, Number, Cup, Number) => Number*/ = function(bidCount, bidFace, myCup, totalCups) {
-var totalDice/* Number*/ = totalCups * dicePerPlayer;
-var myFaceCount/* Number*/ = getFaceCount(bidFace, myCup);
-var neededElsewhere/* Number | 0*/ = ((bidCount > myFaceCount) ? (bidCount - myFaceCount) : (0)) ;
-var remainingDice/* Number*/ = totalDice - myCup.dice.length();
-var probability/* Number*/ = 0;
-var i/* Number | 0*/ = neededElsewhere;
-while (i < remainingDice) {
- probability = probability + binomialProbability(i, remainingDice, 1 / 3);
-i = i + 1 
-};
-return probability
-};
-export var myCup/* Cup*/ = rollCup();
-print(myCup.dice);
-print(bidProbability(4, 3, Cup(Array(0)([3, 3, 4, 5, 1])), 2))
+return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(getIterator))
+}
+}

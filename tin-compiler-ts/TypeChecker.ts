@@ -6,8 +6,11 @@ import {
    Make,
    TypeCheck,
 } from "./Parser";
-import { SquareTypeToTypeLambda, Cast, Group } from "./Parser";
 import {
+   SquareTypeToTypeLambda,
+   Cast,
+   Group,
+   Change,
    Block,
    Assignment,
    IfStatement,
@@ -287,27 +290,8 @@ export class OptionalType extends Type {
       this.type = type;
    }
 
-   isAssignableTo(other: Type, scope: Scope): boolean {
-      console.log("Checking " + this.toString() + " vs. " + other.toString());
-      return (
-         // this.type.isAssignableTo(other, scope) ||
-         this.extends(other, scope) || other.isExtendedBy(this, scope)
-      );
-   }
-
    isSame(other: OptionalType, scope: Scope): boolean {
       return this.type.isAssignableTo(other.type, scope);
-   }
-
-   extends(other: Type, scope: Scope) {
-      // Named types are assignable if they are equal (same name)
-      if (other instanceof OptionalType && this.isSame(other, scope)) {
-         return true;
-      }
-      return (
-         this.type.extends(other, scope) ||
-         other === NamedType.PRIMITIVE_TYPES.Nothing
-      );
    }
 
    isExtendedBy(other: Type, scope: Scope) {
@@ -315,7 +299,7 @@ export class OptionalType extends Type {
          return true;
       }
       return (
-         this.type.isExtendedBy(other, scope) ||
+         other.isAssignableTo(this.type, scope) ||
          other === NamedType.PRIMITIVE_TYPES.Nothing
       );
    }
@@ -677,6 +661,7 @@ export class Symbol {
    run: number = 0;
    position?: TokenPos;
    index?: number;
+   shadowing?: Symbol;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
       this.name = name;
       this.typeSymbol = typeSymbol;
@@ -812,6 +797,14 @@ export class Scope {
          if (symbol.ast instanceof Assignment) {
             symbol.ast.symbol = symbol;
          }
+      }
+   }
+
+   remove(name: string) {
+      if (this.symbols.has(name)) {
+         this.symbols.delete(name);
+      } else {
+         this.parent?.remove(name);
       }
    }
 
@@ -1054,6 +1047,13 @@ export class Scope {
             return new OptionalType(newInnerType);
          case "LiteralType":
             return type;
+         case "BinaryOpType":
+            const bType = type as BinaryOpType;
+            return new BinaryOpType(
+               this.resolveGenericTypes(bType.left, parameters),
+               bType.operator,
+               this.resolveGenericTypes(bType.right, parameters)
+            );
          default:
             throw new Error(
                "Can't handle type " +
@@ -1077,6 +1077,12 @@ export class TypeChecker {
    }
 
    deduceCommonType(type1: Type, type2: Type, scope: Scope): Type {
+      if (type1 === NamedType.PRIMITIVE_TYPES.Nothing) {
+         return new OptionalType(type2);
+      }
+      if (type2 === NamedType.PRIMITIVE_TYPES.Nothing) {
+         return new OptionalType(type1);
+      }
       if (type1.isAssignableTo(type2, scope)) {
          return type2;
       }
@@ -1274,10 +1280,9 @@ export class TypeChecker {
             scope
          );
          if (leftType instanceof OptionalType) {
-            innerScope.declare(
-               node.condition.left.value,
-               new Symbol(node.condition.left.value, leftType.type)
-            );
+            const symbol = new Symbol(node.condition.left.value, leftType.type);
+            symbol.shadowing = innerScope.lookup(node.condition.left.value);
+            innerScope.declare(node.condition.left.value, symbol);
          }
       }
       if (node.start) {
@@ -1451,6 +1456,28 @@ export class TypeChecker {
             }
          }
          return commonFields;
+      } else if (type instanceof BinaryOpType && type.operator === "&") {
+         const leftFields = this.getAllKnownFields(type.left, scope);
+         const rightFields = this.getAllKnownFields(type.right, scope);
+         return [...leftFields, ...rightFields];
+      } else if (type instanceof OptionalType) {
+         return [];
+         // const originalFields = this.getAllKnownFields(type.type, scope);
+         // return originalFields.map((f) => {
+         //    return new Symbol(
+         //       f.name,
+         //       f.typeSymbol instanceof OptionalType
+         //          ? f.typeSymbol
+         //          : new OptionalType(f.typeSymbol)
+         //    );
+         // });
+      } else if (type instanceof AppliedGenericType) {
+         return this.getAllKnownFields(
+            scope.resolveAppliedGenericTypes(type),
+            scope
+         );
+      } else {
+         throw new Error("Could not deduce fields of type " + type.toString());
       }
       return [];
    }
@@ -1934,6 +1961,40 @@ export class TypeChecker {
       }
    }
 
+   typeCheckChange(node: Change, scope: Scope) {
+      this.typeCheck(node.lhs, scope);
+      this.typeCheck(node.value, scope);
+      const leftType = this.infer(node.lhs, scope);
+      const rightType = this.infer(node.value, scope);
+      console.log(leftType.toString());
+      if (!rightType.isAssignableTo(leftType, scope)) {
+         if (node.lhs instanceof Identifier) {
+            const symbol = scope.lookup(node.lhs.value);
+            if (
+               symbol.shadowing &&
+               rightType.isAssignableTo(symbol.shadowing?.typeSymbol, scope)
+            ) {
+               scope.remove(node.lhs.value);
+               return;
+            }
+         }
+
+         let name = "";
+         if (node.lhs instanceof Identifier) {
+            name = node.lhs.value;
+         }
+         if (node.lhs instanceof Select) {
+            name = node.lhs.field;
+         }
+         this.errors.add(
+            `Setting of variable ${name}`,
+            leftType,
+            rightType,
+            node.position
+         );
+      }
+   }
+
    typeCheck(node: AstNode, scope: Scope) {
       if (node instanceof Block) {
          const innerScope = scope.innerScopeOf(node);
@@ -1942,6 +2003,8 @@ export class TypeChecker {
          );
       } else if (node instanceof Assignment && node.value) {
          this.typeCheck(node.value, scope);
+      } else if (node instanceof Change) {
+         this.typeCheckChange(node as Change, scope);
       } else if (node instanceof RoundApply) {
          this.typeCheckApply(node, scope);
       } else if (node instanceof RoundValueToValueLambda) {
@@ -2229,10 +2292,12 @@ export class TypeChecker {
                trueScope
             );
             if (leftType instanceof OptionalType) {
-               trueScope.declare(
+               const symbol = new Symbol(
                   node.condition.left.value,
-                  new Symbol(node.condition.left.value, leftType.type)
+                  leftType.type
                );
+               symbol.shadowing = innerScope.lookup(node.condition.left.value);
+               trueScope.declare(node.condition.left.value, symbol);
             }
          }
          if (
@@ -2361,7 +2426,9 @@ export class TypeChecker {
          return;
       }
       if (!(lhs instanceof Identifier)) {
-         throw new Error("LHS was not Identifier");
+         throw new Error(
+            "Could not declare new variable, maybe you tried to set a field without 'set'"
+         );
       }
       let symbol = new Symbol(lhs.value, rhsType, node);
 

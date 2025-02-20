@@ -40,3 +40,114 @@ statements:
         line: 5
         column: 1
         absolute: 34
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: NonZero
+    value:
+      tag: TypeDef
+      fieldDefs:
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 5
+        column: 1
+        absolute: 41
+      end:
+        line: 7
+        column: 1
+        absolute: 51
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: checkNonZero
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: n
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 9
+              column: 17
+              absolute: 70
+            end:
+              line: 9
+              column: 27
+              absolute: 79
+      block:
+        tag: Block
+        statements:
+          - tag: IfStatement
+            condition:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: n
+              operator: ==
+              right:
+                tag: Literal
+                type: Number
+                value: 0
+            trueBranch:
+              tag: Block
+              statements:
+                - tag: Identifier
+                  value: nothing
+                  position:
+                    start:
+                      line: 13
+                      column: 3
+                      absolute: 106
+                    end:
+                      line: 13
+                      column: 10
+                      absolute: 106
+            falseBranch:
+              tag: Block
+              statements:
+                - tag: Cast
+                  expression:
+                    tag: Identifier
+                    value: n
+                  type:
+                    tag: BinaryExpression
+                    left:
+                      tag: Identifier
+                      value: Number
+                    operator: &
+                    right:
+                      tag: Identifier
+                      value: NonZero
+                  position:
+                    start:
+                      line: 17
+                      column: 3
+                      absolute: 118
+                    end:
+                      line: 19
+                      column: 1
+                      absolute: 138
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 9
+        column: 1
+        absolute: 65
+      end: undefined

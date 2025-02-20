@@ -6,8 +6,19 @@ import { translateFile } from "./translator.js";
 import { TypeChecker } from "./TypeChecker";
 import { exec } from "node:child_process";
 import files from "node:fs/promises";
+import path from "node:path";
 
 Error.stackTraceLimit = 30;
+const SRC_PATH = path.resolve(process.cwd(), "src");
+const OUT_PATH = path.resolve(process.cwd(), "tin-out");
+
+function fromSrcToOut(pathStr: string) {
+   if (pathStr.startsWith(SRC_PATH)) {
+      pathStr = pathStr.substring(SRC_PATH.length + 1);
+      return path.resolve(OUT_PATH, pathStr);
+   }
+   throw new Error("Src Path wasn't in /src");
+}
 
 function tokenTablePrint(tokens: Token[]) {
    let str = "";
@@ -132,13 +143,8 @@ function objectToYAML(obj: object, omitFields: string[] = [], indentLevel = 0) {
    return yaml.join("\n");
 }
 
-const outFolder = "tin-out/";
-if (!fs.existsSync(outFolder)) {
-   files.mkdir(outFolder);
-}
-
-function fullPath(path: string) {
-   return process.cwd() + "./" + path + ".tin";
+function fullPath(pathStr: string) {
+   return path.resolve(process.cwd(), "src", pathStr);
 }
 
 async function getImports(
@@ -150,14 +156,11 @@ async function getImports(
       const statement = ast.statements[i];
       if (statement instanceof Import) {
          const path = fullPath(statement.path);
+         statement.path = path;
          if (!imports.has(path)) {
             imports.set(
                path,
-               await compile(
-                  "./" + statement.path + ".tin",
-                  false,
-                  importsCache
-               )
+               await compile(statement.path + ".tin", false, importsCache)
             );
          }
       } else {
@@ -165,6 +168,11 @@ async function getImports(
       }
    }
    return imports;
+}
+
+function ensureParentDirs(filePath: string) {
+   const dir = path.dirname(filePath);
+   fs.mkdirSync(dir, { recursive: true });
 }
 
 type CompileResult = {
@@ -181,22 +189,19 @@ async function compile(
    importsCache: Map<String, CompileResult>
 ): Promise<CompileResult> {
    // READ
-   const inputContents: string = await files.readFile(
-      "./src/" + inputFile,
-      "utf-8"
-   );
-
+   const inputContents: string = await files.readFile(inputFile, "utf-8");
+   ensureParentDirs(inputFile);
    // LEXER
    const tokens = lexerPhase(inputContents);
    await files.writeFile(
-      outFolder + inputFile + ".tok.txt",
+      fromSrcToOut(inputFile + ".tok.txt"),
       tokenTablePrint(tokens)
    );
 
    // PARSER
    let ast = parserPhase(tokens);
    await files.writeFile(
-      outFolder + inputFile + ".ast.yaml",
+      fromSrcToOut(inputFile + ".ast.yaml"),
       objectToYAML(ast, ["position", "fromTo", "isTypeLevel", "position"])
    );
    // IMPORTS
@@ -213,14 +218,14 @@ async function compile(
 
    // TRANSLATION
    const translatedString = translateFile(ast, typeChecker.fileScope);
-   await files.writeFile(outFolder + inputFile + ".out.js", translatedString);
+   await files.writeFile(fromSrcToOut(inputFile + ".out.js"), translatedString);
 
    console.log("Compiled " + inputFile);
    // RUNNING
    if (run) {
       console.log("==================== Compiled! ====================");
       exec(
-         'cd "' + outFolder + '"' + " && node " + inputFile + ".out.js",
+         'cd "tin-out"' + " && node " + fromSrcToOut(inputFile + ".out.js"),
          (_, out, err) => {
             console.log(out);
             console.log(err);
@@ -237,4 +242,5 @@ async function compile(
    };
 }
 
-void compile(inputFile, true, new Map());
+const allPath = path.resolve(process.cwd(), "src", inputFile);
+void compile(allPath, true, new Map());

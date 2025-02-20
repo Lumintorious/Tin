@@ -1,0 +1,35 @@
+import collections/Iterable
+
+ListHead = [T] => type:
+	value: T
+	rest: ListHead[T]?
+
+List = [T] => (ListHead[T] & Iterable[T])?
+
+listIterator = [T] -> (list: ListHead[T]?) ->
+	mutable currentList: ListHead[T]? = list
+	nextF = () ->
+		if currentList != nothing,
+			result = currentList.value
+			set currentList = currentList.rest
+			result
+		else
+			nothing
+	Iterator[T](nextF)
+
+listOf = [T] -> (arr: Array[T]) ->
+	i = arr.length()
+	list: ListHead[T]? = nothing
+	while i > 0 do
+		set i = i - 1
+		list = ListHead[T](arr.at(i), list)
+	list & makeIterable[T](() -> listIterator[T](list))
+
+listFromIterator = [T] -> (getIterator: () =>Iterator[T]) ->
+	list: ListHead[T]? = nothing
+	iterator = getIterator()
+	current = iterator.next()
+	while current != nothing do
+		set list = ListHead[T](current, list)
+		set current = current.next()
+	list & makeIterable[T](getIterator)

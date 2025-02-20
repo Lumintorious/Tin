@@ -19,7 +19,6 @@ import {
    SquareApply,
    SquareTypeToTypeLambda,
 } from "./Parser";
-import { Scope } from "TypeChecker";
 import {
    WhileLoop,
    SquareTypeToValueLambda,
@@ -27,7 +26,7 @@ import {
    DataDef,
    Optional,
 } from "./Parser";
-import { getConstructorName } from "./TypeChecker";
+import { getConstructorName, Scope } from "./TypeChecker";
 import { Make, Identifier, TypeCheck, Import } from "./Parser";
 
 export function translateFile(fileStatementsBlock: Block, scope: Scope) {
@@ -326,9 +325,12 @@ function translate(
       )}) `;
       // Undefined
    } else if (term instanceof Import) {
-      return `import * as module${moduleNumber} from "./${
-         term.path
-      }.tin.out.js";Object.entries(module${moduleNumber++}).forEach(([key, value]) => {
+      return `import * as module${moduleNumber} from "file://${term.path
+         .replaceAll("\\", "\\\\")
+         .replaceAll(
+            "\\src\\",
+            "\\tin-out\\"
+         )}.tin.out.js";Object.entries(module${moduleNumber++}).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });`;
       // Undefined

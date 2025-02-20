@@ -1,12 +1,19 @@
-import "imports"
-#import "collections"
-#import "refinements"
-
-import "liarsDice"
+import collections/List
+import refinements
 
 myList = listOf[Number](1, 2, 3, 4)
+print(myList.mkString(",", "[", "]"))
 
-iter = makeIterable[Number](() -> listIterator[Number](myList))
+Cat = type:
+	name: String
+	age: Number
 
-iter.forEach((t: Number) -> print(t))
+cat: Cat? = Cat("C", 1)
+age = cat?.age
+print(cat)
+
+num = checkNonZero(3)
+divide = (numerator: Number, denominator: Number & NonZero) -> numerator / denominator
+if num != nothing,
+	divide(6, num)
 
