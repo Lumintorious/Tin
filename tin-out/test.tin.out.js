@@ -116,7 +116,7 @@ import * as module2 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\ref
 	  });;
 export var myList/* ListHead[Number]? & Iterable[Number]*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3, 4]));
 print(myList.mkString(",", "[", "]"));
-export var Cat = TIN_TYPE("87c5cdf8-4e5f-44db-8f65-c716fb7456b5", (_p0,_p1) => ({name: _p0,age: _p1}), {});
+export var Cat = TIN_TYPE("aea70306-c2ba-4cbe-a60f-a3e4eba06338", (_p0,_p1) => ({name: _p0,age: _p1}), {});
 export var cat/* Cat?*/ = Cat("C", 1);
 export var age/* Number?*/ = cat?.age;
 print(cat);

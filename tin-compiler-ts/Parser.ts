@@ -1,5 +1,5 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
-import { Symbol } from "./TypeChecker";
+import { Symbol } from "./Scope";
 const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
 export class AstNode {
    readonly tag: string;

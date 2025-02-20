@@ -108,9 +108,9 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Positive = TIN_TYPE("b58b1da3-35fd-4fad-8316-eaf692bfc773", () => undefined, {});
-export var Negative = TIN_TYPE("5e2ccb28-9500-4a4e-ac7a-9534020bbf01", () => undefined, {});
-export var NonZero = TIN_TYPE("38d01550-c3ba-4775-bcd6-209a7792b877", () => undefined, {});
+export var Positive = TIN_TYPE("bdce5fc4-cac9-409f-b1fd-21a1b5dd56fa", () => undefined, {});
+export var Negative = TIN_TYPE("d6549ec7-bffd-4a40-922c-7d434ea71f5a", () => undefined, {});
+export var NonZero = TIN_TYPE("28809750-8928-4975-9784-a57bd203f7f2", () => undefined, {});
 export var checkNonZero/* (Number) => Number & NonZero?*/ = function(n) {
 return ((n == 0) ? (nothing) : ((n) /* as _TIN_INTERSECT_OBJECTS(Number, NonZero) */)) 
 }

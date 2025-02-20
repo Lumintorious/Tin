@@ -7,6 +7,7 @@ import { TypeChecker } from "./TypeChecker";
 import { exec } from "node:child_process";
 import files from "node:fs/promises";
 import path from "node:path";
+import { TypePhaseContext } from "./Scope";
 
 Error.stackTraceLimit = 30;
 const SRC_PATH = path.resolve(process.cwd(), "src");
@@ -179,7 +180,7 @@ type CompileResult = {
    inputText: string;
    tokens: Token[];
    ast: Block;
-   typeChecker: TypeChecker;
+   typePhaseContext: TypePhaseContext;
    outputText: string;
 };
 
@@ -210,14 +211,14 @@ async function compile(
    // TYPE CHECKING
    const scopes = [] as any;
    const importedScopes = imports.forEach((i, k) =>
-      scopes.push(i.typeChecker.fileScope.innerScopeOf(i.ast))
+      scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
    );
-   const typeChecker = TypeChecker.fromAST(ast, scopes);
-   typeChecker.typeCheck(ast, typeChecker.fileScope);
-   typeChecker.errors.throwAll();
+   const context = new TypePhaseContext(ast, scopes);
+   context.checker.typeCheck(ast, context.fileScope);
+   context.errors.throwAll();
 
    // TRANSLATION
-   const translatedString = translateFile(ast, typeChecker.fileScope);
+   const translatedString = translateFile(ast, context.fileScope);
    await files.writeFile(fromSrcToOut(inputFile + ".out.js"), translatedString);
 
    console.log("Compiled " + inputFile);
@@ -237,7 +238,7 @@ async function compile(
       inputText: inputContents,
       tokens,
       ast,
-      typeChecker,
+      typePhaseContext: context,
       outputText: translatedString,
    };
 }

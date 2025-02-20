@@ -26,8 +26,9 @@ import {
    DataDef,
    Optional,
 } from "./Parser";
-import { getConstructorName, Scope } from "./TypeChecker";
+import { getConstructorName } from "./TypeChecker";
 import { Make, Identifier, TypeCheck, Import } from "./Parser";
+import { Scope } from "./Scope";
 
 export function translateFile(fileStatementsBlock: Block, scope: Scope) {
    const requisites = fs.readFileSync("./tin-compiler-ts/tin.stdlib.js");
