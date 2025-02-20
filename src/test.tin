@@ -1,0 +1,12 @@
+import "imports"
+#import "collections"
+#import "refinements"
+
+import "liarsDice"
+
+myList = listOf[Number](1, 2, 3, 4)
+
+iter = makeIterable[Number](() -> listIterator[Number](myList))
+
+iter.forEach((t: Number) -> print(t))
+

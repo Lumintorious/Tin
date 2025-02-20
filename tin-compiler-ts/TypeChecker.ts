@@ -6,7 +6,7 @@ import {
    Make,
    TypeCheck,
 } from "./Parser";
-import { SquareTypeToTypeLambda, Cast } from "./Parser";
+import { SquareTypeToTypeLambda, Cast, Group } from "./Parser";
 import {
    Block,
    Assignment,
@@ -148,6 +148,13 @@ export class NamedType extends Type {
          return true;
       }
       const realType = scope.lookupType(this.name);
+      if (
+         (other instanceof NamedType || other instanceof GenericNamedType) &&
+         this.name === other.name &&
+         realType !== undefined
+      ) {
+         return true;
+      }
       if (realType instanceof NamedType) {
          if (super.isAssignableTo(other, scope)) {
             return true;
@@ -158,12 +165,6 @@ export class NamedType extends Type {
          ) {
             return true;
          }
-         console.error(
-            "Attempted to check NamedType backed by a Named Type (recursion) " +
-               this.toString() +
-               " vs. " +
-               other.toString()
-         );
          return false;
       }
       realType.name = this.name;
@@ -187,6 +188,22 @@ export class NamedType extends Type {
    }
 }
 
+export class ModuleType extends Type {
+   scope: Scope;
+   constructor(scope: Scope) {
+      super("ModuleType");
+      this.scope = scope;
+   }
+
+   extends(other: Type, scope: Scope): boolean {
+      return false;
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return false;
+   }
+}
+
 export class LiteralType extends Type {
    value: string;
    type: Type;
@@ -197,6 +214,13 @@ export class LiteralType extends Type {
    }
 
    extends(other: Type, scope: Scope) {
+      if (
+         other instanceof LiteralType &&
+         this.type.extends(other.type, scope) &&
+         this.value === other.value
+      ) {
+         return true;
+      }
       return this.type.extends(other, scope);
    }
 
@@ -236,13 +260,19 @@ export class GenericNamedType extends Type {
       this.superType = superType;
    }
 
-   extends(other: Type, scope: Scope) {
+   extends(other: Type, scope: Scope): boolean {
       // Named types are assignable if they are equal (same name)
-      return other instanceof NamedType && this.name === other.name;
+      return (
+         (other instanceof NamedType || other instanceof GenericNamedType) &&
+         this.name === other.name
+      );
    }
 
-   isExtendedBy(other: Type, scope: Scope) {
-      return other instanceof NamedType && this.name === other.name;
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return (
+         (other instanceof NamedType || other instanceof GenericNamedType) &&
+         this.name === other.name
+      );
    }
 
    toString() {
@@ -258,15 +288,22 @@ export class OptionalType extends Type {
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
+      console.log("Checking " + this.toString() + " vs. " + other.toString());
       return (
-         this.type.isAssignableTo(other, scope) ||
-         this.extends(other, scope) ||
-         other.isExtendedBy(this, scope)
+         // this.type.isAssignableTo(other, scope) ||
+         this.extends(other, scope) || other.isExtendedBy(this, scope)
       );
+   }
+
+   isSame(other: OptionalType, scope: Scope): boolean {
+      return this.type.isAssignableTo(other.type, scope);
    }
 
    extends(other: Type, scope: Scope) {
       // Named types are assignable if they are equal (same name)
+      if (other instanceof OptionalType && this.isSame(other, scope)) {
+         return true;
+      }
       return (
          this.type.extends(other, scope) ||
          other === NamedType.PRIMITIVE_TYPES.Nothing
@@ -274,6 +311,9 @@ export class OptionalType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope) {
+      if (other instanceof OptionalType && this.isSame(other, scope)) {
+         return true;
+      }
       return (
          this.type.isExtendedBy(other, scope) ||
          other === NamedType.PRIMITIVE_TYPES.Nothing
@@ -289,6 +329,7 @@ export class OptionalType extends Type {
 export class RoundValueToValueLambdaType extends Type {
    paramTypes: Type[];
    returnType: Type;
+   isFirstParamThis: boolean = false;
    isGeneric?: boolean;
    constructor(paramTypes: Type[], returnType: Type, isGeneric?: boolean) {
       super("RoundValueToValueLambdaType");
@@ -308,9 +349,9 @@ export class RoundValueToValueLambdaType extends Type {
       // Check if parameter types are contravariant
       const paramCheck =
          this.paramTypes.length === other.paramTypes.length &&
-         this.paramTypes.every((paramType, index) =>
-            other.paramTypes[index].isAssignableTo(paramType, scope)
-         );
+         this.paramTypes.every((paramType, index) => {
+            return other.paramTypes[index].isAssignableTo(paramType, scope);
+         });
 
       // Return type must be covariant
       const returnCheck = this.returnType.isAssignableTo(
@@ -322,7 +363,10 @@ export class RoundValueToValueLambdaType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
-      return false;
+      return (
+         other instanceof RoundValueToValueLambdaType &&
+         other.extends(this, scope)
+      );
    }
 
    toString() {
@@ -404,6 +448,9 @@ export class AppliedGenericType extends Type {
       if (this.resolved) {
          return this.resolved.extends(other, scope);
       } else if (other instanceof AppliedGenericType) {
+         console.log(
+            "Checking " + this.toString() + " vs. " + other.toString()
+         );
          if (
             scope
                .resolveAppliedGenericTypes(this)
@@ -441,7 +488,7 @@ export class AppliedGenericType extends Type {
          other instanceof AppliedGenericType &&
          this.callee.name === other.callee?.name &&
          this.callee.name !== undefined &&
-         scope.lookup(this.callee.name) !== undefined
+         scope.lookupType(this.callee.name) !== undefined
       ) {
          return true;
       } else if (this.resolved) {
@@ -493,14 +540,14 @@ export class BinaryOpType extends Type {
          other.operator === "|"
       ) {
          return (
-            this.left.extends(other.left, scope) ||
-            this.right.extends(other.right, scope) ||
-            this.right.extends(other.left, scope) ||
-            this.left.extends(other.right, scope)
+            (this.left.extends(other.left, scope) &&
+               this.right.extends(other.right, scope)) ||
+            (this.right.extends(other.left, scope) &&
+               this.left.extends(other.right, scope))
          );
       } else if (this.operator === "|") {
          return (
-            this.left.isAssignableTo(other, scope) ||
+            this.left.isAssignableTo(other, scope) &&
             this.right.isAssignableTo(other, scope)
          );
       } else {
@@ -521,14 +568,14 @@ export class BinaryOpType extends Type {
          other.operator === "|"
       ) {
          return (
-            this.left.isExtendedBy(other.left, scope) ||
-            this.right.isExtendedBy(other.right, scope) ||
-            this.right.isExtendedBy(other.left, scope) ||
-            this.left.isExtendedBy(other.right, scope)
+            (this.left.extends(other.left, scope) &&
+               this.right.extends(other.right, scope)) ||
+            (this.right.extends(other.left, scope) &&
+               this.left.extends(other.right, scope))
          );
       } else if (this.operator === "|") {
          return (
-            other.extends(this.left, scope) || other.extends(this.right, scope)
+            this.left.extends(other, scope) || this.right.extends(other, scope)
          );
       }
       return false;
@@ -559,6 +606,24 @@ export class BinaryOpType extends Type {
       return `${this.left.toString()} ${
          this.operator
       } ${this.right.toString()}`;
+   }
+}
+
+export class MarkerType extends Type {
+   constructor() {
+      super("MarkerType");
+   }
+
+   extends(other: Type, scope: Scope): boolean {
+      return other instanceof MarkerType && other.name === this.name;
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return other instanceof AnyTypeClass;
+   }
+
+   toString(): string {
+      return `Marker { ${this.name || "Unknown"} }`;
    }
 }
 
@@ -650,15 +715,25 @@ export class Scope {
    typeSymbols: Map<string, Type> = new Map();
    symbolsByAst: Map<AstNode, Symbol> = new Map();
    typeSymbolsByAst: Map<AstNode, Type> = new Map();
-   childrenByAst: Map<AstNode, Scope> = new Map();
+   childrenByAst: Map<Number, Scope> = new Map();
    currentIndex: number = 0;
    run: number = 0;
+   static currentKey = 0;
    constructor(name: string, parent?: Scope) {
       this.name = name;
       this.parent = parent;
       if (parent) {
          this.run = parent.run;
       }
+   }
+
+   absorbAllFrom(scope: Scope) {
+      scope.symbols.forEach((v, k) => this.symbols.set(k, v));
+      scope.typeSymbols.forEach((v, k) => this.typeSymbols.set(k, v));
+      scope.symbolsByAst.forEach((v, k) => this.symbolsByAst.set(k, v));
+      scope.typeSymbolsByAst.forEach((v, k) => this.typeSymbolsByAst.set(k, v));
+      scope.childrenByAst.forEach((v, k) => this.childrenByAst.set(k, v));
+      this.currentIndex = this.currentIndex + scope.currentIndex;
    }
 
    setRun(runNumber: number) {
@@ -668,14 +743,21 @@ export class Scope {
       });
    }
 
-   innerScopeOf(astNode: AstNode) {
-      const child = this.childrenByAst.get(astNode);
+   innerScopeOf(astNode: AstNode, canCreate: boolean = false) {
+      const ast = astNode as any;
+      if (!ast.key) {
+         ast.key = Scope.currentKey++;
+      }
+      const child = this.childrenByAst.get(ast.key);
+      if (!child && !canCreate) {
+         throw new Error("Could not find child scope " + this.toPath());
+      }
       if (child) {
          return child;
       } else {
          const child = new Scope(astNode.tag, this);
          child.run = this.run;
-         this.childrenByAst.set(astNode, child);
+         this.childrenByAst.set(ast.key, child);
          return child;
       }
    }
@@ -717,11 +799,13 @@ export class Scope {
             symbol.run = this.run;
          }
       }
+      console.log(
+         `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
+      );
       symbol.run = this.run;
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
       }
-      console.log("" + name + " :: " + symbol.typeSymbol.toString());
       this.symbols.set(name, symbol);
       if (symbol.ast) {
          this.symbolsByAst.set(symbol.ast, symbol);
@@ -740,6 +824,7 @@ export class Scope {
             typeSymbol.run = this.run;
          }
       }
+      console.log(name + ": " + typeSymbol);
       typeSymbol.run = this.run;
       // [T] => type:
       //   value: T
@@ -761,6 +846,23 @@ export class Scope {
                   )
                )
             )
+         );
+         this.declare(constructorName, constructorSymbol);
+      } else if (typeSymbol instanceof StructType) {
+         const constructorName = getConstructorName(name);
+         const constructorSymbol = new Symbol(
+            constructorName,
+            new RoundValueToValueLambdaType(
+               typeSymbol.fields.map((f) => f.typeSymbol),
+               new NamedType(name)
+            )
+         );
+         this.declare(constructorName, constructorSymbol);
+      } else if (typeSymbol instanceof MarkerType) {
+         const constructorName = getConstructorName(name);
+         const constructorSymbol = new Symbol(
+            constructorName,
+            new RoundValueToValueLambdaType([], new NamedType(name))
          );
          this.declare(constructorName, constructorSymbol);
       } else if (
@@ -827,14 +929,14 @@ export class Scope {
       );
    }
 
-   lookupType(name: string): Type {
+   lookupType(name: string, scopeName: string = ""): Type {
       if (this.typeSymbols.has(name)) {
          return this.typeSymbols.get(name) as any;
       } else if (this.parent) {
-         return this.parent.lookupType(name);
+         return this.parent.lookupType(name, this.name + "." + scopeName);
       }
       throw new Error(
-         `Type Symbol ${name} not found. Scope = ` + this.toPath()
+         `Type Symbol ${name} not found. Scope = ` + this.name + "." + scopeName
       );
    }
 
@@ -1069,9 +1171,13 @@ export class TypeChecker {
                (node as Cast).type,
                scope
             );
+            scope.resolveNamedType(inferredType);
             break;
          case "WhileLoop":
             inferredType = NamedType.PRIMITIVE_TYPES.Nothing;
+            break;
+         case "Group":
+            inferredType = this.infer((node as Group).value, scope);
             break;
          default:
             throw new Error(
@@ -1088,7 +1194,10 @@ export class TypeChecker {
 
    inferIfStatemnet(node: IfStatement, scope: Scope): Type {
       const innerScope = scope.innerScopeOf(node);
-      const trueBranchType = this.infer(node.trueBranch, innerScope);
+      const trueBranchType = this.infer(
+         node.trueBranch,
+         innerScope.innerScopeOf(node.trueBranch)
+      );
       let falseBranchType = NamedType.PRIMITIVE_TYPES.Nothing;
       if (node.falseBranch !== undefined) {
          falseBranchType = this.infer(node.falseBranch, innerScope);
@@ -1151,7 +1260,7 @@ export class TypeChecker {
    }
 
    buildWhileLoop(node: WhileLoop, scope: Scope) {
-      const innerScope = scope.innerScopeOf(node);
+      const innerScope = scope.innerScopeOf(node, true);
       this.build(node.condition, innerScope);
       if (
          node.condition instanceof BinaryExpression &&
@@ -1242,6 +1351,8 @@ export class TypeChecker {
             this.translateTypeNodeToType(node.callee, scope)
          );
          if (type instanceof StructType) {
+            return type;
+         } else if (type instanceof MarkerType) {
             return type;
          } else {
             throw new Error(
@@ -1346,7 +1457,7 @@ export class TypeChecker {
 
    inferBlock(node: Block, scope: Scope) {
       // TO DO: change to find returns recursively
-      const innerScope = scope.innerScopeOf(node);
+      let innerScope = scope.innerScopeOf(node);
       if (node.statements.length === 0) {
          return new Type();
       }
@@ -1377,7 +1488,7 @@ export class TypeChecker {
    }
 
    DEFINED_OPERATIONS = {
-      NumberNumberNumber: ["+", "-", "*", "/"],
+      NumberNumberNumber: ["+", "-", "*", "/", "**"],
       NumberNumberBoolean: [">", "<", "<=", ">=", "=="],
       StringAnyString: ["+"],
    };
@@ -1549,7 +1660,8 @@ export class TypeChecker {
             }
             if (!type) {
                throw new Error(
-                  "Cannot tell type. Maybe you used : instead of ::"
+                  "Cannot tell type. Maybe you used : instead of :: " +
+                     param.tag
                );
                type = new Type();
             }
@@ -1682,6 +1794,7 @@ export class TypeChecker {
                   : undefined;
                return new GenericNamedType(name, extendedType);
             }
+            console.log(node);
             return new Type();
          case "UnaryOperator":
             if (!(node instanceof UnaryOperator)) {
@@ -1718,10 +1831,10 @@ export class TypeChecker {
             if (!(node instanceof RoundValueToValueLambda)) {
                throw new Error("Weird type");
             }
-            const innerScope = scope.innerScopeOf(node);
+            const innerScope = scope.innerScopeOf(node, true);
             innerScope.run = this.run;
             // innerScope.declareType("T", new NamedType("T"));
-            return new RoundValueToValueLambdaType(
+            const type = new RoundValueToValueLambdaType(
                node.params.map((p) =>
                   this.translateTypeNodeToType(p, innerScope)
                ),
@@ -1731,12 +1844,21 @@ export class TypeChecker {
                ),
                node.isTypeLambda
             );
+            if (
+               node.params.length > 0 &&
+               node.params[0] instanceof Assignment &&
+               node.params[0].lhs instanceof Identifier &&
+               node.params[0].lhs.value === "this"
+            ) {
+               type.isFirstParamThis = true;
+            }
+            return type;
          case "SquareTypeToTypeLambda":
             // return new RoundValueToValueLambdaType(node.params.map(p => this.translateTypeNodeToType(p, scope/)))
             if (!(node instanceof SquareTypeToTypeLambda)) {
                throw new Error("Weird type");
             }
-            const innerScope2 = scope.innerScopeOf(node);
+            const innerScope2 = scope.innerScopeOf(node, true);
             innerScope2.run = this.run;
             innerScope2.declareType("T", new NamedType("T"));
             const genericParameters = node.parameterTypes.map((p) => {
@@ -1764,6 +1886,9 @@ export class TypeChecker {
          case "TypeDef":
             if (!(node instanceof TypeDef)) {
                return new Type();
+            }
+            if (node.fieldDefs.length === 0) {
+               return new MarkerType();
             }
             const fieldTypes = node.fieldDefs.map((f) => {
                let fieldType: Type;
@@ -1800,6 +1925,10 @@ export class TypeChecker {
             return new OptionalType(
                this.translateTypeNodeToType(node.expression, scope)
             );
+         case "Group":
+            if (node instanceof Group) {
+               return this.translateTypeNodeToType(node.value, scope);
+            }
          default:
             throw new Error("Could not translate " + node.tag);
       }
@@ -1821,8 +1950,9 @@ export class TypeChecker {
          this.typeCheckSquareTypeToValueLambda(node, scope);
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node);
+         const trueScope = innerScope.innerScopeOf(node.trueBranch);
          this.typeCheck(node.condition, innerScope);
-         this.typeCheck(node.trueBranch, innerScope);
+         this.typeCheck(node.trueBranch, trueScope);
          if (node.falseBranch) {
             this.typeCheck(node.falseBranch, innerScope);
          }
@@ -1852,11 +1982,7 @@ export class TypeChecker {
    // }
 
    typeCheckApply(apply: RoundApply, scope: Scope) {
-      // let symbol =
-      //    apply.callee instanceof Identifier
-      //       ? scope.lookup(apply.callee.value)
-      //       : this.infer(apply.callee, scope);
-
+      scope = scope.innerScopeOf(apply);
       let typeSymbol = this.infer(apply.callee, scope);
       if (
          apply.callee instanceof Identifier &&
@@ -1870,6 +1996,8 @@ export class TypeChecker {
                type.fields.map((f) => f.typeSymbol),
                type
             );
+         } else if (type instanceof MarkerType) {
+            typeSymbol = new RoundValueToValueLambdaType([], type);
          } else {
             throw new Error(
                "Cannot call constructor function for non struct-type"
@@ -1880,17 +2008,16 @@ export class TypeChecker {
          this.typeCheck(p, scope);
       });
 
-      if (
-         // symbol instanceof Symbol &&
-         typeSymbol instanceof RoundValueToValueLambdaType
-      ) {
+      if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.paramTypes;
          if (
             params[0] &&
             params[0] instanceof AppliedGenericType &&
             params[0].callee.name === "Array"
          ) {
-            const expectedType = params[0].parameterTypes[0];
+            const expectedType = scope.resolveNamedType(
+               params[0].parameterTypes[0]
+            );
             const firstArgType = () =>
                scope.resolveAppliedGenericTypes(
                   this.infer(apply.args[0], scope)
@@ -1923,13 +2050,14 @@ export class TypeChecker {
                apply.takesVarargs = true;
             }
          } else {
+            let hasThisParamIncrement = typeSymbol.isFirstParamThis ? 1 : 0;
             apply.args.forEach((p, i) => {
                if (!(typeSymbol instanceof RoundValueToValueLambdaType)) {
                   return;
                }
                const type = scope.resolveNamedType(this.infer(p, scope));
                const expectedType = scope.resolveNamedType(
-                  typeSymbol.paramTypes[i]
+                  typeSymbol.paramTypes[i + hasThisParamIncrement]
                );
                if (!type.isAssignableTo(expectedType, scope)) {
                   this.errors.add(
@@ -1952,8 +2080,11 @@ export class TypeChecker {
    }
 
    // Build symbol table from AST
-   static fromAST(ast: AstNode) {
+   static fromAST(ast: AstNode, existingFileScopes: Scope[] = []) {
       const typeChecker = new TypeChecker();
+      existingFileScopes.forEach((s) => {
+         typeChecker.fileScope.absorbAllFrom(s);
+      });
       const languageScope = typeChecker.outerScope;
       for (const t in NamedType.PRIMITIVE_TYPES) {
          languageScope.typeSymbols.set(t, NamedType.PRIMITIVE_TYPES[t]);
@@ -2067,10 +2198,16 @@ export class TypeChecker {
       if (node instanceof Assignment) {
          this.buildSymbolForAssignment(node, scope);
       } else if (node instanceof Block) {
-         const innerBlockScope = scope.innerScopeOf(node);
+         const innerBlockScope = scope.innerScopeOf(node, true);
          node.statements.forEach((statement) =>
             this.build(statement, innerBlockScope)
          );
+      } else if (node instanceof RoundApply) {
+         const innerBlockScope = scope.innerScopeOf(node, true);
+         node.args.forEach((statement) =>
+            this.build(statement, innerBlockScope)
+         );
+         this.build(node.callee, scope);
       } else if (node instanceof RoundValueToValueLambda) {
          this.buildRoundValueToValueLambda(node, scope);
       } else if (node instanceof SquareTypeToValueLambda) {
@@ -2078,8 +2215,8 @@ export class TypeChecker {
       } else if (node instanceof WhileLoop) {
          this.buildWhileLoop(node, scope);
       } else if (node instanceof IfStatement) {
-         const innerScope = scope.innerScopeOf(node);
-         const trueScope = innerScope.innerScopeOf(node.trueBranch);
+         const innerScope = scope.innerScopeOf(node, true);
+         const trueScope = innerScope.innerScopeOf(node.trueBranch, true);
          if (
             node.condition instanceof BinaryExpression &&
             node.condition.operator === "!=" &&
@@ -2088,8 +2225,8 @@ export class TypeChecker {
             node.condition.right.value === "nothing"
          ) {
             const leftType = this.resolveFully(
-               this.infer(node.condition.left, scope),
-               scope
+               this.infer(node.condition.left, trueScope),
+               trueScope
             );
             if (leftType instanceof OptionalType) {
                trueScope.declare(
@@ -2104,7 +2241,7 @@ export class TypeChecker {
          ) {
             const presumedType = this.translateTypeNodeToType(
                node.condition.type,
-               innerScope
+               trueScope
             );
             trueScope.declare(
                node.condition.term.value,
@@ -2112,8 +2249,7 @@ export class TypeChecker {
                   node.condition.term.value,
                   presumedType,
                   node.condition.term
-               ),
-               true
+               )
             );
          }
          this.build(node.condition, innerScope);
@@ -2125,7 +2261,7 @@ export class TypeChecker {
    }
 
    buildRoundValueToValueLambda(node: RoundValueToValueLambda, scope: Scope) {
-      const innerScope = scope.innerScopeOf(node);
+      const innerScope = scope.innerScopeOf(node, true);
       node.params.forEach((p) => {
          if (p instanceof Assignment && p.lhs instanceof Identifier) {
             const hasSymbol = innerScope.hasSymbol(p.lhs.value);
@@ -2139,7 +2275,7 @@ export class TypeChecker {
    }
 
    buildSquareTypeToValueLambda(node: SquareTypeToValueLambda, scope: Scope) {
-      const innerScope = scope.innerScopeOf(node);
+      const innerScope = scope.innerScopeOf(node, true);
       node.parameterTypes.forEach((p) => {
          const type = this.translateTypeNodeToType(p, innerScope);
          if (type instanceof GenericNamedType) {
@@ -2229,7 +2365,7 @@ export class TypeChecker {
       }
       let symbol = new Symbol(lhs.value, rhsType, node);
 
-      if (node.isDeclaration) {
+      if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
          if (!scope.hasSymbol(lhs.value)) {
             scope.declare(lhs.value, symbol);

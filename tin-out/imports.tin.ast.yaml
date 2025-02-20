@@ -1,0 +1,42 @@
+tag: Block
+statements:
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: pi
+    value:
+      tag: Literal
+      type: Number
+      value: 3.14159
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 1
+        column: 1
+        absolute: 2
+      end:
+        line: 3
+        column: 1
+        absolute: 14
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: Literal
+        type: String
+        value: Loaded!
+    position:
+      start:
+        line: 3
+        column: 6
+        absolute: 20
+      end:
+        line: 3
+        column: 17
+        absolute: 30

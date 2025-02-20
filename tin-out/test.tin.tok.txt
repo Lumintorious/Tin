@@ -1,0 +1,65 @@
+KEYWORD      | import       |   1, 1    
+STRING       | imports      |   1, 8    
+NEWLINE      |              |   3, 1    
+NEWLINE      |              |   4, 1    
+NEWLINE      |              |   5, 1    
+NEWLINE      |              |   7, 1    
+KEYWORD      | import       |   7, 1    
+STRING       | liarsDice    |   7, 8    
+NEWLINE      |              |   9, 1    
+NEWLINE      |              |  11, 1    
+IDENTIFIER   | myList       |  11, 1    
+OPERATOR     | =            |  11, 8    
+IDENTIFIER   | listOf       |  11, 10   
+PARENS       | [            |  11, 16   
+IDENTIFIER   | Number       |  11, 17   
+PARENS       | ]            |  11, 23   
+PARENS       | (            |  11, 24   
+NUMBER       | 1            |  11, 25   
+OPERATOR     | ,            |  11, 26   
+NUMBER       | 2            |  11, 28   
+OPERATOR     | ,            |  11, 29   
+NUMBER       | 3            |  11, 31   
+OPERATOR     | ,            |  11, 32   
+NUMBER       | 4            |  11, 34   
+PARENS       | )            |  11, 35   
+NEWLINE      |              |  13, 1    
+NEWLINE      |              |  15, 1    
+IDENTIFIER   | iter         |  15, 1    
+OPERATOR     | =            |  15, 6    
+IDENTIFIER   | makeIterable |  15, 8    
+PARENS       | [            |  15, 20   
+IDENTIFIER   | Number       |  15, 21   
+PARENS       | ]            |  15, 27   
+PARENS       | (            |  15, 28   
+PARENS       | (            |  15, 29   
+PARENS       | )            |  15, 30   
+OPERATOR     | ->           |  15, 32   
+IDENTIFIER   | listIterator |  15, 35   
+PARENS       | [            |  15, 47   
+IDENTIFIER   | Number       |  15, 48   
+PARENS       | ]            |  15, 54   
+PARENS       | (            |  15, 55   
+IDENTIFIER   | myList       |  15, 56   
+PARENS       | )            |  15, 62   
+PARENS       | )            |  15, 63   
+NEWLINE      |              |  17, 1    
+NEWLINE      |              |  19, 1    
+IDENTIFIER   | iter         |  19, 1    
+OPERATOR     | .            |  19, 5    
+IDENTIFIER   | forEach      |  19, 6    
+PARENS       | (            |  19, 13   
+PARENS       | (            |  19, 14   
+IDENTIFIER   | t            |  19, 15   
+OPERATOR     | :            |  19, 16   
+IDENTIFIER   | Number       |  19, 18   
+PARENS       | )            |  19, 24   
+OPERATOR     | ->           |  19, 26   
+IDENTIFIER   | print        |  19, 29   
+PARENS       | (            |  19, 34   
+IDENTIFIER   | t            |  19, 35   
+PARENS       | )            |  19, 36   
+PARENS       | )            |  19, 37   
+NEWLINE      |              |  21, 1    
+NEWLINE      |              |  23, 1    
+--undefined--

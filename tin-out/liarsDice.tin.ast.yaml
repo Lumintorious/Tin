@@ -1,0 +1,1423 @@
+tag: Block
+statements:
+  - tag: Import
+    path: collections
+  - tag: Import
+    path: refinements
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: getRandomInt
+    value:
+      tag: Literal
+      type: Any
+      value: 
+    type:
+      tag: RoundTypeToTypeLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 7
+              column: 16
+              absolute: 67
+            end:
+              line: 7
+              column: 23
+              absolute: 68
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 7
+              column: 24
+              absolute: 75
+            end:
+              line: 7
+              column: 31
+              absolute: 76
+      returnType:
+        tag: Identifier
+        value: Number
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 7
+        column: 1
+        absolute: 58
+      end:
+        line: 9
+        column: 1
+        absolute: 99
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Roll
+    value:
+      tag: BinaryExpression
+      left:
+        tag: BinaryExpression
+        left:
+          tag: BinaryExpression
+          left:
+            tag: BinaryExpression
+            left:
+              tag: BinaryExpression
+              left:
+                tag: Literal
+                type: Number
+                value: 1
+              operator: |
+              right:
+                tag: Literal
+                type: Number
+                value: 2
+            operator: |
+            right:
+              tag: Literal
+              type: Number
+              value: 3
+          operator: |
+          right:
+            tag: Literal
+            type: Number
+            value: 4
+        operator: |
+        right:
+          tag: Literal
+          type: Number
+          value: 5
+      operator: |
+      right:
+        tag: Literal
+        type: Number
+        value: 6
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 11
+        column: 1
+        absolute: 105
+      end:
+        line: 13
+        column: 1
+        absolute: 131
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: dicePerPlayer
+    value:
+      tag: Literal
+      type: Number
+      value: 5
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 13
+        column: 1
+        absolute: 144
+      end:
+        line: 15
+        column: 1
+        absolute: 150
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Cup
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: dice
+          type:
+            tag: SquareApply
+            callee:
+              tag: Identifier
+              value: Array
+            typeArgs:
+              - tag: Identifier
+                value: Roll
+                position:
+                  start:
+                    line: 17
+                    column: 14
+                    absolute: 180
+                  end:
+                    line: 17
+                    column: 18
+                    absolute: 180
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 15
+        column: 1
+        absolute: 153
+      end:
+        line: 21
+        column: 1
+        absolute: 185
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: rollDice
+    value:
+      tag: RoundValueToValueLambda
+      params:
+      block:
+        tag: Block
+        statements:
+          - tag: Cast
+            expression:
+              tag: RoundApply
+              calledInsteadOfSquare: false
+              callee:
+                tag: Identifier
+                value: getRandomInt
+              args:
+                - tag: Literal
+                  type: Number
+                  value: 1
+                - tag: Literal
+                  type: Number
+                  value: 7
+            type:
+              tag: Identifier
+              value: Roll
+            position:
+              start:
+                line: 21
+                column: 18
+                absolute: 214
+              end:
+                line: 23
+                column: 1
+                absolute: 228
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 21
+        column: 1
+        absolute: 193
+      end:
+        line: 23
+        column: 1
+        absolute: 228
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: rollCup
+    value:
+      tag: RoundValueToValueLambda
+      params:
+      block:
+        tag: Block
+        statements:
+          - tag: RoundApply
+            calledInsteadOfSquare: false
+            callee:
+              tag: Identifier
+              value: Cup
+            args:
+              0:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Identifier
+                  value: rollDice
+                args:
+              1:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Identifier
+                  value: rollDice
+                args:
+              2:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Identifier
+                  value: rollDice
+                args:
+              3:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Identifier
+                  value: rollDice
+                args:
+              4:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Identifier
+                  value: rollDice
+                args:
+            position:
+              start:
+                line: 23
+                column: 20
+                absolute: 248
+              end:
+                line: 23
+                column: 80
+                absolute: 307
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 23
+        column: 1
+        absolute: 235
+      end:
+        line: 25
+        column: 1
+        absolute: 309
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: binomialCoefficient
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: n
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 27
+              column: 24
+              absolute: 335
+            end:
+              line: 27
+              column: 34
+              absolute: 344
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: k
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 27
+              column: 35
+              absolute: 346
+            end:
+              line: 27
+              column: 45
+              absolute: 355
+      block:
+        tag: Block
+        statements:
+          - tag: IfStatement
+            condition:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: k
+              operator: >
+              right:
+                tag: Identifier
+                value: n
+            trueBranch:
+              tag: Block
+              statements:
+                - tag: Literal
+                  type: Number
+                  value: 0
+            falseBranch:
+              tag: Block
+              statements:
+                - tag: Assignment
+                  isMutable: true
+                  isParameter: false
+                  lhs:
+                    tag: Identifier
+                    value: coefficient
+                  value:
+                    tag: Literal
+                    type: Number
+                    value: 1
+                  isDeclaration: true
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 35
+                      column: 11
+                      absolute: 405
+                    end:
+                      line: 37
+                      column: 1
+                      absolute: 411
+                - tag: Assignment
+                  isMutable: true
+                  isParameter: false
+                  lhs:
+                    tag: Identifier
+                    value: i
+                  value:
+                    tag: Literal
+                    type: Number
+                    value: 0
+                  isDeclaration: true
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 37
+                      column: 11
+                      absolute: 422
+                    end:
+                      line: 39
+                      column: 1
+                      absolute: 428
+                - tag: WhileLoop
+                  condition:
+                    tag: BinaryExpression
+                    left:
+                      tag: Identifier
+                      value: i
+                    operator: <
+                    right:
+                      tag: Identifier
+                      value: k
+                  action:
+                    tag: Block
+                    statements:
+                      - tag: Change
+                        lhs:
+                          tag: Identifier
+                          value: coefficient
+                        value:
+                          tag: BinaryExpression
+                          left:
+                            tag: BinaryExpression
+                            left:
+                              tag: Identifier
+                              value: coefficient
+                            operator: *
+                            right:
+                              tag: Group
+                              value:
+                                tag: BinaryExpression
+                                left:
+                                  tag: Identifier
+                                  value: n
+                                operator: -
+                                right:
+                                  tag: Identifier
+                                  value: i
+                          operator: /
+                          right:
+                            tag: Group
+                            value:
+                              tag: BinaryExpression
+                              left:
+                                tag: Identifier
+                                value: i
+                              operator: +
+                              right:
+                                tag: Literal
+                                type: Number
+                                value: 1
+                      - tag: Change
+                        lhs:
+                          tag: Identifier
+                          value: i
+                        value:
+                          tag: BinaryExpression
+                          left:
+                            tag: Identifier
+                            value: i
+                          operator: +
+                          right:
+                            tag: Literal
+                            type: Number
+                            value: 1
+                - tag: Identifier
+                  value: coefficient
+                  position:
+                    start:
+                      line: 45
+                      column: 3
+                      absolute: 531
+                    end:
+                      line: 45
+                      column: 14
+                      absolute: 531
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 27
+        column: 1
+        absolute: 330
+      end:
+        line: 49
+        column: 1
+        absolute: 535
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: binomialProbability
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: k
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 49
+              column: 24
+              absolute: 559
+            end:
+              line: 49
+              column: 34
+              absolute: 568
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: n
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 49
+              column: 35
+              absolute: 570
+            end:
+              line: 49
+              column: 45
+              absolute: 579
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: p
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 49
+              column: 46
+              absolute: 581
+            end:
+              line: 49
+              column: 56
+              absolute: 590
+      block:
+        tag: Block
+        statements:
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: pComplement
+            value:
+              tag: BinaryExpression
+              left:
+                tag: Literal
+                type: Number
+                value: 1
+              operator: -
+              right:
+                tag: Identifier
+                value: p
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 51
+                column: 2
+                absolute: 607
+              end:
+                line: 53
+                column: 1
+                absolute: 617
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: nMinusK
+            value:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: n
+              operator: -
+              right:
+                tag: Identifier
+                value: k
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 53
+                column: 2
+                absolute: 625
+              end:
+                line: 55
+                column: 1
+                absolute: 635
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: coefficient
+            value:
+              tag: RoundApply
+              calledInsteadOfSquare: false
+              callee:
+                tag: Identifier
+                value: binomialCoefficient
+              args:
+                - tag: Identifier
+                  value: n
+                  position:
+                    start:
+                      line: 55
+                      column: 36
+                      absolute: 671
+                    end:
+                      line: 55
+                      column: 37
+                      absolute: 671
+                - tag: Identifier
+                  value: k
+                  position:
+                    start:
+                      line: 55
+                      column: 39
+                      absolute: 674
+                    end:
+                      line: 55
+                      column: 40
+                      absolute: 674
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 55
+                column: 2
+                absolute: 647
+              end:
+                line: 57
+                column: 1
+                absolute: 677
+          - tag: BinaryExpression
+            left:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: coefficient
+              operator: *
+              right:
+                tag: Group
+                value:
+                  tag: BinaryExpression
+                  left:
+                    tag: Identifier
+                    value: p
+                  operator: **
+                  right:
+                    tag: Identifier
+                    value: k
+            operator: *
+            right:
+              tag: Group
+              value:
+                tag: BinaryExpression
+                left:
+                  tag: Identifier
+                  value: pComplement
+                operator: **
+                right:
+                  tag: Identifier
+                  value: nMinusK
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 49
+        column: 1
+        absolute: 554
+      end:
+        line: 61
+        column: 1
+        absolute: 731
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: getFaceCount
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: bidFace
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 61
+              column: 17
+              absolute: 754
+            end:
+              line: 61
+              column: 33
+              absolute: 763
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: cup
+          type:
+            tag: Identifier
+            value: Cup
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 61
+              column: 34
+              absolute: 767
+            end:
+              line: 61
+              column: 43
+              absolute: 773
+      block:
+        tag: Block
+        statements:
+          - tag: Assignment
+            isMutable: true
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: i
+            value:
+              tag: Literal
+              type: Number
+              value: 0
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 63
+                column: 10
+                absolute: 788
+              end:
+                line: 65
+                column: 1
+                absolute: 794
+          - tag: Assignment
+            isMutable: true
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: count
+            value:
+              tag: Literal
+              type: Number
+              value: 0
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 65
+                column: 10
+                absolute: 808
+              end:
+                line: 67
+                column: 1
+                absolute: 814
+          - tag: WhileLoop
+            condition:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: i
+              operator: <
+              right:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Select
+                  ammortized: false
+                  owner:
+                    tag: Select
+                    ammortized: false
+                    owner:
+                      tag: Identifier
+                      value: cup
+                    field: dice
+                  field: length
+                args:
+            action:
+              tag: Block
+              statements:
+                - tag: IfStatement
+                  condition:
+                    tag: BinaryExpression
+                    left:
+                      tag: RoundApply
+                      calledInsteadOfSquare: false
+                      callee:
+                        tag: Select
+                        ammortized: false
+                        owner:
+                          tag: Select
+                          ammortized: false
+                          owner:
+                            tag: Identifier
+                            value: cup
+                          field: dice
+                        field: at
+                      args:
+                        - tag: Identifier
+                          value: i
+                          position:
+                            start:
+                              line: 69
+                              column: 18
+                              absolute: 865
+                            end:
+                              line: 69
+                              column: 19
+                              absolute: 865
+                    operator: ==
+                    right:
+                      tag: Identifier
+                      value: bidFace
+                  trueBranch:
+                    tag: Change
+                    lhs:
+                      tag: Identifier
+                      value: count
+                    value:
+                      tag: BinaryExpression
+                      left:
+                        tag: Identifier
+                        value: count
+                      operator: +
+                      right:
+                        tag: Literal
+                        type: Number
+                        value: 1
+                  falseBranch:
+                    tag: Literal
+                    type: Void
+                    value: null
+                - tag: Change
+                  lhs:
+                    tag: Identifier
+                    value: i
+                  value:
+                    tag: BinaryExpression
+                    left:
+                      tag: Identifier
+                      value: i
+                    operator: +
+                    right:
+                      tag: Literal
+                      type: Number
+                      value: 1
+          - tag: Identifier
+            value: count
+            position:
+              start:
+                line: 73
+                column: 2
+                absolute: 925
+              end:
+                line: 73
+                column: 7
+                absolute: 925
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 61
+        column: 1
+        absolute: 743
+      end:
+        line: 77
+        column: 1
+        absolute: 929
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: bidProbability
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: bidCount
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 77
+              column: 19
+              absolute: 955
+            end:
+              line: 77
+              column: 36
+              absolute: 964
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: bidFace
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 77
+              column: 37
+              absolute: 972
+            end:
+              line: 77
+              column: 53
+              absolute: 981
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: myCup
+          type:
+            tag: Identifier
+            value: Cup
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 77
+              column: 54
+              absolute: 987
+            end:
+              line: 77
+              column: 65
+              absolute: 993
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: totalCups
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 77
+              column: 66
+              absolute: 1003
+            end:
+              line: 77
+              column: 84
+              absolute: 1012
+      block:
+        tag: Block
+        statements:
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: totalDice
+            value:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: totalCups
+              operator: *
+              right:
+                tag: Identifier
+                value: dicePerPlayer
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 79
+                column: 2
+                absolute: 1027
+              end:
+                line: 81
+                column: 1
+                absolute: 1057
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: myFaceCount
+            value:
+              tag: RoundApply
+              calledInsteadOfSquare: false
+              callee:
+                tag: Identifier
+                value: getFaceCount
+              args:
+                - tag: Identifier
+                  value: bidFace
+                  position:
+                    start:
+                      line: 81
+                      column: 29
+                      absolute: 1092
+                    end:
+                      line: 81
+                      column: 36
+                      absolute: 1092
+                - tag: Identifier
+                  value: myCup
+                  position:
+                    start:
+                      line: 81
+                      column: 38
+                      absolute: 1099
+                    end:
+                      line: 81
+                      column: 43
+                      absolute: 1099
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 81
+                column: 2
+                absolute: 1069
+              end:
+                line: 83
+                column: 1
+                absolute: 1102
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: neededElsewhere
+            value:
+              tag: IfStatement
+              condition:
+                tag: BinaryExpression
+                left:
+                  tag: Identifier
+                  value: bidCount
+                operator: >
+                right:
+                  tag: Identifier
+                  value: myFaceCount
+              trueBranch:
+                tag: BinaryExpression
+                left:
+                  tag: Identifier
+                  value: bidCount
+                operator: -
+                right:
+                  tag: Identifier
+                  value: myFaceCount
+              falseBranch:
+                tag: Literal
+                type: Number
+                value: 0
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 83
+                column: 2
+                absolute: 1118
+              end:
+                line: 85
+                column: 1
+                absolute: 1179
+          - tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: remainingDice
+            value:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: totalDice
+              operator: -
+              right:
+                tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: Select
+                  ammortized: false
+                  owner:
+                    tag: Select
+                    ammortized: false
+                    owner:
+                      tag: Identifier
+                      value: myCup
+                    field: dice
+                  field: length
+                args:
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 85
+                column: 2
+                absolute: 1193
+              end:
+                line: 87
+                column: 1
+                absolute: 1229
+          - tag: Assignment
+            isMutable: true
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: probability
+            value:
+              tag: Literal
+              type: Number
+              value: 0
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 87
+                column: 10
+                absolute: 1249
+              end:
+                line: 89
+                column: 1
+                absolute: 1255
+          - tag: Assignment
+            isMutable: true
+            isParameter: false
+            lhs:
+              tag: Identifier
+              value: i
+            value:
+              tag: Identifier
+              value: neededElsewhere
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 89
+                column: 10
+                absolute: 1265
+              end:
+                line: 91
+                column: 1
+                absolute: 1285
+          - tag: WhileLoop
+            condition:
+              tag: BinaryExpression
+              left:
+                tag: Identifier
+                value: i
+              operator: <
+              right:
+                tag: Identifier
+                value: remainingDice
+            action:
+              tag: Block
+              statements:
+                - tag: Change
+                  lhs:
+                    tag: Identifier
+                    value: probability
+                  value:
+                    tag: BinaryExpression
+                    left:
+                      tag: Identifier
+                      value: probability
+                    operator: +
+                    right:
+                      tag: RoundApply
+                      calledInsteadOfSquare: false
+                      callee:
+                        tag: Identifier
+                        value: binomialProbability
+                      args:
+                        - tag: Identifier
+                          value: i
+                          position:
+                            start:
+                              line: 93
+                              column: 55
+                              absolute: 1369
+                            end:
+                              line: 93
+                              column: 56
+                              absolute: 1369
+                        - tag: Identifier
+                          value: remainingDice
+                          position:
+                            start:
+                              line: 93
+                              column: 58
+                              absolute: 1384
+                            end:
+                              line: 93
+                              column: 71
+                              absolute: 1384
+                        - tag: BinaryExpression
+                          left:
+                            tag: Literal
+                            type: Number
+                            value: 1
+                          operator: /
+                          right:
+                            tag: Literal
+                            type: Number
+                            value: 3
+                - tag: Change
+                  lhs:
+                    tag: Identifier
+                    value: i
+                  value:
+                    tag: BinaryExpression
+                    left:
+                      tag: Identifier
+                      value: i
+                    operator: +
+                    right:
+                      tag: Literal
+                      type: Number
+                      value: 1
+          - tag: Identifier
+            value: probability
+            position:
+              start:
+                line: 97
+                column: 2
+                absolute: 1421
+              end:
+                line: 97
+                column: 13
+                absolute: 1421
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 77
+        column: 1
+        absolute: 943
+      end:
+        line: 101
+        column: 1
+        absolute: 1425
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: myCup
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      callee:
+        tag: Identifier
+        value: rollCup
+      args:
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 101
+        column: 1
+        absolute: 1430
+      end:
+        line: 103
+        column: 1
+        absolute: 1444
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: Select
+        ammortized: false
+        owner:
+          tag: Identifier
+          value: myCup
+        field: dice
+    position:
+      start:
+        line: 103
+        column: 6
+        absolute: 1450
+      end:
+        line: 103
+        column: 18
+        absolute: 1461
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        callee:
+          tag: Identifier
+          value: bidProbability
+        args:
+          - tag: Literal
+            type: Number
+            value: 4
+          - tag: Literal
+            type: Number
+            value: 3
+          - tag: RoundApply
+            calledInsteadOfSquare: false
+            callee:
+              tag: Identifier
+              value: Cup
+            args:
+              0:
+                tag: Literal
+                type: Number
+                value: 3
+              1:
+                tag: Literal
+                type: Number
+                value: 3
+              2:
+                tag: Literal
+                type: Number
+                value: 4
+              3:
+                tag: Literal
+                type: Number
+                value: 5
+              4:
+                tag: Literal
+                type: Number
+                value: 1
+            position:
+              start:
+                line: 105
+                column: 31
+                absolute: 1494
+              end:
+                line: 105
+                column: 46
+                absolute: 1508
+          - tag: Literal
+            type: Number
+            value: 2
+    position:
+      start:
+        line: 105
+        column: 6
+        absolute: 1469
+      end:
+        line: 105
+        column: 51
+        absolute: 1513

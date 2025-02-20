@@ -28,7 +28,7 @@ import {
    Optional,
 } from "./Parser";
 import { getConstructorName } from "./TypeChecker";
-import { Make, Identifier, TypeCheck } from "./Parser";
+import { Make, Identifier, TypeCheck, Import } from "./Parser";
 
 export function translateFile(fileStatementsBlock: Block, scope: Scope) {
    const requisites = fs.readFileSync("./tin-compiler-ts/tin.stdlib.js");
@@ -36,6 +36,10 @@ export function translateFile(fileStatementsBlock: Block, scope: Scope) {
 }
 
 function createConstructor(typeDef: TypeDef, scope: Scope): string {
+   if (typeDef.fieldDefs.length === 0) {
+      return "() => undefined";
+   }
+
    const parameters =
       "(" +
       typeDef.fieldDefs.map((param, i) => {
@@ -75,8 +79,12 @@ function translate(
       const isAssignment = last instanceof Assignment;
       return [
          ...term.statements.map((st) => translate(st, scope)),
-         (!isAssignment && args && args.returnLast ? "return " : "") +
-            `${translate(last, scope)}`,
+         (!isAssignment &&
+         args &&
+         args.returnLast &&
+         !(last instanceof WhileLoop)
+            ? "return "
+            : "") + `${translate(last, scope)}`,
       ].join(";\n");
 
       // Group
@@ -99,10 +107,14 @@ function translate(
       // SquareTypeToValueLambda
    } else if (term instanceof SquareTypeToValueLambda) {
       return `function(${term.parameterTypes
-         .map((p) => translate(p, scope.innerScopeOf(term)))
-         .join(", ")}) {\n${translate(term.block, scope.innerScopeOf(term), {
-         returnLast: true,
-      })}\n}`;
+         .map((p) => translate(p, scope.innerScopeOf(term, true)))
+         .join(", ")}) {\n${translate(
+         term.block,
+         scope.innerScopeOf(term, true),
+         {
+            returnLast: true,
+         }
+      )}\n}`;
 
       // Change
    } else if (term instanceof Change) {
@@ -117,7 +129,10 @@ function translate(
       ) {
          return "";
       }
-      const keyword = term.isDeclaration ? "var " : "";
+      let keyword = term.isDeclaration ? "var " : "";
+      const scopeDots = [...(scope.toPath().matchAll(/\./g) || [])].length;
+      const doExport = scopeDots < 2 && term.isDeclaration ? "export " : "";
+      keyword = doExport + keyword;
       const lhs = translate(term.lhs, scope);
       const value = term.value ? " = " + translate(term.value, scope) : "";
       let type = "";
@@ -171,44 +186,73 @@ function translate(
 
       // Identifier
    } else if (term instanceof Identifier) {
+      if (term.value === "this") {
+         return "$this";
+      }
       return term.value;
 
       // RoundValueToValueLambda
    } else if (term instanceof RoundValueToValueLambda) {
       return `function(${term.params
-         .map((p) => translate(p, scope.innerScopeOf(term)))
-         .join(", ")}) {\n${translate(term.block, scope.innerScopeOf(term), {
-         returnLast: true,
-      })}\n}`;
+         .map((p) => translate(p, scope.innerScopeOf(term, true)))
+         .join(", ")}) {\n${translate(
+         term.block,
+         scope.innerScopeOf(term, true),
+         {
+            returnLast: true,
+         }
+      )}\n}`;
 
       //RoundTypeToTypeLambda
    } else if (term instanceof RoundTypeToTypeLambda) {
       return `(${term.parameterTypes
-         .map((t) => translate(t, scope.innerScopeOf(term)))
+         .map((t) => translate(t, scope.innerScopeOf(term, true)))
          .join(", ")}) => ${translate(
          term.returnType,
-         scope.innerScopeOf(term)
+         scope.innerScopeOf(term, true)
       )}`;
 
       // SquareTypeToTypeLambda
    } else if (term instanceof SquareTypeToTypeLambda) {
       return `/* [] */(${term.parameterTypes
-         .map((t) => translate(t, scope.innerScopeOf(term)))
+         .map((t) => translate(t, scope.innerScopeOf(term, true)))
          .join(", ")}) => ${translate(
          term.returnType,
-         scope.innerScopeOf(term)
+         scope.innerScopeOf(term, true)
       )}`;
 
       // IfStatement
    } else if (term instanceof IfStatement) {
-      return `((${translate(term.condition, scope)}) ? (${translate(
-         term.trueBranch,
+      let trueBranch = "";
+      if (
+         term.trueBranch instanceof Block &&
+         term.trueBranch.statements.length > 1
+      ) {
+         trueBranch = `((function(){${translate(term.trueBranch, scope, {
+            returnLast: true,
+         })}})())`;
+      } else {
+         trueBranch = `(${translate(term.trueBranch, scope)})`;
+      }
+      let falseBranch = "";
+      if (
+         term.falseBranch instanceof Block &&
+         term.falseBranch.statements.length > 1
+      ) {
+         falseBranch = `((function(){${translate(term.falseBranch, scope, {
+            returnLast: true,
+         })}})())`;
+      } else {
+         falseBranch = `(${translate(term.falseBranch, scope)})`;
+      }
+      return `((${translate(
+         term.condition,
          scope
-      )}) : (${translate(term.falseBranch, scope)})) `;
+      )}) ? ${trueBranch} : ${falseBranch}) `;
 
       // BinaryExpression
    } else if (term instanceof WhileLoop) {
-      const innerScope = scope.innerScopeOf(term);
+      const innerScope = scope.innerScopeOf(term, true);
       let parts = translate(term.condition, innerScope);
       if (term.start && term.eachLoop) {
          parts =
@@ -281,10 +325,18 @@ function translate(
          scope
       )}) `;
       // Undefined
+   } else if (term instanceof Import) {
+      return `import * as module${moduleNumber} from "./${
+         term.path
+      }.tin.out.js";Object.entries(module${moduleNumber++}).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });`;
+      // Undefined
    } else {
       return "(? " + term.tag + " ?)";
    }
 }
+let moduleNumber = 0;
 
 function translateBinaryExpression(
    term: BinaryExpression,
@@ -329,6 +381,7 @@ function translateBinaryExpression(
          "+",
          "-",
          "*",
+         "**",
          "/",
          "&&",
          "||",

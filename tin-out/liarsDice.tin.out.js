@@ -107,3 +107,60 @@ const debug = (...args) => {
 }
 
 // COMPILED TIN
+;
+import * as module0 from "./collections.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+import * as module1 from "./refinements.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+;
+export var Roll = _TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(1, 2), 3), 4), 5), 6);
+export var dicePerPlayer/* Number*/ = 5;
+export var Cup = TIN_TYPE("d0f417e1-a164-4d4e-9812-5b85831b3acb", (_p0) => ({dice: _p0}), {});
+export var rollDice/* () => Roll*/ = function() {
+return (getRandomInt(1, 7)) /* as Roll */
+};
+export var rollCup/* () => Cup*/ = function() {
+return Cup(Array(0)([rollDice(), rollDice(), rollDice(), rollDice(), rollDice()]))
+};
+export var binomialCoefficient/* (Number, Number) => Number*/ = function(n, k) {
+return ((k > n) ? (0) : ((function(){var coefficient/* Number*/ = 1;
+var i/* Number*/ = 0;
+while (i < k) {
+ coefficient = coefficient * (n - i) / (i + 1);
+i = i + 1 
+};
+return coefficient})())) 
+};
+export var binomialProbability/* (Number, Number, Number) => Number*/ = function(k, n, p) {
+var pComplement/* Number*/ = 1 - p;
+var nMinusK/* Number*/ = n - k;
+var coefficient/* Number*/ = binomialCoefficient(n, k);
+return coefficient * (p ** k) * (pComplement ** nMinusK)
+};
+export var getFaceCount/* (Number, Cup) => Number*/ = function(bidFace, cup) {
+var i/* Number*/ = 0;
+var count/* Number*/ = 0;
+while (i < cup.dice.length()) {
+ ((cup.dice.at(i) == bidFace) ? (count = count + 1) : (null)) ;
+i = i + 1 
+};
+return count
+};
+export var bidProbability/* (Number, Number, Cup, Number) => Number*/ = function(bidCount, bidFace, myCup, totalCups) {
+var totalDice/* Number*/ = totalCups * dicePerPlayer;
+var myFaceCount/* Number*/ = getFaceCount(bidFace, myCup);
+var neededElsewhere/* Number | 0*/ = ((bidCount > myFaceCount) ? (bidCount - myFaceCount) : (0)) ;
+var remainingDice/* Number*/ = totalDice - myCup.dice.length();
+var probability/* Number*/ = 0;
+var i/* Number | 0*/ = neededElsewhere;
+while (i < remainingDice) {
+ probability = probability + binomialProbability(i, remainingDice, 1 / 3);
+i = i + 1 
+};
+return probability
+};
+export var myCup/* Cup*/ = rollCup();
+print(myCup.dice);
+print(bidProbability(4, 3, Cup(Array(0)([3, 3, 4, 5, 1])), 2))

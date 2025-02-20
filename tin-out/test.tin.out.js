@@ -107,3 +107,17 @@ const debug = (...args) => {
 }
 
 // COMPILED TIN
+;
+import * as module2 from "./imports.tin.out.js";Object.entries(module2).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+import * as module3 from "./liarsDice.tin.out.js";Object.entries(module3).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+export var myList/* ListHead[Number]?*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3, 4]));
+export var iter/* Iterable[Number]*/ = makeIterable.call('Type', Number)(function() {
+return listIterator.call('Type', Number)(myList)
+});
+iter.forEach(function(t) {
+return print(t)
+})

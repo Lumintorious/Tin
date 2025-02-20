@@ -1,0 +1,42 @@
+tag: Block
+statements:
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Positive
+    value:
+      tag: TypeDef
+      fieldDefs:
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 1
+        column: 1
+        absolute: 8
+      end:
+        line: 3
+        column: 1
+        absolute: 17
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Negative
+    value:
+      tag: TypeDef
+      fieldDefs:
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 3
+        column: 1
+        absolute: 25
+      end:
+        line: 5
+        column: 1
+        absolute: 34

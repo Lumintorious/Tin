@@ -1,0 +1,53 @@
+import "collections"
+import "refinements"
+
+getRandomInt: (Number, Number) => Number = external
+
+Roll = 1 | 2 | 3 | 4 | 5 | 6
+dicePerPlayer = 5
+Cup = type:
+	dice: Array[Roll]
+
+rollDice = () -> getRandomInt(1, 7): Roll
+rollCup = () -> Cup(rollDice(), rollDice(), rollDice(), rollDice(), rollDice())
+
+binomialCoefficient = (n: Number, k: Number) ->
+	if k > n,
+		0
+	else
+		mutable coefficient = 1
+		mutable i = 0
+		while i < k do
+			set coefficient = coefficient * (n - i) / (i + 1)
+			set i = i + 1
+		coefficient
+
+binomialProbability = (k: Number, n: Number, p: Number) ->
+	pComplement = 1 - p
+	nMinusK = n - k
+	coefficient = binomialCoefficient(n, k)
+	coefficient * (p ** k) * (pComplement ** nMinusK)
+
+getFaceCount = (bidFace: Number, cup: Cup) ->
+	mutable i = 0
+	mutable count = 0
+	while i < cup.dice.length() do
+		if cup.dice.at(i) == bidFace, set count = count + 1
+		set i = i + 1
+	count
+
+bidProbability = (bidCount: Number, bidFace: Number, myCup: Cup, totalCups: Number) ->
+	totalDice = totalCups * dicePerPlayer
+	myFaceCount = getFaceCount(bidFace, myCup)
+	neededElsewhere = if bidCount > myFaceCount, bidCount - myFaceCount else 0
+	remainingDice = totalDice - myCup.dice.length()
+	mutable probability = 0
+	mutable i = neededElsewhere
+	while i < remainingDice do
+		set probability = probability + binomialProbability(i, remainingDice, 1/3)
+		set i = i + 1
+	probability
+
+myCup = rollCup()
+print(myCup.dice)
+print(bidProbability(4, 3, Cup(3, 3, 4, 5, 1), 2))

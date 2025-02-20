@@ -84,6 +84,7 @@ export class Lexer {
          "set",
          "mut",
          "external",
+         "import",
       ];
       this.operators = [
          "...",
@@ -98,6 +99,7 @@ export class Lexer {
          "!=",
          ">=",
          "<=",
+         "**",
          "=",
          "+",
          "*",
@@ -273,11 +275,39 @@ export class Lexer {
          );
       }
 
+      // if (indentLength < previousIndent) {
+      //    const len = this.indentStack.pop();
+      //    console.log(indentLength, len);
+      //    return new Token(
+      //       TokenTag.DEDENT,
+      //       String(len),
+      //       new TokenPos(
+      //          new CodePoint(this.line, 1, this.position),
+      //          new CodePoint(this.line, this.column, this.position)
+      //       )
+      //    );
+      // }
+
       if (indentLength < previousIndent) {
-         const len = this.indentStack.pop();
-         return new Token(
-            TokenTag.DEDENT,
-            String(len),
+         const tokens = [];
+         while (
+            this.indentStack.length &&
+            indentLength < this.indentStack[this.indentStack.length - 1]
+         ) {
+            const len = this.indentStack.pop();
+            tokens.push(
+               new Token(
+                  TokenTag.DEDENT,
+                  String(len),
+                  new TokenPos(
+                     new CodePoint(this.line, 1, this.position),
+                     new CodePoint(this.line, this.column, this.position)
+                  )
+               )
+            );
+         }
+         return new MultipleToken(
+            tokens,
             new TokenPos(
                new CodePoint(this.line, 1, this.position),
                new CodePoint(this.line, this.column, this.position)

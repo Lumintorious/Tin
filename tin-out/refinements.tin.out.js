@@ -1,7 +1,9 @@
 function TIN_TYPE(typeId, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		result.__tin_typeIds = [typeId]
+		if (result !== undefined) {
+			result.__tin_typeIds = [typeId]
+		}
 		return result;
 	}
 	constructor._tinFields = descriptor;
@@ -22,6 +24,12 @@ function TIN_TYPE(typeId, constructorRaw, descriptor) {
 }
 
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
+	if (obj1 === undefined) {
+		return obj2
+	}
+	if (obj2 === undefined) {
+		return obj1
+	}
 	const result = { ...obj1, ...obj2 }
 	result.__tin_typeIds = [...(obj1.__tin_typeIds ?? []), ... (obj2.__tin_typeIds ?? [])]
 	return result
@@ -37,9 +45,8 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
-const Array = (T) => TIN_TYPE("", (args) => ({
+const Array = (T) => TIN_TYPE("Array", (args) => ({
 	length() {
-		console.log("called")
 		return args.length;
 	},
 	at(index) {
@@ -63,6 +70,14 @@ function makeString(obj) {
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
+
+	if (obj.__tin_typeIds.includes("Array")) {
+		let result = '[';
+		for (let i = 0; i < obj.length(); i++) {
+			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
+		}
+		return result + "]"
+	}
 
 	if (typeof obj === 'object') {
 		let result = 'data(';
@@ -93,33 +108,5 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-var ListHead = /* [] */(T) => TIN_TYPE("a2b3bb4a-a34b-470d-b4b8-cf50126ba30d", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
-var List = /* [] */(T) => ListHead.call('Type', T);
-var s/* String*/ = "Hello";
-var listOf/* [T] => (Array[T]) => List[T]*/ = function(T) {
-return function(arr) {
-var i/* Number*/ = arr.length();
-var list/* List[T]*/ = nothing;
-while (i > 0) {
- i = i - 1;
-list = ListHead.call('Type', T)(arr.at(i), list) 
-};
-return list
-}
-};
-var mkString/* [T] => (List[T]) => String*/ = function(T) {
-return function(originalList) {
-var list/* List[T]*/ = originalList;
-var string/* String*/ = "";
-while (list != nothing) {
- print("Hey");
-var comma/*  | , */ = ((string == "") ? ("") : (", ")) ;
-string = "" + string + "" + comma + "" + list.value + "";
-list = list.rest 
-};
-return string
-}
-};
-var head/* List[Number]*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3]));
-var r/* String*/ = mkString.call('Type', String)(head);
-print(r)
+export var Positive = TIN_TYPE("f16f4fb8-10c2-4fd8-a16e-da97b61aff80", () => undefined, {});
+export var Negative = TIN_TYPE("258cd42b-a867-41c0-819d-25f52b2db570", () => undefined, {})

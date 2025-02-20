@@ -1,0 +1,50 @@
+Iterator = [T] => type:
+	next: () => T?
+
+Iterable = [T] => type:
+	forEach: ((T) => Nothing) => Nothing
+
+makeIterable = [T] -> (getIterator: () => Iterator[T]) ->
+	forEach = (fn: (T) => Nothing) ->
+		iterator = getIterator()
+		current = iterator.next()
+		while current != nothing do
+			fn(current)
+			current = iterator.next()
+	Iterable[T](forEach)
+
+
+ListHead = [T] => type:
+	value: T
+	rest: ListHead[T]?
+
+List = [T] => (ListHead[T] & Iterable[T])?
+
+listIterator = [T] -> (list: ListHead[T]?) ->
+	mutable currentList: ListHead[T]? = list
+	nextF = () ->
+		if currentList != nothing,
+			result = currentList.value
+			set currentList = currentList.rest
+			result
+		else
+			nothing
+	thing: () => T | Nothing = nextF
+	Iterator[T](nextF)
+
+listOf = [T] -> (arr: Array[T]) ->
+	i = arr.length()
+	list: ListHead[T]? = nothing
+	while i > 0 do
+		set i = i - 1
+		list = ListHead[T](arr.at(i), list)
+	list
+
+mkString = [T] -> (originalList: ListHead[T]?, separator: String = ", ", left: String = "", right: String = "") ->
+	list = originalList
+	string = ""
+	while list != nothing do
+		comma = if string == "", "" else separator
+		set string = "{string}{comma}{list.value}"
+		set list = list.rest
+	"{left}{string}{right}"

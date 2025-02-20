@@ -107,3 +107,56 @@ const debug = (...args) => {
 }
 
 // COMPILED TIN
+;
+export var Iterator = /* [] */(T) => TIN_TYPE("f2f237c0-385c-4acd-9524-00939c288c04", (_p0) => ({next: _p0}), {});
+export var Iterable = /* [] */(T) => TIN_TYPE("28ccdc01-f4c7-403f-88f7-ba68e21e415b", (_p0) => ({forEach: _p0}), {});
+export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
+return function(getIterator) {
+var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {
+var iterator/* Iterator[T]*/ = getIterator();
+var current/* T?*/ = iterator.next();
+while (current != nothing) {
+ fn(current);
+current = iterator.next() 
+}
+};
+return Iterable.call('Type', T)(forEach)
+}
+};
+export var ListHead = /* [] */(T) => TIN_TYPE("5b8e1818-11fc-4c6d-9507-db47257c959d", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
+export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)));
+export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
+return function(list) {
+var currentList/* ListHead[T]?*/ = list;
+var nextF/* () => T | Nothing*/ = function() {
+return ((currentList != nothing) ? ((function(){var result/* T*/ = currentList.value;
+currentList = currentList.rest;
+return result})()) : (nothing)) 
+};
+var thing/* () => T | Nothing*/ = nextF;
+return Iterator.call('Type', T)(nextF)
+}
+};
+export var listOf/* [T] => (Array[T]) => ListHead[T]?*/ = function(T) {
+return function(arr) {
+var i/* Number*/ = arr.length();
+var list/* ListHead[T]?*/ = nothing;
+while (i > 0) {
+ i = i - 1;
+list = ListHead.call('Type', T)(arr.at(i), list) 
+};
+return list
+}
+};
+export var mkString/* [T] => (ListHead[T]?, String, String, String) => String*/ = function(T) {
+return function(originalList, separator = ", ", left = "", right = "") {
+var list/* ListHead[T]?*/ = originalList;
+var string/* String*/ = "";
+while (list != nothing) {
+ var comma/* String*/ = ((string == "") ? ("") : (separator)) ;
+string = "" + string + "" + comma + "" + list.value + "";
+list = list.rest 
+};
+return "" + left + "" + string + "" + right + ""
+}
+}

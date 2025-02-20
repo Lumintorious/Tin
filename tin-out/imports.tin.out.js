@@ -107,3 +107,6 @@ const debug = (...args) => {
 }
 
 // COMPILED TIN
+;
+export var pi/* Number*/ = 3.14159;
+print("Loaded!")

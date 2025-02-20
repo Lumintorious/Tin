@@ -1,6 +1,6 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./TypeChecker";
-const applyableKeywords = ["return", "mut", "set", "make"];
+const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
 export class AstNode {
    readonly tag: string;
    position?: TokenPos;
@@ -27,6 +27,14 @@ export class Statement extends AstNode {
    }
 }
 
+export class Import extends Statement {
+   path: string;
+   constructor(path: string) {
+      super("Import");
+      this.path = path;
+   }
+}
+
 export class Assignment extends AstNode {
    lhs: Term;
    value?: Term;
@@ -34,6 +42,7 @@ export class Assignment extends AstNode {
    symbol?: Symbol;
    isDeclaration: boolean;
    isMutable: boolean = false;
+   isParameter: boolean = false;
    isTypeLevel?: boolean;
    constructor(lhs: Term, value?: Term, isDeclaration = true, type?: Term) {
       super("Assignment"); // tag of the AST node
@@ -324,6 +333,7 @@ const PRECEDENCE: { [_: string]: number } = {
    "?:": 110, // Walrus
    ".": 100, // Field access
    "?.": 100, // Field access
+   "**": 10, // Exponentiation
    "*": 10, // Multiplication
    "/": 10, // Division
    "+": 9, // Addition
@@ -374,6 +384,12 @@ export class Parser {
    parseStatement(): Statement | null {
       let token = this.peek();
 
+      if (token.tag === "KEYWORD" && token.value === "import") {
+         this.consume();
+         const path = this.parseString(this.consume());
+         return new Import(path.value as string);
+      }
+
       if (token.tag === "INDENT" || token.tag === "DEDENT") {
          this.consume("INDENT");
          token = this.peek();
@@ -414,7 +430,7 @@ export class Parser {
 
       return result.fromTo(start.position, end.position); // Return a function application node
    }
-
+   // parseExpression > parsePrimary
    parseExpression(precedence = 0, stopAtEquals = false) {
       const startPos = this.peek().position;
       let left: Term; // Parse the left-hand side (like a literal or identifier)
@@ -600,7 +616,8 @@ export class Parser {
       this.consume("PARENS", isSquare ? "[" : "("); // This should throw an error if not found
       let isTypeLevel = false;
 
-      const parameters: Assignment[] = [];
+      const parameters: Term[] = [];
+      let groupCatch: Term | undefined = undefined;
 
       // Parse parameters until we reach the closing parenthesis
       while (this.peek().value !== ")" && this.peek().value !== "]") {
@@ -610,9 +627,11 @@ export class Parser {
          const param = this.resolveAsAssignment(paramTerm);
          if (param instanceof Assignment) {
             param.isDeclaration = false;
-
-            parameters.push(param);
+            param.isParameter = true;
+         } else {
+            groupCatch = param;
          }
+         parameters.push(param);
 
          // Check for a comma to separate parameters
          if (this.peek().tag === "OPERATOR") {
@@ -630,8 +649,15 @@ export class Parser {
          this.consume("OPERATOR", ":");
          specifiedType = this.parseExpression();
       }
-
-      const arrow = this.consume("OPERATOR", "->");
+      if (
+         this.peek().value != "->" &&
+         this.peek().value != "=>" &&
+         groupCatch !== undefined
+      ) {
+         this.omit("NEWLINE");
+         return new Group(groupCatch);
+      }
+      let arrow = this.consume("OPERATOR");
       let body = this.parseExpression(undefined, true);
       const givesType = body.isTypeLevel || arrow.value === "=>"; // arrow.value === "=>";
       if (!givesType) {
@@ -715,6 +741,13 @@ export class Parser {
          keyword.value === "set"
       ) {
          return new Change(expression.lhs, expression.value);
+      } else if (
+         expression instanceof Assignment &&
+         expression.value &&
+         keyword.value === "mutable"
+      ) {
+         expression.isMutable = true;
+         return expression;
       } else if (keyword.value === "make") {
          return new Make(expression);
       } else if (keyword.value === "return") {
@@ -830,9 +863,6 @@ export class Parser {
          return this.parseIfStatement();
       }
 
-      if (token.value === ")") {
-         return new Identifier("WTF");
-      }
       return this.createError(`Unexpected token: ${token.value}`, token);
    }
 
@@ -931,6 +961,10 @@ export function parseNewData(parser: Parser): Term {
 }
 
 export function parseObject(parser: Parser): DataDef {
+   if (parser.peek().value != ":") {
+      return new DataDef([]);
+   }
+
    let token = parser.consume("OPERATOR", ":");
 
    // Expect INDENT (start of type block)

@@ -1,0 +1,10 @@
+IDENTIFIER   | pi           |   1, 1    
+OPERATOR     | =            |   1, 4    
+NUMBER       | 3.14159      |   1, 6    
+NEWLINE      |              |   3, 1    
+IDENTIFIER   | print        |   3, 1    
+PARENS       | (            |   3, 6    
+STRING       | Loaded!      |   3, 7    
+PARENS       | )            |   3, 16   
+NEWLINE      |              |   5, 1    
+--undefined--

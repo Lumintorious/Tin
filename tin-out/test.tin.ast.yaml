@@ -1,0 +1,186 @@
+tag: Block
+statements:
+  - tag: Import
+    path: imports
+  - tag: Import
+    path: liarsDice
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: myList
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      callee:
+        tag: SquareApply
+        callee:
+          tag: Identifier
+          value: listOf
+        typeArgs:
+          - tag: Identifier
+            value: Number
+            position:
+              start:
+                line: 11
+                column: 17
+                absolute: 110
+              end:
+                line: 11
+                column: 23
+                absolute: 110
+      args:
+        - tag: Literal
+          type: Number
+          value: 1
+        - tag: Literal
+          type: Number
+          value: 2
+        - tag: Literal
+          type: Number
+          value: 3
+        - tag: Literal
+          type: Number
+          value: 4
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 11
+        column: 1
+        absolute: 94
+      end:
+        line: 13
+        column: 1
+        absolute: 125
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: iter
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      callee:
+        tag: SquareApply
+        callee:
+          tag: Identifier
+          value: makeIterable
+        typeArgs:
+          - tag: Identifier
+            value: Number
+            position:
+              start:
+                line: 15
+                column: 21
+                absolute: 153
+              end:
+                line: 15
+                column: 27
+                absolute: 153
+      args:
+        - tag: RoundValueToValueLambda
+          params:
+          block:
+            tag: Block
+            statements:
+              - tag: RoundApply
+                calledInsteadOfSquare: false
+                callee:
+                  tag: SquareApply
+                  callee:
+                    tag: Identifier
+                    value: listIterator
+                  typeArgs:
+                    - tag: Identifier
+                      value: Number
+                      position:
+                        start:
+                          line: 15
+                          column: 48
+                          absolute: 180
+                        end:
+                          line: 15
+                          column: 54
+                          absolute: 180
+                args:
+                  0:
+                    tag: Identifier
+                    value: myList
+                position:
+                  start:
+                    line: 15
+                    column: 55
+                    absolute: 182
+                  end:
+                    line: 15
+                    column: 63
+                    absolute: 189
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 15
+        column: 1
+        absolute: 131
+      end:
+        line: 17
+        column: 1
+        absolute: 192
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: iter
+      field: forEach
+    args:
+      0:
+        tag: RoundValueToValueLambda
+        params:
+          - tag: Assignment
+            isMutable: false
+            isParameter: true
+            lhs:
+              tag: Identifier
+              value: t
+            type:
+              tag: Identifier
+              value: Number
+            isDeclaration: false
+            isTypeLevel: false
+            position:
+              start:
+                line: 19
+                column: 15
+                absolute: 209
+              end:
+                line: 19
+                column: 25
+                absolute: 218
+        block:
+          tag: Block
+          statements:
+            - tag: RoundApply
+              calledInsteadOfSquare: false
+              callee:
+                tag: Identifier
+                value: print
+              args:
+                0:
+                  tag: Identifier
+                  value: t
+              position:
+                start:
+                  line: 19
+                  column: 34
+                  absolute: 228
+                end:
+                  line: 19
+                  column: 37
+                  absolute: 230
+        explicitType: undefined
