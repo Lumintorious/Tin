@@ -13,6 +13,8 @@ import {
    RoundTypeToTypeLambda,
 } from "./Parser";
 import { Symbol, Scope, TypePhaseContext } from "./Scope";
+import { StructType, SquareTypeToTypeLambdaType } from "./Types";
+import { Select, TypeDef } from "./Parser";
 import {
    OptionalType,
    GenericNamedType,
@@ -92,7 +94,20 @@ export class TypeBuilder {
          if (node.falseBranch) {
             this.build(node.falseBranch, innerScope);
          }
+      } else if (node instanceof Select) {
+         this.buildSelect(node, scope);
       }
+   }
+
+   buildSelect(node: Select, scope: Scope) {
+      let parentType = this.context.inferencer.infer(node.owner, scope);
+      let ammortized = false;
+      if (parentType instanceof OptionalType && node.ammortized) {
+         parentType = parentType.type;
+         ammortized = true;
+      }
+      console.log("SLEEECT", parentType.toString());
+      // const fields = this.context.inferencer.getAllKnownFields()
    }
 
    buildRoundValueToValueLambda(node: RoundValueToValueLambda, scope: Scope) {
@@ -189,6 +204,20 @@ export class TypeBuilder {
                node.value,
                scope
             );
+            if (symbolToDeclare instanceof StructType) {
+               symbolToDeclare.name = node.lhs.value;
+            }
+            if (node.value instanceof TypeDef) {
+               node.value.name = node.lhs.value;
+            }
+            // Possibly needs recursion
+            if (
+               symbolToDeclare instanceof SquareTypeToTypeLambdaType &&
+               symbolToDeclare.returnType instanceof StructType
+            ) {
+               symbolToDeclare.name = node.lhs.value;
+               symbolToDeclare.returnType.name = node.lhs.value;
+            }
             if (!scope.hasTypeSymbol(node.lhs.value)) {
                scope.declareType(node.lhs.value, symbolToDeclare);
             }

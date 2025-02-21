@@ -94,7 +94,9 @@ function translate(
       // Select
    } else if (term instanceof Select) {
       const operator = term.ammortized ? "?." : ".";
-      return `${translate(term.owner, scope)}${operator}${term.field}`;
+      return `${translate(term.owner, scope)}[${
+         term.ownerComponent
+      }._typeId]${operator}${term.field}`;
 
       // Make
    } else if (term instanceof Make) {
@@ -294,9 +296,10 @@ function translate(
 
       // TypeDef
    } else if (term instanceof TypeDef) {
-      return `TIN_TYPE("${randomUUID()}", ${createConstructor(term, scope)}, {${
-         /*term.fieldDefs.map((f) => translate(f, scope))*/ ""
-      }})`;
+      return `TIN_TYPE("${term.name}", "${randomUUID()}", ${createConstructor(
+         term,
+         scope
+      )}, {${/*term.fieldDefs.map((f) => translate(f, scope))*/ ""}})`;
 
       // DataDef
    } else if (term instanceof DataDef) {

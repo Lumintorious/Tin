@@ -1,94 +1,5 @@
 tag: Block
 statements:
-  - tag: Import
-    path: collections/List
-  - tag: Import
-    path: refinements
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: myList
-    value:
-      tag: RoundApply
-      calledInsteadOfSquare: false
-      callee:
-        tag: SquareApply
-        callee:
-          tag: Identifier
-          value: listOf
-        typeArgs:
-          - tag: Identifier
-            value: Number
-            position:
-              start:
-                line: 7
-                column: 17
-                absolute: 69
-              end:
-                line: 7
-                column: 23
-                absolute: 69
-      args:
-        - tag: Literal
-          type: Number
-          value: 1
-        - tag: Literal
-          type: Number
-          value: 2
-        - tag: Literal
-          type: Number
-          value: 3
-        - tag: Literal
-          type: Number
-          value: 4
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 7
-        column: 1
-        absolute: 53
-      end:
-        line: 9
-        column: 1
-        absolute: 84
-  - tag: RoundApply
-    calledInsteadOfSquare: false
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: RoundApply
-        calledInsteadOfSquare: false
-        callee:
-          tag: Select
-          ammortized: false
-          owner:
-            tag: Identifier
-            value: myList
-          field: mkString
-        args:
-          - tag: Literal
-            type: String
-            value: ,
-          - tag: Literal
-            type: String
-            value: [
-          - tag: Literal
-            type: String
-            value: ]
-    position:
-      start:
-        line: 9
-        column: 6
-        absolute: 90
-      end:
-        line: 9
-        column: 38
-        absolute: 121
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -114,13 +25,97 @@ statements:
     isTypeLevel: true
     position:
       start:
-        line: 13
+        line: 7
         column: 1
-        absolute: 128
+        absolute: 28
       end:
-        line: 21
+        line: 11
         column: 1
-        absolute: 169
+        absolute: 69
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Mech
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: name
+          type:
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+        - tag: FieldDef
+          name: material
+          type:
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 11
+        column: 1
+        absolute: 73
+      end:
+        line: 15
+        column: 1
+        absolute: 119
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Dog
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: name
+          type:
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 15
+        column: 1
+        absolute: 122
+      end:
+        line: 18
+        column: 1
+        absolute: 149
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: Mechacat
+    value:
+      tag: BinaryExpression
+      left:
+        tag: Identifier
+        value: Mech
+      operator: &
+      right:
+        tag: Identifier
+        value: Cat
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 18
+        column: 1
+        absolute: 157
+      end:
+        line: 19
+        column: 1
+        absolute: 172
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -128,59 +123,48 @@ statements:
       tag: Identifier
       value: cat
     value:
-      tag: RoundApply
-      calledInsteadOfSquare: false
-      callee:
-        tag: Identifier
-        value: Cat
-      args:
-        - tag: Literal
-          type: String
-          value: C
-        - tag: Literal
-          type: Number
-          value: 1
+      tag: BinaryExpression
+      left:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        callee:
+          tag: Identifier
+          value: Cat
+        args:
+          - tag: Literal
+            type: String
+            value: C
+          - tag: Literal
+            type: Number
+            value: 1
+      operator: &
+      right:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        callee:
+          tag: Identifier
+          value: Mech
+        args:
+          - tag: Literal
+            type: String
+            value: KT-1
+          - tag: Literal
+            type: String
+            value: Platinum
     type:
-      tag: Optional
-      doubleQuestionMark: false
-      expression:
-        tag: Identifier
-        value: Cat
+      tag: Identifier
+      value: Mech
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
+        line: 20
+        column: 1
+        absolute: 177
+      end:
         line: 21
         column: 1
-        absolute: 172
-      end:
-        line: 23
-        column: 1
-        absolute: 194
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: age
-    value:
-      tag: Select
-      ammortized: true
-      owner:
-        tag: Identifier
-        value: cat
-      field: age
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 23
-        column: 1
-        absolute: 197
-      end:
-        line: 25
-        column: 1
-        absolute: 210
+        absolute: 226
   - tag: RoundApply
     calledInsteadOfSquare: false
     callee:
@@ -192,128 +176,22 @@ statements:
         value: cat
     position:
       start:
-        line: 25
+        line: 21
         column: 6
-        absolute: 216
+        absolute: 232
       end:
-        line: 25
+        line: 21
         column: 11
-        absolute: 220
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: num
-    value:
-      tag: RoundApply
-      calledInsteadOfSquare: false
-      callee:
-        tag: Identifier
-        value: checkNonZero
-      args:
-        - tag: Literal
-          type: Number
-          value: 3
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 29
-        column: 1
-        absolute: 227
-      end:
-        line: 31
-        column: 1
-        absolute: 247
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: divide
-    value:
-      tag: RoundValueToValueLambda
-      params:
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: numerator
-          type:
-            tag: Identifier
-            value: Number
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 31
-              column: 11
-              absolute: 266
-            end:
-              line: 31
-              column: 29
-              absolute: 275
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: denominator
-          type:
-            tag: BinaryExpression
-            left:
-              tag: Identifier
-              value: Number
-            operator: &
-            right:
-              tag: Identifier
-              value: NonZero
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 31
-              column: 30
-              absolute: 287
-            end:
-              line: 31
-              column: 60
-              absolute: 306
-      block:
-        tag: Block
-        statements:
-          - tag: BinaryExpression
-            left:
-              tag: Identifier
-              value: numerator
-            operator: /
-            right:
-              tag: Identifier
-              value: denominator
-      explicitType: undefined
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 31
-        column: 1
-        absolute: 253
-      end:
-        line: 33
-        column: 1
-        absolute: 335
+        absolute: 236
   - tag: IfStatement
     condition:
-      tag: BinaryExpression
-      left:
+      tag: TypeCheck
+      term:
         tag: Identifier
-        value: num
-      operator: !=
-      right:
+        value: cat
+      type:
         tag: Identifier
-        value: nothing
+        value: Cat
     trueBranch:
       tag: Block
       statements:
@@ -321,25 +199,43 @@ statements:
           calledInsteadOfSquare: false
           callee:
             tag: Identifier
-            value: divide
+            value: print
           args:
             0:
-              tag: Literal
-              type: Number
-              value: 6
-            1:
               tag: Identifier
-              value: num
+              value: cat
           position:
             start:
-              line: 35
-              column: 8
-              absolute: 363
+              line: 23
+              column: 7
+              absolute: 261
             end:
-              line: 35
-              column: 16
-              absolute: 370
+              line: 23
+              column: 12
+              absolute: 265
     falseBranch:
       tag: Literal
       type: Void
       value: null
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        tag: Select
+        ammortized: false
+        owner:
+          tag: Identifier
+          value: cat
+        field: name
+    position:
+      start:
+        line: 24
+        column: 6
+        absolute: 273
+      end:
+        line: 24
+        column: 16
+        absolute: 282

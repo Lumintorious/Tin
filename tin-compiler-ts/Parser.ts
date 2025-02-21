@@ -281,6 +281,7 @@ export class Optional extends Term {
 export class Select extends Term {
    owner: Term;
    field: string;
+   ownerComponent?: string;
    ammortized: boolean = false; // if its x?.blabla
    constructor(owner: Term, field: string, ammortized: boolean = false) {
       super("Select");
@@ -924,6 +925,7 @@ export class Parser {
 
 export class TypeDef extends Term {
    fieldDefs: FieldDef[];
+   name?: string;
    constructor(fieldDefs: FieldDef[]) {
       super("TypeDef");
       this.fieldDefs = fieldDefs;

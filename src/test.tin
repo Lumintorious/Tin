@@ -1,19 +1,24 @@
-import collections/List
-import refinements
+#aaa
 
-myList = listOf[Number](1, 2, 3, 4)
-print(myList.mkString(",", "[", "]"))
+#aaa
+
+#aaa 
 
 Cat = type:
 	name: String
 	age: Number
 
-cat: Cat? = Cat("C", 1)
-age = cat?.age
+Mech = type:
+	name: String
+	material: String
+
+Dog = type:
+	name: String
+
+Mechacat = Mech & Cat
+
+cat: Mech = Cat("C", 1) & Mech("KT-1", "Platinum")
 print(cat)
-
-num = checkNonZero(3)
-divide = (numerator: Number, denominator: Number & NonZero) -> numerator / denominator
-if num != nothing,
-	divide(6, num)
-
+if cat :: Cat,
+	print(cat)
+print(cat.name)

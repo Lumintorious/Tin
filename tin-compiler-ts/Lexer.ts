@@ -139,6 +139,7 @@ export class Lexer {
       let extraIndex = 0;
       let lastNewlinePosition = 0;
       let addedLines = 0;
+
       while (true) {
          const char = this.peek(extraIndex);
          if (char === undefined) {
@@ -167,13 +168,13 @@ export class Lexer {
          this.pruneEmptyLines();
       }
 
+      if (char === "\n") {
+         return this.consumeNewline();
+      }
+
       if (char === "#") {
          this.consumeComment();
          char = this.peek();
-      }
-
-      if (char === "\n") {
-         return this.consumeNewline();
       }
 
       if (this.column === 1) {
@@ -231,7 +232,7 @@ export class Lexer {
    // Handle newlines and indentation levels
    consumeNewline(): Token {
       this.position++;
-      this.line++;
+      // this.line++;
       this.column = 1;
       return new Token(
          TokenTag.NEWLINE,

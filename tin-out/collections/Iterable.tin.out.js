@@ -1,19 +1,12 @@
 function TIN_TYPE(typeId, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		if (result !== undefined) {
-			result.__tin_typeIds = [typeId]
-		}
-		return result;
+		return {
+			[typeId]: result
+		};
 	}
 	constructor._tinFields = descriptor;
-	constructor._tinTypeId = typeId;
-	constructor["&"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
-	constructor["|"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
+	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
@@ -108,8 +101,8 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("c0fc5f41-b13b-45fc-b885-8c693eb8f660", (_p0) => ({next: _p0}), {});
-export var Iterable = /* [] */(T) => TIN_TYPE("4613f358-384c-4eef-b0f2-5faefb639bfd", (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {});
+export var Iterator = /* [] */(T) => TIN_TYPE(Symbol(), (_p0) => ({next: _p0}), {});
+export var Iterable = /* [] */(T) => TIN_TYPE(Symbol(), (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {});
 export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
 return function(getIterator) {
 var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {

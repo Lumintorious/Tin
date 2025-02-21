@@ -1,19 +1,12 @@
 function TIN_TYPE(typeId, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		if (result !== undefined) {
-			result.__tin_typeIds = [typeId]
-		}
-		return result;
+		return {
+			[typeId]: result
+		};
 	}
 	constructor._tinFields = descriptor;
-	constructor._tinTypeId = typeId;
-	constructor["&"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
-	constructor["|"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
+	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
@@ -111,7 +104,7 @@ const debug = (...args) => {
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("12fff869-a5c6-4621-af77-2c06e9a6a4a2", (_p0,_p1) => ({value: _p0,rest: _p1}), {});
+export var ListHead = /* [] */(T) => TIN_TYPE(Symbol(), (_p0,_p1) => ({value: _p0,rest: _p1}), {});
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)));
 export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
 return function(list) {

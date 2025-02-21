@@ -342,7 +342,29 @@ export class TypeInferencer {
    }
 
    // Questionable
-   inferSelect(node: Select, scope: Scope) {
+   inferSelect(node: Select, scope: Scope): Type {
+      function findField(
+         fieldName: string,
+         fields: Map<Type, Symbol[]>
+      ): [Type, Symbol] | undefined {
+         let firstFind: [Type, Symbol] | undefined;
+         for (const [type, symbols] of fields) {
+            for (const symbol of symbols) {
+               if (symbol.name === fieldName) {
+                  if (firstFind) {
+                     throw new Error(
+                        "Attempted to access field " +
+                           node.field +
+                           ", but type has multiple fields of that name. Try casting the object first."
+                     );
+                  }
+                  firstFind = [type, symbol];
+               }
+            }
+         }
+         return firstFind;
+      }
+
       let ownerType = this.infer(node.owner, scope);
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
@@ -360,57 +382,74 @@ export class TypeInferencer {
       // if (ownerType instanceof AppliedGenericType) {
       //    ownerType = this.resolvedGeneric(ownerType, scope);
       // }
-      let fields = this.getAllKnownFields(ownerType, scope);
-      fields = fields.filter((f) => f.name === node.field);
-      if (!fields[0] || !fields[0].typeSymbol) {
+      const fields = this.getAllKnownFields(ownerType, scope);
+      const found = findField(node.field, fields);
+      if (!found) {
          throw new Error(
             `Field '${node.field}' could not be found on '` +
                ownerType.toString() +
                "'"
          );
       }
-      let result = fields[0].typeSymbol;
+      found[1].parentComponent = found[0];
+      node.ownerComponent = found[0].name;
+      let result = found[1].typeSymbol;
       if (node.ammortized) {
          result = new OptionalType(result);
       }
       return result;
    }
 
-   getAllKnownFields(type: Type, scope: Scope): Symbol[] {
+   getAllKnownFields(type: Type, scope: Scope): Map<Type, Symbol[]> {
+      function mergeMaps<K, V>(
+         map1: Map<K, V[]>,
+         map2: Map<K, V[]>
+      ): Map<K, V[]> {
+         const mergedMap = new Map(map1);
+
+         map2.forEach((value, key) => {
+            const existing = mergedMap.get(key);
+            mergedMap.set(key, existing ? [...existing, ...value] : [...value]);
+         });
+
+         return mergedMap;
+      }
+
       if (type instanceof NamedType) {
          return this.getAllKnownFields(scope.resolveNamedType(type), scope);
       }
       if (type instanceof StructType) {
-         return type.fields;
+         if (!type.name) {
+            throw new Error("Found anonymous struct");
+         }
+         return new Map([[type, type.fields]]);
       } else if (type instanceof BinaryOpType && type.operator == "&") {
-         return [
-            ...this.getAllKnownFields(type.left, scope),
-            ...this.getAllKnownFields(type.right, scope),
-         ];
+         return mergeMaps(
+            this.getAllKnownFields(type.left, scope),
+            this.getAllKnownFields(type.right, scope)
+         );
       } else if (type instanceof BinaryOpType && type.operator == "|") {
          const leftFields = this.getAllKnownFields(type.left, scope);
          const rightFields = this.getAllKnownFields(type.right, scope);
          const commonFields = [] as Symbol[];
-         for (const leftField of leftFields) {
-            const rightField = rightFields.find(
-               (f) => f.name === leftField.name
-            );
-            if (rightField === undefined) continue;
-            const leftType = scope.resolveNamedType(leftField.typeSymbol);
-            const rightType = scope.resolveNamedType(rightField.typeSymbol);
-            if (rightType.isAssignableTo(leftType, scope)) {
-               commonFields.push(leftField);
-            } else if (leftType.isAssignableTo(rightType, scope)) {
-               commonFields.push(rightField);
-            }
-         }
-         return commonFields;
-      } else if (type instanceof BinaryOpType && type.operator === "&") {
-         const leftFields = this.getAllKnownFields(type.left, scope);
-         const rightFields = this.getAllKnownFields(type.right, scope);
-         return [...leftFields, ...rightFields];
+         // for (const [type, leftFieldsOfType] of leftFields) {
+         //    for (const leftField of leftFieldsOfType) {
+         //       const rightField = [...rightFields.values()]
+         //          .flat()
+         //          .find((f) => f.name === leftField.name);
+         //       if (rightField === undefined) continue;
+         //       const leftType = scope.resolveNamedType(leftField.typeSymbol);
+         //       const rightType = scope.resolveNamedType(rightField.typeSymbol);
+         //       if (rightType.isAssignableTo(leftType, scope)) {
+         //          commonFields.push(leftField);
+         //       } else if (leftType.isAssignableTo(rightType, scope)) {
+         //          commonFields.push(rightField);
+         //       }
+         //    }
+         // }
+         return new Map();
       } else if (type instanceof OptionalType) {
-         return [];
+         return new Map();
          // const originalFields = this.getAllKnownFields(type.type, scope);
          // return originalFields.map((f) => {
          //    return new Symbol(
@@ -428,7 +467,7 @@ export class TypeInferencer {
       } else {
          throw new Error("Could not deduce fields of type " + type.toString());
       }
-      return [];
+      return new Map();
    }
 
    inferBlock(node: Block, scope: Scope) {

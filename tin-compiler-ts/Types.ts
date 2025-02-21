@@ -26,6 +26,9 @@ export class Type {
       if (!other) {
          throw new Error("Found undefined type");
       }
+      if (other instanceof AnyTypeClass) {
+         return true;
+      }
       return this.extends(other, scope) || other.isExtendedBy(this, scope);
    }
 
@@ -471,6 +474,9 @@ export class BinaryOpType extends Type {
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
+      if (super.isAssignableTo(other, scope)) {
+         return true;
+      }
       if (
          this.operator === "&" &&
          other instanceof BinaryOpType &&

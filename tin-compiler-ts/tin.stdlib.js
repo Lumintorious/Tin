@@ -1,24 +1,18 @@
-function TIN_TYPE(typeId, constructorRaw, descriptor) {
+function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		if (result !== undefined) {
-			result.__tin_typeIds = [typeId]
-		}
-		return result;
+		return {
+			[typeId]: result
+		};
 	}
 	constructor._tinFields = descriptor;
-	constructor._tinTypeId = typeId;
-	constructor["&"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
-	constructor["|"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
+	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
 	constructor.__is_child = (obj) =>
-		obj.__tin_typeIds.includes(typeId)
+		Reflect.ownKeys(obj).includes(typeId)
+	// obj.__tin_typeIds.includes(typeId)
 
 	return constructor;
 }
@@ -31,7 +25,6 @@ const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 		return obj1
 	}
 	const result = { ...obj1, ...obj2 }
-	result.__tin_typeIds = [...(obj1.__tin_typeIds ?? []), ... (obj2.__tin_typeIds ?? [])]
 	return result
 }
 
@@ -45,7 +38,8 @@ const Type = TIN_TYPE("", (i) => null, {})
 const Int = TIN_TYPE("", (i) => Number(i), {})
 const String = TIN_TYPE("", (i) => String(i), {})
 const Void = TIN_TYPE("", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", (args) => ({
+const arraySymbol = Symbol()
+const Array = (T) => TIN_TYPE(arraySymbol, (args) => ({
 	length() {
 		return args.length;
 	},
@@ -71,7 +65,7 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
-	if (obj.__tin_typeIds.includes("Array")) {
+	if (Reflect.ownKeys(obj).includes(arraySymbol)) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
 			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
@@ -80,16 +74,28 @@ function makeString(obj) {
 	}
 
 	if (typeof obj === 'object') {
-		let result = 'data(';
-		for (let key in obj) {
-			if (obj.hasOwnProperty(key)) {
-				if (typeof obj[key] === "function" || key.startsWith("__")) {
-					continue
-				}
-				result += makeString(key) + '=' + makeString(obj[key]) + ',';
+		let result = '';
+		let number = 0;
+		for (let componentKey of Reflect.ownKeys(obj)) {
+			const component = obj[componentKey]
+			if (++number > 1) {
+				result += " & "
 			}
+			result += componentKey + "("
+			for (let key in component) {
+				if (component.hasOwnProperty(key)) {
+					if (typeof component[key] === "function" || key.startsWith("__")) {
+						continue
+					}
+					result += makeString(key) + '=' + makeString(component[key]) + ',';
+				}
+			}
+			if (result.length > 1 && result[result.length - 1] === ",") {
+				result = result.slice(0, -1); // Remove trailing comma and space
+			}
+			result += ")"
 		}
-		if (result.length > 1) {
+		if (result.length > 1 && result[result.length - 1] === ")") {
 			result = result.slice(0, -1); // Remove trailing comma and space
 		}
 		return result + ')';

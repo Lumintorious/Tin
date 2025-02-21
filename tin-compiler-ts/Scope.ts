@@ -33,6 +33,7 @@ export class Symbol {
    run: number = 0;
    position?: TokenPos;
    index?: number;
+   parentComponent?: Type; // If a field on type ABC, then parentComponent is ABC
    shadowing?: Symbol;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
       this.name = name;

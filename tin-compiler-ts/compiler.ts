@@ -210,7 +210,7 @@ async function compile(
 
    // TYPE CHECKING
    const scopes = [] as any;
-   const importedScopes = imports.forEach((i, k) =>
+   imports.forEach((i, k) =>
       scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
    );
    const context = new TypePhaseContext(ast, scopes);

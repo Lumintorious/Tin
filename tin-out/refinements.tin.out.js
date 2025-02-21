@@ -1,19 +1,12 @@
 function TIN_TYPE(typeId, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		if (result !== undefined) {
-			result.__tin_typeIds = [typeId]
-		}
-		return result;
+		return {
+			[typeId]: result
+		};
 	}
 	constructor._tinFields = descriptor;
-	constructor._tinTypeId = typeId;
-	constructor["&"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
-	constructor["|"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
+	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
@@ -108,9 +101,9 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Positive = TIN_TYPE("bdce5fc4-cac9-409f-b1fd-21a1b5dd56fa", () => undefined, {});
-export var Negative = TIN_TYPE("d6549ec7-bffd-4a40-922c-7d434ea71f5a", () => undefined, {});
-export var NonZero = TIN_TYPE("28809750-8928-4975-9784-a57bd203f7f2", () => undefined, {});
+export var Positive = TIN_TYPE(Symbol(), () => undefined, {});
+export var Negative = TIN_TYPE(Symbol(), () => undefined, {});
+export var NonZero = TIN_TYPE(Symbol(), () => undefined, {});
 export var checkNonZero/* (Number) => Number & NonZero?*/ = function(n) {
 return ((n == 0) ? (nothing) : ((n) /* as _TIN_INTERSECT_OBJECTS(Number, NonZero) */)) 
 }
