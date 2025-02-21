@@ -1,24 +1,3 @@
-#aaa
+Thing = (String) => String
 
-#aaa
 
-#aaa 
-
-Cat = type:
-	name: String
-	age: Number
-
-Mech = type:
-	name: String
-	material: String
-
-Dog = type:
-	name: String
-
-Mechacat = Mech & Cat
-
-cat: Mech = Cat("C", 1) & Mech("KT-1", "Platinum")
-print(cat)
-if cat :: Cat,
-	print(cat)
-print(cat.name)

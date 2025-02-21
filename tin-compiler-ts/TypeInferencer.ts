@@ -378,10 +378,6 @@ export class TypeInferencer {
       if (ownerType instanceof NamedType) {
          ownerType = scope.lookupType(ownerType.name);
       }
-      // HERE
-      // if (ownerType instanceof AppliedGenericType) {
-      //    ownerType = this.resolvedGeneric(ownerType, scope);
-      // }
       const fields = this.getAllKnownFields(ownerType, scope);
       const found = findField(node.field, fields);
       if (!found) {
@@ -420,7 +416,7 @@ export class TypeInferencer {
       }
       if (type instanceof StructType) {
          if (!type.name) {
-            throw new Error("Found anonymous struct");
+            throw new Error("Found anonymous struct " + type.toString());
          }
          return new Map([[type, type.fields]]);
       } else if (type instanceof BinaryOpType && type.operator == "&") {

@@ -34,12 +34,11 @@ const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 
 const nothing = undefined;
 
-const Type = TIN_TYPE("", (i) => null, {})
-const Int = TIN_TYPE("", (i) => Number(i), {})
-const String = TIN_TYPE("", (i) => String(i), {})
-const Void = TIN_TYPE("", (i) => null, {})
-const arraySymbol = Symbol()
-const Array = (T) => TIN_TYPE(arraySymbol, (args) => ({
+const Type = TIN_TYPE("", "", (i) => null, {})
+const Int = TIN_TYPE("", "", (i) => Number(i), {})
+const String = TIN_TYPE("", "", (i) => String(i), {})
+const Void = TIN_TYPE("", "", (i) => null, {})
+const Array = (T) => TIN_TYPE("Array", "", (args) => ({
 	length() {
 		return args.length;
 	},
@@ -51,6 +50,7 @@ const Array = (T) => TIN_TYPE(arraySymbol, (args) => ({
 		return "Array(" + parts + ")"
 	}
 }), {})
+Array._typeId = "Array"
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -65,7 +65,7 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
-	if (Reflect.ownKeys(obj).includes(arraySymbol)) {
+	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
 			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")

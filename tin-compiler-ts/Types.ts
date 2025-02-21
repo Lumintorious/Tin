@@ -395,6 +395,9 @@ export class AppliedGenericType extends Type {
       super("AppliedGenericType");
       this.callee = callee;
       this.parameterTypes = parameterTypes;
+      if (callee.name) {
+         this.name = callee.name;
+      }
    }
 
    extends(other: Type, scope: Scope) {
@@ -404,9 +407,6 @@ export class AppliedGenericType extends Type {
       if (this.resolved) {
          return this.resolved.extends(other, scope);
       } else if (other instanceof AppliedGenericType) {
-         console.log(
-            "Checking " + this.toString() + " vs. " + other.toString()
-         );
          if (
             scope
                .resolveAppliedGenericTypes(this)

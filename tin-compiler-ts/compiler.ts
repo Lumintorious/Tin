@@ -9,7 +9,7 @@ import files from "node:fs/promises";
 import path from "node:path";
 import { TypePhaseContext } from "./Scope";
 
-Error.stackTraceLimit = 30;
+Error.stackTraceLimit = 12;
 const SRC_PATH = path.resolve(process.cwd(), "src");
 const OUT_PATH = path.resolve(process.cwd(), "tin-out");
 
@@ -189,58 +189,66 @@ async function compile(
    run: boolean = false,
    importsCache: Map<String, CompileResult>
 ): Promise<CompileResult> {
-   // READ
-   const inputContents: string = await files.readFile(inputFile, "utf-8");
-   ensureParentDirs(inputFile);
-   // LEXER
-   const tokens = lexerPhase(inputContents);
-   await files.writeFile(
-      fromSrcToOut(inputFile + ".tok.txt"),
-      tokenTablePrint(tokens)
-   );
-
-   // PARSER
-   let ast = parserPhase(tokens);
-   await files.writeFile(
-      fromSrcToOut(inputFile + ".ast.yaml"),
-      objectToYAML(ast, ["position", "fromTo", "isTypeLevel", "position"])
-   );
-   // IMPORTS
-   const imports = await getImports(ast, importsCache);
-
-   // TYPE CHECKING
-   const scopes = [] as any;
-   imports.forEach((i, k) =>
-      scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
-   );
-   const context = new TypePhaseContext(ast, scopes);
-   context.checker.typeCheck(ast, context.fileScope);
-   context.errors.throwAll();
-
-   // TRANSLATION
-   const translatedString = translateFile(ast, context.fileScope);
-   await files.writeFile(fromSrcToOut(inputFile + ".out.js"), translatedString);
-
-   console.log("Compiled " + inputFile);
-   // RUNNING
-   if (run) {
-      console.log("==================== Compiled! ====================");
-      exec(
-         'cd "tin-out"' + " && node " + fromSrcToOut(inputFile + ".out.js"),
-         (_, out, err) => {
-            console.log(out);
-            console.log(err);
-         }
+   try {
+      // READ
+      const inputContents: string = await files.readFile(inputFile, "utf-8");
+      ensureParentDirs(inputFile);
+      // LEXER
+      const tokens = lexerPhase(inputContents);
+      await files.writeFile(
+         fromSrcToOut(inputFile + ".tok.txt"),
+         tokenTablePrint(tokens)
       );
-   } else {
+
+      // PARSER
+      let ast = parserPhase(tokens);
+      await files.writeFile(
+         fromSrcToOut(inputFile + ".ast.yaml"),
+         objectToYAML(ast, ["position", "fromTo", "isTypeLevel", "position"])
+      );
+      // IMPORTS
+      const imports = await getImports(ast, importsCache);
+
+      // TYPE CHECKING
+      const scopes = [] as any;
+      imports.forEach((i, k) =>
+         scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
+      );
+      const context = new TypePhaseContext(ast, scopes);
+      context.checker.typeCheck(ast, context.fileScope);
+      context.errors.throwAll();
+
+      // TRANSLATION
+      const translatedString = translateFile(ast, context.fileScope);
+      await files.writeFile(
+         fromSrcToOut(inputFile + ".out.js"),
+         translatedString
+      );
+
+      console.log("Compiled " + inputFile);
+      // RUNNING
+      if (run) {
+         console.log("==================== Compiled! ====================");
+         exec(
+            'cd "tin-out"' + " && node " + fromSrcToOut(inputFile + ".out.js"),
+            (_, out, err) => {
+               console.log(out);
+               console.log(err);
+            }
+         );
+      } else {
+      }
+      return {
+         inputText: inputContents,
+         tokens,
+         ast,
+         typePhaseContext: context,
+         outputText: translatedString,
+      };
+   } catch (e) {
+      console.error(e);
+      process.exit(0);
    }
-   return {
-      inputText: inputContents,
-      tokens,
-      ast,
-      typePhaseContext: context,
-      outputText: translatedString,
-   };
 }
 
 const allPath = path.resolve(process.cwd(), "src", inputFile);

@@ -209,7 +209,7 @@ class OptionalType extends Type {
 		this.type = type;
 	}
 	isAssignableTo(other, scope) {
-		console.log("Checking " + this.toString() + " vs. " + other.toString());
+		console.log("Checking " + this.toString() + " vs. " + other.toString())
 		return (
 			// this.type.isAssignableTo(other, scope) ||
 			this.extends(other, scope) || other.isExtendedBy(this, scope));
@@ -331,7 +331,6 @@ class AppliedGenericType extends Type {
 			return this.resolved.extends(other, scope);
 		}
 		else if (other instanceof AppliedGenericType) {
-			console.log("Checking " + this.toString() + " vs. " + other.toString());
 			if (scope
 				.resolveAppliedGenericTypes(this)
 				.extends(scope.resolveAppliedGenericTypes(other), scope)) {

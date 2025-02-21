@@ -1,4 +1,4 @@
-function TIN_TYPE(typeId, constructorRaw, descriptor) {
+function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
 		return {
@@ -11,7 +11,8 @@ function TIN_TYPE(typeId, constructorRaw, descriptor) {
 		return descriptor.toString()
 	}
 	constructor.__is_child = (obj) =>
-		obj.__tin_typeIds.includes(typeId)
+		Reflect.ownKeys(obj).includes(typeId)
+	// obj.__tin_typeIds.includes(typeId)
 
 	return constructor;
 }
@@ -24,7 +25,6 @@ const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 		return obj1
 	}
 	const result = { ...obj1, ...obj2 }
-	result.__tin_typeIds = [...(obj1.__tin_typeIds ?? []), ... (obj2.__tin_typeIds ?? [])]
 	return result
 }
 
@@ -34,11 +34,11 @@ const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 
 const nothing = undefined;
 
-const Type = TIN_TYPE("", (i) => null, {})
-const Int = TIN_TYPE("", (i) => Number(i), {})
-const String = TIN_TYPE("", (i) => String(i), {})
-const Void = TIN_TYPE("", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", (args) => ({
+const Type = TIN_TYPE("", "", (i) => null, {})
+const Int = TIN_TYPE("", "", (i) => Number(i), {})
+const String = TIN_TYPE("", "", (i) => String(i), {})
+const Void = TIN_TYPE("", "", (i) => null, {})
+const Array = (T) => TIN_TYPE("Array", "", (args) => ({
 	length() {
 		return args.length;
 	},
@@ -50,6 +50,7 @@ const Array = (T) => TIN_TYPE("Array", (args) => ({
 		return "Array(" + parts + ")"
 	}
 }), {})
+Array._typeId = "Array"
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -64,7 +65,7 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
-	if (obj.__tin_typeIds.includes("Array")) {
+	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
 			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
@@ -73,16 +74,28 @@ function makeString(obj) {
 	}
 
 	if (typeof obj === 'object') {
-		let result = 'data(';
-		for (let key in obj) {
-			if (obj.hasOwnProperty(key)) {
-				if (typeof obj[key] === "function" || key.startsWith("__")) {
-					continue
-				}
-				result += makeString(key) + '=' + makeString(obj[key]) + ',';
+		let result = '';
+		let number = 0;
+		for (let componentKey of Reflect.ownKeys(obj)) {
+			const component = obj[componentKey]
+			if (++number > 1) {
+				result += " & "
 			}
+			result += componentKey + "("
+			for (let key in component) {
+				if (component.hasOwnProperty(key)) {
+					if (typeof component[key] === "function" || key.startsWith("__")) {
+						continue
+					}
+					result += makeString(key) + '=' + makeString(component[key]) + ',';
+				}
+			}
+			if (result.length > 1 && result[result.length - 1] === ",") {
+				result = result.slice(0, -1); // Remove trailing comma and space
+			}
+			result += ")"
 		}
-		if (result.length > 1) {
+		if (result.length > 1 && result[result.length - 1] === ")") {
 			result = result.slice(0, -1); // Remove trailing comma and space
 		}
 		return result + ')';
@@ -101,16 +114,16 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE(Symbol(), (_p0) => ({next: _p0}), {});
-export var Iterable = /* [] */(T) => TIN_TYPE(Symbol(), (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {});
+export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "5091729c-a372-4a7a-bfe9-68142c9f1c80", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
+export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "f292c69e-591e-4dff-8718-4d3c9b64d551", (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {}); Iterable._typeId = "Iterable";;
 export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
 return function(getIterator) {
 var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {
 var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator.next();
+var current/* T?*/ = iterator[Iterator._typeId].next();
 while (current != nothing) {
  fn(current);
-current = iterator.next() 
+current = iterator[Iterator._typeId].next() 
 }
 };
 var mkString/* (String, String, String) => String*/ = function(separator = ", ", left = "", right = "") {

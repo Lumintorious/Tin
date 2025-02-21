@@ -34,12 +34,11 @@ const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 
 const nothing = undefined;
 
-const Type = TIN_TYPE("", (i) => null, {})
-const Int = TIN_TYPE("", (i) => Number(i), {})
-const String = TIN_TYPE("", (i) => String(i), {})
-const Void = TIN_TYPE("", (i) => null, {})
-const arraySymbol = Symbol()
-const Array = (T) => TIN_TYPE(arraySymbol, (args) => ({
+const Type = TIN_TYPE("", "", (i) => null, {})
+const Int = TIN_TYPE("", "", (i) => Number(i), {})
+const String = TIN_TYPE("", "", (i) => String(i), {})
+const Void = TIN_TYPE("", "", (i) => null, {})
+const Array = (T) => TIN_TYPE("Array", "", (args) => ({
 	length() {
 		return args.length;
 	},
@@ -51,6 +50,7 @@ const Array = (T) => TIN_TYPE(arraySymbol, (args) => ({
 		return "Array(" + parts + ")"
 	}
 }), {})
+Array._typeId = "Array"
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -65,7 +65,7 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
-	if (Reflect.ownKeys(obj).includes(arraySymbol)) {
+	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
 			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
@@ -114,11 +114,4 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Cat = TIN_TYPE("Cat", "cfb3a29b-98af-475f-a853-b0e72bcff409", (_p0,_p1) => ({name: _p0,age: _p1}), {});
-export var Mech = TIN_TYPE("Mech", "86eecc63-e39a-4d9a-89fe-b40b5bf4b2e0", (_p0,_p1) => ({name: _p0,material: _p1}), {});
-export var Dog = TIN_TYPE("Dog", "b9c8f3ec-6cee-4748-83b7-b10a98a6e30f", (_p0) => ({name: _p0}), {});
-export var Mechacat = _TIN_INTERSECT_OBJECTS(Mech, Cat);
-export var cat/* Mech*/ = _TIN_INTERSECT_OBJECTS(Cat("C", 1), Mech("KT-1", "Platinum"));
-print(cat);
-((Cat.__is_child(cat) ) ? (print(cat)) : (null)) ;
-print(cat[Mech._typeId].name)
+export var Thing = (String) => String

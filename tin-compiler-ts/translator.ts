@@ -299,7 +299,9 @@ function translate(
       return `TIN_TYPE("${term.name}", "${randomUUID()}", ${createConstructor(
          term,
          scope
-      )}, {${/*term.fieldDefs.map((f) => translate(f, scope))*/ ""}})`;
+      )}, {${/*term.fieldDefs.map((f) => translate(f, scope))*/ ""}}); ${
+         term.name
+      }._typeId = "${term.name}";`;
 
       // DataDef
    } else if (term instanceof DataDef) {

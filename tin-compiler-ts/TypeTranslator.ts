@@ -70,7 +70,6 @@ export class TypeTranslator {
                   : undefined;
                return new GenericNamedType(name, extendedType);
             }
-            console.log(node);
             return new Type();
          case "UnaryOperator":
             if (!(node instanceof UnaryOperator)) {

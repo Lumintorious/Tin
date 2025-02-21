@@ -25,7 +25,7 @@ listOf = [T] -> (arr: Array[T]) ->
 		list = ListHead[T](arr.at(i), list)
 	list & makeIterable[T](() -> listIterator[T](list))
 
-listFromIterator = [T] -> (getIterator: () =>Iterator[T]) ->
+listFromIterator = [T] -> (getIterator: () => Iterator[T]) ->
 	list: ListHead[T]? = nothing
 	iterator = getIterator()
 	current = iterator.next()

@@ -49,7 +49,7 @@ statements:
         column: 1
         absolute: 8
       end:
-        line: 7
+        line: 4
         column: 1
         absolute: 44
   - tag: Assignment
@@ -71,11 +71,11 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 7
+              line: 4
               column: 13
               absolute: 57
             end:
-              line: 7
+              line: 4
               column: 15
               absolute: 58
       returnType:
@@ -121,11 +121,11 @@ statements:
                   isTypeLevel: true
                   position:
                     start:
-                      line: 11
+                      line: 6
                       column: 13
                       absolute: 126
                     end:
-                      line: 11
+                      line: 6
                       column: 20
                       absolute: 127
                 - tag: Assignment
@@ -138,11 +138,11 @@ statements:
                   isTypeLevel: true
                   position:
                     start:
-                      line: 11
+                      line: 6
                       column: 21
                       absolute: 134
                     end:
-                      line: 11
+                      line: 6
                       column: 28
                       absolute: 135
                 - tag: Assignment
@@ -155,11 +155,11 @@ statements:
                   isTypeLevel: true
                   position:
                     start:
-                      line: 11
+                      line: 6
                       column: 29
                       absolute: 142
                     end:
-                      line: 11
+                      line: 6
                       column: 36
                       absolute: 143
               returnType:
@@ -181,11 +181,11 @@ statements:
                     value: T
                     position:
                       start:
-                        line: 13
+                        line: 7
                         column: 30
                         absolute: 185
                       end:
-                        line: 13
+                        line: 7
                         column: 31
                         absolute: 185
             isTypeLevel: true
@@ -193,11 +193,11 @@ statements:
     isTypeLevel: true
     position:
       start:
-        line: 7
+        line: 4
         column: 1
         absolute: 52
       end:
-        line: 17
+        line: 9
         column: 1
         absolute: 190
   - tag: Assignment
@@ -219,11 +219,11 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 17
+              line: 9
               column: 17
               absolute: 207
             end:
-              line: 17
+              line: 9
               column: 19
               absolute: 208
       block:
@@ -252,11 +252,11 @@ statements:
                         value: T
                         position:
                           start:
-                            line: 17
+                            line: 9
                             column: 52
                             absolute: 242
                           end:
-                            line: 17
+                            line: 9
                             column: 53
                             absolute: 242
                 isDeclaration: false
@@ -291,11 +291,11 @@ statements:
                               isTypeLevel: true
                               position:
                                 start:
-                                  line: 19
+                                  line: 10
                                   column: 18
                                   absolute: 267
                                 end:
-                                  line: 19
+                                  line: 10
                                   column: 20
                                   absolute: 268
                           returnType:
@@ -305,11 +305,11 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 19
+                            line: 10
                             column: 13
                             absolute: 263
                           end:
-                            line: 19
+                            line: 10
                             column: 32
                             absolute: 280
                     block:
@@ -332,11 +332,11 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 21
+                              line: 11
                               column: 3
                               absolute: 295
                             end:
-                              line: 23
+                              line: 12
                               column: 1
                               absolute: 313
                         - tag: Assignment
@@ -360,11 +360,11 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 23
+                              line: 12
                               column: 3
                               absolute: 322
                             end:
-                              line: 25
+                              line: 13
                               column: 1
                               absolute: 342
                         - tag: WhileLoop
@@ -391,11 +391,11 @@ statements:
                                     value: current
                                 position:
                                   start:
-                                    line: 27
+                                    line: 14
                                     column: 6
                                     absolute: 379
                                   end:
-                                    line: 27
+                                    line: 14
                                     column: 15
                                     absolute: 387
                               - tag: Assignment
@@ -419,11 +419,11 @@ statements:
                                 isTypeLevel: false
                                 position:
                                   start:
-                                    line: 29
+                                    line: 15
                                     column: 4
                                     absolute: 399
                                   end:
-                                    line: 31
+                                    line: 16
                                     column: 1
                                     absolute: 419
                     explicitType: undefined
@@ -431,11 +431,11 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 19
+                      line: 10
                       column: 2
                       absolute: 257
                     end:
-                      line: 31
+                      line: 16
                       column: 10
                       absolute: 428
                 - tag: Assignment
@@ -464,11 +464,11 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 31
+                            line: 16
                             column: 14
                             absolute: 441
                           end:
-                            line: 31
+                            line: 16
                             column: 39
                             absolute: 457
                       - tag: Assignment
@@ -488,11 +488,11 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 31
+                            line: 16
                             column: 40
                             absolute: 462
                           end:
-                            line: 31
+                            line: 16
                             column: 58
                             absolute: 476
                       - tag: Assignment
@@ -512,11 +512,11 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 31
+                            line: 16
                             column: 59
                             absolute: 482
                           end:
-                            line: 31
+                            line: 16
                             column: 78
                             absolute: 496
                     block:
@@ -536,11 +536,11 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 33
+                              line: 17
                               column: 3
                               absolute: 509
                             end:
-                              line: 35
+                              line: 18
                               column: 1
                               absolute: 516
                         - tag: Assignment
@@ -565,11 +565,11 @@ statements:
                                 isTypeLevel: false
                                 position:
                                   start:
-                                    line: 35
+                                    line: 18
                                     column: 9
                                     absolute: 525
                                   end:
-                                    line: 35
+                                    line: 18
                                     column: 14
                                     absolute: 529
                             block:
@@ -604,11 +604,11 @@ statements:
                                   isTypeLevel: false
                                   position:
                                     start:
-                                      line: 37
+                                      line: 19
                                       column: 4
                                       absolute: 542
                                     end:
-                                      line: 39
+                                      line: 20
                                       column: 1
                                       absolute: 581
                                 - tag: Change
@@ -663,11 +663,11 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 35
+                              line: 18
                               column: 3
                               absolute: 520
                             end:
-                              line: 41
+                              line: 21
                               column: 10
                               absolute: 628
                         - tag: RoundApply
@@ -681,11 +681,11 @@ statements:
                               value: fn
                           position:
                             start:
-                              line: 41
+                              line: 21
                               column: 10
                               absolute: 629
                             end:
-                              line: 41
+                              line: 21
                               column: 14
                               absolute: 632
                         - tag: BinaryExpression
@@ -735,11 +735,11 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 31
+                      line: 16
                       column: 2
                       absolute: 428
                     end:
-                      line: 45
+                      line: 23
                       column: 10
                       absolute: 670
                 - tag: RoundApply
@@ -754,11 +754,11 @@ statements:
                         value: T
                         position:
                           start:
-                            line: 45
+                            line: 23
                             column: 11
                             absolute: 672
                           end:
-                            line: 45
+                            line: 23
                             column: 12
                             absolute: 672
                   args:
@@ -773,18 +773,18 @@ statements:
                       value: getIterator
                   position:
                     start:
-                      line: 45
+                      line: 23
                       column: 13
                       absolute: 674
                     end:
-                      line: 45
+                      line: 23
                       column: 45
                       absolute: 705
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 17
+        line: 9
         column: 1
         absolute: 202
       end: undefined

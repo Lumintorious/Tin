@@ -14,7 +14,7 @@ import {
 } from "./Parser";
 import { Symbol, Scope, TypePhaseContext } from "./Scope";
 import { StructType, SquareTypeToTypeLambdaType } from "./Types";
-import { Select, TypeDef } from "./Parser";
+import { Select, TypeDef, SquareTypeToTypeLambda } from "./Parser";
 import {
    OptionalType,
    GenericNamedType,
@@ -100,13 +100,14 @@ export class TypeBuilder {
    }
 
    buildSelect(node: Select, scope: Scope) {
+      this.context.inferencer.infer(node, scope); // To assign ownerComponent
       let parentType = this.context.inferencer.infer(node.owner, scope);
+
       let ammortized = false;
       if (parentType instanceof OptionalType && node.ammortized) {
          parentType = parentType.type;
          ammortized = true;
       }
-      console.log("SLEEECT", parentType.toString());
       // const fields = this.context.inferencer.getAllKnownFields()
    }
 
@@ -209,6 +210,12 @@ export class TypeBuilder {
             }
             if (node.value instanceof TypeDef) {
                node.value.name = node.lhs.value;
+            }
+            if (
+               node.value instanceof SquareTypeToTypeLambda &&
+               node.value.returnType instanceof TypeDef
+            ) {
+               node.value.returnType.name = node.lhs.value;
             }
             // Possibly needs recursion
             if (

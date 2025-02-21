@@ -5,237 +5,38 @@ statements:
     isParameter: false
     lhs:
       tag: Identifier
-      value: Cat
+      value: Thing
     value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: name
-          type:
+      tag: RoundTypeToTypeLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
             tag: Identifier
             value: String
+          isDeclaration: false
           isTypeLevel: true
-        - tag: FieldDef
-          name: age
-          type:
-            tag: Identifier
-            value: Number
-          isTypeLevel: true
-    isDeclaration: true
-    isTypeLevel: true
-    position:
-      start:
-        line: 7
-        column: 1
-        absolute: 28
-      end:
-        line: 11
-        column: 1
-        absolute: 69
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: Mech
-    value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: name
-          type:
-            tag: Identifier
-            value: String
-          isTypeLevel: true
-        - tag: FieldDef
-          name: material
-          type:
-            tag: Identifier
-            value: String
-          isTypeLevel: true
-    isDeclaration: true
-    isTypeLevel: true
-    position:
-      start:
-        line: 11
-        column: 1
-        absolute: 73
-      end:
-        line: 15
-        column: 1
-        absolute: 119
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: Dog
-    value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: name
-          type:
-            tag: Identifier
-            value: String
-          isTypeLevel: true
-    isDeclaration: true
-    isTypeLevel: true
-    position:
-      start:
-        line: 15
-        column: 1
-        absolute: 122
-      end:
-        line: 18
-        column: 1
-        absolute: 149
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: Mechacat
-    value:
-      tag: BinaryExpression
-      left:
-        tag: Identifier
-        value: Mech
-      operator: &
-      right:
-        tag: Identifier
-        value: Cat
-    isDeclaration: true
-    isTypeLevel: true
-    position:
-      start:
-        line: 18
-        column: 1
-        absolute: 157
-      end:
-        line: 19
-        column: 1
-        absolute: 172
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: cat
-    value:
-      tag: BinaryExpression
-      left:
-        tag: RoundApply
-        calledInsteadOfSquare: false
-        callee:
-          tag: Identifier
-          value: Cat
-        args:
-          - tag: Literal
-            type: String
-            value: C
-          - tag: Literal
-            type: Number
-            value: 1
-      operator: &
-      right:
-        tag: RoundApply
-        calledInsteadOfSquare: false
-        callee:
-          tag: Identifier
-          value: Mech
-        args:
-          - tag: Literal
-            type: String
-            value: KT-1
-          - tag: Literal
-            type: String
-            value: Platinum
-    type:
-      tag: Identifier
-      value: Mech
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 20
-        column: 1
-        absolute: 177
-      end:
-        line: 21
-        column: 1
-        absolute: 226
-  - tag: RoundApply
-    calledInsteadOfSquare: false
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: Identifier
-        value: cat
-    position:
-      start:
-        line: 21
-        column: 6
-        absolute: 232
-      end:
-        line: 21
-        column: 11
-        absolute: 236
-  - tag: IfStatement
-    condition:
-      tag: TypeCheck
-      term:
-        tag: Identifier
-        value: cat
-      type:
-        tag: Identifier
-        value: Cat
-    trueBranch:
-      tag: Block
-      statements:
-        - tag: RoundApply
-          calledInsteadOfSquare: false
-          callee:
-            tag: Identifier
-            value: print
-          args:
-            0:
-              tag: Identifier
-              value: cat
           position:
             start:
-              line: 23
-              column: 7
-              absolute: 261
+              line: 1
+              column: 10
+              absolute: 15
             end:
-              line: 23
-              column: 12
-              absolute: 265
-    falseBranch:
-      tag: Literal
-      type: Void
-      value: null
-  - tag: RoundApply
-    calledInsteadOfSquare: false
-    callee:
-      tag: Identifier
-      value: print
-    args:
-      0:
-        tag: Select
-        ammortized: false
-        owner:
-          tag: Identifier
-          value: cat
-        field: name
+              line: 1
+              column: 17
+              absolute: 16
+      returnType:
+        tag: Identifier
+        value: String
+    isDeclaration: true
+    isTypeLevel: true
     position:
       start:
-        line: 24
-        column: 6
-        absolute: 273
+        line: 1
+        column: 1
+        absolute: 5
       end:
-        line: 24
-        column: 16
-        absolute: 282
+        line: 2
+        column: 1
+        absolute: 28

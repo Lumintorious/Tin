@@ -157,9 +157,9 @@ export class Scope {
             symbol.run = this.run;
          }
       }
-      console.log(
-         `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
-      );
+      // console.log(
+      //    `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
+      // );
       symbol.run = this.run;
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
@@ -190,10 +190,9 @@ export class Scope {
             typeSymbol.run = this.run;
          }
       }
+      typeSymbol.name = name;
       console.log(name + ": " + typeSymbol);
       typeSymbol.run = this.run;
-      // [T] => type:
-      //   value: T
       if (
          typeSymbol instanceof SquareTypeToTypeLambdaType &&
          typeSymbol.returnType instanceof StructType
@@ -347,6 +346,11 @@ export class Scope {
          params[expectedArgs[i].name] = calledArgs[i];
       }
       type.resolved = this.resolveGenericTypes(typeCallee.returnType, params);
+      if (typeCallee.returnType.name && !type.resolved.name) {
+         type.resolved.name = typeCallee.returnType.name;
+      } else if (typeCallee.name && !type.resolved.name) {
+         type.resolved.name = typeCallee.name;
+      }
       return type.resolved;
    }
 
@@ -515,13 +519,13 @@ export class TypePhaseContext {
             )
          ),
       ]);
-      this.languageScope.declareType(
-         "Array",
-         new SquareTypeToTypeLambdaType(
-            [new GenericNamedType("T")],
-            arrayStruct
-         )
+      const arrayLambdaType = new SquareTypeToTypeLambdaType(
+         [new GenericNamedType("T")],
+         arrayStruct
       );
+      arrayStruct.name = "Array";
+      arrayLambdaType.name = "Array";
+      this.languageScope.declareType("Array", arrayLambdaType);
       this.languageScope.declare(
          "Array",
          new Symbol(

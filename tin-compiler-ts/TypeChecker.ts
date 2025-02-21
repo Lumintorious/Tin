@@ -109,7 +109,6 @@ export class TypeChecker {
       this.typeCheck(node.value, scope);
       const leftType = this.context.inferencer.infer(node.lhs, scope);
       const rightType = this.context.inferencer.infer(node.value, scope);
-      console.log(leftType.toString());
       if (!rightType.isAssignableTo(leftType, scope)) {
          if (node.lhs instanceof Identifier) {
             const symbol = scope.lookup(node.lhs.value);
