@@ -274,6 +274,16 @@ function translate(
 
       // RoundApply
    } else if (term instanceof RoundApply) {
+      let args = [];
+      for (let [from, to] of term.paramOrder) {
+         args[to] = term.args[from];
+      }
+      for (let i = 0; i < args.length; i++) {
+         if (!Object.hasOwn(args, i)) {
+            args[i] = undefined;
+         }
+      }
+      // console.log(args);
       const takesVarargs = term.takesVarargs;
       const open = takesVarargs ? "(Array(0)([" : "(";
       const close = takesVarargs ? "]))" : ")";
@@ -281,7 +291,11 @@ function translate(
          (term.calledInsteadOfSquare ? "() =>" : "") +
          translate(term.callee, scope) +
          open +
-         term.args.map((arg) => translate(arg[1], scope)).join(", ") +
+         args
+            .map((arg) => {
+               return !arg ? "undefined" : translate(arg[1], scope);
+            })
+            .join(", ") +
          close
       );
 

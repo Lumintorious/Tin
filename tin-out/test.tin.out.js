@@ -120,10 +120,7 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Thing = TIN_LAMBDA_TYPE("Lambda", [String, String], String);
-export var th/* [T] => (String, String) => String*/ = function(T) {
-return function(n, x = "Hello") {
-return "" + n + " " + x + "!"
-}
+export var greet/* (String, String) => String*/ = function(greet = "Hello", target = "World") {
+return "" + greet + ", " + target + "!"
 };
-print(th.call('Type', 2)("Hello", "World"))
+print(greet(undefined, "Mom"))

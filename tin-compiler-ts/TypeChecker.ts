@@ -327,12 +327,13 @@ export class TypeChecker {
             }
          } else {
             let hasThisParamIncrement = typeSymbol.isFirstParamThis ? 1 : 0;
-            this.typeCheckLambdaCall(
+            const paramOrder = this.typeCheckLambdaCall(
                apply,
                apply.args,
                typeSymbol.params,
                scope
             );
+            apply.paramOrder = paramOrder;
          }
       }
    }
@@ -342,7 +343,7 @@ export class TypeChecker {
       applyArgs: [string, Term][], // Positional arguments, with possible names
       expectedParams: RoundLambdaParamType[], // Expected parameter definitions
       scope: Scope
-   ): boolean {
+   ): [number, number][] /* How to shuffle parameters when translating */ {
       const termName =
          term.callee instanceof Identifier
             ? term.callee.value
@@ -350,18 +351,12 @@ export class TypeChecker {
       let fulfilledNamedParams = new Set<String>();
       let fulfilledNumericParams = new Set<Number>();
       let unfulfilledExpectedParams = [...expectedParams];
+      let paramOrder: [number, number][] = [];
 
       let namedPhase = false;
       for (let i = 0; i < applyArgs.length; i++) {
          const applyArg = applyArgs[i];
          const applyArgName = applyArg[0];
-         const expectedParam = expectedParams[i];
-         if (!expectedParam) {
-            this.context.errors.add(
-               "Applying too many parameters to lambda " + termName
-            );
-            return false;
-         }
          if (applyArgName) {
             namedPhase = true; // Streak of unnamed parameter ended
          }
@@ -381,6 +376,16 @@ export class TypeChecker {
                applyArg[1].position
             );
             continue;
+         }
+
+         const expectedParam = applyArgName
+            ? expectedParams.find((p) => p.name === applyArgName)
+            : expectedParams[i];
+         if (!expectedParam) {
+            this.context.errors.add(
+               "Applying too many parameters to lambda " + termName
+            );
+            return [];
          }
 
          const appliedType = this.context.inferencer.infer(applyArg[1], scope);
@@ -403,6 +408,20 @@ export class TypeChecker {
          unfulfilledExpectedParams = unfulfilledExpectedParams.filter(
             (p) => p !== expectedParam
          );
+
+         if (!namedPhase) {
+            paramOrder.push([i, i]);
+         } else {
+            paramOrder.push([i, expectedParams.indexOf(expectedParam)]);
+         }
+      }
+
+      for (let param of unfulfilledExpectedParams) {
+         if (param.defaultValue) {
+            unfulfilledExpectedParams = unfulfilledExpectedParams.filter(
+               (p) => p !== param
+            );
+         }
       }
 
       if (unfulfilledExpectedParams.length > 0) {
@@ -414,7 +433,7 @@ export class TypeChecker {
          );
       }
 
-      return true;
+      return paramOrder;
    }
 }
 

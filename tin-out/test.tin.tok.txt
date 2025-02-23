@@ -1,56 +1,38 @@
-IDENTIFIER   | Thing        |   1, 1    
+IDENTIFIER   | greet        |   1, 1    
 OPERATOR     | =            |   1, 7    
 PARENS       | (            |   1, 9    
-IDENTIFIER   | String       |   1, 10   
-OPERATOR     | ,            |   1, 16   
-IDENTIFIER   | String       |   1, 18   
-PARENS       | )            |   1, 24   
-OPERATOR     | =>           |   1, 26   
-IDENTIFIER   | String       |   1, 29   
+IDENTIFIER   | greet        |   1, 10   
+OPERATOR     | :            |   1, 15   
+IDENTIFIER   | String       |   1, 17   
+OPERATOR     | =            |   1, 24   
+STRING       | Hello        |   1, 26   
+OPERATOR     | ,            |   1, 33   
+IDENTIFIER   | target       |   1, 35   
+OPERATOR     | :            |   1, 41   
+IDENTIFIER   | String       |   1, 43   
+OPERATOR     | =            |   1, 50   
+STRING       | World        |   1, 52   
+PARENS       | )            |   1, 59   
+OPERATOR     | ->           |   1, 61   
+STRING       |              |   1, 64   
+OPERATOR     | +            |   1, 64   
+IDENTIFIER   | greet        |   1, 66   
+OPERATOR     | +            |   1, 64   
+STRING       | ,            |   1, 64   
+OPERATOR     | +            |   1, 64   
+IDENTIFIER   | target       |   1, 75   
+OPERATOR     | +            |   1, 64   
+STRING       | !            |   1, 64   
 NEWLINE      |              |   2, 1    
 NEWLINE      |              |   3, 1    
-IDENTIFIER   | th           |   3, 1    
-OPERATOR     | =            |   3, 4    
-PARENS       | [            |   3, 6    
-IDENTIFIER   | T            |   3, 7    
-OPERATOR     | :            |   3, 8    
-IDENTIFIER   | Number       |   3, 10   
-PARENS       | ]            |   3, 16   
-OPERATOR     | ->           |   3, 18   
-PARENS       | (            |   3, 21   
-IDENTIFIER   | n            |   3, 22   
-OPERATOR     | :            |   3, 23   
-IDENTIFIER   | String       |   3, 25   
-OPERATOR     | ,            |   3, 31   
-IDENTIFIER   | x            |   3, 33   
-OPERATOR     | :            |   3, 34   
-IDENTIFIER   | String       |   3, 36   
-OPERATOR     | =            |   3, 43   
-STRING       | Hello        |   3, 45   
-PARENS       | )            |   3, 52   
-OPERATOR     | ->           |   3, 54   
-STRING       |              |   3, 57   
-OPERATOR     | +            |   3, 57   
-IDENTIFIER   | n            |   3, 59   
-OPERATOR     | +            |   3, 57   
-STRING       |              |   3, 57   
-OPERATOR     | +            |   3, 57   
-IDENTIFIER   | x            |   3, 63   
-OPERATOR     | +            |   3, 57   
-STRING       | !            |   3, 57   
+IDENTIFIER   | print        |   3, 1    
+PARENS       | (            |   3, 6    
+IDENTIFIER   | greet        |   3, 7    
+PARENS       | (            |   3, 12   
+IDENTIFIER   | target       |   3, 13   
+OPERATOR     | =            |   3, 20   
+STRING       | Mom          |   3, 22   
+PARENS       | )            |   3, 27   
+PARENS       | )            |   3, 28   
 NEWLINE      |              |   4, 1    
-NEWLINE      |              |   5, 1    
-IDENTIFIER   | print        |   5, 1    
-PARENS       | (            |   5, 6    
-IDENTIFIER   | th           |   5, 7    
-PARENS       | [            |   5, 9    
-NUMBER       | 2            |   5, 10   
-PARENS       | ]            |   5, 11   
-PARENS       | (            |   5, 12   
-STRING       | Hello        |   5, 13   
-OPERATOR     | ,            |   5, 20   
-STRING       | World        |   5, 22   
-PARENS       | )            |   5, 29   
-PARENS       | )            |   5, 30   
-NEWLINE      |              |   6, 1    
 --undefined--

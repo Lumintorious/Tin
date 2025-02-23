@@ -1,5 +1,3 @@
-Thing = (String, String) => String
+greet = (greet: String = "Hello", target: String = "World") -> "{greet}, {target}!"
 
-th = [T: Number] -> (n: String, x: String = "Hello") -> "{n} {x}!"
-
-print(th[2]("Hello", "World"))
+print(greet(target = "Mom"))

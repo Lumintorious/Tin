@@ -5,49 +5,93 @@ statements:
     isParameter: false
     lhs:
       tag: Identifier
-      value: Thing
+      value: greet
     value:
-      tag: RoundTypeToTypeLambda
-      parameterTypes:
+      tag: RoundValueToValueLambda
+      params:
         - tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
             tag: Identifier
+            value: greet
+          value:
+            tag: Literal
+            type: String
+            value: Hello
+          type:
+            tag: Identifier
             value: String
           isDeclaration: false
-          isTypeLevel: true
+          isTypeLevel: false
           position:
             start:
               line: 1
               column: 10
-              absolute: 15
+              absolute: 14
             end:
               line: 1
-              column: 17
-              absolute: 16
+              column: 34
+              absolute: 33
         - tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
             tag: Identifier
+            value: target
+          value:
+            tag: Literal
+            type: String
+            value: World
+          type:
+            tag: Identifier
             value: String
           isDeclaration: false
-          isTypeLevel: true
+          isTypeLevel: false
           position:
             start:
               line: 1
-              column: 18
-              absolute: 23
+              column: 35
+              absolute: 40
             end:
               line: 1
-              column: 25
-              absolute: 24
-      returnType:
-        tag: Identifier
-        value: String
+              column: 60
+              absolute: 59
+      block:
+        tag: Block
+        statements:
+          - tag: BinaryExpression
+            left:
+              tag: BinaryExpression
+              left:
+                tag: BinaryExpression
+                left:
+                  tag: BinaryExpression
+                  left:
+                    tag: Literal
+                    type: String
+                    value: 
+                  operator: +
+                  right:
+                    tag: Identifier
+                    value: greet
+                operator: +
+                right:
+                  tag: Literal
+                  type: String
+                  value: , 
+              operator: +
+              right:
+                tag: Identifier
+                value: target
+            operator: +
+            right:
+              tag: Literal
+              type: String
+              value: !
+      explicitType: undefined
     isDeclaration: true
-    isTypeLevel: true
+    isTypeLevel: false
     position:
       start:
         line: 1
@@ -56,113 +100,10 @@ statements:
       end:
         line: 2
         column: 1
-        absolute: 36
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: th
-    value:
-      tag: SquareTypeToValueLambda
-      parameterTypes:
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: T
-          type:
-            tag: Identifier
-            value: Number
-          isDeclaration: false
-          isTypeLevel: true
-          position:
-            start:
-              line: 3
-              column: 7
-              absolute: 45
-            end:
-              line: 3
-              column: 17
-              absolute: 54
-      block:
-        tag: Block
-        statements:
-          - tag: RoundValueToValueLambda
-            params:
-              0:
-                tag: Assignment
-                isMutable: false
-                isParameter: true
-                lhs:
-                  tag: Identifier
-                  value: n
-                value: undefined
-                type:
-                  tag: Identifier
-                  value: String
-                isDeclaration: false
-              1:
-                tag: Assignment
-                isMutable: false
-                isParameter: true
-                lhs:
-                  tag: Identifier
-                  value: x
-                value:
-                  tag: Literal
-                  type: String
-                  value: Hello
-                type:
-                  tag: Identifier
-                  value: String
-                isDeclaration: false
-            block:
-              tag: Block
-              statements:
-                - tag: BinaryExpression
-                  left:
-                    tag: BinaryExpression
-                    left:
-                      tag: BinaryExpression
-                      left:
-                        tag: BinaryExpression
-                        left:
-                          tag: Literal
-                          type: String
-                          value: 
-                        operator: +
-                        right:
-                          tag: Identifier
-                          value: n
-                      operator: +
-                      right:
-                        tag: Literal
-                        type: String
-                        value:  
-                    operator: +
-                    right:
-                      tag: Identifier
-                      value: x
-                  operator: +
-                  right:
-                    tag: Literal
-                    type: String
-                    value: !
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 3
-        column: 1
-        absolute: 40
-      end:
-        line: 4
-        column: 1
-        absolute: 106
+        absolute: 85
   - tag: RoundApply
     calledInsteadOfSquare: false
+    paramOrder:
     callee:
       tag: Identifier
       value: print
@@ -171,41 +112,31 @@ statements:
         - 
         - tag: RoundApply
           calledInsteadOfSquare: false
+          paramOrder:
           callee:
-            tag: SquareApply
-            callee:
-              tag: Identifier
-              value: th
-            typeArgs:
-              - tag: Literal
-                type: Number
-                value: 2
+            tag: Identifier
+            value: greet
           args:
             0:
-              - 
+              - target
               - tag: Literal
                 type: String
-                value: Hello
-            1:
-              - 
-              - tag: Literal
-                type: String
-                value: World
+                value: Mom
           position:
             start:
-              line: 5
+              line: 3
               column: 12
-              absolute: 120
+              absolute: 99
             end:
-              line: 5
-              column: 30
-              absolute: 137
+              line: 3
+              column: 28
+              absolute: 114
     position:
       start:
-        line: 5
+        line: 3
         column: 6
-        absolute: 114
+        absolute: 93
       end:
-        line: 5
-        column: 31
-        absolute: 138
+        line: 3
+        column: 29
+        absolute: 115

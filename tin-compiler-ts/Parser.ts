@@ -200,6 +200,7 @@ export class RoundApply extends Term {
    args: [string, Term][];
    takesVarargs?: boolean;
    calledInsteadOfSquare: boolean = false;
+   paramOrder: [number, number][] = [];
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
