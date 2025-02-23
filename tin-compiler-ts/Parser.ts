@@ -128,6 +128,17 @@ export class RoundValueToValueLambda extends Term {
       this.block = block;
       this.explicitType = explicitType;
    }
+
+   isFirstParamThis() {
+      if (
+         this.params[0] instanceof Assignment &&
+         this.params[0].lhs instanceof Identifier &&
+         this.params[0].lhs.value === "this"
+      ) {
+         return true;
+      }
+      return false;
+   }
 }
 
 // (Number) => String
@@ -201,6 +212,7 @@ export class RoundApply extends Term {
    takesVarargs?: boolean;
    calledInsteadOfSquare: boolean = false;
    paramOrder: [number, number][] = [];
+   isFirstParamThis: boolean = false;
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;

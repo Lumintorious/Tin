@@ -324,6 +324,8 @@ statements:
                           value:
                             tag: RoundApply
                             calledInsteadOfSquare: false
+                            paramOrder:
+                            isFirstParamThis: false
                             callee:
                               tag: Identifier
                               value: getIterator
@@ -348,6 +350,8 @@ statements:
                           value:
                             tag: RoundApply
                             calledInsteadOfSquare: false
+                            paramOrder:
+                            isFirstParamThis: false
                             callee:
                               tag: Select
                               ammortized: false
@@ -382,13 +386,25 @@ statements:
                             statements:
                               - tag: RoundApply
                                 calledInsteadOfSquare: false
+                                paramOrder:
+                                isFirstParamThis: false
                                 callee:
                                   tag: Identifier
                                   value: fn
                                 args:
                                   0:
-                                    tag: Identifier
-                                    value: current
+                                    - 
+                                    - tag: Identifier
+                                      value: current
+                                      position:
+                                        start:
+                                          line: 14
+                                          column: 7
+                                          absolute: 386
+                                        end:
+                                          line: 14
+                                          column: 14
+                                          absolute: 386
                                 position:
                                   start:
                                     line: 14
@@ -407,6 +423,8 @@ statements:
                                 value:
                                   tag: RoundApply
                                   calledInsteadOfSquare: false
+                                  paramOrder:
+                                  isFirstParamThis: false
                                   callee:
                                     tag: Select
                                     ammortized: false
@@ -672,13 +690,25 @@ statements:
                               absolute: 628
                         - tag: RoundApply
                           calledInsteadOfSquare: false
+                          paramOrder:
+                          isFirstParamThis: false
                           callee:
                             tag: Identifier
                             value: forEach
                           args:
                             0:
-                              tag: Identifier
-                              value: fn
+                              - 
+                              - tag: Identifier
+                                value: fn
+                                position:
+                                  start:
+                                    line: 21
+                                    column: 11
+                                    absolute: 631
+                                  end:
+                                    line: 21
+                                    column: 13
+                                    absolute: 631
                           position:
                             start:
                               line: 21
@@ -744,6 +774,8 @@ statements:
                       absolute: 670
                 - tag: RoundApply
                   calledInsteadOfSquare: false
+                  paramOrder:
+                  isFirstParamThis: false
                   callee:
                     tag: SquareApply
                     callee:
@@ -763,14 +795,44 @@ statements:
                             absolute: 672
                   args:
                     0:
-                      tag: Identifier
-                      value: forEach
+                      - 
+                      - tag: Identifier
+                        value: forEach
+                        position:
+                          start:
+                            line: 23
+                            column: 14
+                            absolute: 681
+                          end:
+                            line: 23
+                            column: 21
+                            absolute: 681
                     1:
-                      tag: Identifier
-                      value: mkString
+                      - 
+                      - tag: Identifier
+                        value: mkString
+                        position:
+                          start:
+                            line: 23
+                            column: 23
+                            absolute: 691
+                          end:
+                            line: 23
+                            column: 31
+                            absolute: 691
                     2:
-                      tag: Identifier
-                      value: getIterator
+                      - 
+                      - tag: Identifier
+                        value: getIterator
+                        position:
+                          start:
+                            line: 23
+                            column: 33
+                            absolute: 704
+                          end:
+                            line: 23
+                            column: 44
+                            absolute: 704
                   position:
                     start:
                       line: 23

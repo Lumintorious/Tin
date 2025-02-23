@@ -9,7 +9,7 @@ import files from "node:fs/promises";
 import path from "node:path";
 import { TypePhaseContext } from "./Scope";
 
-Error.stackTraceLimit = 12;
+Error.stackTraceLimit = 40;
 const SRC_PATH = path.resolve(process.cwd(), "src");
 const OUT_PATH = path.resolve(process.cwd(), "tin-out");
 

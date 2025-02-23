@@ -17,6 +17,12 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	return constructor;
 }
 
+function TIN_LAMBDA_TYPE(typeId, paramTypes, returnType) {
+	return { __is_child: (f) => typeof f === "function" };
+}
+
+// function _TIN_MAKE_LAMBDA(type)
+
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj1 === undefined) {
 		return obj2
@@ -65,6 +71,10 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
+	if (typeof obj === 'function') {
+		return 'Lambda'
+	}
+
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
@@ -84,7 +94,7 @@ function makeString(obj) {
 			result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
-					if (typeof component[key] === "function" || key.startsWith("__")) {
+					if (key.startsWith("__")) {
 						continue
 					}
 					result += makeString(key) + '=' + makeString(component[key]) + ',';
@@ -117,7 +127,7 @@ const debug = (...args) => {
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "c0841cd5-ead2-46bb-bb6d-01e2097fa125", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
+export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "6159be94-ffcc-4d2b-8570-109660f70c59", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)));
 export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
 return function(list) {

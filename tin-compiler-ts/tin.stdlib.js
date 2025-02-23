@@ -71,6 +71,10 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
+	if (typeof obj === 'function') {
+		return 'Lambda'
+	}
+
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
@@ -90,7 +94,7 @@ function makeString(obj) {
 			result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
-					if (typeof component[key] === "function" || key.startsWith("__")) {
+					if (key.startsWith("__")) {
 						continue
 					}
 					result += makeString(key) + '=' + makeString(component[key]) + ',';

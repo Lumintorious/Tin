@@ -11,7 +11,7 @@ import { getConstructorName, TypeErrorList, TypeChecker } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeBuilder } from "./TypeBuilder";
 import { TypeTranslator } from "./TypeTranslator";
-import { RoundLambdaParamType } from "./Types";
+import { ParamType } from "./Types";
 import {
    AppliedGenericType,
    BinaryOpType,
@@ -158,9 +158,9 @@ export class Scope {
             symbol.run = this.run;
          }
       }
-      // console.log(
-      //    `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
-      // );
+      console.log(
+         `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
+      );
       symbol.run = this.run;
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
@@ -206,7 +206,7 @@ export class Scope {
                typeSymbol.paramTypes,
                new RoundValueToValueLambdaType(
                   typeSymbol.returnType.fields.map(
-                     (f) => new RoundLambdaParamType(f.typeSymbol)
+                     (f) => new ParamType(f.typeSymbol)
                   ),
                   new AppliedGenericType(
                      new NamedType(name),
@@ -221,9 +221,7 @@ export class Scope {
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType(
-               typeSymbol.fields.map(
-                  (f) => new RoundLambdaParamType(f.typeSymbol)
-               ),
+               typeSymbol.fields.map((f) => new ParamType(f.typeSymbol)),
                new NamedType(name)
             )
          );
@@ -245,9 +243,7 @@ export class Scope {
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType(
-               structTypeSymbol.fields.map(
-                  (f) => new RoundLambdaParamType(f.typeSymbol)
-               ),
+               structTypeSymbol.fields.map((f) => new ParamType(f.typeSymbol)),
                typeSymbol
             ).named(constructorName)
          );
@@ -407,7 +403,7 @@ export class Scope {
                parameters
             );
             const result = new RoundValueToValueLambdaType(
-               resolvedParams.map((p) => new RoundLambdaParamType(p)),
+               resolvedParams.map((p) => new ParamType(p)),
                returnType
             );
             return result;
@@ -491,7 +487,7 @@ export class TypePhaseContext {
          new Symbol(
             "print",
             new RoundValueToValueLambdaType(
-               [new RoundLambdaParamType(NamedType.PRIMITIVE_TYPES.Any)],
+               [new ParamType(NamedType.PRIMITIVE_TYPES.Any)],
                NamedType.PRIMITIVE_TYPES.Nothing
             ),
             new RoundValueToValueLambda([], new Block([]))
@@ -502,7 +498,7 @@ export class TypePhaseContext {
          new Symbol(
             "debug",
             new RoundValueToValueLambdaType(
-               [new RoundLambdaParamType(NamedType.PRIMITIVE_TYPES.Any)],
+               [new ParamType(NamedType.PRIMITIVE_TYPES.Any)],
                NamedType.PRIMITIVE_TYPES.Nothing
             ),
             new RoundValueToValueLambda([], new Block([]))
@@ -521,7 +517,7 @@ export class TypePhaseContext {
          new Symbol(
             "at",
             new RoundValueToValueLambdaType(
-               [new RoundLambdaParamType(new NamedType("Number"))],
+               [new ParamType(new NamedType("Number"))],
                new GenericNamedType("T")
             )
          ),
@@ -541,7 +537,7 @@ export class TypePhaseContext {
                [new GenericNamedType("T")],
                new RoundValueToValueLambdaType(
                   [
-                     new RoundLambdaParamType(
+                     new ParamType(
                         new AppliedGenericType(new NamedType("Array"), [
                            new GenericNamedType("T"),
                         ])

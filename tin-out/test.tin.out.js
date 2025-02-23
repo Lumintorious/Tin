@@ -71,6 +71,10 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
+	if (typeof obj === 'function') {
+		return 'Lambda'
+	}
+
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
@@ -90,7 +94,7 @@ function makeString(obj) {
 			result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
-					if (typeof component[key] === "function" || key.startsWith("__")) {
+					if (key.startsWith("__")) {
 						continue
 					}
 					result += makeString(key) + '=' + makeString(component[key]) + ',';
@@ -120,7 +124,26 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var greet/* (String, String) => String*/ = function(greet = "Hello", target = "World") {
-return "" + greet + ", " + target + "!"
+import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+export var Cat = TIN_TYPE("Cat", "e5a94d37-0e51-4c1a-8775-1ff2fd4eb0dd", (_p0) => ({name: _p0}), {}); Cat._typeId = "Cat";;
+export var CatMeow = TIN_TYPE("CatMeow", "6e9bbe29-7265-44a8-8300-d0159deb938e", (_p0) => ({meow: _p0}), {}); CatMeow._typeId = "CatMeow";;
+export var CatPurr = TIN_TYPE("CatPurr", "6b1abc00-472a-43c1-88e2-1b7977e2b834", (_p0) => ({purr: _p0}), {}); CatPurr._typeId = "CatPurr";;
+export var meow/* (Cat) => Nothing*/ = function() {
+return print("Meow, I'm " + this[Cat._typeId].name)
 };
-print(greet(undefined, "Mom"))
+export var purr/* (Cat) => () => Nothing*/ = function(cat) {
+return function() {
+return print("Prr, I'm " + cat[Cat._typeId].name)
+}
+};
+export var cat/* Cat & CatMeow*/ = _TIN_INTERSECT_OBJECTS(Cat("Kitty"), CatMeow(meow));
+cat[CatMeow._typeId].meow.call(cat);
+cat[Cat._typeId].name = "A dude";
+cat[CatMeow._typeId].meow.call(cat);
+export var catTwoData/* Cat*/ = Cat("Kitty");
+export var catTwo/* Cat & CatPurr*/ = _TIN_INTERSECT_OBJECTS(catTwoData, CatPurr(purr(catTwoData)));
+catTwo[CatPurr._typeId].purr();
+catTwo[Cat._typeId].name = "A dude";
+catTwo[CatPurr._typeId].purr()

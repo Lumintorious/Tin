@@ -15,7 +15,7 @@ import {
    Term,
 } from "./Parser";
 import { TypePhaseContext, Scope, Symbol } from "./Scope";
-import { RoundLambdaParamType, AnyType } from "./Types";
+import { ParamType, AnyType } from "./Types";
 import { Identifier } from "./Parser";
 import {
    Type,
@@ -208,15 +208,15 @@ export class TypeTranslator {
    translateRoundTypeToTypeLambdaParameter(
       node: Term,
       scope: Scope
-   ): RoundLambdaParamType {
+   ): ParamType {
       if (node instanceof Identifier && node.isTypeLevel) {
          const explicitType = this.translate(node, scope);
-         return new RoundLambdaParamType(explicitType);
+         return new ParamType(explicitType);
       }
       if (node instanceof Assignment && node.lhs instanceof Identifier) {
          if (node.lhs instanceof Identifier && node.isTypeLevel) {
             node.type = node.lhs;
-            return new RoundLambdaParamType(this.translate(node, scope));
+            return new ParamType(this.translate(node, scope));
          }
          if (!node.type && !node.value) {
             throw new Error(
@@ -253,8 +253,15 @@ export class TypeTranslator {
             type = explicitType;
          } else if (inferredType) {
             type = inferredType;
+            if (type instanceof LiteralType) {
+               type = type.type;
+            }
          }
-         return new RoundLambdaParamType(type, name, value);
+         return new ParamType(type, name, value);
+      }
+      const translatedAsType = this.translate(node, scope);
+      if (translatedAsType) {
+         return new ParamType(translatedAsType);
       }
       throw new Error("Term wasn't Assignment, but " + node.tag);
    }

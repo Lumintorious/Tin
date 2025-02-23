@@ -29,7 +29,7 @@ import {
    Optional,
 } from "./Parser";
 import { Symbol, Scope, TypePhaseContext } from "./Scope";
-import { RoundLambdaParamType } from "./Types";
+import { ParamType } from "./Types";
 import { RoundValueToValueLambda } from "./Parser";
 import {
    AnyType,
@@ -192,7 +192,7 @@ export class TypeChecker {
       this.typeCheck(node.block, innerScope);
    }
 
-   checkLambdaParamsValidity(params: RoundLambdaParamType[], scope: Scope) {
+   checkLambdaParamsValidity(params: ParamType[], scope: Scope) {
       let hitNamed = false;
       let hitDefault = false;
       for (const param of params) {
@@ -225,7 +225,12 @@ export class TypeChecker {
    }
 
    typeCheckSquareApply(apply: SquareApply, scope: Scope) {
-      const type = this.context.inferencer.infer(apply, scope);
+      const testCalleeIsType = scope.resolveFully(
+         this.context.translator.translate(apply.callee, scope)
+      );
+      if (testCalleeIsType instanceof SquareTypeToTypeLambdaType) {
+         return;
+      }
       const calleeType = this.context.inferencer.infer(apply.callee, scope);
       if (!(calleeType instanceof SquareTypeToValueLambdaType)) {
          throw new Error(
@@ -267,9 +272,7 @@ export class TypeChecker {
          );
          if (type instanceof StructType) {
             typeSymbol = new RoundValueToValueLambdaType(
-               type.fields.map(
-                  (f) => new RoundLambdaParamType(f.typeSymbol, f.name)
-               ),
+               type.fields.map((f) => new ParamType(f.typeSymbol, f.name)),
                type
             );
          } else if (type instanceof MarkerType) {
@@ -326,7 +329,6 @@ export class TypeChecker {
                apply.takesVarargs = true;
             }
          } else {
-            let hasThisParamIncrement = typeSymbol.isFirstParamThis ? 1 : 0;
             const paramOrder = this.typeCheckLambdaCall(
                apply,
                apply.args,
@@ -341,7 +343,7 @@ export class TypeChecker {
    typeCheckLambdaCall(
       term: RoundApply,
       applyArgs: [string, Term][], // Positional arguments, with possible names
-      expectedParams: RoundLambdaParamType[], // Expected parameter definitions
+      expectedParams: ParamType[], // Expected parameter definitions
       scope: Scope
    ): [number, number][] /* How to shuffle parameters when translating */ {
       const termName =
@@ -350,8 +352,35 @@ export class TypeChecker {
             : "Anonymous lambda";
       let fulfilledNamedParams = new Set<String>();
       let fulfilledNumericParams = new Set<Number>();
-      let unfulfilledExpectedParams = [...expectedParams];
+      let unfulfilledExpectedParams = [
+         ...expectedParams.filter((f) => f.name !== "this"),
+      ];
       let paramOrder: [number, number][] = [];
+      let hasThisParamIncrement =
+         expectedParams[0] && expectedParams[0].name === "this" ? 1 : 0;
+
+      if (hasThisParamIncrement === 1) {
+         const expectedThisType = expectedParams[0].type;
+         if (!(term.callee instanceof Select)) {
+            this.context.errors.add(
+               "Method with 'this' as a parameter must be called on the field of a struct",
+               expectedThisType
+            );
+         } else {
+            const calleeType = this.context.inferencer.infer(
+               term.callee.owner,
+               scope
+            );
+            if (!calleeType.isAssignableTo(expectedThisType, scope)) {
+               this.context.errors.add(
+                  `Call target ('this') of lambda ${term.callee.field}`,
+                  expectedThisType,
+                  calleeType
+               );
+            }
+         }
+         term.isFirstParamThis = true;
+      }
 
       let namedPhase = false;
       for (let i = 0; i < applyArgs.length; i++) {
@@ -380,7 +409,7 @@ export class TypeChecker {
 
          const expectedParam = applyArgName
             ? expectedParams.find((p) => p.name === applyArgName)
-            : expectedParams[i];
+            : expectedParams[i + hasThisParamIncrement];
          if (!expectedParam) {
             this.context.errors.add(
                "Applying too many parameters to lambda " + termName

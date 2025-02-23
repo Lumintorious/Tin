@@ -25,7 +25,7 @@ import {
 } from "./Parser";
 import { Symbol, Scope, TypePhaseContext } from "./Scope";
 import { TypeErrorList } from "./TypeChecker";
-import { RoundLambdaParamType } from "./Types";
+import { ParamType } from "./Types";
 import {
    Type,
    NamedType,
@@ -85,7 +85,7 @@ export class TypeInferencer {
             }
             return new RoundValueToValueLambdaType(
                type.fields.map((f) => {
-                  return new RoundLambdaParamType(f.typeSymbol, f.name);
+                  return new ParamType(f.typeSymbol, f.name);
                }),
                type
             );
@@ -628,7 +628,7 @@ export class TypeInferencer {
    inferRoundValueToValueLambda(node: RoundValueToValueLambda, scope: Scope) {
       const innerScope = scope.innerScopeOf(node);
       innerScope.run = this.context.run;
-      let paramsAsTypes: RoundLambdaParamType[] = [];
+      let paramsAsTypes: ParamType[] = [];
       // Check for Varargs expected type
       if (
          node.params[0] &&
@@ -648,7 +648,7 @@ export class TypeInferencer {
             ]
          );
          // paramType.resolved = innerScope.lookup("Array").returnType;
-         paramsAsTypes = [new RoundLambdaParamType(paramType)];
+         paramsAsTypes = [new ParamType(paramType)];
          if (param instanceof Assignment && param.lhs instanceof Identifier) {
             if (!innerScope.hasSymbol(param.lhs.value)) {
                innerScope.declare(
@@ -663,42 +663,6 @@ export class TypeInferencer {
                param,
                scope
             );
-            // let type;
-            // if (param instanceof Assignment) {
-            //    if (param.type) {
-            //       type = this.context.translator.translate(
-            //          param.type,
-            //          innerScope
-            //       );
-            //    } else if (param.value) {
-            //       type = this.infer(param.value, innerScope);
-            //    }
-            // } else if (
-            //    node.isTypeLambda &&
-            //    param instanceof Assignment &&
-            //    param.lhs instanceof Identifier
-            // ) {
-            //    type = new NamedType(param.lhs.value);
-            // }
-            // if (!type) {
-            //    throw new Error(
-            //       "Cannot tell type. Maybe you used : instead of :: " +
-            //          param.tag
-            //    );
-            //    type = new Type();
-            // }
-
-            // // if (
-            // //    param instanceof Assignment &&
-            // //    param.lhs instanceof Identifier
-            // // ) {
-            // //    innerScope.declare(
-            // //       param.lhs.value,
-            // //       new Symbol(param.lhs.value, type, param)
-            // //    );
-            // // }
-            // return type;
-            // throw new Error(`Missing type annotation or default value for parameter: ${param.name}`);
          });
       }
 

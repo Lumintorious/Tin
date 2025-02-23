@@ -1,3 +1,29 @@
-greet = (greet: String = "Hello", target: String = "World") -> "{greet}, {target}!"
+import collections/List
 
-print(greet(target = "Mom"))
+Cat = type:
+	name: String
+
+CatMeow = type:
+	meow: (this: Cat) => Nothing
+
+CatPurr = type:
+	purr: () => Nothing
+
+meow = (this: Cat) ->
+	print("Meow, I'm " + this.name)
+
+purr = (cat: Cat) -> () ->
+	print("Prr, I'm " + cat.name)
+
+cat = Cat("Kitty") & CatMeow(meow)
+cat.meow()
+set cat.name = "A dude"
+cat.meow()
+
+catTwoData = Cat("Kitty")
+catTwo = catTwoData & CatPurr(purr(catTwoData))
+catTwo.purr()
+set catTwo.purr = purr(cat)
+set catTwo.name = "A dude"
+catTwo.purr()
+

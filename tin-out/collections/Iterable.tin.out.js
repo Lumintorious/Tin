@@ -17,6 +17,12 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	return constructor;
 }
 
+function TIN_LAMBDA_TYPE(typeId, paramTypes, returnType) {
+	return { __is_child: (f) => typeof f === "function" };
+}
+
+// function _TIN_MAKE_LAMBDA(type)
+
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj1 === undefined) {
 		return obj2
@@ -65,6 +71,10 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
+	if (typeof obj === 'function') {
+		return 'Lambda'
+	}
+
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = '[';
 		for (let i = 0; i < obj.length(); i++) {
@@ -84,7 +94,7 @@ function makeString(obj) {
 			result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
-					if (typeof component[key] === "function" || key.startsWith("__")) {
+					if (key.startsWith("__")) {
 						continue
 					}
 					result += makeString(key) + '=' + makeString(component[key]) + ',';
@@ -114,8 +124,8 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "5091729c-a372-4a7a-bfe9-68142c9f1c80", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
-export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "f292c69e-591e-4dff-8718-4d3c9b64d551", (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {}); Iterable._typeId = "Iterable";;
+export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "8f4436e0-349b-42e5-a2e3-609821c9fd57", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
+export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "d296e249-1db8-44cb-8f45-f9c3aa99139c", (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {}); Iterable._typeId = "Iterable";;
 export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
 return function(getIterator) {
 var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {

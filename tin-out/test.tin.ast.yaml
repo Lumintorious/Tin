@@ -1,11 +1,117 @@
 tag: Block
 statements:
+  - tag: Import
+    path: collections/List
   - tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
       tag: Identifier
-      value: greet
+      value: Cat
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: name
+          type:
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 3
+        column: 1
+        absolute: 30
+      end:
+        line: 6
+        column: 1
+        absolute: 57
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: CatMeow
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: meow
+          type:
+            tag: RoundTypeToTypeLambda
+            parameterTypes:
+              - tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  tag: Identifier
+                  value: this
+                type:
+                  tag: Identifier
+                  value: Cat
+                isDeclaration: false
+                isTypeLevel: false
+                position:
+                  start:
+                    line: 7
+                    column: 9
+                    absolute: 86
+                  end:
+                    line: 7
+                    column: 19
+                    absolute: 92
+            returnType:
+              tag: Identifier
+              value: Nothing
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 6
+        column: 1
+        absolute: 64
+      end:
+        line: 9
+        column: 1
+        absolute: 107
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: CatPurr
+    value:
+      tag: TypeDef
+      fieldDefs:
+        - tag: FieldDef
+          name: purr
+          type:
+            tag: RoundTypeToTypeLambda
+            parameterTypes:
+            returnType:
+              tag: Identifier
+              value: Nothing
+          isTypeLevel: true
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 9
+        column: 1
+        absolute: 114
+      end:
+        line: 12
+        column: 1
+        absolute: 148
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: meow
     value:
       tag: RoundValueToValueLambda
       params:
@@ -14,129 +120,363 @@ statements:
           isParameter: true
           lhs:
             tag: Identifier
-            value: greet
-          value:
-            tag: Literal
-            type: String
-            value: Hello
+            value: this
           type:
             tag: Identifier
-            value: String
+            value: Cat
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
-              line: 1
-              column: 10
-              absolute: 14
+              line: 12
+              column: 9
+              absolute: 160
             end:
-              line: 1
-              column: 34
-              absolute: 33
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: target
-          value:
-            tag: Literal
-            type: String
-            value: World
-          type:
-            tag: Identifier
-            value: String
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 1
-              column: 35
-              absolute: 40
-            end:
-              line: 1
-              column: 60
-              absolute: 59
+              line: 12
+              column: 19
+              absolute: 166
       block:
         tag: Block
         statements:
-          - tag: BinaryExpression
-            left:
-              tag: BinaryExpression
-              left:
-                tag: BinaryExpression
-                left:
-                  tag: BinaryExpression
+          - tag: RoundApply
+            calledInsteadOfSquare: false
+            paramOrder:
+            isFirstParamThis: false
+            callee:
+              tag: Identifier
+              value: print
+            args:
+              0:
+                - 
+                - tag: BinaryExpression
                   left:
                     tag: Literal
                     type: String
-                    value: 
+                    value: Meow, I'm 
                   operator: +
                   right:
-                    tag: Identifier
-                    value: greet
-                operator: +
-                right:
-                  tag: Literal
-                  type: String
-                  value: , 
-              operator: +
-              right:
-                tag: Identifier
-                value: target
-            operator: +
-            right:
-              tag: Literal
-              type: String
-              value: !
+                    tag: Select
+                    ammortized: false
+                    owner:
+                      tag: Identifier
+                      value: this
+                    field: name
+            position:
+              start:
+                line: 13
+                column: 7
+                absolute: 178
+              end:
+                line: 13
+                column: 33
+                absolute: 203
       explicitType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 1
+        line: 12
         column: 1
-        absolute: 5
+        absolute: 152
       end:
-        line: 2
+        line: 15
         column: 1
-        absolute: 85
+        absolute: 207
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: purr
+    value:
+      tag: RoundValueToValueLambda
+      params:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: cat
+          type:
+            tag: Identifier
+            value: Cat
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 15
+              column: 9
+              absolute: 218
+            end:
+              line: 15
+              column: 18
+              absolute: 224
+      block:
+        tag: Block
+        statements:
+          - tag: RoundValueToValueLambda
+            params:
+            block:
+              tag: Block
+              statements:
+                - tag: RoundApply
+                  calledInsteadOfSquare: false
+                  paramOrder:
+                  isFirstParamThis: false
+                  callee:
+                    tag: Identifier
+                    value: print
+                  args:
+                    0:
+                      - 
+                      - tag: BinaryExpression
+                        left:
+                          tag: Literal
+                          type: String
+                          value: Prr, I'm 
+                        operator: +
+                        right:
+                          tag: Select
+                          ammortized: false
+                          owner:
+                            tag: Identifier
+                            value: cat
+                          field: name
+                  position:
+                    start:
+                      line: 16
+                      column: 7
+                      absolute: 242
+                    end:
+                      line: 16
+                      column: 31
+                      absolute: 265
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 15
+        column: 1
+        absolute: 211
+      end:
+        line: 18
+        column: 1
+        absolute: 269
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: cat
+    value:
+      tag: BinaryExpression
+      left:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        paramOrder:
+        isFirstParamThis: false
+        callee:
+          tag: Identifier
+          value: Cat
+        args:
+          - 0: 
+            1:
+              tag: Literal
+              type: String
+              value: Kitty
+      operator: &
+      right:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        paramOrder:
+        isFirstParamThis: false
+        callee:
+          tag: Identifier
+          value: CatMeow
+        args:
+          - 0: 
+            1:
+              tag: Identifier
+              value: meow
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 18
+        column: 1
+        absolute: 272
+      end:
+        line: 19
+        column: 1
+        absolute: 305
   - tag: RoundApply
     calledInsteadOfSquare: false
     paramOrder:
+    isFirstParamThis: false
     callee:
-      tag: Identifier
-      value: print
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: cat
+      field: meow
     args:
-      0:
-        - 
-        - tag: RoundApply
-          calledInsteadOfSquare: false
-          paramOrder:
-          callee:
-            tag: Identifier
-            value: greet
-          args:
-            0:
-              - target
-              - tag: Literal
-                type: String
-                value: Mom
-          position:
-            start:
-              line: 3
-              column: 12
-              absolute: 99
-            end:
-              line: 3
-              column: 28
-              absolute: 114
+  - tag: Change
+    lhs:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: cat
+      field: name
+    value:
+      tag: Literal
+      type: String
+      value: A dude
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    callee:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: cat
+      field: meow
+    args:
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: catTwoData
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      callee:
+        tag: Identifier
+        value: Cat
+      args:
+        - 0: 
+          1:
+            tag: Literal
+            type: String
+            value: Kitty
+    isDeclaration: true
+    isTypeLevel: false
     position:
       start:
-        line: 3
-        column: 6
-        absolute: 93
+        line: 23
+        column: 1
+        absolute: 366
       end:
-        line: 3
-        column: 29
-        absolute: 115
+        line: 24
+        column: 1
+        absolute: 383
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: catTwo
+    value:
+      tag: BinaryExpression
+      left:
+        tag: Identifier
+        value: catTwoData
+      operator: &
+      right:
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        paramOrder:
+        isFirstParamThis: false
+        callee:
+          tag: Identifier
+          value: CatPurr
+        args:
+          - 0: 
+            1:
+              tag: RoundApply
+              calledInsteadOfSquare: false
+              paramOrder:
+              isFirstParamThis: false
+              callee:
+                tag: Identifier
+                value: purr
+              args:
+                - 0: 
+                  1:
+                    tag: Identifier
+                    value: catTwoData
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 24
+        column: 1
+        absolute: 389
+      end:
+        line: 25
+        column: 1
+        absolute: 432
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    callee:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: catTwo
+      field: purr
+    args:
+  - tag: Change
+    lhs:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: catTwo
+      field: purr
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      callee:
+        tag: Identifier
+        value: purr
+      args:
+        - 0: 
+          1:
+            tag: Identifier
+            value: cat
+  - tag: Change
+    lhs:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: catTwo
+      field: name
+    value:
+      tag: Literal
+      type: String
+      value: A dude
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    callee:
+      tag: Select
+      ammortized: false
+      owner:
+        tag: Identifier
+        value: catTwo
+      field: purr
+    args:

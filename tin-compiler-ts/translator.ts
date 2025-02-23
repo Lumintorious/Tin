@@ -18,6 +18,7 @@ import {
    FieldDef,
    SquareApply,
    SquareTypeToTypeLambda,
+   Term,
 } from "./Parser";
 import {
    WhileLoop,
@@ -188,14 +189,17 @@ function translate(
 
       // Identifier
    } else if (term instanceof Identifier) {
-      if (term.value === "this") {
-         return "$this";
-      }
+      // if (term.value === "this") {
+      //    return "$this";
+      // }
       return term.value;
 
       // RoundValueToValueLambda
    } else if (term instanceof RoundValueToValueLambda) {
-      return `function(${term.params
+      const params = term.isFirstParamThis()
+         ? term.params.slice(1, term.params.length)
+         : term.params;
+      return `function(${params
          .map((p) => translate(p, scope.innerScopeOf(term, true)))
          .join(", ")}) {\n${translate(
          term.block,
@@ -274,9 +278,13 @@ function translate(
 
       // RoundApply
    } else if (term instanceof RoundApply) {
-      let args = [];
-      for (let [from, to] of term.paramOrder) {
-         args[to] = term.args[from];
+      let args: ([string, Term] | undefined)[] = [];
+      if (term.paramOrder.length === 0) {
+         args = term.args;
+      } else {
+         for (let [from, to] of term.paramOrder) {
+            args[to] = term.args[from];
+         }
       }
       for (let i = 0; i < args.length; i++) {
          if (!Object.hasOwn(args, i)) {
@@ -285,8 +293,11 @@ function translate(
       }
       // console.log(args);
       const takesVarargs = term.takesVarargs;
-      const open = takesVarargs ? "(Array(0)([" : "(";
+      let open = takesVarargs ? "(Array(0)([" : "(";
       const close = takesVarargs ? "]))" : ")";
+      if (term.isFirstParamThis && term.callee instanceof Select) {
+         open = ".call(" + translate(term.callee.owner, scope);
+      }
       return (
          (term.calledInsteadOfSquare ? "() =>" : "") +
          translate(term.callee, scope) +
@@ -383,13 +394,10 @@ function translateBinaryExpression(
       );
    }
    if (term.operator === "&") {
-      return translate(
-         new RoundApply(new Identifier("_TIN_INTERSECT_OBJECTS"), [
-            ["", term.left],
-            ["", term.right],
-         ]),
+      return `_TIN_INTERSECT_OBJECTS(${translate(
+         term.left,
          scope
-      );
+      )}, ${translate(term.right, scope)})`;
    }
    if (term.operator === "?:") {
       return `${translate(term.left, scope)} ?? ${translate(
