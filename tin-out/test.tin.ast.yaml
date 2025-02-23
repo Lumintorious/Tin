@@ -26,6 +26,23 @@ statements:
               line: 1
               column: 17
               absolute: 16
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: String
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 1
+              column: 18
+              absolute: 23
+            end:
+              line: 1
+              column: 25
+              absolute: 24
       returnType:
         tag: Identifier
         value: String
@@ -39,4 +56,156 @@ statements:
       end:
         line: 2
         column: 1
-        absolute: 28
+        absolute: 36
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: th
+    value:
+      tag: SquareTypeToValueLambda
+      parameterTypes:
+        - tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            tag: Identifier
+            value: T
+          type:
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 3
+              column: 7
+              absolute: 45
+            end:
+              line: 3
+              column: 17
+              absolute: 54
+      block:
+        tag: Block
+        statements:
+          - tag: RoundValueToValueLambda
+            params:
+              0:
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  tag: Identifier
+                  value: n
+                value: undefined
+                type:
+                  tag: Identifier
+                  value: String
+                isDeclaration: false
+              1:
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  tag: Identifier
+                  value: x
+                value:
+                  tag: Literal
+                  type: String
+                  value: Hello
+                type:
+                  tag: Identifier
+                  value: String
+                isDeclaration: false
+            block:
+              tag: Block
+              statements:
+                - tag: BinaryExpression
+                  left:
+                    tag: BinaryExpression
+                    left:
+                      tag: BinaryExpression
+                      left:
+                        tag: BinaryExpression
+                        left:
+                          tag: Literal
+                          type: String
+                          value: 
+                        operator: +
+                        right:
+                          tag: Identifier
+                          value: n
+                      operator: +
+                      right:
+                        tag: Literal
+                        type: String
+                        value:  
+                    operator: +
+                    right:
+                      tag: Identifier
+                      value: x
+                  operator: +
+                  right:
+                    tag: Literal
+                    type: String
+                    value: !
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 3
+        column: 1
+        absolute: 40
+      end:
+        line: 4
+        column: 1
+        absolute: 106
+  - tag: RoundApply
+    calledInsteadOfSquare: false
+    callee:
+      tag: Identifier
+      value: print
+    args:
+      0:
+        - 
+        - tag: RoundApply
+          calledInsteadOfSquare: false
+          callee:
+            tag: SquareApply
+            callee:
+              tag: Identifier
+              value: th
+            typeArgs:
+              - tag: Literal
+                type: Number
+                value: 2
+          args:
+            0:
+              - 
+              - tag: Literal
+                type: String
+                value: Hello
+            1:
+              - 
+              - tag: Literal
+                type: String
+                value: World
+          position:
+            start:
+              line: 5
+              column: 12
+              absolute: 120
+            end:
+              line: 5
+              column: 30
+              absolute: 137
+    position:
+      start:
+        line: 5
+        column: 6
+        absolute: 114
+      end:
+        line: 5
+        column: 31
+        absolute: 138

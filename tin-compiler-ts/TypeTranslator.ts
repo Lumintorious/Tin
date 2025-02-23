@@ -1,6 +1,5 @@
 import {
    AstNode,
-   Identifier,
    Literal,
    Assignment,
    UnaryOperator,
@@ -13,8 +12,11 @@ import {
    BinaryExpression,
    Optional,
    Group,
+   Term,
 } from "./Parser";
 import { TypePhaseContext, Scope, Symbol } from "./Scope";
+import { RoundLambdaParamType, AnyType } from "./Types";
+import { Identifier } from "./Parser";
 import {
    Type,
    NamedType,
@@ -91,10 +93,10 @@ export class TypeTranslator {
             }
             return new RoundValueToValueLambdaType(
                node.parameterTypes.map((p) => {
-                  let translated = this.translate(p, scope);
-                  if (translated instanceof GenericNamedType) {
-                     return new NamedType(translated.name);
-                  }
+                  let translated = this.translateRoundTypeToTypeLambdaParameter(
+                     p,
+                     scope
+                  );
                   return translated;
                }),
                this.translate(node.returnType, scope)
@@ -108,7 +110,9 @@ export class TypeTranslator {
             innerScope.run = this.context.run;
             // innerScope.declareType("T", new NamedType("T"));
             const type = new RoundValueToValueLambdaType(
-               node.params.map((p) => this.translate(p, innerScope)),
+               node.params.map((p) =>
+                  this.translateRoundTypeToTypeLambdaParameter(p, innerScope)
+               ),
                this.translate(node.block.statements[0], innerScope),
                node.isTypeLambda
             );
@@ -199,5 +203,59 @@ export class TypeTranslator {
          default:
             throw new Error("Could not translate " + node.tag);
       }
+   }
+
+   translateRoundTypeToTypeLambdaParameter(
+      node: Term,
+      scope: Scope
+   ): RoundLambdaParamType {
+      if (node instanceof Identifier && node.isTypeLevel) {
+         const explicitType = this.translate(node, scope);
+         return new RoundLambdaParamType(explicitType);
+      }
+      if (node instanceof Assignment && node.lhs instanceof Identifier) {
+         if (node.lhs instanceof Identifier && node.isTypeLevel) {
+            node.type = node.lhs;
+            return new RoundLambdaParamType(this.translate(node, scope));
+         }
+         if (!node.type && !node.value) {
+            throw new Error(
+               "Cannot deduce type from typeless, valueless parameter."
+            );
+         }
+         let explicitType;
+         if (node.type) {
+            explicitType = this.translate(node.type, scope);
+         }
+         let inferredType;
+         if (node.value) {
+            inferredType = this.context.inferencer.infer(node.value, scope);
+         }
+         const name = node.lhs.value;
+         const value = node.value;
+
+         let type: Type = AnyType;
+         if (explicitType && inferredType) {
+            // Check if inferred extends explicit
+            if (!inferredType.isAssignableTo(explicitType, scope)) {
+               this.context.errors.add(
+                  `Default value of parameter ${
+                     node.lhs instanceof Identifier ? node.lhs.value : "term"
+                  }`,
+                  explicitType,
+                  inferredType,
+                  node.position,
+                  new Error()
+               );
+            }
+            type = explicitType;
+         } else if (explicitType) {
+            type = explicitType;
+         } else if (inferredType) {
+            type = inferredType;
+         }
+         return new RoundLambdaParamType(type, name, value);
+      }
+      throw new Error("Term wasn't Assignment, but " + node.tag);
    }
 }

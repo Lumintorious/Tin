@@ -1,5 +1,6 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
+import { RoundValueToValueLambdaType } from "./Types";
 const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
 export class AstNode {
    readonly tag: string;
@@ -120,6 +121,7 @@ export class RoundValueToValueLambda extends Term {
    block: Block;
    explicitType?: Term;
    isTypeLambda?: boolean;
+   type?: RoundValueToValueLambdaType;
    constructor(params: Term[], block: Block, explicitType?: Term) {
       super("RoundValueToValueLambda");
       this.params = params;
@@ -195,10 +197,10 @@ export class Literal extends Term {
 // callee(args, args, args)
 export class RoundApply extends Term {
    callee: Term;
-   args: Term[];
+   args: [string, Term][];
    takesVarargs?: boolean;
    calledInsteadOfSquare: boolean = false;
-   constructor(callee: Term, args: Term[]) {
+   constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
       this.args = args;
@@ -423,14 +425,21 @@ export class Parser {
 
    parseApply(callee: Term, isSquare?: boolean) {
       const start = this.consume("PARENS", isSquare ? "[" : "("); // Consume '('
-      const args: Term[] = [];
+      const args: [string, Term][] = [];
 
       // Parse arguments (expressions)
       while (this.peek() && this.peek().value !== (isSquare ? "]" : ")")) {
          this.omit("NEWLINE");
          this.omit("INDENT");
          this.omit("DEDENT");
-         args.push(this.parseExpression());
+         let paramName = "";
+         if (this.peek().tag === "IDENTIFIER" && this.peek(1).value === "=") {
+            console.log(this.peek().value);
+            paramName = this.consume().value;
+            this.consume("OPERATOR", "=");
+         }
+         const paramValue = this.parseExpression();
+         args.push([paramName, paramValue]);
          // If there's a comma, consume it and continue parsing more arguments
          this.omit("NEWLINE");
          this.omit("INDENT");
@@ -443,7 +452,10 @@ export class Parser {
       const end = this.consume("PARENS", isSquare ? "]" : ")");
 
       const result = isSquare
-         ? new SquareApply(callee, args)
+         ? new SquareApply(
+              callee,
+              args.map(([name, type]) => type)
+           )
          : new RoundApply(callee, args);
 
       return result.fromTo(start.position, end.position); // Return a function application node

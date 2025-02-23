@@ -11,6 +11,7 @@ import { getConstructorName, TypeErrorList, TypeChecker } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeBuilder } from "./TypeBuilder";
 import { TypeTranslator } from "./TypeTranslator";
+import { RoundLambdaParamType } from "./Types";
 import {
    AppliedGenericType,
    BinaryOpType,
@@ -204,7 +205,9 @@ export class Scope {
             new SquareTypeToValueLambdaType(
                typeSymbol.paramTypes,
                new RoundValueToValueLambdaType(
-                  typeSymbol.returnType.fields.map((f) => f.typeSymbol),
+                  typeSymbol.returnType.fields.map(
+                     (f) => new RoundLambdaParamType(f.typeSymbol)
+                  ),
                   new AppliedGenericType(
                      new NamedType(name),
                      typeSymbol.paramTypes
@@ -218,7 +221,9 @@ export class Scope {
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType(
-               typeSymbol.fields.map((f) => f.typeSymbol),
+               typeSymbol.fields.map(
+                  (f) => new RoundLambdaParamType(f.typeSymbol)
+               ),
                new NamedType(name)
             )
          );
@@ -240,7 +245,9 @@ export class Scope {
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType(
-               structTypeSymbol.fields.map((f) => f.typeSymbol),
+               structTypeSymbol.fields.map(
+                  (f) => new RoundLambdaParamType(f.typeSymbol)
+               ),
                typeSymbol
             ).named(constructorName)
          );
@@ -392,15 +399,15 @@ export class Scope {
             return type;
          case "RoundValueToValueLambdaType":
             const lambdaType = type as RoundValueToValueLambdaType;
-            const resolvedParams = lambdaType.paramTypes.map((pt) => {
-               return this.resolveGenericTypes(pt, parameters);
+            const resolvedParams = lambdaType.params.map((pt) => {
+               return this.resolveGenericTypes(pt.type, parameters);
             });
             const returnType = this.resolveGenericTypes(
                lambdaType.returnType,
                parameters
             );
             const result = new RoundValueToValueLambdaType(
-               resolvedParams,
+               resolvedParams.map((p) => new RoundLambdaParamType(p)),
                returnType
             );
             return result;
@@ -484,7 +491,7 @@ export class TypePhaseContext {
          new Symbol(
             "print",
             new RoundValueToValueLambdaType(
-               [NamedType.PRIMITIVE_TYPES.Any],
+               [new RoundLambdaParamType(NamedType.PRIMITIVE_TYPES.Any)],
                NamedType.PRIMITIVE_TYPES.Nothing
             ),
             new RoundValueToValueLambda([], new Block([]))
@@ -495,7 +502,7 @@ export class TypePhaseContext {
          new Symbol(
             "debug",
             new RoundValueToValueLambdaType(
-               [NamedType.PRIMITIVE_TYPES.Any],
+               [new RoundLambdaParamType(NamedType.PRIMITIVE_TYPES.Any)],
                NamedType.PRIMITIVE_TYPES.Nothing
             ),
             new RoundValueToValueLambda([], new Block([]))
@@ -514,7 +521,7 @@ export class TypePhaseContext {
          new Symbol(
             "at",
             new RoundValueToValueLambdaType(
-               [new NamedType("Number")],
+               [new RoundLambdaParamType(new NamedType("Number"))],
                new GenericNamedType("T")
             )
          ),
@@ -534,9 +541,11 @@ export class TypePhaseContext {
                [new GenericNamedType("T")],
                new RoundValueToValueLambdaType(
                   [
-                     new AppliedGenericType(new NamedType("Array"), [
-                        new GenericNamedType("T"),
-                     ]),
+                     new RoundLambdaParamType(
+                        new AppliedGenericType(new NamedType("Array"), [
+                           new GenericNamedType("T"),
+                        ])
+                     ),
                   ],
                   new AppliedGenericType(new NamedType("Array"), [
                      new GenericNamedType("T"),

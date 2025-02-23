@@ -1,5 +1,5 @@
 import { TokenPos } from "./Lexer";
-import { AstNode } from "./Parser";
+import { AstNode, Term } from "./Parser";
 import { Symbol, Scope } from "./Scope";
 
 export class Type {
@@ -196,13 +196,15 @@ export class LiteralType extends Type {
       ) {
          return true;
       }
-      return this.type.extends(other, scope);
+      return (
+         this.type.extends(other, scope) || other.isExtendedBy(this.type, scope)
+      );
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
       return (
          other instanceof LiteralType &&
-         other.type.extends(this.type, scope) &&
+         other.type.isExtendedBy(this.type, scope) &&
          other.value === this.value
       );
    }
@@ -238,15 +240,19 @@ export class GenericNamedType extends Type {
    extends(other: Type, scope: Scope): boolean {
       // Named types are assignable if they are equal (same name)
       return (
-         (other instanceof NamedType || other instanceof GenericNamedType) &&
-         this.name === other.name
+         ((other instanceof NamedType || other instanceof GenericNamedType) &&
+            this.name === other.name) ||
+         (this.extendedType != undefined &&
+            this.extendedType.extends(other, scope))
       );
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
       return (
-         (other instanceof NamedType || other instanceof GenericNamedType) &&
-         this.name === other.name
+         ((other instanceof NamedType || other instanceof GenericNamedType) &&
+            this.name === other.name) ||
+         (this.extendedType != undefined &&
+            this.extendedType.isExtendedBy(other, scope))
       );
    }
 
@@ -281,20 +287,35 @@ export class OptionalType extends Type {
    }
 }
 
+export class RoundLambdaParamType {
+   type: Type;
+   name?: string;
+   defaultValue?: Term;
+   constructor(type: Type, name?: string, defaultValue?: Term) {
+      this.type = type;
+      this.name = name;
+      this.defaultValue = defaultValue;
+   }
+}
+
 // Type of a RoundValueToValueLambda: (Int) => String
 export class RoundValueToValueLambdaType extends Type {
-   paramTypes: Type[];
+   params: RoundLambdaParamType[];
    returnType: Type;
    isFirstParamThis: boolean = false;
    isGeneric?: boolean;
-   constructor(paramTypes: Type[], returnType: Type, isGeneric?: boolean) {
+   constructor(
+      params: RoundLambdaParamType[],
+      returnType: Type,
+      isGeneric?: boolean
+   ) {
       super("RoundValueToValueLambdaType");
-      paramTypes.forEach((p) => {
-         if (p.tag === undefined) {
-            throw new Error("Empty type");
+      for (let param of params) {
+         if (!(param instanceof RoundLambdaParamType)) {
+            throw new Error("HERE");
          }
-      });
-      this.paramTypes = paramTypes;
+      }
+      this.params = params;
       this.returnType = returnType;
       this.isGeneric = isGeneric;
       this.isForwardReferenceable = true;
@@ -304,9 +325,9 @@ export class RoundValueToValueLambdaType extends Type {
       if (!(other instanceof RoundValueToValueLambdaType)) return false;
       // Check if parameter types are contravariant
       const paramCheck =
-         this.paramTypes.length === other.paramTypes.length &&
-         this.paramTypes.every((paramType, index) => {
-            return other.paramTypes[index].isAssignableTo(paramType, scope);
+         this.params.length === other.params.length &&
+         this.params.every((param, index) => {
+            return other.params[index].type.isAssignableTo(param.type, scope);
          });
 
       // Return type must be covariant
@@ -329,7 +350,7 @@ export class RoundValueToValueLambdaType extends Type {
       if (this.name) {
          return this.name;
       }
-      const paramsStr = this.paramTypes.map((t) => t.toString()).join(", ");
+      const paramsStr = this.params.map((t) => t.type.toString()).join(", ");
       return `${this.isGeneric ? "[" : "("}${paramsStr}${
          this.isGeneric ? "]" : ")"
       } => ${this.returnType ? this.returnType.toString() : "undefined"}`;

@@ -41,7 +41,7 @@ export class TypeBuilder {
       } else if (node instanceof RoundApply) {
          const innerBlockScope = scope.innerScopeOf(node, true);
          node.args.forEach((statement) =>
-            this.build(statement, innerBlockScope)
+            this.build(statement[1], innerBlockScope)
          );
          this.build(node.callee, scope);
       } else if (node instanceof RoundValueToValueLambda) {
@@ -123,6 +123,11 @@ export class TypeBuilder {
          }
       });
       this.build(node.block, innerScope);
+      const inferredType = this.context.inferencer.inferRoundValueToValueLambda(
+         node,
+         scope
+      );
+      node.type = inferredType;
    }
 
    buildSquareTypeToValueLambda(node: SquareTypeToValueLambda, scope: Scope) {

@@ -17,6 +17,12 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	return constructor;
 }
 
+function TIN_LAMBDA_TYPE(typeId, paramTypes, returnType) {
+	return { __is_child: (f) => typeof f === "function" };
+}
+
+// function _TIN_MAKE_LAMBDA(type)
+
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj1 === undefined) {
 		return obj2

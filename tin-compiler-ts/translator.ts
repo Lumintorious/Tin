@@ -207,12 +207,12 @@ function translate(
 
       //RoundTypeToTypeLambda
    } else if (term instanceof RoundTypeToTypeLambda) {
-      return `(${term.parameterTypes
+      return `TIN_LAMBDA_TYPE("Lambda", [${term.parameterTypes
          .map((t) => translate(t, scope.innerScopeOf(term, true)))
-         .join(", ")}) => ${translate(
+         .join(", ")}], ${translate(
          term.returnType,
          scope.innerScopeOf(term, true)
-      )}`;
+      )})`;
 
       // SquareTypeToTypeLambda
    } else if (term instanceof SquareTypeToTypeLambda) {
@@ -281,7 +281,7 @@ function translate(
          (term.calledInsteadOfSquare ? "() =>" : "") +
          translate(term.callee, scope) +
          open +
-         term.args.map((arg) => translate(arg, scope)).join(", ") +
+         term.args.map((arg) => translate(arg[1], scope)).join(", ") +
          close
       );
 
@@ -362,8 +362,8 @@ function translateBinaryExpression(
    if (term.operator === "|") {
       return translate(
          new RoundApply(new Identifier("_TIN_UNION_OBJECTS"), [
-            term.left,
-            term.right,
+            ["", term.left],
+            ["", term.right],
          ]),
          scope
       );
@@ -371,8 +371,8 @@ function translateBinaryExpression(
    if (term.operator === "&") {
       return translate(
          new RoundApply(new Identifier("_TIN_INTERSECT_OBJECTS"), [
-            term.left,
-            term.right,
+            ["", term.left],
+            ["", term.right],
          ]),
          scope
       );
