@@ -141,7 +141,7 @@ const debug = (...args) => {
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "c6ee501a-278c-442c-95f9-866a0fb99454", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
+export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "1a5c94de-7e35-4e39-b39e-8fc419212e97", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)), Accessible.call('Type', T)), ToString));
 export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
 return function(list) {
@@ -202,6 +202,8 @@ while (current != nothing) {
  list = ListHead.call('Type', T)(current, list);
 current = iterator.Iterator.next() 
 };
-return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(getIterator))
+return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(function() {
+return listIterator.call('Type', T)(list)
+}))
 }
 }

@@ -1,23 +1,10 @@
-import collections/List
+#import collections/List
 
-Cat = type:
-	name: String = "Unknown Cat"
+Iterator = [T] => type:
+	next: () => T?
+	consumeAll: (fn: (T) => Nothing) => Nothing = (t: (T) => Nothing) ->
+		print("Hello")
 
-Third = type:
-	label: String
+print("Hi")
 
-CatMeow = type:
-	meow = (this: Cat) ->
-		if this :: Third, 
-			print("THIRD {this.label}")
-		else
-			print("Hello")
-
-catProto = Cat("Kitty")
-cat = catProto & CatMeow() & Third("New")
-cat.meow()
-
-a = arrayOf[Number](1, 2, 3, 4)
-l = listOf[Number](1, 2, 3, 4, 5)
-print(stringOf(l))
-
+Iterator[String](() -> "")

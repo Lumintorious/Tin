@@ -165,9 +165,9 @@ export class Scope {
             symbol.run = this.run;
          }
       }
-      console.log(
-         `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
-      );
+      // console.log(
+      //    `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
+      // );
       symbol.run = this.run;
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
@@ -199,7 +199,7 @@ export class Scope {
          }
       }
       typeSymbol.name = name;
-      console.log(name + ": " + typeSymbol);
+      // console.log(name + ": " + typeSymbol);
       typeSymbol.run = this.run;
       if (
          typeSymbol instanceof SquareTypeToTypeLambdaType &&
@@ -401,14 +401,18 @@ export class Scope {
          case "RoundValueToValueLambdaType":
             const lambdaType = type as RoundValueToValueLambdaType;
             const resolvedParams = lambdaType.params.map((pt) => {
-               return this.resolveGenericTypes(pt.type, parameters);
+               return new ParamType(
+                  this.resolveGenericTypes(pt.type, parameters),
+                  pt.name,
+                  pt.defaultValue
+               );
             });
             const returnType = this.resolveGenericTypes(
                lambdaType.returnType,
                parameters
             );
             const result = new RoundValueToValueLambdaType(
-               resolvedParams.map((p) => new ParamType(p)),
+               resolvedParams,
                returnType
             );
             return result;

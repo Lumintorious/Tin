@@ -1,5 +1,5 @@
 import { TokenPos } from "./Lexer";
-import { AstNode, Term } from "./Parser";
+import { AstNode, Term, RoundValueToValueLambda } from "./Parser";
 import { Symbol, Scope } from "./Scope";
 
 export class Type {

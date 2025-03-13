@@ -69,8 +69,8 @@ statements:
         absolute: 39
       end:
         line: 7
-        column: 1
-        absolute: 90
+        column: 5
+        absolute: 94
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -173,9 +173,9 @@ statements:
         column: 1
         absolute: 94
       end:
-        line: 8
+        line: 9
         column: 1
-        absolute: 161
+        absolute: 163
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -373,9 +373,9 @@ statements:
                       column: 2
                       absolute: 259
                     end:
-                      line: 18
+                      line: 19
                       column: 10
-                      absolute: 409
+                      absolute: 411
                 - tag: RoundApply
                   calledInsteadOfSquare: false
                   paramOrder:
@@ -390,13 +390,13 @@ statements:
                         value: T
                         position:
                           start:
-                            line: 18
+                            line: 19
                             column: 11
-                            absolute: 411
+                            absolute: 413
                           end:
-                            line: 18
+                            line: 19
                             column: 12
-                            absolute: 411
+                            absolute: 413
                   args:
                     0:
                       - 
@@ -404,22 +404,22 @@ statements:
                         value: nextF
                         position:
                           start:
-                            line: 18
+                            line: 19
                             column: 14
-                            absolute: 418
+                            absolute: 420
                           end:
-                            line: 18
+                            line: 19
                             column: 19
-                            absolute: 418
+                            absolute: 420
                   position:
                     start:
-                      line: 18
+                      line: 19
                       column: 13
-                      absolute: 413
+                      absolute: 415
                     end:
-                      line: 18
+                      line: 19
                       column: 20
-                      absolute: 419
+                      absolute: 421
     isDeclaration: true
     isTypeLevel: false
     position:
@@ -428,9 +428,9 @@ statements:
         column: 1
         absolute: 175
       end:
-        line: 20
-        column: 1
-        absolute: 423
+        line: 21
+        column: 15
+        absolute: 439
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -450,13 +450,13 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 20
+              line: 21
               column: 19
-              absolute: 442
+              absolute: 444
             end:
-              line: 20
+              line: 21
               column: 21
-              absolute: 443
+              absolute: 445
       block:
         tag: Block
         statements:
@@ -480,13 +480,13 @@ statements:
                       value: T
                       position:
                         start:
-                          line: 20
+                          line: 21
                           column: 41
-                          absolute: 464
+                          absolute: 466
                         end:
-                          line: 20
+                          line: 21
                           column: 42
-                          absolute: 464
+                          absolute: 466
                 isDeclaration: false
             block:
               tag: Block
@@ -517,13 +517,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 22
-                              column: 3
-                              absolute: 493
-                            end:
                               line: 23
+                              column: 3
+                              absolute: 495
+                            end:
+                              line: 24
                               column: 1
-                              absolute: 499
+                              absolute: 501
                         - tag: Assignment
                           isMutable: false
                           isParameter: false
@@ -537,13 +537,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 23
-                              column: 3
-                              absolute: 502
-                            end:
                               line: 24
+                              column: 3
+                              absolute: 504
+                            end:
+                              line: 25
                               column: 1
-                              absolute: 511
+                              absolute: 513
                         - tag: WhileLoop
                           condition:
                             tag: BinaryExpression
@@ -575,25 +575,25 @@ statements:
                           value: num
                           position:
                             start:
-                              line: 26
+                              line: 27
                               column: 3
-                              absolute: 563
+                              absolute: 565
                             end:
-                              line: 26
+                              line: 27
                               column: 6
-                              absolute: 563
+                              absolute: 565
                     explicitType: undefined
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 21
+                      line: 22
                       column: 2
-                      absolute: 478
+                      absolute: 480
                     end:
-                      line: 27
+                      line: 29
                       column: 4
-                      absolute: 568
+                      absolute: 572
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -616,13 +616,13 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 27
+                            line: 29
                             column: 8
-                            absolute: 577
+                            absolute: 581
                           end:
-                            line: 27
+                            line: 29
                             column: 22
-                            absolute: 586
+                            absolute: 590
                     block:
                       tag: Block
                       statements:
@@ -640,13 +640,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 28
+                              line: 30
                               column: 3
-                              absolute: 605
+                              absolute: 609
                             end:
-                              line: 29
+                              line: 31
                               column: 1
-                              absolute: 611
+                              absolute: 615
                         - tag: Assignment
                           isMutable: false
                           isParameter: false
@@ -660,13 +660,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 29
+                              line: 31
                               column: 3
-                              absolute: 614
+                              absolute: 618
                             end:
-                              line: 30
+                              line: 32
                               column: 1
-                              absolute: 623
+                              absolute: 627
                         - tag: WhileLoop
                           condition:
                             tag: BinaryExpression
@@ -733,13 +733,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 27
+                      line: 29
                       column: 2
-                      absolute: 568
+                      absolute: 572
                     end:
-                      line: 35
-                      column: 12
-                      absolute: 759
+                      line: 38
+                      column: 8
+                      absolute: 761
                 - tag: RoundApply
                   calledInsteadOfSquare: false
                   paramOrder:
@@ -754,13 +754,13 @@ statements:
                         value: T
                         position:
                           start:
-                            line: 35
-                            column: 13
-                            absolute: 761
+                            line: 38
+                            column: 20
+                            absolute: 774
                           end:
-                            line: 35
-                            column: 14
-                            absolute: 761
+                            line: 38
+                            column: 21
+                            absolute: 774
                   args:
                     0:
                       - 
@@ -768,46 +768,46 @@ statements:
                         value: at
                         position:
                           start:
-                            line: 35
-                            column: 16
-                            absolute: 765
+                            line: 38
+                            column: 23
+                            absolute: 778
                           end:
-                            line: 35
-                            column: 18
-                            absolute: 765
+                            line: 38
+                            column: 25
+                            absolute: 778
                     1:
                       - 
                       - tag: Identifier
                         value: length
                         position:
                           start:
-                            line: 35
-                            column: 20
-                            absolute: 773
+                            line: 38
+                            column: 27
+                            absolute: 786
                           end:
-                            line: 35
-                            column: 26
-                            absolute: 773
+                            line: 38
+                            column: 33
+                            absolute: 786
                   position:
                     start:
-                      line: 35
-                      column: 15
-                      absolute: 763
+                      line: 38
+                      column: 22
+                      absolute: 776
                     end:
-                      line: 35
-                      column: 27
-                      absolute: 774
+                      line: 38
+                      column: 34
+                      absolute: 787
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 20
+        line: 21
         column: 1
-        absolute: 437
+        absolute: 439
       end:
-        line: 37
-        column: 1
-        absolute: 778
+        line: 40
+        column: 7
+        absolute: 797
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -827,13 +827,13 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 37
+              line: 40
               column: 11
-              absolute: 789
+              absolute: 802
             end:
-              line: 37
+              line: 40
               column: 13
-              absolute: 790
+              absolute: 803
       block:
         tag: Block
         statements:
@@ -857,13 +857,13 @@ statements:
                       value: T
                       position:
                         start:
-                          line: 37
+                          line: 40
                           column: 29
-                          absolute: 807
+                          absolute: 820
                         end:
-                          line: 37
+                          line: 40
                           column: 30
-                          absolute: 807
+                          absolute: 820
                 isDeclaration: false
             block:
               tag: Block
@@ -891,13 +891,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 38
+                      line: 41
                       column: 2
-                      absolute: 816
+                      absolute: 829
                     end:
-                      line: 39
+                      line: 42
                       column: 1
-                      absolute: 833
+                      absolute: 846
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -920,24 +920,24 @@ statements:
                           value: T
                           position:
                             start:
-                              line: 39
+                              line: 42
                               column: 17
-                              absolute: 850
+                              absolute: 863
                             end:
-                              line: 39
+                              line: 42
                               column: 18
-                              absolute: 850
+                              absolute: 863
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 39
+                      line: 42
                       column: 2
-                      absolute: 838
+                      absolute: 851
                     end:
-                      line: 40
+                      line: 44
                       column: 1
-                      absolute: 864
+                      absolute: 879
                 - tag: WhileLoop
                   condition:
                     tag: BinaryExpression
@@ -987,13 +987,13 @@ statements:
                                 value: T
                                 position:
                                   start:
-                                    line: 42
+                                    line: 46
                                     column: 19
-                                    absolute: 917
+                                    absolute: 932
                                   end:
-                                    line: 42
+                                    line: 46
                                     column: 20
-                                    absolute: 917
+                                    absolute: 932
                           args:
                             - 0: 
                               1:
@@ -1021,13 +1021,13 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 42
+                            line: 46
                             column: 3
-                            absolute: 904
+                            absolute: 919
                           end:
-                            line: 43
+                            line: 48
                             column: 1
-                            absolute: 937
+                            absolute: 954
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -1049,13 +1049,13 @@ statements:
                           value: T
                           position:
                             start:
-                              line: 43
+                              line: 48
                               column: 26
-                              absolute: 963
+                              absolute: 980
                             end:
-                              line: 43
+                              line: 48
                               column: 27
-                              absolute: 963
+                              absolute: 980
                     args:
                       - 0: 
                         1:
@@ -1078,13 +1078,13 @@ statements:
                                       value: T
                                       position:
                                         start:
-                                          line: 43
+                                          line: 48
                                           column: 48
-                                          absolute: 985
+                                          absolute: 1002
                                         end:
-                                          line: 43
+                                          line: 48
                                           column: 49
-                                          absolute: 985
+                                          absolute: 1002
                                 args:
                                   0:
                                     - 
@@ -1092,34 +1092,34 @@ statements:
                                       value: list
                                       position:
                                         start:
-                                          line: 43
+                                          line: 48
                                           column: 51
-                                          absolute: 991
+                                          absolute: 1008
                                         end:
-                                          line: 43
+                                          line: 48
                                           column: 55
-                                          absolute: 991
+                                          absolute: 1008
                                 position:
                                   start:
-                                    line: 43
+                                    line: 48
                                     column: 50
-                                    absolute: 987
+                                    absolute: 1004
                                   end:
-                                    line: 43
+                                    line: 48
                                     column: 56
-                                    absolute: 992
+                                    absolute: 1009
                           explicitType: undefined
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 43
+                      line: 48
                       column: 2
-                      absolute: 946
+                      absolute: 963
                     end:
-                      line: 44
+                      line: 49
                       column: 1
-                      absolute: 995
+                      absolute: 1012
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -1142,13 +1142,13 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 44
+                            line: 49
                             column: 11
-                            absolute: 1009
+                            absolute: 1026
                           end:
-                            line: 44
+                            line: 49
                             column: 21
-                            absolute: 1015
+                            absolute: 1032
                     block:
                       tag: Block
                       statements:
@@ -1184,13 +1184,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 44
+                      line: 49
                       column: 2
-                      absolute: 1001
+                      absolute: 1018
                     end:
-                      line: 46
-                      column: 6
-                      absolute: 1065
+                      line: 51
+                      column: 1
+                      absolute: 1078
                 - tag: BinaryExpression
                   left:
                     tag: BinaryExpression
@@ -1219,13 +1219,13 @@ statements:
                             value: T
                             position:
                               start:
-                                line: 46
-                                column: 35
-                                absolute: 1095
+                                line: 51
+                                column: 42
+                                absolute: 1120
                               end:
-                                line: 46
-                                column: 36
-                                absolute: 1095
+                                line: 51
+                                column: 43
+                                absolute: 1120
                       args:
                         - 0: 
                           1:
@@ -1249,13 +1249,13 @@ statements:
     isTypeLevel: false
     position:
       start:
-        line: 37
+        line: 40
         column: 1
-        absolute: 784
+        absolute: 797
       end:
-        line: 48
-        column: 1
-        absolute: 1124
+        line: 53
+        column: 17
+        absolute: 1165
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -1275,13 +1275,13 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 48
+              line: 53
               column: 21
-              absolute: 1145
+              absolute: 1170
             end:
-              line: 48
+              line: 53
               column: 23
-              absolute: 1146
+              absolute: 1171
       block:
         tag: Block
         statements:
@@ -1308,13 +1308,13 @@ statements:
                         value: T
                         position:
                           start:
-                            line: 48
+                            line: 53
                             column: 56
-                            absolute: 1180
+                            absolute: 1205
                           end:
-                            line: 48
+                            line: 53
                             column: 57
-                            absolute: 1180
+                            absolute: 1205
                 isDeclaration: false
             block:
               tag: Block
@@ -1341,24 +1341,24 @@ statements:
                           value: T
                           position:
                             start:
-                              line: 49
+                              line: 54
                               column: 17
-                              absolute: 1204
+                              absolute: 1229
                             end:
-                              line: 49
+                              line: 54
                               column: 18
-                              absolute: 1204
+                              absolute: 1229
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 49
+                      line: 54
                       column: 2
-                      absolute: 1192
+                      absolute: 1217
                     end:
-                      line: 50
+                      line: 55
                       column: 1
-                      absolute: 1218
+                      absolute: 1243
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -1378,13 +1378,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 50
+                      line: 55
                       column: 2
-                      absolute: 1227
+                      absolute: 1252
                     end:
-                      line: 51
+                      line: 56
                       column: 1
-                      absolute: 1245
+                      absolute: 1270
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -1408,13 +1408,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 51
+                      line: 56
                       column: 2
-                      absolute: 1253
+                      absolute: 1278
                     end:
-                      line: 52
+                      line: 58
                       column: 1
-                      absolute: 1273
+                      absolute: 1301
                 - tag: WhileLoop
                   condition:
                     tag: BinaryExpression
@@ -1447,13 +1447,13 @@ statements:
                                 value: T
                                 position:
                                   start:
-                                    line: 53
+                                    line: 59
                                     column: 23
-                                    absolute: 1326
+                                    absolute: 1354
                                   end:
-                                    line: 53
+                                    line: 59
                                     column: 24
-                                    absolute: 1326
+                                    absolute: 1354
                           args:
                             - 0: 
                               1:
@@ -1500,23 +1500,71 @@ statements:
                           value: T
                           position:
                             start:
-                              line: 55
-                              column: 22
-                              absolute: 1399
+                              line: 62
+                              column: 29
+                              absolute: 1436
                             end:
-                              line: 55
-                              column: 23
-                              absolute: 1399
+                              line: 62
+                              column: 30
+                              absolute: 1436
                     args:
                       - 0: 
                         1:
-                          tag: Identifier
-                          value: getIterator
+                          tag: RoundValueToValueLambda
+                          params:
+                          block:
+                            tag: Block
+                            statements:
+                              - tag: RoundApply
+                                calledInsteadOfSquare: false
+                                paramOrder:
+                                isFirstParamThis: false
+                                callee:
+                                  tag: SquareApply
+                                  callee:
+                                    tag: Identifier
+                                    value: listIterator
+                                  typeArgs:
+                                    - tag: Identifier
+                                      value: T
+                                      position:
+                                        start:
+                                          line: 62
+                                          column: 51
+                                          absolute: 1458
+                                        end:
+                                          line: 62
+                                          column: 52
+                                          absolute: 1458
+                                args:
+                                  0:
+                                    - 
+                                    - tag: Identifier
+                                      value: list
+                                      position:
+                                        start:
+                                          line: 62
+                                          column: 54
+                                          absolute: 1464
+                                        end:
+                                          line: 62
+                                          column: 58
+                                          absolute: 1464
+                                position:
+                                  start:
+                                    line: 62
+                                    column: 53
+                                    absolute: 1460
+                                  end:
+                                    line: 62
+                                    column: 59
+                                    absolute: 1465
+                          explicitType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 48
+        line: 53
         column: 1
-        absolute: 1140
+        absolute: 1165
       end: undefined

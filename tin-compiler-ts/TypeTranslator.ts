@@ -154,18 +154,6 @@ export class TypeTranslator {
                node.typeArgs.map((arg) => this.translate(arg, scope))
             );
          case "TypeDef":
-            // const fieldSymbols = node.fieldDefs.map((field) => {
-            // 	let fieldType: Type;
-            // 	if (field.type) {
-            // 		fieldType = this.context.translator.translate(field.type, scope);
-            // 	} else if (field.defaultValue) {
-            // 		fieldType = this.infer(field.defaultValue, scope);
-            // 	} else {
-            // 		fieldType = new Type();
-            // 	}
-            // 	return new ParamType(fieldType, field.name, field);
-            // });
-            // return new StructType(fieldSymbols);
             if (!(node instanceof TypeDef)) {
                return new Type();
             }

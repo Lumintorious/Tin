@@ -1,150 +1,69 @@
-KEYWORD      | import       |   1, 1    
-IDENTIFIER   | collections  |   1, 8    
-OPERATOR     | /            |   1, 19   
-IDENTIFIER   | List         |   1, 20   
-NEWLINE      |              |   2, 1    
 NEWLINE      |              |   3, 1    
-IDENTIFIER   | Cat          |   3, 1    
-OPERATOR     | =            |   3, 5    
-KEYWORD      | type         |   3, 7    
-OPERATOR     | :            |   3, 11   
+IDENTIFIER   | Iterator     |   3, 1    
+OPERATOR     | =            |   3, 10   
+PARENS       | [            |   3, 12   
+IDENTIFIER   | T            |   3, 13   
+PARENS       | ]            |   3, 14   
+OPERATOR     | =>           |   3, 16   
+KEYWORD      | type         |   3, 19   
+OPERATOR     | :            |   3, 23   
 NEWLINE      |              |   4, 1    
 INDENT       | 4            |   4, 1    
-IDENTIFIER   | name         |   4, 2    
+IDENTIFIER   | next         |   4, 2    
 OPERATOR     | :            |   4, 6    
-IDENTIFIER   | String       |   4, 8    
-OPERATOR     | =            |   4, 15   
-STRING       | Unknown Cat  |   4, 17   
+PARENS       | (            |   4, 8    
+PARENS       | )            |   4, 9    
+OPERATOR     | =>           |   4, 11   
+IDENTIFIER   | T            |   4, 14   
+OPERATOR     | ?            |   4, 15   
 NEWLINE      |              |   5, 1    
-DEDENT       | 4            |   5, 1    
+IDENTIFIER   | consumeAll   |   5, 2    
+OPERATOR     | :            |   5, 12   
+PARENS       | (            |   5, 14   
+IDENTIFIER   | fn           |   5, 15   
+OPERATOR     | :            |   5, 17   
+PARENS       | (            |   5, 19   
+IDENTIFIER   | T            |   5, 20   
+PARENS       | )            |   5, 21   
+OPERATOR     | =>           |   5, 23   
+IDENTIFIER   | Nothing      |   5, 26   
+PARENS       | )            |   5, 33   
+OPERATOR     | =>           |   5, 35   
+IDENTIFIER   | Nothing      |   5, 38   
+OPERATOR     | =            |   5, 46   
+PARENS       | (            |   5, 48   
+IDENTIFIER   | t            |   5, 49   
+OPERATOR     | :            |   5, 50   
+PARENS       | (            |   5, 52   
+IDENTIFIER   | T            |   5, 53   
+PARENS       | )            |   5, 54   
+OPERATOR     | =>           |   5, 56   
+IDENTIFIER   | Nothing      |   5, 59   
+PARENS       | )            |   5, 66   
+OPERATOR     | ->           |   5, 68   
 NEWLINE      |              |   6, 1    
-IDENTIFIER   | Third        |   6, 1    
-OPERATOR     | =            |   6, 7    
-KEYWORD      | type         |   6, 9    
-OPERATOR     | :            |   6, 13   
-NEWLINE      |              |   7, 1    
-INDENT       | 4            |   7, 1    
-IDENTIFIER   | label        |   7, 2    
-OPERATOR     | :            |   7, 7    
-IDENTIFIER   | String       |   7, 9    
+INDENT       | 8            |   6, 1    
+IDENTIFIER   | print        |   6, 3    
+PARENS       | (            |   6, 8    
+STRING       | Hello        |   6, 9    
+PARENS       | )            |   6, 16   
 NEWLINE      |              |   8, 1    
+DEDENT       | 8            |   8, 1    
 DEDENT       | 4            |   8, 1    
-NEWLINE      |              |   9, 1    
-IDENTIFIER   | CatMeow      |   9, 1    
-OPERATOR     | =            |   9, 9    
-KEYWORD      | type         |   9, 11   
-OPERATOR     | :            |   9, 15   
+IDENTIFIER   | print        |   8, 1    
+PARENS       | (            |   8, 6    
+STRING       | Hi           |   8, 7    
+PARENS       | )            |   8, 11   
 NEWLINE      |              |  10, 1    
-INDENT       | 4            |  10, 1    
-IDENTIFIER   | meow         |  10, 2    
-OPERATOR     | =            |  10, 7    
-PARENS       | (            |  10, 9    
-IDENTIFIER   | this         |  10, 10   
-OPERATOR     | :            |  10, 14   
-IDENTIFIER   | Cat          |  10, 16   
+IDENTIFIER   | Iterator     |  10, 1    
+PARENS       | [            |  10, 9    
+IDENTIFIER   | String       |  10, 10   
+PARENS       | ]            |  10, 16   
+PARENS       | (            |  10, 17   
+PARENS       | (            |  10, 18   
 PARENS       | )            |  10, 19   
 OPERATOR     | ->           |  10, 21   
+STRING       |              |  10, 24   
+PARENS       | )            |  10, 26   
 NEWLINE      |              |  11, 1    
-INDENT       | 8            |  11, 1    
-KEYWORD      | if           |  11, 3    
-IDENTIFIER   | this         |  11, 6    
-OPERATOR     | ::           |  11, 11   
-IDENTIFIER   | Third        |  11, 14   
-NEWLINE      | ,            |  11, 1    
-NEWLINE      |              |  12, 1    
-INDENT       | 12           |  12, 1    
-IDENTIFIER   | print        |  12, 4    
-PARENS       | (            |  12, 9    
-STRING       | THIRD        |  12, 10   
-OPERATOR     | +            |  12, 10   
-IDENTIFIER   | this         |  12, 18   
-OPERATOR     | .            |  12, 22   
-IDENTIFIER   | label        |  12, 23   
-OPERATOR     | +            |  12, 10   
-STRING       |              |  12, 10   
-PARENS       | )            |  12, 30   
-NEWLINE      |              |  13, 1    
-DEDENT       | 12           |  13, 1    
-KEYWORD      | else         |  13, 3    
-NEWLINE      |              |  14, 1    
-INDENT       | 12           |  14, 1    
-IDENTIFIER   | print        |  14, 4    
-PARENS       | (            |  14, 9    
-STRING       | Hello        |  14, 10   
-PARENS       | )            |  14, 17   
-NEWLINE      |              |  15, 1    
-DEDENT       | 12           |  15, 1    
-DEDENT       | 8            |  15, 1    
-DEDENT       | 4            |  15, 1    
-NEWLINE      |              |  16, 1    
-IDENTIFIER   | catProto     |  16, 1    
-OPERATOR     | =            |  16, 10   
-IDENTIFIER   | Cat          |  16, 12   
-PARENS       | (            |  16, 15   
-STRING       | Kitty        |  16, 16   
-PARENS       | )            |  16, 23   
-NEWLINE      |              |  17, 1    
-IDENTIFIER   | cat          |  17, 1    
-OPERATOR     | =            |  17, 5    
-IDENTIFIER   | catProto     |  17, 7    
-OPERATOR     | &            |  17, 16   
-IDENTIFIER   | CatMeow      |  17, 18   
-PARENS       | (            |  17, 25   
-PARENS       | )            |  17, 26   
-OPERATOR     | &            |  17, 28   
-IDENTIFIER   | Third        |  17, 30   
-PARENS       | (            |  17, 35   
-STRING       | New          |  17, 36   
-PARENS       | )            |  17, 41   
-NEWLINE      |              |  18, 1    
-IDENTIFIER   | cat          |  18, 1    
-OPERATOR     | .            |  18, 4    
-IDENTIFIER   | meow         |  18, 5    
-PARENS       | (            |  18, 9    
-PARENS       | )            |  18, 10   
-NEWLINE      |              |  19, 1    
-NEWLINE      |              |  20, 1    
-IDENTIFIER   | a            |  20, 1    
-OPERATOR     | =            |  20, 3    
-IDENTIFIER   | arrayOf      |  20, 5    
-PARENS       | [            |  20, 12   
-IDENTIFIER   | Number       |  20, 13   
-PARENS       | ]            |  20, 19   
-PARENS       | (            |  20, 20   
-NUMBER       | 1            |  20, 21   
-NEWLINE      | ,            |  20, 1    
-NUMBER       | 2            |  20, 24   
-NEWLINE      | ,            |  20, 1    
-NUMBER       | 3            |  20, 27   
-NEWLINE      | ,            |  20, 1    
-NUMBER       | 4            |  20, 30   
-PARENS       | )            |  20, 31   
-NEWLINE      |              |  21, 1    
-IDENTIFIER   | l            |  21, 1    
-OPERATOR     | =            |  21, 3    
-IDENTIFIER   | listOf       |  21, 5    
-PARENS       | [            |  21, 11   
-IDENTIFIER   | Number       |  21, 12   
-PARENS       | ]            |  21, 18   
-PARENS       | (            |  21, 19   
-NUMBER       | 1            |  21, 20   
-NEWLINE      | ,            |  21, 1    
-NUMBER       | 2            |  21, 23   
-NEWLINE      | ,            |  21, 1    
-NUMBER       | 3            |  21, 26   
-NEWLINE      | ,            |  21, 1    
-NUMBER       | 4            |  21, 29   
-NEWLINE      | ,            |  21, 1    
-NUMBER       | 5            |  21, 32   
-PARENS       | )            |  21, 33   
-NEWLINE      |              |  22, 1    
-IDENTIFIER   | print        |  22, 1    
-PARENS       | (            |  22, 6    
-IDENTIFIER   | stringOf     |  22, 7    
-PARENS       | (            |  22, 15   
-IDENTIFIER   | l            |  22, 16   
-PARENS       | )            |  22, 17   
-PARENS       | )            |  22, 18   
-NEWLINE      |              |  23, 1    
-NEWLINE      |              |  24, 1    
 --undefined--

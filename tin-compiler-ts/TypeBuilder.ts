@@ -118,7 +118,7 @@ export class TypeBuilder {
          node instanceof Identifier
       ) {
       } else {
-         console.error("Didn't build node of tag = " + node.tag);
+         // console.error("Didn't build node of tag = " + node.tag);
       }
    }
 

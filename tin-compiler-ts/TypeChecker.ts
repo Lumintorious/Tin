@@ -276,7 +276,9 @@ export class TypeChecker {
          );
          if (type instanceof StructType) {
             typeSymbol = new RoundValueToValueLambdaType(
-               type.fields.map((f) => new ParamType(f.type, f.name)),
+               type.fields.map(
+                  (f) => new ParamType(f.type, f.name, f.defaultValue)
+               ),
                type
             );
          } else if (type instanceof MarkerType) {

@@ -147,7 +147,11 @@ export class Lexer {
          } else if (char === "\n") {
             lastNewlinePosition = extraIndex;
             addedLines++;
-         } else if (char === "\t" || char === " ") {
+         } else if (
+            char === "\t" ||
+            char === " " ||
+            char.charCodeAt(0) === 13
+         ) {
          } else {
             break;
          }

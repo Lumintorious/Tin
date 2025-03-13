@@ -85,7 +85,7 @@ export class TypeInferencer {
             }
             return new RoundValueToValueLambdaType(
                type.fields.map((f) => {
-                  return new ParamType(f.type, f.name);
+                  return new ParamType(f.type, f.name, f.defaultValue);
                }),
                type
             );

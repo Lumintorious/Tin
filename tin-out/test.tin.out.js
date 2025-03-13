@@ -138,17 +138,10 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
-			globalThis[key] = value;
-	  });;
-export var Cat = TIN_TYPE("Cat", "4f58f7e4-f309-42a7-aa4f-56c6c3770948", (_p0 = "Unknown Cat") => ({name: _p0}), {}); Cat._typeId = "Cat";;
-export var Third = TIN_TYPE("Third", "c1be496d-c02b-477b-9e1d-5d61c69b0e3b", (_p0) => ({label: _p0}), {}); Third._typeId = "Third";;
-export var CatMeow = TIN_TYPE("CatMeow", "a96b341a-5cd2-4b62-a650-85d41224e441", (_p0 = function() {
-return ((Third.__is_child(this) ) ? (print("THIRD " + this.Third.label + "")) : (print("Hello"))) 
-}) => ({meow: _p0}), {}); CatMeow._typeId = "CatMeow";;
-export var catProto/* Cat*/ = Cat("Kitty");
-export var cat/* Cat & CatMeow & Third*/ = _TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(catProto, CatMeow()), Third("New"));
-cat.CatMeow.meow.call(cat);
-export var a/* Array[Number]*/ = arrayOf.call('Type', Number)(Array(0)([1, 2, 3, 4]));
-export var l/* ListHead[Number]? & Iterable[Number] & Accessible[Number] & StructType(toString::(Any) => String)*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3, 4, 5]));
-print(stringOf(l))
+export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "6a95cd07-5183-4d9e-8c33-009c3e5580e2", (_p0,_p1 = function(t) {
+return print("Hello")
+}) => ({next: _p0,consumeAll: _p1}), {}); Iterator._typeId = "Iterator";;
+print("Hi");
+Iterator.call('Type', String)(function() {
+return ""
+})

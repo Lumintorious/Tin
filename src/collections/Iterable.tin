@@ -1,5 +1,7 @@
 Iterator = [T] => type:
 	next: () => T?
+	consumeAll: (fn: (String) => Nothing) => Nothing = (t: (String) => Nothing) ->
+		print("Hello")
 
 Accessible = [T] => type:
 	at: (index: Number) => T
