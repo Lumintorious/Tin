@@ -1,3 +1,5 @@
+const __tin_varargs_marker = Symbol();
+
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
@@ -10,9 +12,9 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
-	constructor.__is_child = (obj) =>
-		Reflect.ownKeys(obj).includes(typeId)
-	// obj.__tin_typeIds.includes(typeId)
+	constructor.__is_child = (obj) => {
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(typeId)
+	}
 
 	return constructor;
 }
@@ -44,19 +46,30 @@ const Type = TIN_TYPE("", "", (i) => null, {})
 const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", "", (args) => ({
+const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
 	length() {
 		return args.length;
 	},
 	at(index) {
 		return args[index]
 	},
+	[__tin_varargs_marker]: true,
 	toString() {
 		const parts = args.map(x => JSON.stringify(x)).join(", ")
 		return "Array(" + parts + ")"
 	}
 }), {})
+
+const arrayOf = (t) => (args) => args
 Array._typeId = "Array"
+
+const copy = (T) => (obj) => {
+	const newObj = {};
+	for (let key of Reflect.ownKeys(obj)) {
+		newObj[key] = { ...obj[key] }
+	}
+	return newObj;
+}
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -72,15 +85,16 @@ function makeString(obj) {
 	if (typeof obj === 'string') return obj;
 
 	if (typeof obj === 'function') {
-		return 'Lambda'
+		return 'λ'
 	}
 
 	if (Reflect.ownKeys(obj).includes("Array")) {
-		let result = '[';
-		for (let i = 0; i < obj.length(); i++) {
-			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
+		let result = 'Array(';
+		console.dir(obj)
+		for (let i = 0; i < obj.Array.length(); i++) {
+			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
-		return result + "]"
+		return result + ")"
 	}
 
 	if (typeof obj === 'object') {
@@ -97,7 +111,7 @@ function makeString(obj) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += makeString(key) + '=' + makeString(component[key]) + ',';
+					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
 				}
 			}
 			if (result.length > 1 && result[result.length - 1] === ",") {
@@ -127,40 +141,66 @@ const debug = (...args) => {
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "6159be94-ffcc-4d2b-8570-109660f70c59", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
-export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)));
+export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "c6ee501a-278c-442c-95f9-866a0fb99454", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
+export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)), Accessible.call('Type', T)), ToString));
 export var listIterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
 return function(list) {
 var currentList/* ListHead[T]?*/ = list;
 var nextF/* () => T?*/ = function() {
-return ((currentList != nothing) ? ((function(){var result/* T*/ = currentList[ListHead._typeId].value;
-currentList = currentList[ListHead._typeId].rest;
-return result})()) : (nothing)) 
+return ((currentList != nothing) ? ((function(){var result/* T*/ = currentList.ListHead.value;
+currentList = currentList.ListHead.rest;
+return result}).call(this)) : (nothing)) 
 };
 return Iterator.call('Type', T)(nextF)
 }
 };
-export var listOf/* [T] => (Array[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
+export var listAccessible/* [T] => (ListHead[T]) => Accessible[T]*/ = function(T) {
+return function(list) {
+var length/* () => Number*/ = function() {
+var num/* Number*/ = 0;
+var l/* ListHead[T]*/ = list;
+while (l != nothing) {
+ num = num + 1 
+};
+return num
+};
+var at/* (Number) => T*/ = function(index) {
+var currentIndex/* Number*/ = 0;
+var l/* ListHead[T]*/ = list;
+while (currentIndex < index) {
+ ((l != nothing) ? (l = l.ListHead.rest) : (null)) ;
+currentIndex = currentIndex + 1 
+};
+return l.ListHead.value
+};
+return Accessible.call('Type', T)(at, length)
+}
+};
+export var listOf/* [T] => (Array[T]) => ListHead[T]? & Iterable[T] & Accessible[T] & ToString*/ = function(T) {
 return function(arr) {
-var i/* Number*/ = arr[Array._typeId].length();
+var i/* Number*/ = arr.Array.length();
 var list/* ListHead[T]?*/ = nothing;
 while (i > 0) {
  i = i - 1;
-list = ListHead.call('Type', T)(arr[Array._typeId].at(i), list) 
+list = ListHead.call('Type', T)(arr.Array.at(i), list) 
 };
-return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(function() {
+var iterable/* Iterable[T]*/ = makeIterable.call('Type', T)(function() {
 return listIterator.call('Type', T)(list)
-}))
+});
+var toStr/* (Any) => String*/ = function() {
+return iterable.Iterable.mkString(",", "List(", ")")
+};
+return _TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(list, iterable), listAccessible.call('Type', T)(list)), ToString(toStr))
 }
 };
 export var listFromIterator/* [T] => (() => Iterator[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
 return function(getIterator) {
 var list/* ListHead[T]?*/ = nothing;
 var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator[Iterator._typeId].next();
+var current/* T?*/ = iterator.Iterator.next();
 while (current != nothing) {
  list = ListHead.call('Type', T)(current, list);
-current = current[undefined._typeId].next() 
+current = iterator.Iterator.next() 
 };
 return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(getIterator))
 }

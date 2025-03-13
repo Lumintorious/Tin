@@ -225,11 +225,15 @@ export class TypeChecker {
    }
 
    typeCheckSquareApply(apply: SquareApply, scope: Scope) {
-      const testCalleeIsType = scope.resolveFully(
-         this.context.translator.translate(apply.callee, scope)
-      );
-      if (testCalleeIsType instanceof SquareTypeToTypeLambdaType) {
-         return;
+      try {
+         const testCalleeIsType = scope.resolveFully(
+            this.context.translator.translate(apply.callee, scope)
+         );
+         if (testCalleeIsType instanceof SquareTypeToTypeLambdaType) {
+            return;
+         }
+      } catch (e) {
+         // It's ok, it wasn't a type lambda
       }
       const calleeType = this.context.inferencer.infer(apply.callee, scope);
       if (!(calleeType instanceof SquareTypeToValueLambdaType)) {
@@ -260,7 +264,7 @@ export class TypeChecker {
    }
 
    typeCheckApply(apply: RoundApply, scope: Scope) {
-      scope = scope.innerScopeOf(apply);
+      // scope = scope.innerScopeOf(apply);
       this.typeCheck(apply.callee, scope);
       let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
       if (
@@ -272,7 +276,7 @@ export class TypeChecker {
          );
          if (type instanceof StructType) {
             typeSymbol = new RoundValueToValueLambdaType(
-               type.fields.map((f) => new ParamType(f.typeSymbol, f.name)),
+               type.fields.map((f) => new ParamType(f.type, f.name)),
                type
             );
          } else if (type instanceof MarkerType) {
@@ -349,6 +353,8 @@ export class TypeChecker {
       const termName =
          term.callee instanceof Identifier
             ? term.callee.value
+            : term.callee instanceof Select
+            ? term.callee.field
             : "Anonymous lambda";
       let fulfilledNamedParams = new Set<String>();
       let fulfilledNumericParams = new Set<Number>();
@@ -455,7 +461,11 @@ export class TypeChecker {
 
       if (unfulfilledExpectedParams.length > 0) {
          this.context.errors.add(
-            `Lambda ${termName} didn't have all of its non-optional parameters fulfilled`,
+            `Lambda ${termName} didn't have all of its non-optional parameters fulfilled, ${
+               unfulfilledExpectedParams.length
+            } params unfulfilled ${unfulfilledExpectedParams[0].type} ${
+               "" + applyArgs.length + expectedParams.length
+            }`,
             undefined,
             undefined,
             term.position
@@ -474,7 +484,9 @@ export class TypeErrorList {
       position?: TokenPos;
       errorForStack?: Error;
    }[];
-   constructor() {
+   context: TypePhaseContext;
+   constructor(context: TypePhaseContext) {
+      this.context = context;
       this.errors = [];
    }
 
@@ -501,13 +513,17 @@ export class TypeErrorList {
             this.errors
                .map(
                   (e) =>
-                     `- ${
-                        e.hint
-                     }; Expected '${e.expectedType?.toString()}', but got '${
-                        e.insertedType
-                     }' at line ${e.position?.start.line}, column ${
+                     `- ${e.hint}; ${
+                        e.expectedType
+                           ? `Expected '${e.expectedType?.toString()}';`
+                           : ""
+                     }${
+                        e.insertedType ? ` Got '${e.insertedType}';` : ""
+                     }Line ${e.position?.start.line}, column ${
                         e.position?.start.column
-                     }`
+                     }` +
+                     " @ " +
+                     this.context.fileName
                )
                .join("\n");
          console.error(message);

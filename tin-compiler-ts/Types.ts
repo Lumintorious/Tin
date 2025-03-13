@@ -292,6 +292,7 @@ export class ParamType {
    type: Type;
    name?: string;
    defaultValue?: Term;
+   parentComponent?: Type;
    constructor(type: Type, name?: string, defaultValue?: Term) {
       this.type = type;
       this.name = name;
@@ -309,7 +310,7 @@ export class RoundValueToValueLambdaType extends Type {
       super("RoundValueToValueLambdaType");
       for (let param of params) {
          if (!(param instanceof ParamType)) {
-            throw new Error("HERE");
+            throw new Error("HERE " + JSON.stringify(param));
          }
       }
       this.params = params;
@@ -328,10 +329,9 @@ export class RoundValueToValueLambdaType extends Type {
          });
 
       // Return type must be covariant
-      const returnCheck = this.returnType.isAssignableTo(
-         other.returnType,
-         scope
-      );
+      const returnCheck =
+         other.returnType.name === "Nothing" ||
+         this.returnType.isAssignableTo(other.returnType, scope);
 
       return paramCheck && returnCheck;
    }
@@ -605,22 +605,20 @@ export class MarkerType extends Type {
 }
 
 export class StructType extends Type {
-   fields: Symbol[];
-   constructor(fields: Symbol[]) {
+   fields: ParamType[];
+   constructor(fields: ParamType[]) {
       super("StructType");
       this.fields = fields; // Array of { name, type } objects
    }
 
    extends(other: Type, scope: Scope) {
+      if (other.name === "Any") return true;
       if (!(other instanceof StructType)) return false;
 
       // Check if every field in this type exists in the other and is assignable
       const result = this.fields.every((field) => {
          const otherField = other.fields.find((f) => f.name === field.name);
-         return (
-            otherField &&
-            field.typeSymbol.isAssignableTo(otherField.typeSymbol, scope)
-         );
+         return otherField && field.type.isAssignableTo(otherField.type, scope);
       });
 
       return result;
@@ -634,7 +632,7 @@ export class StructType extends Type {
          const otherField = other.fields.find((f) => f.name === field.name);
          return (
             otherField !== undefined &&
-            field.typeSymbol.isAssignableTo(otherField.typeSymbol, scope)
+            field.type.isAssignableTo(otherField.type, scope)
          );
       });
    }
@@ -643,7 +641,7 @@ export class StructType extends Type {
       return (
          this.name ??
          `StructType(${this.fields.map(
-            (f) => `${f.name}::${f.typeSymbol.toString()}`
+            (f) => `${f.name}::${f.type.toString()}`
          )})`
       );
    }

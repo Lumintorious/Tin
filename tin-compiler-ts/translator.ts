@@ -95,9 +95,13 @@ function translate(
       // Select
    } else if (term instanceof Select) {
       const operator = term.ammortized ? "?." : ".";
-      return `${translate(term.owner, scope)}[${
+      if (!term.ownerComponent) {
+         console.error(term);
+         throw new Error("Attempted select on object without components: ");
+      }
+      return `${translate(term.owner, scope)}${operator}${
          term.ownerComponent
-      }._typeId]${operator}${term.field}`;
+      }${operator}${term.field}`;
 
       // Make
    } else if (term instanceof Make) {
@@ -236,7 +240,7 @@ function translate(
       ) {
          trueBranch = `((function(){${translate(term.trueBranch, scope, {
             returnLast: true,
-         })}})())`;
+         })}}).call(this))`;
       } else {
          trueBranch = `(${translate(term.trueBranch, scope)})`;
       }
@@ -299,8 +303,8 @@ function translate(
          open = ".call(" + translate(term.callee.owner, scope);
       }
       return (
-         (term.calledInsteadOfSquare ? "() =>" : "") +
          translate(term.callee, scope) +
+         (term.calledInsteadOfSquare ? "(0)" : "") +
          open +
          args
             .map((arg) => {

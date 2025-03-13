@@ -345,7 +345,6 @@ export class Make extends Term {
 }
 
 const PRECEDENCE: { [_: string]: number } = {
-   "::": 140, // Type Check
    "?:": 110, // Walrus
    ".": 100, // Field access
    "?.": 100, // Field access
@@ -354,8 +353,6 @@ const PRECEDENCE: { [_: string]: number } = {
    "/": 10, // Division
    "+": 9, // Addition
    "-": 9, // Subtraction
-   "==": 8, // Equality
-   "!=": 8, // Inequality
    "<": 7, // Less than
    ">": 7, // Greater than
    "<=": 7, // Less than or equal to
@@ -366,7 +363,11 @@ const PRECEDENCE: { [_: string]: number } = {
    "|": 3,
    "@": 2,
    // ':': 1,
-   "=": 0, // Assignment (right-associative)
+   // (right-associative)
+   "!=": 0, // Inequality
+   "==": 0, // Equality
+   "::": 0, // Type Check
+   "=": 0, // Assignment
 };
 
 export class Parser {
@@ -441,7 +442,14 @@ export class Parser {
       const args: [string, Term][] = [];
 
       // Parse arguments (expressions)
-      while (this.peek() && this.peek().value !== (isSquare ? "]" : ")")) {
+      while (true) {
+         if (
+            this.peek() &&
+            this.peek().tag === "PARENS" &&
+            this.peek().value === (isSquare ? "]" : ")")
+         ) {
+            break;
+         }
          this.omit("NEWLINE");
          this.omit("INDENT");
          this.omit("DEDENT");
@@ -457,7 +465,11 @@ export class Parser {
          this.omit("NEWLINE");
          this.omit("INDENT");
          this.omit("DEDENT");
-         if (this.peek() && this.peek().value === ",") {
+         if (
+            this.peek() &&
+            (this.peek().tag === "NEWLINE" || this.peek().tag === "OPERATOR") &&
+            this.peek().value === ","
+         ) {
             this.consume("OPERATOR", ",");
          }
       }
@@ -663,7 +675,13 @@ export class Parser {
       let groupCatch: Term | undefined = undefined;
 
       // Parse parameters until we reach the closing parenthesis
-      while (this.peek().value !== ")" && this.peek().value !== "]") {
+      while (true) {
+         if (
+            this.peek().tag === "PARENS" &&
+            (this.peek().value === ")" || this.peek().value === "]")
+         ) {
+            break;
+         }
          // Parse each parameter
          // const param = this.parseParameter();
          const paramTerm: Term = this.parseExpression();
@@ -677,8 +695,11 @@ export class Parser {
          parameters.push(param);
 
          // Check for a comma to separate parameters
-         if (this.peek().tag === "OPERATOR") {
-            this.consume("OPERATOR", ",");
+         if (
+            this.peek().value === "," &&
+            (this.peek().tag === "OPERATOR" || this.peek().tag === "NEWLINE")
+         ) {
+            this.consume();
          } else {
             break; // No more parameters, exit the loop
          }
@@ -891,11 +912,6 @@ export class Parser {
          return this.parseBlock(); // Grouping with parentheses
       }
 
-      // if (token.tag === "PARENS" && token.value === "{") {
-      //    this.current--;
-      //    return this.parseGrouping(); // Grouping with parentheses
-      // }
-
       if (token.value === "while") {
          this.current--;
          return this.parseWhileLoop();
@@ -927,7 +943,7 @@ export class Parser {
          throw this.createError(
             `Expected '${expectedValue}', but got '${
                token ? token.value : "undefined"
-            }'`,
+            }'. Previous token = ` + this.tokens[this.tokens.length - 1].tag,
             token
          );
       }
@@ -942,6 +958,9 @@ export class Parser {
 
    createError(message: string, token: Token): any {
       const position = token.position || { line: 0, column: 0 };
+      this.tokens
+         .slice(0, this.current)
+         .forEach((t) => console.error(t.tag, t.value));
       throw new Error(
          `${message} at line ${token.position.start.line}, column ${token.position.start.column}, token = ${token.tag}`
       );

@@ -1,3 +1,5 @@
+const __tin_varargs_marker = Symbol();
+
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
@@ -10,9 +12,9 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
-	constructor.__is_child = (obj) =>
-		Reflect.ownKeys(obj).includes(typeId)
-	// obj.__tin_typeIds.includes(typeId)
+	constructor.__is_child = (obj) => {
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(typeId)
+	}
 
 	return constructor;
 }
@@ -44,19 +46,30 @@ const Type = TIN_TYPE("", "", (i) => null, {})
 const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", "", (args) => ({
+const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
 	length() {
 		return args.length;
 	},
 	at(index) {
 		return args[index]
 	},
+	[__tin_varargs_marker]: true,
 	toString() {
 		const parts = args.map(x => JSON.stringify(x)).join(", ")
 		return "Array(" + parts + ")"
 	}
 }), {})
+
+const arrayOf = (t) => (args) => args
 Array._typeId = "Array"
+
+const copy = (T) => (obj) => {
+	const newObj = {};
+	for (let key of Reflect.ownKeys(obj)) {
+		newObj[key] = { ...obj[key] }
+	}
+	return newObj;
+}
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -72,15 +85,16 @@ function makeString(obj) {
 	if (typeof obj === 'string') return obj;
 
 	if (typeof obj === 'function') {
-		return 'Lambda'
+		return 'λ'
 	}
 
 	if (Reflect.ownKeys(obj).includes("Array")) {
-		let result = '[';
-		for (let i = 0; i < obj.length(); i++) {
-			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
+		let result = 'Array(';
+		console.dir(obj)
+		for (let i = 0; i < obj.Array.length(); i++) {
+			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
-		return result + "]"
+		return result + ")"
 	}
 
 	if (typeof obj === 'object') {
@@ -97,7 +111,7 @@ function makeString(obj) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += makeString(key) + '=' + makeString(component[key]) + ',';
+					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
 				}
 			}
 			if (result.length > 1 && result[result.length - 1] === ",") {
@@ -127,23 +141,14 @@ const debug = (...args) => {
 import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var Cat = TIN_TYPE("Cat", "e5a94d37-0e51-4c1a-8775-1ff2fd4eb0dd", (_p0) => ({name: _p0}), {}); Cat._typeId = "Cat";;
-export var CatMeow = TIN_TYPE("CatMeow", "6e9bbe29-7265-44a8-8300-d0159deb938e", (_p0) => ({meow: _p0}), {}); CatMeow._typeId = "CatMeow";;
-export var CatPurr = TIN_TYPE("CatPurr", "6b1abc00-472a-43c1-88e2-1b7977e2b834", (_p0) => ({purr: _p0}), {}); CatPurr._typeId = "CatPurr";;
-export var meow/* (Cat) => Nothing*/ = function() {
-return print("Meow, I'm " + this[Cat._typeId].name)
-};
-export var purr/* (Cat) => () => Nothing*/ = function(cat) {
-return function() {
-return print("Prr, I'm " + cat[Cat._typeId].name)
-}
-};
-export var cat/* Cat & CatMeow*/ = _TIN_INTERSECT_OBJECTS(Cat("Kitty"), CatMeow(meow));
-cat[CatMeow._typeId].meow.call(cat);
-cat[Cat._typeId].name = "A dude";
-cat[CatMeow._typeId].meow.call(cat);
-export var catTwoData/* Cat*/ = Cat("Kitty");
-export var catTwo/* Cat & CatPurr*/ = _TIN_INTERSECT_OBJECTS(catTwoData, CatPurr(purr(catTwoData)));
-catTwo[CatPurr._typeId].purr();
-catTwo[Cat._typeId].name = "A dude";
-catTwo[CatPurr._typeId].purr()
+export var Cat = TIN_TYPE("Cat", "4f58f7e4-f309-42a7-aa4f-56c6c3770948", (_p0 = "Unknown Cat") => ({name: _p0}), {}); Cat._typeId = "Cat";;
+export var Third = TIN_TYPE("Third", "c1be496d-c02b-477b-9e1d-5d61c69b0e3b", (_p0) => ({label: _p0}), {}); Third._typeId = "Third";;
+export var CatMeow = TIN_TYPE("CatMeow", "a96b341a-5cd2-4b62-a650-85d41224e441", (_p0 = function() {
+return ((Third.__is_child(this) ) ? (print("THIRD " + this.Third.label + "")) : (print("Hello"))) 
+}) => ({meow: _p0}), {}); CatMeow._typeId = "CatMeow";;
+export var catProto/* Cat*/ = Cat("Kitty");
+export var cat/* Cat & CatMeow & Third*/ = _TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(catProto, CatMeow()), Third("New"));
+cat.CatMeow.meow.call(cat);
+export var a/* Array[Number]*/ = arrayOf.call('Type', Number)(Array(0)([1, 2, 3, 4]));
+export var l/* ListHead[Number]? & Iterable[Number] & Accessible[Number] & StructType(toString::(Any) => String)*/ = listOf.call('Type', Number)(Array(0)([1, 2, 3, 4, 5]));
+print(stringOf(l))

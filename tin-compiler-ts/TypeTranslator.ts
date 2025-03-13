@@ -154,25 +154,38 @@ export class TypeTranslator {
                node.typeArgs.map((arg) => this.translate(arg, scope))
             );
          case "TypeDef":
+            // const fieldSymbols = node.fieldDefs.map((field) => {
+            // 	let fieldType: Type;
+            // 	if (field.type) {
+            // 		fieldType = this.context.translator.translate(field.type, scope);
+            // 	} else if (field.defaultValue) {
+            // 		fieldType = this.infer(field.defaultValue, scope);
+            // 	} else {
+            // 		fieldType = new Type();
+            // 	}
+            // 	return new ParamType(fieldType, field.name, field);
+            // });
+            // return new StructType(fieldSymbols);
             if (!(node instanceof TypeDef)) {
                return new Type();
             }
             if (node.fieldDefs.length === 0) {
                return new MarkerType();
             }
+            const veryInnerScope = scope.innerScopeOf(node, true);
             const fieldTypes = node.fieldDefs.map((f) => {
                let fieldType: Type;
                if (f.type) {
-                  fieldType = this.translate(f.type, scope);
+                  fieldType = this.translate(f.type, veryInnerScope);
                } else if (f.defaultValue) {
                   fieldType = this.context.inferencer.infer(
                      f.defaultValue,
-                     scope
+                     veryInnerScope
                   );
                } else {
                   fieldType = new Type();
                }
-               return new Symbol(f.name, fieldType, f);
+               return new ParamType(fieldType, f.name, f.defaultValue);
             });
             return new StructType(fieldTypes);
          case "RoundApply":

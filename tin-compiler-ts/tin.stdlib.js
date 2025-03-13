@@ -1,3 +1,5 @@
+const __tin_varargs_marker = Symbol();
+
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
@@ -10,9 +12,9 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
-	constructor.__is_child = (obj) =>
-		Reflect.ownKeys(obj).includes(typeId)
-	// obj.__tin_typeIds.includes(typeId)
+	constructor.__is_child = (obj) => {
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(typeId)
+	}
 
 	return constructor;
 }
@@ -44,19 +46,30 @@ const Type = TIN_TYPE("", "", (i) => null, {})
 const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", "", (args) => ({
+const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
 	length() {
 		return args.length;
 	},
 	at(index) {
 		return args[index]
 	},
+	[__tin_varargs_marker]: true,
 	toString() {
 		const parts = args.map(x => JSON.stringify(x)).join(", ")
 		return "Array(" + parts + ")"
 	}
 }), {})
+
+const arrayOf = (t) => (args) => args
 Array._typeId = "Array"
+
+const copy = (T) => (obj) => {
+	const newObj = {};
+	for (let key of Reflect.ownKeys(obj)) {
+		newObj[key] = { ...obj[key] }
+	}
+	return newObj;
+}
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -72,15 +85,16 @@ function makeString(obj) {
 	if (typeof obj === 'string') return obj;
 
 	if (typeof obj === 'function') {
-		return 'Lambda'
+		return 'λ'
 	}
 
 	if (Reflect.ownKeys(obj).includes("Array")) {
-		let result = '[';
-		for (let i = 0; i < obj.length(); i++) {
-			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
+		let result = 'Array(';
+		console.dir(obj)
+		for (let i = 0; i < obj.Array.length(); i++) {
+			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
-		return result + "]"
+		return result + ")"
 	}
 
 	if (typeof obj === 'object') {
@@ -97,7 +111,7 @@ function makeString(obj) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += makeString(key) + '=' + makeString(component[key]) + ',';
+					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
 				}
 			}
 			if (result.length > 1 && result[result.length - 1] === ",") {

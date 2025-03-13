@@ -13,166 +13,138 @@ INDENT       | 4            |   4, 1
 IDENTIFIER   | name         |   4, 2    
 OPERATOR     | :            |   4, 6    
 IDENTIFIER   | String       |   4, 8    
+OPERATOR     | =            |   4, 15   
+STRING       | Unknown Cat  |   4, 17   
 NEWLINE      |              |   5, 1    
 DEDENT       | 4            |   5, 1    
 NEWLINE      |              |   6, 1    
-IDENTIFIER   | CatMeow      |   6, 1    
-OPERATOR     | =            |   6, 9    
-KEYWORD      | type         |   6, 11   
-OPERATOR     | :            |   6, 15   
+IDENTIFIER   | Third        |   6, 1    
+OPERATOR     | =            |   6, 7    
+KEYWORD      | type         |   6, 9    
+OPERATOR     | :            |   6, 13   
 NEWLINE      |              |   7, 1    
 INDENT       | 4            |   7, 1    
-IDENTIFIER   | meow         |   7, 2    
-OPERATOR     | :            |   7, 6    
-PARENS       | (            |   7, 8    
-IDENTIFIER   | this         |   7, 9    
-OPERATOR     | :            |   7, 13   
-IDENTIFIER   | Cat          |   7, 15   
-PARENS       | )            |   7, 18   
-OPERATOR     | =>           |   7, 20   
-IDENTIFIER   | Nothing      |   7, 23   
+IDENTIFIER   | label        |   7, 2    
+OPERATOR     | :            |   7, 7    
+IDENTIFIER   | String       |   7, 9    
 NEWLINE      |              |   8, 1    
 DEDENT       | 4            |   8, 1    
 NEWLINE      |              |   9, 1    
-IDENTIFIER   | CatPurr      |   9, 1    
+IDENTIFIER   | CatMeow      |   9, 1    
 OPERATOR     | =            |   9, 9    
 KEYWORD      | type         |   9, 11   
 OPERATOR     | :            |   9, 15   
 NEWLINE      |              |  10, 1    
 INDENT       | 4            |  10, 1    
-IDENTIFIER   | purr         |  10, 2    
-OPERATOR     | :            |  10, 6    
-PARENS       | (            |  10, 8    
-PARENS       | )            |  10, 9    
-OPERATOR     | =>           |  10, 11   
-IDENTIFIER   | Nothing      |  10, 14   
+IDENTIFIER   | meow         |  10, 2    
+OPERATOR     | =            |  10, 7    
+PARENS       | (            |  10, 9    
+IDENTIFIER   | this         |  10, 10   
+OPERATOR     | :            |  10, 14   
+IDENTIFIER   | Cat          |  10, 16   
+PARENS       | )            |  10, 19   
+OPERATOR     | ->           |  10, 21   
 NEWLINE      |              |  11, 1    
-DEDENT       | 4            |  11, 1    
+INDENT       | 8            |  11, 1    
+KEYWORD      | if           |  11, 3    
+IDENTIFIER   | this         |  11, 6    
+OPERATOR     | ::           |  11, 11   
+IDENTIFIER   | Third        |  11, 14   
+NEWLINE      | ,            |  11, 1    
 NEWLINE      |              |  12, 1    
-IDENTIFIER   | meow         |  12, 1    
-OPERATOR     | =            |  12, 6    
-PARENS       | (            |  12, 8    
-IDENTIFIER   | this         |  12, 9    
-OPERATOR     | :            |  12, 13   
-IDENTIFIER   | Cat          |  12, 15   
-PARENS       | )            |  12, 18   
-OPERATOR     | ->           |  12, 20   
+INDENT       | 12           |  12, 1    
+IDENTIFIER   | print        |  12, 4    
+PARENS       | (            |  12, 9    
+STRING       | THIRD        |  12, 10   
+OPERATOR     | +            |  12, 10   
+IDENTIFIER   | this         |  12, 18   
+OPERATOR     | .            |  12, 22   
+IDENTIFIER   | label        |  12, 23   
+OPERATOR     | +            |  12, 10   
+STRING       |              |  12, 10   
+PARENS       | )            |  12, 30   
 NEWLINE      |              |  13, 1    
-INDENT       | 4            |  13, 1    
-IDENTIFIER   | print        |  13, 2    
-PARENS       | (            |  13, 7    
-STRING       | Meow, I'm    |  13, 8    
-OPERATOR     | +            |  13, 21   
-IDENTIFIER   | this         |  13, 23   
-OPERATOR     | .            |  13, 27   
-IDENTIFIER   | name         |  13, 28   
-PARENS       | )            |  13, 32   
+DEDENT       | 12           |  13, 1    
+KEYWORD      | else         |  13, 3    
 NEWLINE      |              |  14, 1    
-DEDENT       | 4            |  14, 1    
+INDENT       | 12           |  14, 1    
+IDENTIFIER   | print        |  14, 4    
+PARENS       | (            |  14, 9    
+STRING       | Hello        |  14, 10   
+PARENS       | )            |  14, 17   
 NEWLINE      |              |  15, 1    
-IDENTIFIER   | purr         |  15, 1    
-OPERATOR     | =            |  15, 6    
-PARENS       | (            |  15, 8    
-IDENTIFIER   | cat          |  15, 9    
-OPERATOR     | :            |  15, 12   
-IDENTIFIER   | Cat          |  15, 14   
-PARENS       | )            |  15, 17   
-OPERATOR     | ->           |  15, 19   
-PARENS       | (            |  15, 22   
-PARENS       | )            |  15, 23   
-OPERATOR     | ->           |  15, 25   
+DEDENT       | 12           |  15, 1    
+DEDENT       | 8            |  15, 1    
+DEDENT       | 4            |  15, 1    
 NEWLINE      |              |  16, 1    
-INDENT       | 4            |  16, 1    
-IDENTIFIER   | print        |  16, 2    
-PARENS       | (            |  16, 7    
-STRING       | Prr, I'm     |  16, 8    
-OPERATOR     | +            |  16, 20   
-IDENTIFIER   | cat          |  16, 22   
-OPERATOR     | .            |  16, 25   
-IDENTIFIER   | name         |  16, 26   
-PARENS       | )            |  16, 30   
+IDENTIFIER   | catProto     |  16, 1    
+OPERATOR     | =            |  16, 10   
+IDENTIFIER   | Cat          |  16, 12   
+PARENS       | (            |  16, 15   
+STRING       | Kitty        |  16, 16   
+PARENS       | )            |  16, 23   
 NEWLINE      |              |  17, 1    
-DEDENT       | 4            |  17, 1    
+IDENTIFIER   | cat          |  17, 1    
+OPERATOR     | =            |  17, 5    
+IDENTIFIER   | catProto     |  17, 7    
+OPERATOR     | &            |  17, 16   
+IDENTIFIER   | CatMeow      |  17, 18   
+PARENS       | (            |  17, 25   
+PARENS       | )            |  17, 26   
+OPERATOR     | &            |  17, 28   
+IDENTIFIER   | Third        |  17, 30   
+PARENS       | (            |  17, 35   
+STRING       | New          |  17, 36   
+PARENS       | )            |  17, 41   
 NEWLINE      |              |  18, 1    
 IDENTIFIER   | cat          |  18, 1    
-OPERATOR     | =            |  18, 5    
-IDENTIFIER   | Cat          |  18, 7    
-PARENS       | (            |  18, 10   
-STRING       | Kitty        |  18, 11   
-PARENS       | )            |  18, 18   
-OPERATOR     | &            |  18, 20   
-IDENTIFIER   | CatMeow      |  18, 22   
-PARENS       | (            |  18, 29   
-IDENTIFIER   | meow         |  18, 30   
-PARENS       | )            |  18, 34   
+OPERATOR     | .            |  18, 4    
+IDENTIFIER   | meow         |  18, 5    
+PARENS       | (            |  18, 9    
+PARENS       | )            |  18, 10   
 NEWLINE      |              |  19, 1    
-IDENTIFIER   | cat          |  19, 1    
-OPERATOR     | .            |  19, 4    
-IDENTIFIER   | meow         |  19, 5    
-PARENS       | (            |  19, 9    
-PARENS       | )            |  19, 10   
 NEWLINE      |              |  20, 1    
-KEYWORD      | set          |  20, 1    
-IDENTIFIER   | cat          |  20, 5    
-OPERATOR     | .            |  20, 8    
-IDENTIFIER   | name         |  20, 9    
-OPERATOR     | =            |  20, 14   
-STRING       | A dude       |  20, 16   
+IDENTIFIER   | a            |  20, 1    
+OPERATOR     | =            |  20, 3    
+IDENTIFIER   | arrayOf      |  20, 5    
+PARENS       | [            |  20, 12   
+IDENTIFIER   | Number       |  20, 13   
+PARENS       | ]            |  20, 19   
+PARENS       | (            |  20, 20   
+NUMBER       | 1            |  20, 21   
+NEWLINE      | ,            |  20, 1    
+NUMBER       | 2            |  20, 24   
+NEWLINE      | ,            |  20, 1    
+NUMBER       | 3            |  20, 27   
+NEWLINE      | ,            |  20, 1    
+NUMBER       | 4            |  20, 30   
+PARENS       | )            |  20, 31   
 NEWLINE      |              |  21, 1    
-IDENTIFIER   | cat          |  21, 1    
-OPERATOR     | .            |  21, 4    
-IDENTIFIER   | meow         |  21, 5    
-PARENS       | (            |  21, 9    
-PARENS       | )            |  21, 10   
+IDENTIFIER   | l            |  21, 1    
+OPERATOR     | =            |  21, 3    
+IDENTIFIER   | listOf       |  21, 5    
+PARENS       | [            |  21, 11   
+IDENTIFIER   | Number       |  21, 12   
+PARENS       | ]            |  21, 18   
+PARENS       | (            |  21, 19   
+NUMBER       | 1            |  21, 20   
+NEWLINE      | ,            |  21, 1    
+NUMBER       | 2            |  21, 23   
+NEWLINE      | ,            |  21, 1    
+NUMBER       | 3            |  21, 26   
+NEWLINE      | ,            |  21, 1    
+NUMBER       | 4            |  21, 29   
+NEWLINE      | ,            |  21, 1    
+NUMBER       | 5            |  21, 32   
+PARENS       | )            |  21, 33   
 NEWLINE      |              |  22, 1    
+IDENTIFIER   | print        |  22, 1    
+PARENS       | (            |  22, 6    
+IDENTIFIER   | stringOf     |  22, 7    
+PARENS       | (            |  22, 15   
+IDENTIFIER   | l            |  22, 16   
+PARENS       | )            |  22, 17   
+PARENS       | )            |  22, 18   
 NEWLINE      |              |  23, 1    
-IDENTIFIER   | catTwoData   |  23, 1    
-OPERATOR     | =            |  23, 12   
-IDENTIFIER   | Cat          |  23, 14   
-PARENS       | (            |  23, 17   
-STRING       | Kitty        |  23, 18   
-PARENS       | )            |  23, 25   
 NEWLINE      |              |  24, 1    
-IDENTIFIER   | catTwo       |  24, 1    
-OPERATOR     | =            |  24, 8    
-IDENTIFIER   | catTwoData   |  24, 10   
-OPERATOR     | &            |  24, 21   
-IDENTIFIER   | CatPurr      |  24, 23   
-PARENS       | (            |  24, 30   
-IDENTIFIER   | purr         |  24, 31   
-PARENS       | (            |  24, 35   
-IDENTIFIER   | catTwoData   |  24, 36   
-PARENS       | )            |  24, 46   
-PARENS       | )            |  24, 47   
-NEWLINE      |              |  25, 1    
-IDENTIFIER   | catTwo       |  25, 1    
-OPERATOR     | .            |  25, 7    
-IDENTIFIER   | purr         |  25, 8    
-PARENS       | (            |  25, 12   
-PARENS       | )            |  25, 13   
-NEWLINE      |              |  26, 1    
-KEYWORD      | set          |  26, 1    
-IDENTIFIER   | catTwo       |  26, 5    
-OPERATOR     | .            |  26, 11   
-IDENTIFIER   | purr         |  26, 12   
-OPERATOR     | =            |  26, 17   
-IDENTIFIER   | purr         |  26, 19   
-PARENS       | (            |  26, 23   
-IDENTIFIER   | cat          |  26, 24   
-PARENS       | )            |  26, 27   
-NEWLINE      |              |  27, 1    
-KEYWORD      | set          |  27, 1    
-IDENTIFIER   | catTwo       |  27, 5    
-OPERATOR     | .            |  27, 11   
-IDENTIFIER   | name         |  27, 12   
-OPERATOR     | =            |  27, 17   
-STRING       | A dude       |  27, 19   
-NEWLINE      |              |  28, 1    
-IDENTIFIER   | catTwo       |  28, 1    
-OPERATOR     | .            |  28, 7    
-IDENTIFIER   | purr         |  28, 8    
-PARENS       | (            |  28, 12   
-PARENS       | )            |  28, 13   
-NEWLINE      |              |  29, 1    
-NEWLINE      |              |  30, 1    
 --undefined--

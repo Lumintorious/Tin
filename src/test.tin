@@ -1,29 +1,23 @@
 import collections/List
 
 Cat = type:
-	name: String
+	name: String = "Unknown Cat"
+
+Third = type:
+	label: String
 
 CatMeow = type:
-	meow: (this: Cat) => Nothing
+	meow = (this: Cat) ->
+		if this :: Third, 
+			print("THIRD {this.label}")
+		else
+			print("Hello")
 
-CatPurr = type:
-	purr: () => Nothing
-
-meow = (this: Cat) ->
-	print("Meow, I'm " + this.name)
-
-purr = (cat: Cat) -> () ->
-	print("Prr, I'm " + cat.name)
-
-cat = Cat("Kitty") & CatMeow(meow)
-cat.meow()
-set cat.name = "A dude"
+catProto = Cat("Kitty")
+cat = catProto & CatMeow() & Third("New")
 cat.meow()
 
-catTwoData = Cat("Kitty")
-catTwo = catTwoData & CatPurr(purr(catTwoData))
-catTwo.purr()
-set catTwo.purr = purr(cat)
-set catTwo.name = "A dude"
-catTwo.purr()
+a = arrayOf[Number](1, 2, 3, 4)
+l = listOf[Number](1, 2, 3, 4, 5)
+print(stringOf(l))
 

@@ -18,219 +18,391 @@ OPERATOR     | ?            |   2, 15
 NEWLINE      |              |   3, 1    
 DEDENT       | 4            |   3, 1    
 NEWLINE      |              |   4, 1    
-IDENTIFIER   | Iterable     |   4, 1    
-OPERATOR     | =            |   4, 10   
-PARENS       | [            |   4, 12   
-IDENTIFIER   | T            |   4, 13   
-PARENS       | ]            |   4, 14   
-OPERATOR     | =>           |   4, 16   
-KEYWORD      | type         |   4, 19   
-OPERATOR     | :            |   4, 23   
+IDENTIFIER   | Accessible   |   4, 1    
+OPERATOR     | =            |   4, 12   
+PARENS       | [            |   4, 14   
+IDENTIFIER   | T            |   4, 15   
+PARENS       | ]            |   4, 16   
+OPERATOR     | =>           |   4, 18   
+KEYWORD      | type         |   4, 21   
+OPERATOR     | :            |   4, 25   
 NEWLINE      |              |   5, 1    
 INDENT       | 4            |   5, 1    
-IDENTIFIER   | forEach      |   5, 2    
-OPERATOR     | :            |   5, 9    
-PARENS       | (            |   5, 11   
-PARENS       | (            |   5, 12   
-IDENTIFIER   | T            |   5, 13   
-PARENS       | )            |   5, 14   
-OPERATOR     | =>           |   5, 16   
-IDENTIFIER   | Nothing      |   5, 19   
-PARENS       | )            |   5, 26   
-OPERATOR     | =>           |   5, 28   
-IDENTIFIER   | Nothing      |   5, 31   
+IDENTIFIER   | at           |   5, 2    
+OPERATOR     | :            |   5, 4    
+PARENS       | (            |   5, 6    
+IDENTIFIER   | index        |   5, 7    
+OPERATOR     | :            |   5, 12   
+IDENTIFIER   | Number       |   5, 14   
+PARENS       | )            |   5, 20   
+OPERATOR     | =>           |   5, 22   
+IDENTIFIER   | T            |   5, 25   
 NEWLINE      |              |   6, 1    
-IDENTIFIER   | mkString     |   6, 2    
-OPERATOR     | :            |   6, 10   
-PARENS       | (            |   6, 12   
-IDENTIFIER   | String       |   6, 13   
-OPERATOR     | ,            |   6, 19   
-IDENTIFIER   | String       |   6, 21   
-OPERATOR     | ,            |   6, 27   
-IDENTIFIER   | String       |   6, 29   
-PARENS       | )            |   6, 35   
-OPERATOR     | =>           |   6, 37   
-IDENTIFIER   | String       |   6, 40   
+IDENTIFIER   | length       |   6, 2    
+OPERATOR     | :            |   6, 8    
+PARENS       | (            |   6, 10   
+PARENS       | )            |   6, 11   
+OPERATOR     | =>           |   6, 13   
+IDENTIFIER   | Number       |   6, 16   
 NEWLINE      |              |   7, 1    
-IDENTIFIER   | getIterator  |   7, 2    
-OPERATOR     | :            |   7, 13   
-PARENS       | (            |   7, 15   
-PARENS       | )            |   7, 16   
-OPERATOR     | =>           |   7, 18   
-IDENTIFIER   | Iterator     |   7, 21   
-PARENS       | [            |   7, 29   
-IDENTIFIER   | T            |   7, 30   
-PARENS       | ]            |   7, 31   
+DEDENT       | 4            |   7, 1    
 NEWLINE      |              |   8, 1    
-DEDENT       | 4            |   8, 1    
+IDENTIFIER   | makeString   |   8, 1    
+OPERATOR     | :            |   8, 11   
+PARENS       | (            |   8, 13   
+IDENTIFIER   | Any          |   8, 14   
+PARENS       | )            |   8, 17   
+OPERATOR     | =>           |   8, 19   
+IDENTIFIER   | String       |   8, 22   
+OPERATOR     | =            |   8, 29   
+KEYWORD      | external     |   8, 31   
 NEWLINE      |              |   9, 1    
-IDENTIFIER   | makeIterable |   9, 1    
-OPERATOR     | =            |   9, 14   
-PARENS       | [            |   9, 16   
-IDENTIFIER   | T            |   9, 17   
-PARENS       | ]            |   9, 18   
-OPERATOR     | ->           |   9, 20   
-PARENS       | (            |   9, 23   
-IDENTIFIER   | getIterator  |   9, 24   
-OPERATOR     | :            |   9, 35   
-PARENS       | (            |   9, 37   
-PARENS       | )            |   9, 38   
-OPERATOR     | =>           |   9, 40   
-IDENTIFIER   | Iterator     |   9, 43   
-PARENS       | [            |   9, 51   
-IDENTIFIER   | T            |   9, 52   
-PARENS       | ]            |   9, 53   
-PARENS       | )            |   9, 54   
-OPERATOR     | ->           |   9, 56   
 NEWLINE      |              |  10, 1    
-INDENT       | 4            |  10, 1    
-IDENTIFIER   | forEach      |  10, 2    
+IDENTIFIER   | ToString     |  10, 1    
 OPERATOR     | =            |  10, 10   
-PARENS       | (            |  10, 12   
-IDENTIFIER   | fn           |  10, 13   
-OPERATOR     | :            |  10, 15   
-PARENS       | (            |  10, 17   
-IDENTIFIER   | T            |  10, 18   
-PARENS       | )            |  10, 19   
-OPERATOR     | =>           |  10, 21   
-IDENTIFIER   | Nothing      |  10, 24   
-PARENS       | )            |  10, 31   
-OPERATOR     | ->           |  10, 33   
+KEYWORD      | type         |  10, 12   
+OPERATOR     | :            |  10, 16   
 NEWLINE      |              |  11, 1    
-INDENT       | 8            |  11, 1    
-IDENTIFIER   | iterator     |  11, 3    
-OPERATOR     | =            |  11, 12   
-IDENTIFIER   | getIterator  |  11, 14   
-PARENS       | (            |  11, 25   
-PARENS       | )            |  11, 26   
+INDENT       | 4            |  11, 1    
+IDENTIFIER   | toString     |  11, 2    
+OPERATOR     | :            |  11, 10   
+PARENS       | (            |  11, 12   
+IDENTIFIER   | this         |  11, 13   
+OPERATOR     | :            |  11, 17   
+IDENTIFIER   | Any          |  11, 19   
+PARENS       | )            |  11, 22   
+OPERATOR     | =>           |  11, 24   
+IDENTIFIER   | String       |  11, 27   
 NEWLINE      |              |  12, 1    
-IDENTIFIER   | current      |  12, 3    
-OPERATOR     | =            |  12, 11   
-IDENTIFIER   | iterator     |  12, 13   
-OPERATOR     | .            |  12, 21   
-IDENTIFIER   | next         |  12, 22   
-PARENS       | (            |  12, 26   
-PARENS       | )            |  12, 27   
+DEDENT       | 4            |  12, 1    
 NEWLINE      |              |  13, 1    
-KEYWORD      | while        |  13, 3    
-IDENTIFIER   | current      |  13, 9    
-OPERATOR     | !=           |  13, 17   
-IDENTIFIER   | nothing      |  13, 20   
-KEYWORD      | do           |  13, 28   
+IDENTIFIER   | stringOf     |  13, 1    
+OPERATOR     | =            |  13, 10   
+PARENS       | (            |  13, 12   
+IDENTIFIER   | obj          |  13, 13   
+OPERATOR     | :            |  13, 16   
+IDENTIFIER   | Any          |  13, 18   
+PARENS       | )            |  13, 21   
+OPERATOR     | ->           |  13, 23   
 NEWLINE      |              |  14, 1    
-INDENT       | 12           |  14, 1    
-IDENTIFIER   | fn           |  14, 4    
-PARENS       | (            |  14, 6    
-IDENTIFIER   | current      |  14, 7    
-PARENS       | )            |  14, 14   
+INDENT       | 4            |  14, 1    
+KEYWORD      | if           |  14, 2    
+IDENTIFIER   | obj          |  14, 5    
+OPERATOR     | ::           |  14, 9    
+IDENTIFIER   | ToString     |  14, 12   
+NEWLINE      | ,            |  14, 1    
 NEWLINE      |              |  15, 1    
-IDENTIFIER   | current      |  15, 4    
-OPERATOR     | =            |  15, 12   
-IDENTIFIER   | iterator     |  15, 14   
-OPERATOR     | .            |  15, 22   
-IDENTIFIER   | next         |  15, 23   
-PARENS       | (            |  15, 27   
-PARENS       | )            |  15, 28   
+INDENT       | 8            |  15, 1    
+IDENTIFIER   | debug        |  15, 3    
+PARENS       | (            |  15, 8    
+IDENTIFIER   | obj          |  15, 9    
+OPERATOR     | .            |  15, 12   
+IDENTIFIER   | toString     |  15, 13   
+PARENS       | (            |  15, 21   
+PARENS       | )            |  15, 22   
+PARENS       | )            |  15, 23   
 NEWLINE      |              |  16, 1    
-DEDENT       | 12           |  16, 1    
-DEDENT       | 8            |  16, 1    
-IDENTIFIER   | mkString     |  16, 2    
-OPERATOR     | =            |  16, 11   
-PARENS       | (            |  16, 13   
-IDENTIFIER   | separator    |  16, 14   
-OPERATOR     | :            |  16, 23   
-IDENTIFIER   | String       |  16, 25   
-OPERATOR     | =            |  16, 32   
-STRING       | ,            |  16, 34   
-OPERATOR     | ,            |  16, 38   
-IDENTIFIER   | left         |  16, 40   
-OPERATOR     | :            |  16, 44   
-IDENTIFIER   | String       |  16, 46   
-OPERATOR     | =            |  16, 53   
-STRING       |              |  16, 55   
-OPERATOR     | ,            |  16, 57   
-IDENTIFIER   | right        |  16, 59   
-OPERATOR     | :            |  16, 64   
-IDENTIFIER   | String       |  16, 66   
-OPERATOR     | =            |  16, 73   
-STRING       |              |  16, 75   
-PARENS       | )            |  16, 77   
-OPERATOR     | ->           |  16, 79   
+IDENTIFIER   | obj          |  16, 3    
+OPERATOR     | .            |  16, 6    
+IDENTIFIER   | toString     |  16, 7    
+PARENS       | (            |  16, 15   
+PARENS       | )            |  16, 16   
 NEWLINE      |              |  17, 1    
-INDENT       | 8            |  17, 1    
-IDENTIFIER   | string       |  17, 3    
-OPERATOR     | =            |  17, 10   
-STRING       |              |  17, 12   
+DEDENT       | 8            |  17, 1    
+KEYWORD      | else         |  17, 2    
 NEWLINE      |              |  18, 1    
-IDENTIFIER   | fn           |  18, 3    
-OPERATOR     | =            |  18, 6    
-PARENS       | (            |  18, 8    
-IDENTIFIER   | t            |  18, 9    
-OPERATOR     | :            |  18, 10   
-IDENTIFIER   | T            |  18, 12   
-PARENS       | )            |  18, 13   
-OPERATOR     | ->           |  18, 15   
+INDENT       | 8            |  18, 1    
+IDENTIFIER   | makeString   |  18, 3    
+PARENS       | (            |  18, 13   
+IDENTIFIER   | obj          |  18, 14   
+PARENS       | )            |  18, 17   
 NEWLINE      |              |  19, 1    
-INDENT       | 12           |  19, 1    
-IDENTIFIER   | comma        |  19, 4    
-OPERATOR     | =            |  19, 10   
-KEYWORD      | if           |  19, 12   
-IDENTIFIER   | string       |  19, 15   
-OPERATOR     | ==           |  19, 22   
-STRING       |              |  19, 25   
-OPERATOR     | ,            |  19, 27   
-STRING       |              |  19, 29   
-KEYWORD      | else         |  19, 32   
-IDENTIFIER   | separator    |  19, 37   
+DEDENT       | 8            |  19, 1    
+DEDENT       | 4            |  19, 1    
 NEWLINE      |              |  20, 1    
-KEYWORD      | set          |  20, 4    
-IDENTIFIER   | string       |  20, 8    
-OPERATOR     | =            |  20, 15   
-STRING       |              |  20, 17   
-OPERATOR     | +            |  20, 17   
-IDENTIFIER   | string       |  20, 19   
-OPERATOR     | +            |  20, 17   
-STRING       |              |  20, 17   
-OPERATOR     | +            |  20, 17   
-IDENTIFIER   | comma        |  20, 27   
-OPERATOR     | +            |  20, 17   
-STRING       |              |  20, 17   
-OPERATOR     | +            |  20, 17   
-IDENTIFIER   | t            |  20, 34   
-OPERATOR     | +            |  20, 17   
-STRING       |              |  20, 17   
+IDENTIFIER   | Iterable     |  20, 1    
+OPERATOR     | =            |  20, 10   
+PARENS       | [            |  20, 12   
+IDENTIFIER   | T            |  20, 13   
+PARENS       | ]            |  20, 14   
+OPERATOR     | =>           |  20, 16   
+KEYWORD      | type         |  20, 19   
+OPERATOR     | :            |  20, 23   
 NEWLINE      |              |  21, 1    
-DEDENT       | 12           |  21, 1    
-IDENTIFIER   | forEach      |  21, 3    
-PARENS       | (            |  21, 10   
-IDENTIFIER   | fn           |  21, 11   
-PARENS       | )            |  21, 13   
+INDENT       | 4            |  21, 1    
+IDENTIFIER   | forEach      |  21, 2    
+OPERATOR     | :            |  21, 9    
+PARENS       | (            |  21, 11   
+PARENS       | (            |  21, 12   
+IDENTIFIER   | T            |  21, 13   
+PARENS       | )            |  21, 14   
+OPERATOR     | =>           |  21, 16   
+IDENTIFIER   | Nothing      |  21, 19   
+PARENS       | )            |  21, 26   
+OPERATOR     | =>           |  21, 28   
+IDENTIFIER   | Nothing      |  21, 31   
 NEWLINE      |              |  22, 1    
-STRING       |              |  22, 3    
-OPERATOR     | +            |  22, 3    
-IDENTIFIER   | left         |  22, 5    
-OPERATOR     | +            |  22, 3    
-STRING       |              |  22, 3    
-OPERATOR     | +            |  22, 3    
-IDENTIFIER   | string       |  22, 11   
-OPERATOR     | +            |  22, 3    
-STRING       |              |  22, 3    
-OPERATOR     | +            |  22, 3    
-IDENTIFIER   | right        |  22, 19   
-OPERATOR     | +            |  22, 3    
-STRING       |              |  22, 3    
+IDENTIFIER   | mkString     |  22, 2    
+OPERATOR     | :            |  22, 10   
+PARENS       | (            |  22, 12   
+IDENTIFIER   | separator    |  22, 13   
+OPERATOR     | :            |  22, 22   
+IDENTIFIER   | String       |  22, 24   
+NEWLINE      | ,            |  22, 1    
+IDENTIFIER   | left         |  22, 32   
+OPERATOR     | :            |  22, 36   
+IDENTIFIER   | String       |  22, 38   
+NEWLINE      | ,            |  22, 1    
+IDENTIFIER   | right        |  22, 46   
+OPERATOR     | :            |  22, 51   
+IDENTIFIER   | String       |  22, 53   
+PARENS       | )            |  22, 59   
+OPERATOR     | =>           |  22, 61   
+IDENTIFIER   | String       |  22, 64   
 NEWLINE      |              |  23, 1    
-DEDENT       | 8            |  23, 1    
-IDENTIFIER   | Iterable     |  23, 2    
-PARENS       | [            |  23, 10   
+IDENTIFIER   | count        |  23, 2    
+OPERATOR     | :            |  23, 7    
+PARENS       | (            |  23, 9    
+PARENS       | (            |  23, 10   
 IDENTIFIER   | T            |  23, 11   
-PARENS       | ]            |  23, 12   
-PARENS       | (            |  23, 13   
-IDENTIFIER   | forEach      |  23, 14   
-OPERATOR     | ,            |  23, 21   
-IDENTIFIER   | mkString     |  23, 23   
-OPERATOR     | ,            |  23, 31   
-IDENTIFIER   | getIterator  |  23, 33   
-PARENS       | )            |  23, 44   
+PARENS       | )            |  23, 12   
+OPERATOR     | =>           |  23, 14   
+IDENTIFIER   | Boolean      |  23, 17   
+PARENS       | )            |  23, 24   
+OPERATOR     | =>           |  23, 26   
+IDENTIFIER   | Number       |  23, 29   
 NEWLINE      |              |  24, 1    
+IDENTIFIER   | getIterator  |  24, 2    
+OPERATOR     | :            |  24, 13   
+PARENS       | (            |  24, 15   
+PARENS       | )            |  24, 16   
+OPERATOR     | =>           |  24, 18   
+IDENTIFIER   | Iterator     |  24, 21   
+PARENS       | [            |  24, 29   
+IDENTIFIER   | T            |  24, 30   
+PARENS       | ]            |  24, 31   
+NEWLINE      |              |  25, 1    
+DEDENT       | 4            |  25, 1    
+NEWLINE      |              |  26, 1    
+IDENTIFIER   | makeIterable |  26, 1    
+OPERATOR     | =            |  26, 14   
+PARENS       | [            |  26, 16   
+IDENTIFIER   | T            |  26, 17   
+PARENS       | ]            |  26, 18   
+OPERATOR     | ->           |  26, 20   
+PARENS       | (            |  26, 23   
+IDENTIFIER   | getIterator  |  26, 24   
+OPERATOR     | :            |  26, 35   
+PARENS       | (            |  26, 37   
+PARENS       | )            |  26, 38   
+OPERATOR     | =>           |  26, 40   
+IDENTIFIER   | Iterator     |  26, 43   
+PARENS       | [            |  26, 51   
+IDENTIFIER   | T            |  26, 52   
+PARENS       | ]            |  26, 53   
+PARENS       | )            |  26, 54   
+OPERATOR     | ->           |  26, 56   
+NEWLINE      |              |  27, 1    
+INDENT       | 4            |  27, 1    
+IDENTIFIER   | forEach      |  27, 2    
+OPERATOR     | =            |  27, 10   
+PARENS       | (            |  27, 12   
+IDENTIFIER   | fn           |  27, 13   
+OPERATOR     | :            |  27, 15   
+PARENS       | (            |  27, 17   
+IDENTIFIER   | T            |  27, 18   
+PARENS       | )            |  27, 19   
+OPERATOR     | =>           |  27, 21   
+IDENTIFIER   | Nothing      |  27, 24   
+PARENS       | )            |  27, 31   
+OPERATOR     | ->           |  27, 33   
+NEWLINE      |              |  28, 1    
+INDENT       | 8            |  28, 1    
+IDENTIFIER   | iterator     |  28, 3    
+OPERATOR     | =            |  28, 12   
+IDENTIFIER   | getIterator  |  28, 14   
+PARENS       | (            |  28, 25   
+PARENS       | )            |  28, 26   
+NEWLINE      |              |  29, 1    
+IDENTIFIER   | current      |  29, 3    
+OPERATOR     | =            |  29, 11   
+IDENTIFIER   | iterator     |  29, 13   
+OPERATOR     | .            |  29, 21   
+IDENTIFIER   | next         |  29, 22   
+PARENS       | (            |  29, 26   
+PARENS       | )            |  29, 27   
+NEWLINE      |              |  30, 1    
+KEYWORD      | while        |  30, 3    
+IDENTIFIER   | current      |  30, 9    
+OPERATOR     | !=           |  30, 17   
+IDENTIFIER   | nothing      |  30, 20   
+KEYWORD      | do           |  30, 28   
+NEWLINE      |              |  31, 1    
+INDENT       | 12           |  31, 1    
+IDENTIFIER   | fn           |  31, 4    
+PARENS       | (            |  31, 6    
+IDENTIFIER   | current      |  31, 7    
+PARENS       | )            |  31, 14   
+NEWLINE      |              |  32, 1    
+IDENTIFIER   | current      |  32, 4    
+OPERATOR     | =            |  32, 12   
+IDENTIFIER   | iterator     |  32, 14   
+OPERATOR     | .            |  32, 22   
+IDENTIFIER   | next         |  32, 23   
+PARENS       | (            |  32, 27   
+PARENS       | )            |  32, 28   
+NEWLINE      |              |  33, 1    
+DEDENT       | 12           |  33, 1    
+DEDENT       | 8            |  33, 1    
+IDENTIFIER   | mkString     |  33, 2    
+OPERATOR     | =            |  33, 11   
+PARENS       | (            |  33, 13   
+IDENTIFIER   | separator    |  33, 14   
+OPERATOR     | :            |  33, 23   
+IDENTIFIER   | String       |  33, 25   
+OPERATOR     | =            |  33, 32   
+STRING       | ,            |  33, 34   
+NEWLINE      | ,            |  33, 1    
+IDENTIFIER   | left         |  33, 40   
+OPERATOR     | :            |  33, 44   
+IDENTIFIER   | String       |  33, 46   
+OPERATOR     | =            |  33, 53   
+STRING       |              |  33, 55   
+NEWLINE      | ,            |  33, 1    
+IDENTIFIER   | right        |  33, 59   
+OPERATOR     | :            |  33, 64   
+IDENTIFIER   | String       |  33, 66   
+OPERATOR     | =            |  33, 73   
+STRING       |              |  33, 75   
+PARENS       | )            |  33, 77   
+OPERATOR     | ->           |  33, 79   
+NEWLINE      |              |  34, 1    
+INDENT       | 8            |  34, 1    
+IDENTIFIER   | string       |  34, 3    
+OPERATOR     | =            |  34, 10   
+STRING       |              |  34, 12   
+NEWLINE      |              |  35, 1    
+IDENTIFIER   | fn           |  35, 3    
+OPERATOR     | =            |  35, 6    
+PARENS       | (            |  35, 8    
+IDENTIFIER   | t            |  35, 9    
+OPERATOR     | :            |  35, 10   
+IDENTIFIER   | T            |  35, 12   
+PARENS       | )            |  35, 13   
+OPERATOR     | ->           |  35, 15   
+NEWLINE      |              |  36, 1    
+INDENT       | 12           |  36, 1    
+IDENTIFIER   | comma        |  36, 4    
+OPERATOR     | =            |  36, 10   
+KEYWORD      | if           |  36, 12   
+IDENTIFIER   | string       |  36, 15   
+OPERATOR     | ==           |  36, 22   
+STRING       |              |  36, 25   
+NEWLINE      | ,            |  36, 1    
+STRING       |              |  36, 29   
+KEYWORD      | else         |  36, 32   
+IDENTIFIER   | separator    |  36, 37   
+NEWLINE      |              |  37, 1    
+KEYWORD      | set          |  37, 4    
+IDENTIFIER   | string       |  37, 8    
+OPERATOR     | =            |  37, 15   
+STRING       |              |  37, 17   
+OPERATOR     | +            |  37, 17   
+IDENTIFIER   | string       |  37, 19   
+OPERATOR     | +            |  37, 17   
+STRING       |              |  37, 17   
+OPERATOR     | +            |  37, 17   
+IDENTIFIER   | comma        |  37, 27   
+OPERATOR     | +            |  37, 17   
+STRING       |              |  37, 17   
+OPERATOR     | +            |  37, 17   
+IDENTIFIER   | t            |  37, 34   
+OPERATOR     | +            |  37, 17   
+STRING       |              |  37, 17   
+NEWLINE      |              |  38, 1    
+DEDENT       | 12           |  38, 1    
+IDENTIFIER   | forEach      |  38, 3    
+PARENS       | (            |  38, 10   
+IDENTIFIER   | fn           |  38, 11   
+PARENS       | )            |  38, 13   
+NEWLINE      |              |  39, 1    
+STRING       |              |  39, 3    
+OPERATOR     | +            |  39, 3    
+IDENTIFIER   | left         |  39, 5    
+OPERATOR     | +            |  39, 3    
+STRING       |              |  39, 3    
+OPERATOR     | +            |  39, 3    
+IDENTIFIER   | string       |  39, 11   
+OPERATOR     | +            |  39, 3    
+STRING       |              |  39, 3    
+OPERATOR     | +            |  39, 3    
+IDENTIFIER   | right        |  39, 19   
+OPERATOR     | +            |  39, 3    
+STRING       |              |  39, 3    
+NEWLINE      |              |  40, 1    
+DEDENT       | 8            |  40, 1    
+IDENTIFIER   | count        |  40, 2    
+OPERATOR     | =            |  40, 8    
+PARENS       | (            |  40, 10   
+IDENTIFIER   | pred         |  40, 11   
+OPERATOR     | :            |  40, 15   
+PARENS       | (            |  40, 17   
+IDENTIFIER   | T            |  40, 18   
+PARENS       | )            |  40, 19   
+OPERATOR     | =>           |  40, 21   
+IDENTIFIER   | Boolean      |  40, 24   
+PARENS       | )            |  40, 31   
+OPERATOR     | ->           |  40, 33   
+NEWLINE      |              |  41, 1    
+INDENT       | 8            |  41, 1    
+IDENTIFIER   | num          |  41, 3    
+OPERATOR     | =            |  41, 7    
+NUMBER       | 0            |  41, 9    
+NEWLINE      |              |  42, 1    
+IDENTIFIER   | fn           |  42, 3    
+OPERATOR     | =            |  42, 6    
+PARENS       | (            |  42, 8    
+IDENTIFIER   | t            |  42, 9    
+OPERATOR     | :            |  42, 10   
+IDENTIFIER   | T            |  42, 12   
+PARENS       | )            |  42, 13   
+OPERATOR     | ->           |  42, 15   
+NEWLINE      |              |  43, 1    
+INDENT       | 12           |  43, 1    
+KEYWORD      | if           |  43, 4    
+IDENTIFIER   | pred         |  43, 7    
+PARENS       | (            |  43, 11   
+IDENTIFIER   | t            |  43, 12   
+PARENS       | )            |  43, 13   
+NEWLINE      | ,            |  43, 1    
+KEYWORD      | set          |  43, 16   
+IDENTIFIER   | num          |  43, 20   
+OPERATOR     | =            |  43, 24   
+IDENTIFIER   | num          |  43, 26   
+OPERATOR     | +            |  43, 30   
+NUMBER       | 1            |  43, 32   
+NEWLINE      |              |  44, 1    
+DEDENT       | 12           |  44, 1    
+IDENTIFIER   | forEach      |  44, 3    
+PARENS       | (            |  44, 10   
+IDENTIFIER   | fn           |  44, 11   
+PARENS       | )            |  44, 13   
+NEWLINE      |              |  45, 1    
+IDENTIFIER   | num          |  45, 3    
+NEWLINE      |              |  46, 1    
+DEDENT       | 8            |  46, 1    
+IDENTIFIER   | Iterable     |  46, 2    
+PARENS       | [            |  46, 10   
+IDENTIFIER   | T            |  46, 11   
+PARENS       | ]            |  46, 12   
+PARENS       | (            |  46, 13   
+IDENTIFIER   | forEach      |  46, 14   
+NEWLINE      | ,            |  46, 1    
+IDENTIFIER   | mkString     |  46, 23   
+NEWLINE      | ,            |  46, 1    
+IDENTIFIER   | count        |  46, 33   
+NEWLINE      | ,            |  46, 1    
+IDENTIFIER   | getIterator  |  46, 40   
+PARENS       | )            |  46, 51   
+NEWLINE      |              |  47, 1    
 --undefined--

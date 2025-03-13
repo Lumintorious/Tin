@@ -8,13 +8,22 @@ import {
    WhileLoop,
    IfStatement,
    BinaryExpression,
-   Identifier,
    TypeCheck,
    RoundTypeToTypeLambda,
+   Change,
+   Literal,
 } from "./Parser";
 import { Symbol, Scope, TypePhaseContext } from "./Scope";
-import { StructType, SquareTypeToTypeLambdaType } from "./Types";
-import { Select, TypeDef, SquareTypeToTypeLambda } from "./Parser";
+import { StructType, SquareTypeToTypeLambdaType, BinaryOpType } from "./Types";
+import {
+   Select,
+   TypeDef,
+   SquareTypeToTypeLambda,
+   SquareApply,
+   Import,
+   Identifier,
+} from "./Parser";
+import { type } from "os";
 import {
    OptionalType,
    GenericNamedType,
@@ -39,10 +48,7 @@ export class TypeBuilder {
             this.build(statement, innerBlockScope)
          );
       } else if (node instanceof RoundApply) {
-         const innerBlockScope = scope.innerScopeOf(node, true);
-         node.args.forEach((statement) =>
-            this.build(statement[1], innerBlockScope)
-         );
+         node.args.forEach((statement) => this.build(statement[1], scope));
          this.build(node.callee, scope);
       } else if (node instanceof RoundValueToValueLambda) {
          this.buildRoundValueToValueLambda(node, scope);
@@ -76,9 +82,8 @@ export class TypeBuilder {
             node.condition instanceof TypeCheck &&
             node.condition.term instanceof Identifier
          ) {
-            const presumedType = this.context.translator.translate(
-               node.condition.type,
-               trueScope
+            const presumedType = scope.resolveNamedType(
+               this.context.translator.translate(node.condition.type, trueScope)
             );
             trueScope.declare(
                node.condition.term.value,
@@ -96,6 +101,32 @@ export class TypeBuilder {
          }
       } else if (node instanceof Select) {
          this.buildSelect(node, scope);
+      } else if (node instanceof TypeDef) {
+         this.buildTypeDef(node, scope);
+      } else if (node instanceof BinaryExpression) {
+         this.build(node.left, scope);
+         this.build(node.right, scope);
+      } else if (node instanceof Change) {
+         this.build(node.lhs, scope);
+         this.build(node.value, scope);
+      } else if (node instanceof SquareApply) {
+         this.build(node.callee, scope);
+         // this.build(node., scope);
+      } else if (
+         node instanceof Import ||
+         node instanceof Literal ||
+         node instanceof Identifier
+      ) {
+      } else {
+         console.error("Didn't build node of tag = " + node.tag);
+      }
+   }
+
+   buildTypeDef(node: TypeDef, scope: Scope) {
+      scope = scope.innerScopeOf(node, true);
+      for (let param of node.fieldDefs) {
+         if (param.defaultValue) this.build(param.defaultValue, scope);
+         if (param.type) this.build(param.type, scope);
       }
    }
 

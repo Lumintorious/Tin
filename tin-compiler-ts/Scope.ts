@@ -102,14 +102,21 @@ export class Scope {
       });
    }
 
-   innerScopeOf(astNode: AstNode, canCreate: boolean = false) {
+   innerScopeOf(astNode: AstNode, canCreate: boolean = false): Scope {
       const ast = astNode as any;
       if (!ast.key) {
          ast.key = Scope.currentKey++;
       }
-      const child = this.childrenByAst.get(ast.key);
+      let child = this.childrenByAst.get(ast.key);
       if (!child && !canCreate) {
-         throw new Error("Could not find child scope " + this.toPath());
+         try {
+            child = this.parent?.innerScopeOf(astNode);
+         } catch (e) {}
+      }
+      if (!child && !canCreate) {
+         throw new Error(
+            "Could not find child scope " + this.toPath() + " -- " + astNode.tag
+         );
       }
       if (child) {
          return child;
@@ -205,9 +212,7 @@ export class Scope {
             new SquareTypeToValueLambdaType(
                typeSymbol.paramTypes,
                new RoundValueToValueLambdaType(
-                  typeSymbol.returnType.fields.map(
-                     (f) => new ParamType(f.typeSymbol)
-                  ),
+                  typeSymbol.returnType.fields,
                   new AppliedGenericType(
                      new NamedType(name),
                      typeSymbol.paramTypes
@@ -221,7 +226,7 @@ export class Scope {
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType(
-               typeSymbol.fields.map((f) => new ParamType(f.typeSymbol)),
+               typeSymbol.fields,
                new NamedType(name)
             )
          );
@@ -243,7 +248,7 @@ export class Scope {
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType(
-               structTypeSymbol.fields.map((f) => new ParamType(f.typeSymbol)),
+               structTypeSymbol.fields,
                typeSymbol
             ).named(constructorName)
          );
@@ -412,9 +417,10 @@ export class Scope {
                throw new Error("What the hell??");
             }
             const mappedFields = type.fields.map((f) => {
-               return new Symbol(
+               return new ParamType(
+                  this.resolveGenericTypes(f.type, parameters),
                   f.name,
-                  this.resolveGenericTypes(f.typeSymbol, parameters)
+                  f.defaultValue
                );
             });
             return new StructType(mappedFields);
@@ -459,6 +465,7 @@ export class Scope {
 }
 
 export class TypePhaseContext {
+   fileName: string;
    languageScope: Scope;
    fileScope: Scope;
    builder: TypeBuilder;
@@ -467,14 +474,19 @@ export class TypePhaseContext {
    checker: TypeChecker;
    errors: TypeErrorList;
    run: number;
-   constructor(ast: AstNode, existingFileScopes: Scope[] = []) {
+   constructor(
+      fileName: string,
+      ast: AstNode,
+      existingFileScopes: Scope[] = []
+   ) {
+      this.fileName = fileName;
       this.languageScope = new Scope("Language");
       this.fileScope = new Scope("File", this.languageScope);
       this.builder = new TypeBuilder(this);
       this.inferencer = new TypeInferencer(this);
       this.translator = new TypeTranslator(this);
       this.checker = new TypeChecker(this);
-      this.errors = new TypeErrorList();
+      this.errors = new TypeErrorList(this);
       this.run = 0;
       existingFileScopes.forEach((s) => {
          this.fileScope.absorbAllFrom(s);
@@ -507,19 +519,19 @@ export class TypePhaseContext {
       const innerArrayScope = new Scope("inner-array", this.languageScope);
       innerArrayScope.declareType("T", new GenericNamedType("T"));
       const arrayStruct = new StructType([
-         new Symbol(
-            "length",
+         new ParamType(
             new RoundValueToValueLambdaType(
                [],
                this.languageScope.lookupType("Number")
-            )
+            ),
+            "length"
          ),
-         new Symbol(
-            "at",
+         new ParamType(
             new RoundValueToValueLambdaType(
                [new ParamType(new NamedType("Number"))],
                new GenericNamedType("T")
-            )
+            ),
+            "at"
          ),
       ]);
       const arrayLambdaType = new SquareTypeToTypeLambdaType(
@@ -530,9 +542,9 @@ export class TypePhaseContext {
       arrayLambdaType.name = "Array";
       this.languageScope.declareType("Array", arrayLambdaType);
       this.languageScope.declare(
-         "Array",
+         "arrayOf",
          new Symbol(
-            "Array",
+            "arrayOf",
             new SquareTypeToValueLambdaType(
                [new GenericNamedType("T")],
                new RoundValueToValueLambdaType(
@@ -551,6 +563,20 @@ export class TypePhaseContext {
             )
          ),
          true
+      );
+      this.languageScope.declare(
+         "copy",
+         new Symbol(
+            "copy",
+            new SquareTypeToValueLambdaType(
+               [new GenericNamedType("T")],
+               new RoundValueToValueLambdaType(
+                  [new ParamType(new NamedType("T"))],
+                  new NamedType("T"),
+                  true
+               )
+            )
+         )
       );
       this.languageScope.declare(
          "nothing",

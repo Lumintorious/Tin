@@ -214,7 +214,7 @@ async function compile(
       imports.forEach((i, k) =>
          scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
       );
-      const context = new TypePhaseContext(ast, scopes);
+      const context = new TypePhaseContext(inputFile, ast, scopes);
       context.checker.typeCheck(ast, context.fileScope);
       context.errors.throwAll();
 

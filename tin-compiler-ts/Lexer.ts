@@ -164,6 +164,19 @@ export class Lexer {
 
       let char = this.peek();
 
+      if (char === ",") {
+         this.position++;
+         this.column++;
+         return new Token(
+            TokenTag.NEWLINE,
+            ",",
+            new TokenPos(
+               new CodePoint(this.line, 1, this.position),
+               new CodePoint(this.line, this.column, this.position)
+            )
+         );
+      }
+
       if (char === "\n") {
          this.pruneEmptyLines();
       }

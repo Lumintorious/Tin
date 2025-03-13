@@ -1,3 +1,5 @@
+const __tin_varargs_marker = Symbol();
+
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
@@ -10,9 +12,9 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
-	constructor.__is_child = (obj) =>
-		Reflect.ownKeys(obj).includes(typeId)
-	// obj.__tin_typeIds.includes(typeId)
+	constructor.__is_child = (obj) => {
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(typeId)
+	}
 
 	return constructor;
 }
@@ -44,19 +46,30 @@ const Type = TIN_TYPE("", "", (i) => null, {})
 const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", "", (args) => ({
+const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
 	length() {
 		return args.length;
 	},
 	at(index) {
 		return args[index]
 	},
+	[__tin_varargs_marker]: true,
 	toString() {
 		const parts = args.map(x => JSON.stringify(x)).join(", ")
 		return "Array(" + parts + ")"
 	}
 }), {})
+
+const arrayOf = (t) => (args) => args
 Array._typeId = "Array"
+
+const copy = (T) => (obj) => {
+	const newObj = {};
+	for (let key of Reflect.ownKeys(obj)) {
+		newObj[key] = { ...obj[key] }
+	}
+	return newObj;
+}
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -72,15 +85,16 @@ function makeString(obj) {
 	if (typeof obj === 'string') return obj;
 
 	if (typeof obj === 'function') {
-		return 'Lambda'
+		return 'λ'
 	}
 
 	if (Reflect.ownKeys(obj).includes("Array")) {
-		let result = '[';
-		for (let i = 0; i < obj.length(); i++) {
-			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
+		let result = 'Array(';
+		console.dir(obj)
+		for (let i = 0; i < obj.Array.length(); i++) {
+			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
-		return result + "]"
+		return result + ")"
 	}
 
 	if (typeof obj === 'object') {
@@ -97,7 +111,7 @@ function makeString(obj) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += makeString(key) + '=' + makeString(component[key]) + ',';
+					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
 				}
 			}
 			if (result.length > 1 && result[result.length - 1] === ",") {
@@ -124,16 +138,23 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "8f4436e0-349b-42e5-a2e3-609821c9fd57", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
-export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "d296e249-1db8-44cb-8f45-f9c3aa99139c", (_p0,_p1,_p2) => ({forEach: _p0,mkString: _p1,getIterator: _p2}), {}); Iterable._typeId = "Iterable";;
+export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "07b4c586-de89-41e1-a8f1-1ab1c42baa23", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
+export var Accessible = /* [] */(T) => TIN_TYPE("Accessible", "36fa00b3-cc71-4ab4-9afa-675367aa6ba4", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
+;
+export var ToString = TIN_TYPE("ToString", "270ef25f-0c43-4573-a3d3-318f662623e1", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export var stringOf/* (Any) => String*/ = function(obj) {
+return ((ToString.__is_child(obj) ) ? ((function(){debug(obj.ToString.toString.call(obj));
+return obj.ToString.toString.call(obj)}).call(this)) : (makeString(obj))) 
+};
+export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "9eb46806-b7f0-4dd1-8cf1-c1a0af3359aa", (_p0,_p1,_p2,_p3) => ({forEach: _p0,mkString: _p1,count: _p2,getIterator: _p3}), {}); Iterable._typeId = "Iterable";;
 export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
 return function(getIterator) {
 var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {
 var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator[Iterator._typeId].next();
+var current/* T?*/ = iterator.Iterator.next();
 while (current != nothing) {
  fn(current);
-current = iterator[Iterator._typeId].next() 
+current = iterator.Iterator.next() 
 }
 };
 var mkString/* (String, String, String) => String*/ = function(separator = ", ", left = "", right = "") {
@@ -145,6 +166,14 @@ return string = "" + string + "" + comma + "" + t + ""
 forEach(fn);
 return "" + left + "" + string + "" + right + ""
 };
-return Iterable.call('Type', T)(forEach, mkString, getIterator)
+var count/* ((T) => Boolean) => Number*/ = function(pred) {
+var num/* Number*/ = 0;
+var fn/* (T) => Any?*/ = function(t) {
+return ((pred(t)) ? (num = num + 1) : (null)) 
+};
+forEach(fn);
+return num
+};
+return Iterable.call('Type', T)(forEach, mkString, count, getIterator)
 }
 }
