@@ -13,17 +13,23 @@ import {
    Change,
    Literal,
 } from "./Parser";
-import { Symbol, Scope, TypePhaseContext } from "./Scope";
-import { StructType, SquareTypeToTypeLambdaType, BinaryOpType } from "./Types";
+import { Scope, TypePhaseContext, RecursiveResolutionOptions } from "./Scope";
+import {
+   StructType,
+   SquareTypeToTypeLambdaType,
+   BinaryOpType,
+   RoundValueToValueLambdaType,
+} from "./Types";
 import {
    Select,
-   TypeDef,
    SquareTypeToTypeLambda,
    SquareApply,
    Import,
    Identifier,
 } from "./Parser";
 import { type } from "os";
+import { TypeDef } from "./Parser";
+import { Symbol } from "./Scope";
 import {
    OptionalType,
    GenericNamedType,
@@ -39,19 +45,32 @@ export class TypeBuilder {
    }
 
    // Walk through the AST and infer types for definitions
-   build(node: AstNode, scope: Scope) {
+   build(
+      node: AstNode,
+      scope: Scope,
+      options: RecursiveResolutionOptions = {}
+   ) {
       if (node instanceof Assignment) {
-         this.buildSymbolForAssignment(node, scope);
+         this.buildSymbolForAssignment(node, scope, options);
       } else if (node instanceof Block) {
          const innerBlockScope = scope.innerScopeOf(node, true);
          node.statements.forEach((statement) =>
             this.build(statement, innerBlockScope)
          );
       } else if (node instanceof RoundApply) {
-         node.args.forEach((statement) => this.build(statement[1], scope));
+         const calleeType = this.context.inferencer.infer(node.callee, scope);
+         if (!(calleeType instanceof RoundValueToValueLambdaType)) {
+            // will be hanlded in TypeChecker
+         } else {
+            node.args.forEach((statement, i) =>
+               this.build(statement[1], scope, {
+                  typeExpectedInPlace: calleeType.params[i].type,
+               })
+            );
+         }
          this.build(node.callee, scope);
       } else if (node instanceof RoundValueToValueLambda) {
-         this.buildRoundValueToValueLambda(node, scope);
+         this.buildRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
          this.buildSquareTypeToValueLambda(node, scope);
       } else if (node instanceof WhileLoop) {
@@ -142,21 +161,46 @@ export class TypeBuilder {
       // const fields = this.context.inferencer.getAllKnownFields()
    }
 
-   buildRoundValueToValueLambda(node: RoundValueToValueLambda, scope: Scope) {
+   buildRoundValueToValueLambda(
+      node: RoundValueToValueLambda,
+      scope: Scope,
+      options: RecursiveResolutionOptions = {}
+   ) {
       const innerScope = scope.innerScopeOf(node, true);
-      node.params.forEach((p) => {
+      node.params.forEach((p, i) => {
          if (p instanceof Assignment && p.lhs instanceof Identifier) {
             const hasSymbol = innerScope.hasSymbol(p.lhs.value);
             if (hasSymbol) {
                return;
             }
-            this.build(p, innerScope);
+            if (
+               options.typeExpectedInPlace instanceof
+                  RoundValueToValueLambdaType &&
+               options.typeExpectedInPlace.params[i]
+            ) {
+               this.build(p, innerScope, {
+                  typeExpectedInPlace:
+                     options.typeExpectedInPlace.params[i].type,
+               });
+            } else {
+               this.build(p, innerScope);
+            }
+            // if (p.type) {
+            //    innerScope.declare(
+            //       p.lhs.value,
+            //       new Symbol(
+            //          p.lhs.value,
+            //          this.context.translator.translate(p.type, innerScope)
+            //       )
+            //    );
+            // }
          }
       });
       this.build(node.block, innerScope);
       const inferredType = this.context.inferencer.inferRoundValueToValueLambda(
          node,
-         scope
+         scope,
+         options
       );
       node.type = inferredType;
    }
@@ -174,7 +218,11 @@ export class TypeBuilder {
       this.build(node.block, innerScope);
    }
 
-   buildSymbolForAssignment(node: Assignment, scope: Scope) {
+   buildSymbolForAssignment(
+      node: Assignment,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       // If it's not a declaration
       if (
          this.context.run == 0 &&
@@ -186,6 +234,18 @@ export class TypeBuilder {
       }
 
       const lhs = node.lhs;
+      // When lambda like (i) -> i + 1 with i having an expected type
+      if (
+         lhs instanceof Identifier &&
+         options.typeExpectedInPlace &&
+         node.isParameter
+      ) {
+         scope.declare(
+            lhs.value,
+            new Symbol(lhs.value, options.typeExpectedInPlace)
+         );
+      }
+
       // Means it's a parameter
       if (!node.value) {
          if (node.type && node.lhs instanceof Identifier) {

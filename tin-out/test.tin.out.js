@@ -1,5 +1,16 @@
 const __tin_varargs_marker = Symbol();
 
+// Object.prototype._copy = function (...args) {
+// 	const keys = Object.keys(this).flatMap(k => Object.keys(this[k]));
+// 	let i = 0;
+// 	const copyObj = {};
+// 	for (let arg of args) {
+// 		copyObj[keys[i]] = arg
+// 		i++;
+// 	}
+// 	return { ...this, ...copyObj }
+// }
+
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
@@ -32,8 +43,28 @@ const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj2 === undefined) {
 		return obj1
 	}
-	const result = { ...obj1, ...obj2 }
-	return result
+	const commonModules = [];
+	for (let key of Reflect.ownKeys(obj1)) {
+		if (Reflect.ownKeys(obj2).includes(key)) {
+			commonModules.push(key)
+		}
+	}
+	const newObj = { ...obj1 };
+	const obj1Keys = Reflect.ownKeys(obj1)
+	const obj2Keys = Reflect.ownKeys(obj2)
+	for (let key of obj2Keys) {
+		if (obj1Keys.includes(key)) {
+			const obj2Module = obj2[key]
+			for (let originalKey of Reflect.ownKeys(obj2Module)) {
+				if (obj2Module[originalKey] !== undefined) {
+					newObj[key][originalKey] = obj2Module[originalKey]
+				}
+			}
+		} else {
+			newObj[key] = obj2[key]
+		}
+	}
+	return newObj
 }
 
 const _TIN_UNION_OBJECTS = function (obj1, obj2) {
@@ -138,10 +169,16 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "6a95cd07-5183-4d9e-8c33-009c3e5580e2", (_p0,_p1 = function(t) {
-return print("Hello")
-}) => ({next: _p0,consumeAll: _p1}), {}); Iterator._typeId = "Iterator";;
-print("Hi");
-Iterator.call('Type', String)(function() {
-return ""
+export var Cat = TIN_TYPE("Cat", "f614c16a-ea67-4617-9710-0b4200ad73ad", (_p0,_p1) => ({name: _p0,age: _p1}), {}); Cat._typeId = "Cat";;
+export var callFunction/* (Number, (Number) => Nothng) => Nothng*/ = function(number, func) {
+return func(number)
+};
+export var showNumber/* (Number) => Nothing*/ = function(number) {
+return print(number)
+};
+export var showString/* (String) => Nothing*/ = function(string) {
+return print(string)
+};
+callFunction(3, function(n) {
+return showNumber(n)
 })

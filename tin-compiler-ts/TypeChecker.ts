@@ -1,36 +1,23 @@
-import { type } from "os";
 import { TokenPos } from "./Lexer";
-import {
-   SquareTypeToValueLambda,
-   SquareApply,
-   DataDef,
-   Make,
-   TypeCheck,
-} from "./Parser";
+import { SquareTypeToValueLambda, SquareApply } from "./Parser";
 import {
    SquareTypeToTypeLambda,
-   Cast,
-   Group,
    Change,
    Block,
    Assignment,
    IfStatement,
-   TypeDef,
    RoundTypeToTypeLambda,
    RoundApply,
    Select,
-   UnaryOperator,
    Identifier,
-   WhileLoop,
    AstNode,
    Term,
-   Literal,
    BinaryExpression,
-   Optional,
 } from "./Parser";
-import { Symbol, Scope, TypePhaseContext } from "./Scope";
+import { Scope, TypePhaseContext } from "./Scope";
 import { ParamType } from "./Types";
-import { RoundValueToValueLambda } from "./Parser";
+import { RoundValueToValueLambda, TypeDef } from "./Parser";
+import { RecursiveResolutionOptions } from "./Scope";
 import {
    AnyType,
    AppliedGenericType,
@@ -139,7 +126,11 @@ export class TypeChecker {
       }
    }
 
-   typeCheck(node: AstNode, scope: Scope) {
+   typeCheck(
+      node: AstNode,
+      scope: Scope,
+      options: RecursiveResolutionOptions = {}
+   ) {
       if (node instanceof Block) {
          const innerScope = scope.innerScopeOf(node);
          node.statements.forEach((c) =>
@@ -150,13 +141,15 @@ export class TypeChecker {
       } else if (node instanceof Change) {
          this.typeCheckChange(node as Change, scope);
       } else if (node instanceof RoundApply) {
-         this.typeCheckApply(node, scope);
+         this.typeCheckApply(node, scope, options);
       } else if (node instanceof SquareApply) {
          this.typeCheckSquareApply(node, scope);
       } else if (node instanceof RoundValueToValueLambda) {
-         this.typeCheckRoundValueToValueLambda(node, scope);
+         this.typeCheckRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
          this.typeCheckSquareTypeToValueLambda(node, scope);
+      } else if (node instanceof SquareTypeToTypeLambda) {
+         this.typeCheck(node.returnType, scope);
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node);
          const trueScope = innerScope.innerScopeOf(node.trueBranch);
@@ -175,18 +168,55 @@ export class TypeChecker {
             ).params,
             scope
          );
+      } else if (node instanceof TypeDef) {
+         const innerScope = scope.innerScopeOf(node);
+         node.fieldDefs.forEach((fd) => {
+            if (fd.defaultValue) {
+               this.typeCheck(fd.defaultValue, innerScope);
+               if (fd.type) {
+                  const inferredType = this.context.inferencer.infer(
+                     fd.defaultValue,
+                     innerScope
+                  );
+                  const expectedType = this.context.translator.translate(
+                     fd.type,
+                     innerScope
+                  );
+                  if (!inferredType.isAssignableTo(expectedType, innerScope)) {
+                     this.context.errors.add(
+                        "Default value of field " + fd.name,
+                        expectedType,
+                        inferredType,
+                        fd.position
+                     );
+                  }
+               }
+            }
+         });
+      } else if (node instanceof BinaryExpression) {
+         this.typeCheck(node.left, scope);
+         const leftType = this.context.inferencer.infer(node.left, scope);
+         this.typeCheck(node.right, scope, {
+            firstPartOfIntersection: leftType,
+         });
       }
    }
 
    typeCheckRoundValueToValueLambda(
       node: RoundValueToValueLambda,
-      scope: Scope
+      scope: Scope,
+      options: RecursiveResolutionOptions
    ) {
       const innerScope = scope.innerScopeOf(node);
       node.params.forEach((p) => this.typeCheck(p, innerScope));
+      const lambdaType = this.context.inferencer.infer(node, scope, options);
+      if (!(lambdaType instanceof RoundValueToValueLambdaType)) {
+         throw new Error("Calling non-lambda");
+      }
       let type = this.context.inferencer.inferRoundValueToValueLambda(
          node,
-         scope
+         scope,
+         { typeExpectedInPlace: lambdaType }
       );
       this.checkLambdaParamsValidity(type.params, scope);
       this.typeCheck(node.block, innerScope);
@@ -263,8 +293,11 @@ export class TypeChecker {
       }
    }
 
-   typeCheckApply(apply: RoundApply, scope: Scope) {
-      // scope = scope.innerScopeOf(apply);
+   typeCheckApply(
+      apply: RoundApply,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       this.typeCheck(apply.callee, scope);
       let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
       if (
@@ -289,12 +322,14 @@ export class TypeChecker {
             );
          }
       }
-      apply.args.forEach((p) => {
-         this.typeCheck(p[1], scope);
-      });
 
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
+         apply.args.forEach((p, i) => {
+            this.typeCheck(p[1], scope, {
+               typeExpectedInPlace: params[i].type,
+            });
+         });
          if (
             params[0] &&
             params[0].type instanceof AppliedGenericType &&
@@ -334,15 +369,32 @@ export class TypeChecker {
                });
                apply.takesVarargs = true;
             }
-         } else {
-            const paramOrder = this.typeCheckLambdaCall(
-               apply,
-               apply.args,
-               typeSymbol.params,
-               scope
-            );
-            apply.paramOrder = paramOrder;
          }
+      }
+
+      if (
+         typeSymbol instanceof StructType ||
+         typeSymbol instanceof RoundValueToValueLambdaType
+      ) {
+         let params: ParamType[] = [];
+         if (typeSymbol instanceof StructType) {
+            params = typeSymbol.fields.map((f) => {
+               return new ParamType(f.type, f.name, new Identifier("external"));
+            });
+         } else {
+            params = typeSymbol.params;
+         }
+         const calleeType = this.context.inferencer.infer(apply.callee, scope);
+         const paramOrder = this.typeCheckLambdaCall(
+            apply,
+            apply.args,
+            params,
+            scope,
+            { typeExpectedInPlace: calleeType },
+            options?.firstPartOfIntersection !== undefined &&
+               apply.callee instanceof Identifier
+         );
+         apply.paramOrder = paramOrder;
       }
    }
 
@@ -350,7 +402,9 @@ export class TypeChecker {
       term: RoundApply,
       applyArgs: [string, Term][], // Positional arguments, with possible names
       expectedParams: ParamType[], // Expected parameter definitions
-      scope: Scope
+      scope: Scope,
+      options: RecursiveResolutionOptions,
+      areAllOptional: boolean
    ): [number, number][] /* How to shuffle parameters when translating */ {
       const termName =
          term.callee instanceof Identifier
@@ -424,12 +478,20 @@ export class TypeChecker {
             );
             return [];
          }
-
-         const appliedType = this.context.inferencer.infer(applyArg[1], scope);
+         let appliedType;
+         if (
+            options.typeExpectedInPlace instanceof RoundValueToValueLambdaType
+         ) {
+            appliedType = this.context.inferencer.infer(applyArg[1], scope, {
+               typeExpectedInPlace: options.typeExpectedInPlace.params[i].type,
+            });
+         } else {
+            appliedType = this.context.inferencer.infer(applyArg[1], scope);
+         }
          const expectedType = expectedParam.type;
          if (!appliedType.isAssignableTo(expectedType, scope)) {
             this.context.errors.add(
-               `Parameter ${expectedParam.name || `[${i}]`} or ${termName}`,
+               `Parameter '${expectedParam.name || `[${i}]`}' of '${termName}'`,
                expectedType,
                appliedType,
                applyArg[1].position
@@ -461,7 +523,7 @@ export class TypeChecker {
          }
       }
 
-      if (unfulfilledExpectedParams.length > 0) {
+      if (unfulfilledExpectedParams.length > 0 && !areAllOptional) {
          this.context.errors.add(
             `Lambda ${termName} didn't have all of its non-optional parameters fulfilled, ${
                unfulfilledExpectedParams.length

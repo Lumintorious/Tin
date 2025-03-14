@@ -1,5 +1,16 @@
 const __tin_varargs_marker = Symbol();
 
+// Object.prototype._copy = function (...args) {
+// 	const keys = Object.keys(this).flatMap(k => Object.keys(this[k]));
+// 	let i = 0;
+// 	const copyObj = {};
+// 	for (let arg of args) {
+// 		copyObj[keys[i]] = arg
+// 		i++;
+// 	}
+// 	return { ...this, ...copyObj }
+// }
+
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
@@ -32,8 +43,28 @@ const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj2 === undefined) {
 		return obj1
 	}
-	const result = { ...obj1, ...obj2 }
-	return result
+	const commonModules = [];
+	for (let key of Reflect.ownKeys(obj1)) {
+		if (Reflect.ownKeys(obj2).includes(key)) {
+			commonModules.push(key)
+		}
+	}
+	const newObj = { ...obj1 };
+	const obj1Keys = Reflect.ownKeys(obj1)
+	const obj2Keys = Reflect.ownKeys(obj2)
+	for (let key of obj2Keys) {
+		if (obj1Keys.includes(key)) {
+			const obj2Module = obj2[key]
+			for (let originalKey of Reflect.ownKeys(obj2Module)) {
+				if (obj2Module[originalKey] !== undefined) {
+					newObj[key][originalKey] = obj2Module[originalKey]
+				}
+			}
+		} else {
+			newObj[key] = obj2[key]
+		}
+	}
+	return newObj
 }
 
 const _TIN_UNION_OBJECTS = function (obj1, obj2) {

@@ -380,6 +380,7 @@ statements:
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
+                  isAnObjectCopy: false
                   callee:
                     tag: SquareApply
                     callee:
@@ -744,6 +745,7 @@ statements:
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
+                  isAnObjectCopy: false
                   callee:
                     tag: SquareApply
                     callee:
@@ -879,6 +881,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: Select
                       ammortized: false
@@ -977,6 +980,7 @@ statements:
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
+                          isAnObjectCopy: false
                           callee:
                             tag: SquareApply
                             callee:
@@ -1001,6 +1005,7 @@ statements:
                                 calledInsteadOfSquare: false
                                 paramOrder:
                                 isFirstParamThis: false
+                                isAnObjectCopy: false
                                 callee:
                                   tag: Select
                                   ammortized: false
@@ -1039,6 +1044,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: SquareApply
                       callee:
@@ -1068,6 +1074,7 @@ statements:
                                 calledInsteadOfSquare: false
                                 paramOrder:
                                 isFirstParamThis: false
+                                isAnObjectCopy: false
                                 callee:
                                   tag: SquareApply
                                   callee:
@@ -1156,6 +1163,7 @@ statements:
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
+                          isAnObjectCopy: false
                           callee:
                             tag: Select
                             ammortized: false
@@ -1209,6 +1217,7 @@ statements:
                       calledInsteadOfSquare: false
                       paramOrder:
                       isFirstParamThis: false
+                      isAnObjectCopy: false
                       callee:
                         tag: SquareApply
                         callee:
@@ -1237,6 +1246,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: Identifier
                       value: ToString
@@ -1370,6 +1380,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: Identifier
                       value: getIterator
@@ -1396,6 +1407,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: Select
                       ammortized: false
@@ -1437,6 +1449,7 @@ statements:
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
+                          isAnObjectCopy: false
                           callee:
                             tag: SquareApply
                             callee:
@@ -1472,6 +1485,7 @@ statements:
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
+                          isAnObjectCopy: false
                           callee:
                             tag: Select
                             ammortized: false
@@ -1490,6 +1504,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: SquareApply
                       callee:
@@ -1519,6 +1534,7 @@ statements:
                                 calledInsteadOfSquare: false
                                 paramOrder:
                                 isFirstParamThis: false
+                                isAnObjectCopy: false
                                 callee:
                                   tag: SquareApply
                                   callee:

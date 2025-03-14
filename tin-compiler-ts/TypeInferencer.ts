@@ -23,7 +23,12 @@ import {
    Term,
    WhileLoop,
 } from "./Parser";
-import { Symbol, Scope, TypePhaseContext } from "./Scope";
+import {
+   Symbol,
+   Scope,
+   TypePhaseContext,
+   RecursiveResolutionOptions,
+} from "./Scope";
 import { TypeErrorList } from "./TypeChecker";
 import { ParamType } from "./Types";
 import {
@@ -64,7 +69,11 @@ export class TypeInferencer {
       return new BinaryOpType(type1, "|", type2);
    }
 
-   infer(node: AstNode, scope: Scope) {
+   infer(
+      node: AstNode,
+      scope: Scope,
+      options: RecursiveResolutionOptions = {}
+   ) {
       let inferredType: Type;
       switch (node.tag) {
          case "Literal":
@@ -104,7 +113,8 @@ export class TypeInferencer {
          case "RoundValueToValueLambda":
             inferredType = this.inferRoundValueToValueLambda(
                node as RoundValueToValueLambda,
-               scope
+               scope,
+               options
             );
             break;
          case "SquareTypeToValueLambda":
@@ -325,6 +335,9 @@ export class TypeInferencer {
             calleeType.returnType.returnType,
             mappings
          );
+      } else if (calleeType instanceof StructType) {
+         node.isAnObjectCopy = true;
+         return calleeType;
       }
       throw new Error(
          `Not calling a function. Object ${
@@ -491,15 +504,25 @@ export class TypeInferencer {
    }
 
    inferIdentifier(node: Identifier, scope: Scope) {
-      const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
+      try {
+         const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
 
-      if (!symbol) {
-         if (node.value.charAt(0) === node.value.charAt(0).toUpperCase()) {
-            return NamedType.PRIMITIVE_TYPES.Type;
+         if (!symbol) {
+            if (node.value.charAt(0) === node.value.charAt(0).toUpperCase()) {
+               return NamedType.PRIMITIVE_TYPES.Type;
+            }
+            throw new Error(`Undefined identifier: ${node.value}`);
          }
-         throw new Error(`Undefined identifier: ${node.value}`);
+         return symbol.typeSymbol;
+      } catch (e) {
+         this.context.errors.add(
+            `Could not find symbol '${node.value}'`,
+            undefined,
+            undefined,
+            node.position
+         );
+         return NamedType.PRIMITIVE_TYPES.Nothing;
       }
-      return symbol.typeSymbol;
    }
 
    DEFINED_OPERATIONS = {
@@ -628,7 +651,11 @@ export class TypeInferencer {
    }
 
    // (i: Number) -> i + 2
-   inferRoundValueToValueLambda(node: RoundValueToValueLambda, scope: Scope) {
+   inferRoundValueToValueLambda(
+      node: RoundValueToValueLambda,
+      scope: Scope,
+      options: RecursiveResolutionOptions = {}
+   ) {
       const innerScope = scope.innerScopeOf(node);
       innerScope.run = this.context.run;
       let paramsAsTypes: ParamType[] = [];
@@ -661,12 +688,21 @@ export class TypeInferencer {
             }
          }
       } else {
-         paramsAsTypes = node.params.map((param) => {
-            return this.context.translator.translateRoundTypeToTypeLambdaParameter(
-               param,
-               scope
-            );
-         });
+         const expected = options.typeExpectedInPlace;
+         if (expected) {
+            if (expected instanceof RoundValueToValueLambdaType) {
+               paramsAsTypes = expected.params;
+            } else {
+               throw new Error("Expected lambda type.");
+            }
+         } else {
+            paramsAsTypes = node.params.map((param) => {
+               return this.context.translator.translateRoundTypeToTypeLambdaParameter(
+                  param,
+                  scope
+               );
+            });
+         }
       }
 
       if (

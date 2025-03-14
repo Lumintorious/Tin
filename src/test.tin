@@ -1,10 +1,11 @@
 #import collections/List
 
-Iterator = [T] => type:
-	next: () => T?
-	consumeAll: (fn: (T) => Nothing) => Nothing = (t: (T) => Nothing) ->
-		print("Hello")
+Cat = type:
+	name: String
+	age: Number
 
-print("Hi")
+callFunction = (number: Number, func: (Number) => Nothng) -> func(number)
+showNumber = (number: Number) -> print(number)
+showString = (string: String) -> print(string)
 
-Iterator[String](() -> "")
+callFunction(3, (n) -> showNumber(n))

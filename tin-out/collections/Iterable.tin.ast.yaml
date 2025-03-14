@@ -139,6 +139,7 @@ statements:
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
+                    isAnObjectCopy: false
                     callee:
                       tag: Identifier
                       value: print
@@ -389,6 +390,7 @@ statements:
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
+                  isAnObjectCopy: false
                   callee:
                     tag: Identifier
                     value: debug
@@ -399,6 +401,7 @@ statements:
                         calledInsteadOfSquare: false
                         paramOrder:
                         isFirstParamThis: false
+                        isAnObjectCopy: false
                         callee:
                           tag: Select
                           ammortized: false
@@ -420,6 +423,7 @@ statements:
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
+                  isAnObjectCopy: false
                   callee:
                     tag: Select
                     ammortized: false
@@ -435,6 +439,7 @@ statements:
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
+                  isAnObjectCopy: false
                   callee:
                     tag: Identifier
                     value: makeString
@@ -781,6 +786,7 @@ statements:
                             calledInsteadOfSquare: false
                             paramOrder:
                             isFirstParamThis: false
+                            isAnObjectCopy: false
                             callee:
                               tag: Identifier
                               value: getIterator
@@ -807,6 +813,7 @@ statements:
                             calledInsteadOfSquare: false
                             paramOrder:
                             isFirstParamThis: false
+                            isAnObjectCopy: false
                             callee:
                               tag: Select
                               ammortized: false
@@ -843,6 +850,7 @@ statements:
                                 calledInsteadOfSquare: false
                                 paramOrder:
                                 isFirstParamThis: false
+                                isAnObjectCopy: false
                                 callee:
                                   tag: Identifier
                                   value: fn
@@ -880,6 +888,7 @@ statements:
                                   calledInsteadOfSquare: false
                                   paramOrder:
                                   isFirstParamThis: false
+                                  isAnObjectCopy: false
                                   callee:
                                     tag: Select
                                     ammortized: false
@@ -1147,6 +1156,7 @@ statements:
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
+                          isAnObjectCopy: false
                           callee:
                             tag: Identifier
                             value: forEach
@@ -1338,6 +1348,7 @@ statements:
                                     calledInsteadOfSquare: false
                                     paramOrder:
                                     isFirstParamThis: false
+                                    isAnObjectCopy: false
                                     callee:
                                       tag: Identifier
                                       value: pred
@@ -1381,6 +1392,7 @@ statements:
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
+                          isAnObjectCopy: false
                           callee:
                             tag: Identifier
                             value: forEach
@@ -1434,6 +1446,7 @@ statements:
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
+                  isAnObjectCopy: false
                   callee:
                     tag: SquareApply
                     callee:

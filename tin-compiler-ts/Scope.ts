@@ -468,6 +468,11 @@ export class Scope {
    }
 }
 
+export type RecursiveResolutionOptions = {
+   firstPartOfIntersection?: Type;
+   typeExpectedInPlace?: Type;
+};
+
 export class TypePhaseContext {
    fileName: string;
    languageScope: Scope;

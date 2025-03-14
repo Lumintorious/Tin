@@ -213,6 +213,7 @@ export class RoundApply extends Term {
    calledInsteadOfSquare: boolean = false;
    paramOrder: [number, number][] = [];
    isFirstParamThis: boolean = false;
+   isAnObjectCopy: boolean = false;
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;

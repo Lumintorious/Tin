@@ -305,6 +305,7 @@ function translate(
       return (
          translate(term.callee, scope) +
          (term.calledInsteadOfSquare ? "(0)" : "") +
+         (term.isAnObjectCopy ? "._copy" : "") +
          open +
          args
             .map((arg) => {
