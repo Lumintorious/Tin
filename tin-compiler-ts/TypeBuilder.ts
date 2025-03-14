@@ -30,6 +30,8 @@ import {
 import { type } from "os";
 import { TypeDef } from "./Parser";
 import { Symbol } from "./Scope";
+import { NamedType } from "./Types";
+import { SquareTypeToValueLambdaType } from "./Types";
 import {
    OptionalType,
    GenericNamedType,
@@ -58,21 +60,13 @@ export class TypeBuilder {
             this.build(statement, innerBlockScope)
          );
       } else if (node instanceof RoundApply) {
-         const calleeType = this.context.inferencer.infer(node.callee, scope);
-         if (!(calleeType instanceof RoundValueToValueLambdaType)) {
-            // will be hanlded in TypeChecker
-         } else {
-            node.args.forEach((statement, i) =>
-               this.build(statement[1], scope, {
-                  typeExpectedInPlace: calleeType.params[i].type,
-               })
-            );
-         }
-         this.build(node.callee, scope);
+         this.buildRoundApply(node, scope);
       } else if (node instanceof RoundValueToValueLambda) {
          this.buildRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
          this.buildSquareTypeToValueLambda(node, scope);
+      } else if (node instanceof SquareTypeToTypeLambda) {
+         this.build(node.returnType, scope);
       } else if (node instanceof WhileLoop) {
          this.buildWhileLoop(node, scope);
       } else if (node instanceof IfStatement) {
@@ -141,11 +135,105 @@ export class TypeBuilder {
       }
    }
 
+   buildRoundApply(node: RoundApply, scope: Scope) {
+      const calleeType = this.context.inferencer.infer(node.callee, scope);
+      if (!(calleeType instanceof RoundValueToValueLambdaType)) {
+         // will be hanlded in TypeChecker
+         if (
+            calleeType instanceof SquareTypeToValueLambdaType &&
+            calleeType.returnType instanceof RoundValueToValueLambdaType
+         ) {
+            node.autoFilledSquareParams = [];
+            const expectedTypeParams = calleeType.paramTypes;
+            const expectedParams = calleeType.returnType.params;
+            const appliedParams = node.args;
+            // If Varargs
+            if (
+               expectedParams.length === 1 &&
+               expectedParams[0].type instanceof AppliedGenericType &&
+               expectedParams[0].type.callee instanceof NamedType &&
+               expectedParams[0].type.callee.name === "Array"
+            ) {
+               let firstAppliedParamType = this.context.inferencer.infer(
+                  appliedParams[0][1],
+                  scope
+               );
+               if (firstAppliedParamType instanceof LiteralType) {
+                  firstAppliedParamType = firstAppliedParamType.type;
+               }
+               // If array past raw, not as varargs 'func(Array@of(1, 2, 3))'
+               if (
+                  firstAppliedParamType instanceof AppliedGenericType &&
+                  firstAppliedParamType.callee instanceof NamedType &&
+                  firstAppliedParamType.callee.name === "Array"
+               ) {
+                  if (
+                     expectedParams[0].type.parameterTypes[0] instanceof
+                        GenericNamedType &&
+                     firstAppliedParamType.parameterTypes[0] instanceof
+                        NamedType
+                  ) {
+                     node.autoFilledSquareParams = [
+                        firstAppliedParamType.parameterTypes[0],
+                     ];
+                  } else if (
+                     expectedParams[0].type.parameterTypes[0] instanceof
+                        NamedType &&
+                     firstAppliedParamType.parameterTypes[0] instanceof
+                        NamedType
+                  ) {
+                  }
+                  // Varargs
+               } else {
+                  node.autoFilledSquareParams = [firstAppliedParamType];
+                  node.takesVarargs = true;
+               }
+            } else {
+               // Not Varargs
+               let i = 0;
+               for (let [appliedName, appliedTerm] of appliedParams) {
+                  let appliedType = this.context.inferencer.infer(
+                     appliedTerm,
+                     scope
+                  );
+                  if (appliedType instanceof LiteralType) {
+                     appliedType = appliedType.type;
+                  }
+                  const expectedType = appliedName
+                     ? expectedParams.find((p) => p.name === appliedName)
+                     : expectedParams[i];
+                  if (expectedType && expectedType.type instanceof NamedType) {
+                     let index = -1;
+                     while (index < expectedTypeParams.length) {
+                        if (
+                           expectedTypeParams[index]?.name ===
+                           expectedType.type.name
+                        ) {
+                           node.autoFilledSquareParams[index] = appliedType;
+                           break;
+                        }
+                        index++;
+                     }
+                  }
+                  i++;
+               }
+            }
+         }
+      } else {
+         node.args.forEach((statement, i) =>
+            this.build(statement[1], scope, {
+               typeExpectedInPlace: calleeType?.params?.[i]?.type,
+            })
+         );
+      }
+      this.build(node.callee, scope);
+   }
+
    buildTypeDef(node: TypeDef, scope: Scope) {
-      scope = scope.innerScopeOf(node, true);
+      const innerScope = scope.innerScopeOf(node, true);
       for (let param of node.fieldDefs) {
-         if (param.defaultValue) this.build(param.defaultValue, scope);
-         if (param.type) this.build(param.type, scope);
+         if (param.defaultValue) this.build(param.defaultValue, innerScope);
+         if (param.type) this.build(param.type, innerScope);
       }
    }
 
@@ -185,15 +273,6 @@ export class TypeBuilder {
             } else {
                this.build(p, innerScope);
             }
-            // if (p.type) {
-            //    innerScope.declare(
-            //       p.lhs.value,
-            //       new Symbol(
-            //          p.lhs.value,
-            //          this.context.translator.translate(p.type, innerScope)
-            //       )
-            //    );
-            // }
          }
       });
       this.build(node.block, innerScope);

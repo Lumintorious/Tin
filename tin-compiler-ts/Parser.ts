@@ -1,6 +1,6 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
-import { RoundValueToValueLambdaType } from "./Types";
+import { RoundValueToValueLambdaType, Type } from "./Types";
 const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
 export class AstNode {
    readonly tag: string;
@@ -54,7 +54,8 @@ export class Assignment extends AstNode {
       if (lhs instanceof Identifier) {
          this.isTypeLevel =
             lhs.tag === "Identifier" &&
-            lhs.value.charAt(0) === lhs.value.charAt(0).toUpperCase();
+            lhs.value.charAt(0) === lhs.value.charAt(0).toUpperCase() &&
+            !lhs.value.includes("@");
       }
    }
 }
@@ -214,6 +215,7 @@ export class RoundApply extends Term {
    paramOrder: [number, number][] = [];
    isFirstParamThis: boolean = false;
    isAnObjectCopy: boolean = false;
+   autoFilledSquareParams?: Type[];
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
@@ -382,13 +384,19 @@ export class Parser {
    }
 
    parse(): Block {
+      const startPos = this.positionNow();
       while (this.current < this.tokens.length) {
          const statement = this.parseStatement();
          if (statement) {
             this.body.push(statement);
          }
       }
-      return new Block(this.body);
+      const endPos = this.positionNow();
+      return new Block(this.body).fromTo(startPos, endPos);
+   }
+
+   positionNow() {
+      return this.tokens[this.current]?.position || { start: 0, end: 0 };
    }
 
    is(tokenValue: string) {
@@ -418,11 +426,11 @@ export class Parser {
 
    parseStatement(): Statement | null {
       let token = this.peek();
-
+      const startPos = this.positionNow();
       if (token.tag === "KEYWORD" && token.value === "import") {
          this.consume();
          const path = this.parseImportString();
-         return new Import(path as string);
+         return new Import(path as string).fromTo(startPos, this.positionNow());
       }
 
       if (token.tag === "INDENT" || token.tag === "DEDENT") {
@@ -486,8 +494,16 @@ export class Parser {
 
       return result.fromTo(start.position, end.position); // Return a function application node
    }
-   // parseExpression > parsePrimary
+
    parseExpression(precedence = 0, stopAtEquals = false) {
+      const startPos = this.positionNow();
+      const result = this.parseExpressionRaw(precedence, stopAtEquals);
+      const endPos = this.positionNow();
+      return result.fromTo(startPos, endPos);
+   }
+
+   // parseExpression > parsePrimary
+   parseExpressionRaw(precedence = 0, stopAtEquals = false) {
       const startPos = this.peek().position;
       let left: Term; // Parse the left-hand side (like a literal or identifier)
 
@@ -858,8 +874,15 @@ export class Parser {
       return new Literal(String(token.value), "String");
    }
 
-   // Parse primary expressions like literals or identifiers
    parsePrimary(): Term {
+      const startPos = this.positionNow();
+      const result = this.parsePrimaryRaw();
+      const endPos = this.positionNow();
+      return result.fromTo(startPos, endPos);
+   }
+
+   // Parse primary expressions like literals or identifiers
+   parsePrimaryRaw(): Term {
       const token = this.consume();
 
       if (applyableKeywords.includes(token.value)) {

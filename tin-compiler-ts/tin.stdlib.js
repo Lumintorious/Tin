@@ -91,7 +91,7 @@ const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] 
 	}
 }), {})
 
-const arrayOf = (t) => (args) => args
+const Array$of = (t) => (args) => args
 Array._typeId = "Array"
 
 const copy = (T) => (obj) => {

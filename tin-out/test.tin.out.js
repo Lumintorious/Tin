@@ -91,7 +91,7 @@ const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] 
 	}
 }), {})
 
-const arrayOf = (t) => (args) => args
+const Array$of = (t) => (args) => args
 Array._typeId = "Array"
 
 const copy = (T) => (obj) => {
@@ -169,16 +169,9 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Cat = TIN_TYPE("Cat", "f614c16a-ea67-4617-9710-0b4200ad73ad", (_p0,_p1) => ({name: _p0,age: _p1}), {}); Cat._typeId = "Cat";;
-export var callFunction/* (Number, (Number) => Nothng) => Nothng*/ = function(number, func) {
-return func(number)
+export var func/* [T] => (T, T) => Array[T]*/ = function(T) {
+return function(param, paramz) {
+return Array$of.call('Type', T)(Array(0)([param, paramz]))
+}
 };
-export var showNumber/* (Number) => Nothing*/ = function(number) {
-return print(number)
-};
-export var showString/* (String) => Nothing*/ = function(string) {
-return print(string)
-};
-callFunction(3, function(n) {
-return showNumber(n)
-})
+export var x/* Array[Number]*/ = func(0)(1, 2)

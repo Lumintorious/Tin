@@ -551,9 +551,9 @@ export class TypePhaseContext {
       arrayLambdaType.name = "Array";
       this.languageScope.declareType("Array", arrayLambdaType);
       this.languageScope.declare(
-         "arrayOf",
+         "Array@of",
          new Symbol(
-            "arrayOf",
+            "Array@of",
             new SquareTypeToValueLambdaType(
                [new GenericNamedType("T")],
                new RoundValueToValueLambdaType(

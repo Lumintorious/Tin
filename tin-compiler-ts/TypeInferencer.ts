@@ -202,6 +202,12 @@ export class TypeInferencer {
    }
 
    inferTypeDef(node: TypeDef, scope: Scope): Type {
+      const innerScope = scope.innerScopeOf(node, true);
+      node.fieldDefs.forEach((fd) => {
+         if (fd.defaultValue) {
+            this.context.builder.build(fd.defaultValue, innerScope);
+         }
+      });
       return new TypeOfTypes();
    }
 
@@ -290,7 +296,9 @@ export class TypeInferencer {
    }
 
    isCapitalized(str: string) {
-      return str.charAt(0) === str.charAt(0).toUpperCase();
+      return (
+         str.charAt(0) === str.charAt(0).toUpperCase() && !str.includes("@")
+      );
    }
 
    // func = [T, X] -> (thing: T, other: X) -> thing
@@ -330,14 +338,26 @@ export class TypeInferencer {
             scope,
             mappings
          );
-         node.calledInsteadOfSquare = true;
-         return scope.resolveGenericTypes(
-            calleeType.returnType.returnType,
-            mappings
+         const squareArgs = node.autoFilledSquareParams;
+
+         const calledArgs = squareArgs;
+         if (calledArgs) {
+            const expectedArgs = calleeType.paramTypes;
+            const params: { [_: string]: Type } = {};
+            for (let i = 0; i < calledArgs.length; i++) {
+               params[expectedArgs[i].name] = calledArgs[i];
+            }
+            const result = scope.resolveGenericTypes(
+               calleeType.returnType,
+               params
+            );
+            if (result instanceof RoundValueToValueLambdaType) {
+               return result.returnType;
+            }
+         }
+         throw new Error(
+            "Square lambda called with round parens, but types could not be automatically resolved."
          );
-      } else if (calleeType instanceof StructType) {
-         node.isAnObjectCopy = true;
-         return calleeType;
       }
       throw new Error(
          `Not calling a function. Object ${
@@ -469,6 +489,8 @@ export class TypeInferencer {
          );
       } else if (type instanceof GenericNamedType) {
          return new Map([]);
+      } else if (type instanceof RoundValueToValueLambdaType) {
+         return new Map([]);
       } else {
          throw new Error(
             "Could not deduce fields of type " +
@@ -482,7 +504,7 @@ export class TypeInferencer {
 
    inferBlock(node: Block, scope: Scope) {
       // TO DO: change to find returns recursively
-      let innerScope = scope.innerScopeOf(node);
+      let innerScope = scope.innerScopeOf(node, true);
       if (node.statements.length === 0) {
          return new Type();
       }
@@ -508,7 +530,10 @@ export class TypeInferencer {
          const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
 
          if (!symbol) {
-            if (node.value.charAt(0) === node.value.charAt(0).toUpperCase()) {
+            if (
+               node.value.charAt(0) === node.value.charAt(0).toUpperCase() &&
+               !node.value.includes("@")
+            ) {
                return NamedType.PRIMITIVE_TYPES.Type;
             }
             throw new Error(`Undefined identifier: ${node.value}`);
@@ -521,7 +546,8 @@ export class TypeInferencer {
             undefined,
             node.position
          );
-         return NamedType.PRIMITIVE_TYPES.Nothing;
+         this.context.errors.throwAll();
+         return {} as any;
       }
    }
 
@@ -618,36 +644,10 @@ export class TypeInferencer {
       scope: Scope,
       mappings: { [_: string]: Type }
    ) {
-      const expectedValueParams: Type[] = roundLambda.params.map((p) => p.type);
-      const expectedTypeParams: GenericNamedType[] =
-         squareLambda.paramTypes.map((p) => {
-            const pType = p;
-            if (pType instanceof GenericNamedType) {
-               return pType;
-            } else {
-               throw new Error(
-                  "Expected generic types for SquareTypeToTypeLambda"
-               );
-            }
-         });
-      const suppliedParams: [string, Term][] = roundApply.args;
-      for (let i = 0; i < suppliedParams.length; i++) {
-         const typeofSuppliedParam: Type = this.infer(
-            suppliedParams[i][1],
-            scope
-         );
-         const typeofExpectedParam: Type = expectedValueParams[i];
-         if (
-            typeofExpectedParam instanceof NamedType ||
-            typeofExpectedParam instanceof GenericNamedType
-         ) {
-            const typeNameToFind = typeofExpectedParam.name;
-            const indexOfTypeInSquareLambda = expectedTypeParams.findIndex(
-               (v) => v.name === typeNameToFind
-            );
-            mappings[typeNameToFind] = typeofSuppliedParam;
-         }
-      }
+      // for(let calledParam of)
+      // console.log(roundLambda);
+      // console.log(squareLambda);
+      // console.log(roundApply);
    }
 
    // (i: Number) -> i + 2
@@ -656,7 +656,7 @@ export class TypeInferencer {
       scope: Scope,
       options: RecursiveResolutionOptions = {}
    ) {
-      const innerScope = scope.innerScopeOf(node);
+      const innerScope = scope.innerScopeOf(node, true);
       innerScope.run = this.context.run;
       let paramsAsTypes: ParamType[] = [];
       // Check for Varargs expected type

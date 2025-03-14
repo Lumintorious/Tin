@@ -5,366 +5,171 @@ statements:
     isParameter: false
     lhs:
       tag: Identifier
-      value: Cat
+      value: func
     value:
-      tag: TypeDef
-      fieldDefs:
-        - tag: FieldDef
-          name: name
-          type:
-            tag: Identifier
-            value: String
-          isTypeLevel: true
-        - tag: FieldDef
-          name: age
-          type:
-            tag: Identifier
-            value: Number
-          isTypeLevel: true
-    isDeclaration: true
-    isTypeLevel: true
-    position:
-      start:
-        line: 3
-        column: 1
-        absolute: 31
-      end:
-        line: 7
-        column: 13
-        absolute: 84
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: callFunction
-    value:
-      tag: RoundValueToValueLambda
-      params:
+      tag: SquareTypeToValueLambda
+      parameterTypes:
         - tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
             tag: Identifier
-            value: number
-          type:
-            tag: Identifier
-            value: Number
+            value: T
           isDeclaration: false
-          isTypeLevel: false
+          isTypeLevel: true
           position:
             start:
-              line: 7
-              column: 17
-              absolute: 94
+              line: 3
+              column: 9
+              absolute: 37
             end:
-              line: 7
-              column: 32
-              absolute: 103
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: func
-          type:
-            tag: RoundTypeToTypeLambda
-            parameterTypes:
-              - tag: Assignment
+              line: 3
+              column: 11
+              absolute: 38
+      block:
+        tag: Block
+        statements:
+          - tag: RoundValueToValueLambda
+            params:
+              0:
+                tag: Assignment
                 isMutable: false
                 isParameter: true
                 lhs:
                   tag: Identifier
-                  value: Number
+                  value: param
+                value: undefined
+                type:
+                  tag: Identifier
+                  value: T
                 isDeclaration: false
-                isTypeLevel: true
-                position:
-                  start:
-                    line: 7
-                    column: 40
-                    absolute: 117
-                  end:
-                    line: 7
-                    column: 47
-                    absolute: 118
-            returnType:
-              tag: Identifier
-              value: Nothng
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 7
-              column: 33
-              absolute: 108
-            end:
-              line: 7
-              column: 58
-              absolute: 129
-      block:
-        tag: Block
-        statements:
-          - tag: RoundApply
-            calledInsteadOfSquare: false
-            paramOrder:
-            isFirstParamThis: false
-            isAnObjectCopy: false
-            callee:
-              tag: Identifier
-              value: func
-            args:
-              0:
-                - 
-                - tag: Identifier
-                  value: number
+              1:
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  tag: Identifier
+                  value: paramz
+                value: undefined
+                type:
+                  tag: Identifier
+                  value: T
+                isDeclaration: false
+            block:
+              tag: Block
+              statements:
+                - tag: RoundApply
+                  calledInsteadOfSquare: false
+                  paramOrder:
+                  isFirstParamThis: false
+                  isAnObjectCopy: false
+                  callee:
+                    tag: SquareApply
+                    callee:
+                      tag: Identifier
+                      value: Array@of
+                    typeArgs:
+                      - tag: Identifier
+                        value: T
+                        position:
+                          start:
+                            line: 3
+                            column: 49
+                            absolute: 77
+                          end:
+                            line: 3
+                            column: 51
+                            absolute: 78
+                  args:
+                    0:
+                      - 
+                      - tag: Identifier
+                        value: param
+                        position:
+                          start:
+                            line: 3
+                            column: 52
+                            absolute: 84
+                          end:
+                            line: 3
+                            column: 58
+                            absolute: 85
+                    1:
+                      - 
+                      - tag: Identifier
+                        value: paramz
+                        position:
+                          start:
+                            line: 3
+                            column: 59
+                            absolute: 92
+                          end:
+                            line: 3
+                            column: 66
+                            absolute: 93
                   position:
                     start:
-                      line: 7
-                      column: 67
-                      absolute: 144
+                      line: 3
+                      column: 40
+                      absolute: 75
                     end:
-                      line: 7
-                      column: 73
-                      absolute: 144
+                      line: 5
+                      column: 1
+                      absolute: 97
             position:
               start:
-                line: 7
-                column: 66
-                absolute: 138
+                line: 3
+                column: 15
+                absolute: 43
               end:
-                line: 7
-                column: 74
-                absolute: 145
-      explicitType: undefined
+                line: 5
+                column: 1
+                absolute: 97
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
+        line: 3
+        column: 1
+        absolute: 32
+      end:
+        line: 5
+        column: 1
+        absolute: 97
+  - tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      tag: Identifier
+      value: x
+    value:
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      isAnObjectCopy: false
+      callee:
+        tag: Identifier
+        value: func
+      args:
+        - 0: 
+          1:
+            tag: Literal
+            type: Number
+            value: 1
+        - 0: 
+          1:
+            tag: Literal
+            type: Number
+            value: 2
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 5
+        column: 1
+        absolute: 98
+      end:
         line: 7
         column: 1
-        absolute: 84
-      end:
-        line: 8
-        column: 1
-        absolute: 147
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: showNumber
-    value:
-      tag: RoundValueToValueLambda
-      params:
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: number
-          type:
-            tag: Identifier
-            value: Number
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 8
-              column: 15
-              absolute: 167
-            end:
-              line: 8
-              column: 30
-              absolute: 176
-      block:
-        tag: Block
-        statements:
-          - tag: RoundApply
-            calledInsteadOfSquare: false
-            paramOrder:
-            isFirstParamThis: false
-            isAnObjectCopy: false
-            callee:
-              tag: Identifier
-              value: print
-            args:
-              0:
-                - 
-                - tag: Identifier
-                  value: number
-                  position:
-                    start:
-                      line: 8
-                      column: 40
-                      absolute: 192
-                    end:
-                      line: 8
-                      column: 46
-                      absolute: 192
-            position:
-              start:
-                line: 8
-                column: 39
-                absolute: 186
-              end:
-                line: 8
-                column: 47
-                absolute: 193
-      explicitType: undefined
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 8
-        column: 1
-        absolute: 157
-      end:
-        line: 9
-        column: 1
-        absolute: 195
-  - tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      tag: Identifier
-      value: showString
-    value:
-      tag: RoundValueToValueLambda
-      params:
-        - tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            tag: Identifier
-            value: string
-          type:
-            tag: Identifier
-            value: String
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 9
-              column: 15
-              absolute: 215
-            end:
-              line: 9
-              column: 30
-              absolute: 224
-      block:
-        tag: Block
-        statements:
-          - tag: RoundApply
-            calledInsteadOfSquare: false
-            paramOrder:
-            isFirstParamThis: false
-            isAnObjectCopy: false
-            callee:
-              tag: Identifier
-              value: print
-            args:
-              0:
-                - 
-                - tag: Identifier
-                  value: string
-                  position:
-                    start:
-                      line: 9
-                      column: 40
-                      absolute: 240
-                    end:
-                      line: 9
-                      column: 46
-                      absolute: 240
-            position:
-              start:
-                line: 9
-                column: 39
-                absolute: 234
-              end:
-                line: 9
-                column: 47
-                absolute: 241
-      explicitType: undefined
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 9
-        column: 1
-        absolute: 205
-      end:
-        line: 11
-        column: 1
-        absolute: 245
-  - tag: RoundApply
-    calledInsteadOfSquare: false
-    paramOrder:
-    isFirstParamThis: false
-    isAnObjectCopy: false
-    callee:
-      tag: Identifier
-      value: callFunction
-    args:
-      0:
-        - 
-        - tag: Literal
-          type: Number
-          value: 3
-      1:
-        - 
-        - tag: RoundValueToValueLambda
-          params:
-            0:
-              tag: Assignment
-              isMutable: false
-              isParameter: true
-              lhs:
-                tag: Identifier
-                value: n
-              value: undefined
-              type: undefined
-              isDeclaration: false
-          block:
-            tag: Block
-            statements:
-              - tag: RoundApply
-                calledInsteadOfSquare: false
-                paramOrder:
-                isFirstParamThis: false
-                isAnObjectCopy: false
-                callee:
-                  tag: Identifier
-                  value: showNumber
-                args:
-                  0:
-                    - 
-                    - tag: Identifier
-                      value: n
-                      position:
-                        start:
-                          line: 11
-                          column: 35
-                          absolute: 280
-                        end:
-                          line: 11
-                          column: 36
-                          absolute: 280
-                position:
-                  start:
-                    line: 11
-                    column: 34
-                    absolute: 279
-                  end:
-                    line: 11
-                    column: 37
-                    absolute: 281
-    position:
-      start:
-        line: 11
-        column: 13
-        absolute: 258
-      end:
-        line: 11
-        column: 38
-        absolute: 282
+        absolute: 115

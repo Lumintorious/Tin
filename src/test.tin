@@ -1,11 +1,6 @@
 #import collections/List
 
-Cat = type:
-	name: String
-	age: Number
+func = [T] -> (param: T, paramz: T) -> Array@of[T](param, paramz)
 
-callFunction = (number: Number, func: (Number) => Nothng) -> func(number)
-showNumber = (number: Number) -> print(number)
-showString = (string: String) -> print(string)
+x = func(1, 2)
 
-callFunction(3, (n) -> showNumber(n))

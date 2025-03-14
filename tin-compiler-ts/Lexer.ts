@@ -484,7 +484,7 @@ export class Lexer {
       let start = this.position;
       let startColumn = this.column;
 
-      while (this.peek() !== undefined && /[a-zA-Z_]/.test(this.peek())) {
+      while (this.peek() !== undefined && /[a-zA-Z@]/.test(this.peek())) {
          this.position++;
          this.column++;
       }

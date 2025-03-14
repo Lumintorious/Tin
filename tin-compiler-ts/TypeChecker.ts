@@ -323,11 +323,28 @@ export class TypeChecker {
          }
       }
 
+      let mappings: { [_: string]: Type } = {};
+      if (
+         typeSymbol instanceof SquareTypeToValueLambdaType &&
+         typeSymbol.returnType instanceof RoundValueToValueLambdaType
+      ) {
+         for (let i = 0; i < typeSymbol.paramTypes.length; i++) {
+            if (apply.autoFilledSquareParams) {
+               mappings[typeSymbol.paramTypes[i].name] =
+                  apply.autoFilledSquareParams[i];
+            }
+         }
+         typeSymbol = scope.resolveGenericTypes(
+            typeSymbol.returnType,
+            mappings
+         );
+      }
+
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
          apply.args.forEach((p, i) => {
             this.typeCheck(p[1], scope, {
-               typeExpectedInPlace: params[i].type,
+               typeExpectedInPlace: params[i]?.type,
             });
          });
          if (
@@ -369,21 +386,12 @@ export class TypeChecker {
                });
                apply.takesVarargs = true;
             }
+            return;
          }
       }
 
-      if (
-         typeSymbol instanceof StructType ||
-         typeSymbol instanceof RoundValueToValueLambdaType
-      ) {
-         let params: ParamType[] = [];
-         if (typeSymbol instanceof StructType) {
-            params = typeSymbol.fields.map((f) => {
-               return new ParamType(f.type, f.name, new Identifier("external"));
-            });
-         } else {
-            params = typeSymbol.params;
-         }
+      if (typeSymbol instanceof RoundValueToValueLambdaType) {
+         let params = typeSymbol.params;
          const calleeType = this.context.inferencer.infer(apply.callee, scope);
          const paramOrder = this.typeCheckLambdaCall(
             apply,
@@ -577,17 +585,13 @@ export class TypeErrorList {
             this.errors
                .map(
                   (e) =>
-                     `- ${e.hint}; ${
+                     `- ${e.hint} @ ${this.context.fileName}:${
+                        e.position?.start.line
+                     }:${e.position?.start.column}${
                         e.expectedType
-                           ? `Expected '${e.expectedType?.toString()}';`
+                           ? `\n  > Expected '${e.expectedType?.toString()}'`
                            : ""
-                     }${
-                        e.insertedType ? ` Got '${e.insertedType}';` : ""
-                     }Line ${e.position?.start.line}, column ${
-                        e.position?.start.column
-                     }` +
-                     " @ " +
-                     this.context.fileName
+                     }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}`
                )
                .join("\n");
          console.error(message);

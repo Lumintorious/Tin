@@ -196,7 +196,7 @@ function translate(
       // if (term.value === "this") {
       //    return "$this";
       // }
-      return term.value;
+      return term.value.replaceAll("@", "$");
 
       // RoundValueToValueLambda
    } else if (term instanceof RoundValueToValueLambda) {
@@ -304,7 +304,9 @@ function translate(
       }
       return (
          translate(term.callee, scope) +
-         (term.calledInsteadOfSquare ? "(0)" : "") +
+         (term.calledInsteadOfSquare || term.autoFilledSquareParams
+            ? "(0)"
+            : "") +
          (term.isAnObjectCopy ? "._copy" : "") +
          open +
          args
