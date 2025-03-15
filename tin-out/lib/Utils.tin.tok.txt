@@ -1,0 +1,24 @@
+IDENTIFIER   | max          |   1, 1    
+OPERATOR     | =            |   1, 5    
+PARENS       | (            |   1, 7    
+IDENTIFIER   | a            |   1, 8    
+OPERATOR     | :            |   1, 9    
+IDENTIFIER   | Number       |   1, 11   
+NEWLINE      | ,            |   1, 1    
+IDENTIFIER   | b            |   1, 19   
+OPERATOR     | :            |   1, 20   
+IDENTIFIER   | Number       |   1, 22   
+PARENS       | )            |   1, 28   
+OPERATOR     | ->           |   1, 30   
+NEWLINE      |              |   2, 1    
+INDENT       | 4            |   2, 1    
+KEYWORD      | if           |   2, 2    
+IDENTIFIER   | a            |   2, 5    
+OPERATOR     | >            |   2, 7    
+IDENTIFIER   | b            |   2, 9    
+NEWLINE      | ,            |   2, 1    
+IDENTIFIER   | a            |   2, 12   
+KEYWORD      | else         |   2, 14   
+IDENTIFIER   | b            |   2, 19   
+NEWLINE      |              |   4, 1    
+--undefined--

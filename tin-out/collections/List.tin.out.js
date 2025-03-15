@@ -129,29 +129,29 @@ function makeString(obj) {
 	}
 
 	if (typeof obj === 'object') {
-		let result = '';
+		let result = '(';
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
-			if (++number > 1) {
-				result += " & "
-			}
-			result += componentKey + "("
+			// if (++number > 1) {
+			// 	result += " & "
+			// }
+			// result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
+					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
 				}
 			}
-			if (result.length > 1 && result[result.length - 1] === ",") {
-				result = result.slice(0, -1); // Remove trailing comma and space
+			if (result.length > 1 && result[result.length - 2] === ",") {
+				result = result.slice(0, -2); // Remove trailing comma and space
 			}
-			result += ")"
+			result += ", "
 		}
-		if (result.length > 1 && result[result.length - 1] === ")") {
-			result = result.slice(0, -1); // Remove trailing comma and space
+		if (result.length > 1 && result[result.length - 2] === ",") {
+			result = result.slice(0, -2); // Remove trailing comma and space
 		}
 		return result + ')';
 	}
@@ -172,7 +172,7 @@ const debug = (...args) => {
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "5c4aa30a-a13a-4a14-a54b-e3be30c51f13", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
+export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "d52062c9-38e5-4dc3-bc4c-f2d69d799a03", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)), Accessible.call('Type', T)), ToString));
 export var List$iterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
 return function(list) {

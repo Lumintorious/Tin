@@ -3,11 +3,13 @@ import { Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
 const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
 export class AstNode {
+   static toCheckForPosition: AstNode[] = [];
    readonly tag: string;
    position?: TokenPos;
    isTypeLevel?: boolean;
    constructor(tag: string) {
       this.tag = tag;
+      AstNode.toCheckForPosition.push(this);
    }
 
    fromTo(start?: TokenPos, end?: TokenPos) {
@@ -349,6 +351,7 @@ export class Make extends Term {
 
 const PRECEDENCE: { [_: string]: number } = {
    "?:": 110, // Walrus
+   ":": 101,
    ".": 100, // Field access
    "?.": 100, // Field access
    "**": 10, // Exponentiation
@@ -364,8 +367,6 @@ const PRECEDENCE: { [_: string]: number } = {
    "||": 5, // Logical OR
    "&": 4,
    "|": 3,
-   "@": 2,
-   // ':': 1,
    // (right-associative)
    "!=": 0, // Inequality
    "==": 0, // Equality
@@ -392,6 +393,11 @@ export class Parser {
          }
       }
       const endPos = this.positionNow();
+      AstNode.toCheckForPosition
+         .filter((node) => !node.position)
+         .forEach((node) => {
+            console.log(node.tag + " MISSING POSITION");
+         });
       return new Block(this.body).fromTo(startPos, endPos);
    }
 
@@ -495,15 +501,19 @@ export class Parser {
       return result.fromTo(start.position, end.position); // Return a function application node
    }
 
-   parseExpression(precedence = 0, stopAtEquals = false) {
+   parseExpression(precedence = 0, stopAtEquals = false, stopAtDot = false) {
       const startPos = this.positionNow();
-      const result = this.parseExpressionRaw(precedence, stopAtEquals);
+      const result = this.parseExpressionRaw(
+         precedence,
+         stopAtEquals,
+         stopAtDot
+      );
       const endPos = this.positionNow();
       return result.fromTo(startPos, endPos);
    }
 
    // parseExpression > parsePrimary
-   parseExpressionRaw(precedence = 0, stopAtEquals = false) {
+   parseExpressionRaw(precedence = 0, stopAtEquals = false, stopAtDot = false) {
       const startPos = this.peek().position;
       let left: Term; // Parse the left-hand side (like a literal or identifier)
 
@@ -534,18 +544,22 @@ export class Parser {
       if (this.is(":")) {
          this.consume(":");
          // const type = this.consume("IDENTIFIER");
-         const type = this.parseExpression(-1, true);
+         const type = this.parseExpression(-1, true, true);
          left = new Cast(left, type).fromTo(startPos, this.peek().position);
       }
 
       // Continue parsing if we find a binary operator with the appropriate precedence
+      const whileLoopStart = this.positionNow();
       while (
          (!stopAtEquals || !this.is("=")) &&
+         (!stopAtDot || !this.is(".")) &&
          this.peek() &&
          this.isBinaryOperator(this.peek())
       ) {
          const operator = this.peek().value;
          const operatorPrecedence = PRECEDENCE[operator];
+         const thisLoopStart = this.positionNow();
+         left = left.fromTo(whileLoopStart, thisLoopStart);
 
          // Only continue if the operator has higher precedence than the current one
          if (operatorPrecedence < precedence) {
@@ -565,11 +579,7 @@ export class Parser {
          }
 
          let right;
-         // if (operator === "&" && this.peek().value === "{") {
-         //    right = parseObject(this);
-         // } else {
          right = this.parseExpression(operatorPrecedence + 1);
-         // }
 
          // Parse the right-hand side with precedence rules (note: higher precedence for right-side)
 
@@ -607,36 +617,54 @@ export class Parser {
          }
 
          if (operator === "." && right instanceof Identifier) {
-            left = new Select(left, right.value);
+            left = new Select(left, right.value).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
          } else if (operator === "?." && right instanceof Identifier) {
-            left = new Select(left, right.value, true);
+            left = new Select(left, right.value, true).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
          } else if (
             operator === "?." &&
             right instanceof RoundApply &&
             right.callee instanceof Identifier
          ) {
-            const select = new Select(left, right.callee.value, true);
+            const select = new Select(left, right.callee.value, true).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
             left = new RoundApply(select, right.args);
          } else if (
             operator === "." &&
             right instanceof RoundApply &&
             right.callee instanceof Identifier
          ) {
-            const select = new Select(left, right.callee.value);
+            const select = new Select(left, right.callee.value).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
             left = new RoundApply(select, right.args);
          } else if (
             operator === "." &&
             right instanceof SquareApply &&
             right.callee instanceof Identifier
          ) {
-            const select = new Select(left, right.callee.value);
+            const select = new Select(left, right.callee.value).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
             left = new SquareApply(select, right.typeArgs);
          } else if (
             operator === "?." &&
             right instanceof SquareApply &&
             right.callee instanceof Identifier
          ) {
-            const select = new Select(left, right.callee.value, true);
+            const select = new Select(left, right.callee.value, true).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
             left = new SquareApply(select, right.typeArgs);
          } else if (operator === "::" && right) {
             const typeCheck = new TypeCheck(left, right);
@@ -644,6 +672,7 @@ export class Parser {
          } else {
             left = new BinaryExpression(left, operator, right);
          }
+         left = left.fromTo(whileLoopStart, this.positionNow());
       }
 
       if (this.peek() && this.peek().value === "?") {
@@ -654,7 +683,7 @@ export class Parser {
          left = new Optional(left, true);
       }
 
-      return left;
+      return left.fromTo(whileLoopStart, this.positionNow());
    }
 
    // Check if the next token is a binary operator
@@ -690,6 +719,7 @@ export class Parser {
 
       const parameters: Term[] = [];
       let groupCatch: Term | undefined = undefined;
+      const lambdaStart = this.positionNow();
 
       // Parse parameters until we reach the closing parenthesis
       while (true) {
@@ -701,11 +731,16 @@ export class Parser {
          }
          // Parse each parameter
          // const param = this.parseParameter();
+         const paramStart = this.positionNow();
          const paramTerm: Term = this.parseExpression();
          const param = this.resolveAsAssignment(paramTerm);
          if (param instanceof Assignment) {
             param.isDeclaration = false;
             param.isParameter = true;
+            groupCatch = new Cast(param.lhs, param.type).fromTo(
+               paramStart,
+               this.positionNow()
+            );
          } else {
             groupCatch = param;
          }
@@ -736,7 +771,7 @@ export class Parser {
          groupCatch !== undefined
       ) {
          this.omit("NEWLINE");
-         return new Group(groupCatch);
+         return new Group(groupCatch).fromTo(lambdaStart, this.positionNow());
       }
       let arrow = this.consume("OPERATOR");
       let body = this.parseExpression(undefined, true);
@@ -749,24 +784,33 @@ export class Parser {
          if (body instanceof Block) {
             block = body;
          } else {
-            block = new Block([body]);
+            block = new Block([body]).fromTo(lambdaStart, this.positionNow());
          }
          if (isSquare) {
-            return new SquareTypeToValueLambda(parameters, block);
+            return new SquareTypeToValueLambda(parameters, block).fromTo(
+               lambdaStart,
+               this.positionNow()
+            );
          } else {
             return new RoundValueToValueLambda(
                parameters,
                block,
                specifiedType
-            );
+            ).fromTo(lambdaStart, this.positionNow());
          }
       } else {
          // Type Level
          let returnType = body;
          if (isSquare) {
-            return new SquareTypeToTypeLambda(parameters, returnType);
+            return new SquareTypeToTypeLambda(parameters, returnType).fromTo(
+               lambdaStart,
+               this.positionNow()
+            );
          } else {
-            return new RoundTypeToTypeLambda(parameters, returnType);
+            return new RoundTypeToTypeLambda(parameters, returnType).fromTo(
+               lambdaStart,
+               this.positionNow()
+            );
          }
       }
    }
@@ -792,6 +836,7 @@ export class Parser {
    }
 
    parseIfStatement() {
+      const ifStart = this.positionNow();
       this.consume("KEYWORD", "if");
       const condition = this.parseExpression();
       this.consume("OPERATOR", ",");
@@ -801,7 +846,10 @@ export class Parser {
          this.consume("KEYWORD", "else");
          falseBranch = this.parseExpression();
       } else {
-         falseBranch = new Literal("null", "Void");
+         falseBranch = new Literal("null", "Void").fromTo(
+            ifStart,
+            this.positionNow()
+         );
       }
       return new IfStatement(condition, trueBranch, falseBranch);
    }
@@ -871,7 +919,10 @@ export class Parser {
    }
 
    parseString(token: Token): Literal {
-      return new Literal(String(token.value), "String");
+      return new Literal(String(token.value), "String").fromTo(
+         token.position,
+         token.position
+      );
    }
 
    parsePrimary(): Term {
@@ -1048,8 +1099,9 @@ export function parseNewData(parser: Parser): Term {
 }
 
 export function parseObject(parser: Parser): DataDef {
+   const start = parser.positionNow();
    if (parser.peek().value != ":") {
-      return new DataDef([]);
+      return new DataDef([]).fromTo(start, parser.positionNow());
    }
 
    let token = parser.consume("OPERATOR", ":");
@@ -1073,10 +1125,21 @@ export function parseObject(parser: Parser): DataDef {
 
       // if (token.tag === "IDENTIFIER") {
       const expr = parser.parseExpression();
+      const exprStart = parser.positionNow();
       if (expr instanceof Cast && expr.expression instanceof Identifier) {
-         fieldDefs.push(new FieldDef(expr.expression.value, expr.type));
+         fieldDefs.push(
+            new FieldDef(expr.expression.value, expr.type).fromTo(
+               exprStart,
+               parser.positionNow()
+            )
+         );
       } else if (expr instanceof Assignment && expr.lhs instanceof Identifier) {
-         fieldDefs.push(new FieldDef(expr.lhs.value, expr.type, expr.value));
+         fieldDefs.push(
+            new FieldDef(expr.lhs.value, expr.type, expr.value).fromTo(
+               exprStart,
+               parser.positionNow()
+            )
+         );
       } else {
          console.log(expr);
          throw new Error("Malformed syntax at new object");
@@ -1090,6 +1153,6 @@ export function parseObject(parser: Parser): DataDef {
    }
 
    // parser.consume("PARENS", "}");
-
-   return new DataDef(fieldDefs);
+   const end = parser.positionNow();
+   return new DataDef(fieldDefs).fromTo(start, end);
 }

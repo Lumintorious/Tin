@@ -1,6 +1,16 @@
-#import collections/List
+import collections/List
+# import lib/Utils
 
-func = [T] -> (param: T, paramz: T) -> Array@of[T](param, paramz)
+Cat = type:
+	name: String
+	age: Number
 
-x = func(1, 2)
+Mech = type:
+	name: String
+	version: Number
+
+cat = Cat("Kitten", 12) & Mech("Kittenator", 1.2)
+
+print(cat)
+
 

@@ -79,10 +79,14 @@ function objectToYAML(obj: object, omitFields: string[] = [], indentLevel = 0) {
          ) {
             // If the value is a nested object, process it recursively
 
-            yaml.push(`${indent}${key}:`);
-            processObject(value, indentLevel + 1);
+            if (!omitFields.includes(key)) {
+               // Skip omitted fields
+               yaml.push(`${indent}${key}:`);
+               processObject(value, indentLevel + 1);
+            }
          } else if (Array.isArray(value)) {
             // Handle arrays and ensure dashes are on the same line as the first key of the object
+            if (omitFields.includes(key)) continue; // Skip omitted fields
             yaml.push(`${indent}${key}:`);
             value.forEach((item) => {
                if (typeof item === "object" && item !== null) {
@@ -192,7 +196,8 @@ async function compile(
    try {
       // READ
       const inputContents: string = await files.readFile(inputFile, "utf-8");
-      ensureParentDirs(inputFile);
+      ensureParentDirs(fromSrcToOut(inputFile));
+
       // LEXER
       const tokens = lexerPhase(inputContents);
       await files.writeFile(
@@ -206,6 +211,7 @@ async function compile(
          fromSrcToOut(inputFile + ".ast.yaml"),
          objectToYAML(ast, ["position", "fromTo", "isTypeLevel", "position"])
       );
+
       // IMPORTS
       const imports = await getImports(ast, importsCache);
 
@@ -225,15 +231,19 @@ async function compile(
          translatedString
       );
 
-      console.log("Compiled " + inputFile);
+      console.log("\x1b[32mCompiled " + inputFile + "\x1b[0m");
       // RUNNING
       if (run) {
-         console.log("==================== Compiled! ====================");
+         console.log(
+            "========================= Output ============================"
+         );
          exec(
             'cd "tin-out"' + " && node " + fromSrcToOut(inputFile + ".out.js"),
             (_, out, err) => {
                console.log(out);
-               console.log(err);
+               if (err) {
+                  console.log(err);
+               }
             }
          );
       } else {

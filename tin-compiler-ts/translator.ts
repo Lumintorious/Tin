@@ -196,7 +196,7 @@ function translate(
       // if (term.value === "this") {
       //    return "$this";
       // }
-      return term.value.replaceAll("@", "$");
+      return term.value.replaceAll("@", "$").replaceAll(".", "$");
 
       // RoundValueToValueLambda
    } else if (term instanceof RoundValueToValueLambda) {

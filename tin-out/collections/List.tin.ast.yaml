@@ -46,6 +46,15 @@ statements:
               tag: Identifier
               value: T
             isTypeLevel: true
+            position:
+              start:
+                line: 5
+                column: 1
+                absolute: 67
+              end:
+                line: 5
+                column: 1
+                absolute: 67
           - tag: FieldDef
             name: rest
             type:
@@ -69,6 +78,15 @@ statements:
                         column: 19
                         absolute: 85
             isTypeLevel: true
+            position:
+              start:
+                line: 7
+                column: 1
+                absolute: 90
+              end:
+                line: 7
+                column: 1
+                absolute: 90
     isDeclaration: true
     isTypeLevel: true
     position:

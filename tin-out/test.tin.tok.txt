@@ -1,37 +1,58 @@
-NEWLINE      |              |   3, 1    
-IDENTIFIER   | func         |   3, 1    
-OPERATOR     | =            |   3, 6    
-PARENS       | [            |   3, 8    
-IDENTIFIER   | T            |   3, 9    
-PARENS       | ]            |   3, 10   
-OPERATOR     | ->           |   3, 12   
-PARENS       | (            |   3, 15   
-IDENTIFIER   | param        |   3, 16   
-OPERATOR     | :            |   3, 21   
-IDENTIFIER   | T            |   3, 23   
-NEWLINE      | ,            |   3, 1    
-IDENTIFIER   | paramz       |   3, 26   
-OPERATOR     | :            |   3, 32   
-IDENTIFIER   | T            |   3, 34   
-PARENS       | )            |   3, 35   
-OPERATOR     | ->           |   3, 37   
-IDENTIFIER   | Array@of     |   3, 40   
-PARENS       | [            |   3, 48   
-IDENTIFIER   | T            |   3, 49   
-PARENS       | ]            |   3, 50   
-PARENS       | (            |   3, 51   
-IDENTIFIER   | param        |   3, 52   
-NEWLINE      | ,            |   3, 1    
-IDENTIFIER   | paramz       |   3, 59   
-PARENS       | )            |   3, 65   
+KEYWORD      | import       |   1, 1    
+IDENTIFIER   | collections  |   1, 8    
+OPERATOR     | /            |   1, 19   
+IDENTIFIER   | List         |   1, 20   
+NEWLINE      |              |   2, 1    
+NEWLINE      |              |   4, 1    
+IDENTIFIER   | Cat          |   4, 1    
+OPERATOR     | =            |   4, 5    
+KEYWORD      | type         |   4, 7    
+OPERATOR     | :            |   4, 11   
 NEWLINE      |              |   5, 1    
-IDENTIFIER   | x            |   5, 1    
-OPERATOR     | =            |   5, 3    
-IDENTIFIER   | func         |   5, 5    
-PARENS       | (            |   5, 9    
-NUMBER       | 1            |   5, 10   
-NEWLINE      | ,            |   5, 1    
-NUMBER       | 2            |   5, 13   
-PARENS       | )            |   5, 14   
-NEWLINE      |              |   7, 1    
+INDENT       | 4            |   5, 1    
+IDENTIFIER   | name         |   5, 2    
+OPERATOR     | :            |   5, 6    
+IDENTIFIER   | String       |   5, 8    
+NEWLINE      |              |   6, 1    
+IDENTIFIER   | age          |   6, 2    
+OPERATOR     | :            |   6, 5    
+IDENTIFIER   | Number       |   6, 7    
+NEWLINE      |              |   8, 1    
+DEDENT       | 4            |   8, 1    
+IDENTIFIER   | Mech         |   8, 1    
+OPERATOR     | =            |   8, 6    
+KEYWORD      | type         |   8, 8    
+OPERATOR     | :            |   8, 12   
+NEWLINE      |              |   9, 1    
+INDENT       | 4            |   9, 1    
+IDENTIFIER   | name         |   9, 2    
+OPERATOR     | :            |   9, 6    
+IDENTIFIER   | String       |   9, 8    
+NEWLINE      |              |  10, 1    
+IDENTIFIER   | version      |  10, 2    
+OPERATOR     | :            |  10, 9    
+IDENTIFIER   | Number       |  10, 11   
+NEWLINE      |              |  12, 1    
+DEDENT       | 4            |  12, 1    
+IDENTIFIER   | cat          |  12, 1    
+OPERATOR     | =            |  12, 5    
+IDENTIFIER   | Cat          |  12, 7    
+PARENS       | (            |  12, 10   
+STRING       | Kitten       |  12, 11   
+NEWLINE      | ,            |  12, 1    
+NUMBER       | 12           |  12, 21   
+PARENS       | )            |  12, 23   
+OPERATOR     | &            |  12, 25   
+IDENTIFIER   | Mech         |  12, 27   
+PARENS       | (            |  12, 31   
+STRING       | Kittenator   |  12, 32   
+NEWLINE      | ,            |  12, 1    
+NUMBER       | 1.2          |  12, 46   
+PARENS       | )            |  12, 49   
+NEWLINE      |              |  14, 1    
+IDENTIFIER   | print        |  14, 1    
+PARENS       | (            |  14, 6    
+IDENTIFIER   | cat          |  14, 7    
+PARENS       | )            |  14, 10   
+NEWLINE      |              |  17, 1    
 --undefined--

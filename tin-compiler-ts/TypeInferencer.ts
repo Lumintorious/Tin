@@ -297,7 +297,9 @@ export class TypeInferencer {
 
    isCapitalized(str: string) {
       return (
-         str.charAt(0) === str.charAt(0).toUpperCase() && !str.includes("@")
+         str.charAt(0) === str.charAt(0).toUpperCase() &&
+         !str.includes("@") &&
+         !str.includes(".")
       );
    }
 
@@ -532,7 +534,8 @@ export class TypeInferencer {
          if (!symbol) {
             if (
                node.value.charAt(0) === node.value.charAt(0).toUpperCase() &&
-               !node.value.includes("@")
+               !node.value.includes("@") &&
+               !node.value.includes(".")
             ) {
                return NamedType.PRIMITIVE_TYPES.Type;
             }

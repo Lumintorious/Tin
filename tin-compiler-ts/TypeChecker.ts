@@ -594,7 +594,7 @@ export class TypeErrorList {
                      }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}`
                )
                .join("\n");
-         console.error(message);
+         console.error("\x1b[31m" + message + " \x1b[0m");
          process.exit(-1);
       }
    }

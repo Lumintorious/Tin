@@ -129,29 +129,29 @@ function makeString(obj) {
 	}
 
 	if (typeof obj === 'object') {
-		let result = '(';
+		let result = '';
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
-			// if (++number > 1) {
-			// 	result += " & "
-			// }
-			// result += componentKey + "("
+			if (++number > 1) {
+				result += " & "
+			}
+			result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
+					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
 				}
 			}
-			if (result.length > 1 && result[result.length - 2] === ",") {
-				result = result.slice(0, -2); // Remove trailing comma and space
+			if (result.length > 1 && result[result.length - 1] === ",") {
+				result = result.slice(0, -1); // Remove trailing comma and space
 			}
-			result += ", "
+			result += ")"
 		}
-		if (result.length > 1 && result[result.length - 2] === ",") {
-			result = result.slice(0, -2); // Remove trailing comma and space
+		if (result.length > 1 && result[result.length - 1] === ")") {
+			result = result.slice(0, -1); // Remove trailing comma and space
 		}
 		return result + ')';
 	}
@@ -169,44 +169,6 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "fb67d3b6-7aad-48d2-894a-054f0d765d18", (_p0,_p1 = function(t) {
-return print("Hello")
-}) => ({next: _p0,consumeAll: _p1}), {}); Iterator._typeId = "Iterator";;
-export var Accessible = /* [] */(T) => TIN_TYPE("Accessible", "efe1e1e3-c34d-4857-896f-997996a3fd89", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
-;
-export var ToString = TIN_TYPE("ToString", "6e22f571-f576-456d-b84d-cf8cf9ed6b38", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
-export var stringOf/* (Any) => String*/ = function(obj) {
-return ((ToString.__is_child(obj) ) ? ((function(){debug(obj.ToString.toString.call(obj));
-return obj.ToString.toString.call(obj)}).call(this)) : (makeString(obj))) 
-};
-export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "df1e7783-3efb-40f2-80b3-a5c9ab0bedad", (_p0,_p1,_p2,_p3) => ({forEach: _p0,mkString: _p1,count: _p2,getIterator: _p3}), {}); Iterable._typeId = "Iterable";;
-export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
-return function(getIterator) {
-var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {
-var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator.Iterator.next();
-while (current != nothing) {
- fn(current);
-current = iterator.Iterator.next() 
-}
-};
-var mkString/* (String, String, String) => String*/ = function(separator = ", ", left = "", right = "") {
-var string/* String*/ = "";
-var fn/* (T) => Any*/ = function(t) {
-var comma/* String*/ = ((string == "") ? ("") : (separator)) ;
-return string = "" + string + "" + comma + "" + t + ""
-};
-forEach(fn);
-return "" + left + "" + string + "" + right + ""
-};
-var count/* ((T) => Boolean) => Number*/ = function(pred) {
-var num/* Number*/ = 0;
-var fn/* (T) => Any?*/ = function(t) {
-return ((pred(t)) ? (num = num + 1) : (null)) 
-};
-forEach(fn);
-return num
-};
-return Iterable.call('Type', T)(forEach, mkString, count, getIterator)
-}
+export var max/* (Number, Number) => Number*/ = function(a, b) {
+return ((a > b) ? (a) : (b)) 
 }

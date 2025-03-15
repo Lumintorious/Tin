@@ -129,29 +129,29 @@ function makeString(obj) {
 	}
 
 	if (typeof obj === 'object') {
-		let result = '';
+		let result = '(';
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
-			if (++number > 1) {
-				result += " & "
-			}
-			result += componentKey + "("
+			// if (++number > 1) {
+			// 	result += " & "
+			// }
+			// result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
+					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
 				}
 			}
-			if (result.length > 1 && result[result.length - 1] === ",") {
-				result = result.slice(0, -1); // Remove trailing comma and space
+			if (result.length > 1 && result[result.length - 2] === ",") {
+				result = result.slice(0, -2); // Remove trailing comma and space
 			}
-			result += ")"
+			result += ", "
 		}
-		if (result.length > 1 && result[result.length - 1] === ")") {
-			result = result.slice(0, -1); // Remove trailing comma and space
+		if (result.length > 1 && result[result.length - 2] === ",") {
+			result = result.slice(0, -2); // Remove trailing comma and space
 		}
 		return result + ')';
 	}
@@ -169,9 +169,10 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var func/* [T] => (T, T) => Array[T]*/ = function(T) {
-return function(param, paramz) {
-return Array$of.call('Type', T)(Array(0)([param, paramz]))
-}
-};
-export var x/* Array[Number]*/ = func(0)(1, 2)
+import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+export var Cat = TIN_TYPE("Cat", "b675216d-556e-4a28-89d5-c54f0e65c20d", (_p0,_p1) => ({name: _p0,age: _p1}), {}); Cat._typeId = "Cat";;
+export var Mech = TIN_TYPE("Mech", "28259746-8953-4038-97bb-5f8bf5fd3dcf", (_p0,_p1) => ({name: _p0,version: _p1}), {}); Mech._typeId = "Mech";;
+export var cat/* Cat & Mech*/ = _TIN_INTERSECT_OBJECTS(Cat("Kitten", 12), Mech("Kittenator", 1.2));
+print(cat)

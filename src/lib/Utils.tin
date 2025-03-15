@@ -1,2 +1,3 @@
-max = (a: Number, b: Number) -> if a > b, a else b
+max = (a: Number, b: Number) ->
+	if a > b, a else b
 

@@ -103,7 +103,6 @@ export class Lexer {
          "=",
          "+",
          "*",
-         "@",
          "/",
          "-",
          ":",
@@ -483,6 +482,7 @@ export class Lexer {
    tokenizeIdentifierOrKeyword() {
       let start = this.position;
       let startColumn = this.column;
+      const isCapitalized = this.peek().toUpperCase() === this.peek();
 
       while (this.peek() !== undefined && /[a-zA-Z@]/.test(this.peek())) {
          this.position++;
