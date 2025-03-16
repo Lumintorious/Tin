@@ -5,17 +5,19 @@ makeString: (Any) -> String = external
 
 Cat = type:
 	name: String
-	useCat = (this: Cat) -> this.name
+	useCat = (this: Cat) -> 
+		print(this.name)
 
 ToString = type:
 	toString: (this: Any) -> String
 
 stringOf = (obj: Any) ->
+	print("hi")
 	if obj :: ToString,
 		obj.toString()
 	else
 		makeString(obj)
 
-func = (this: String, other: String) -> "Hi"
-x = ToString(func)
-print(x.toString())
+# func = (this: String, other: String) -> "Hi"
+# x = ToString(func)
+# print(x.toString())

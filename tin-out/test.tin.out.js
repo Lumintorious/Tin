@@ -170,13 +170,11 @@ const debug = (...args) => {
 // COMPILED TIN
 ;
 ;
-export var Cat = TIN_TYPE("Cat", "223a001a-f102-4959-95cc-7e239352b137", (_p0) => ({name: _p0}), {}); Cat._typeId = "Cat";;
-export var ToString = TIN_TYPE("ToString", "64e0a4f4-1e1f-4890-ac52-441500dff586", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
-export var stringOf/* Nothing*/ = function(obj) {
+export var Cat = TIN_TYPE("Cat", "49ac7d2e-79ed-48b9-b6be-1f66645b8abf", (_p0,_p1 = function() {
+return print(this.Cat.name)
+}) => ({name: _p0,useCat: _p1}), {}); Cat._typeId = "Cat";;
+export var ToString = TIN_TYPE("ToString", "39ea9208-3989-4568-8aa2-6789b73d78da", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export var stringOf/* (Any) -> String*/ = function(obj) {
+print("hi");
 return ((ToString.__is_child(obj) ) ? (obj.ToString.toString.call(obj,)) : (makeString(obj))) 
-};
-export var func/* Nothing*/ = function(other) {
-return "Hi"
-};
-export var x/* ToString*/ = ToString(func);
-print(x.ToString.toString.call(x,))
+}

@@ -309,14 +309,13 @@ export class TypeBuilder {
             }
          }
       });
+      this.build(node.block, innerScope);
+      const inferredType = this.context.inferencer.inferRoundValueToValueLambda(
+         node,
+         scope,
+         options
+      );
       if (scope.iteration === "RESOLUTION") {
-         this.build(node.block, innerScope);
-         const inferredType =
-            this.context.inferencer.inferRoundValueToValueLambda(
-               node,
-               scope,
-               options
-            );
          if (inferredType instanceof RoundValueToValueLambdaType) {
             node.type = inferredType;
          }

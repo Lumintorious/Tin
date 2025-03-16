@@ -91,9 +91,6 @@ export class TypeInferencer {
          case "Identifier":
             inferredType = this.inferIdentifier(node as Identifier, scope);
             break;
-         // case "WhileLoop":
-         //    inferredType = this.inferWhileLoop(node as WhileLoop, scope);
-         //    break;
          case "Make":
             const type = scope.resolveNamedType(
                this.context.translator.translate((node as Make).type, scope)
