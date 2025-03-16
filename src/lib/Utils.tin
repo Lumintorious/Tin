@@ -1,3 +1,8 @@
 max = (a: Number, b: Number) ->
 	if a > b, a else b
 
+min = (a: Number, b: Number) ->
+	if a < b, a else b
+
+floor = (n: Number) ->
+	n - (n % 1)

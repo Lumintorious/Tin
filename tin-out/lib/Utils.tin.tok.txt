@@ -21,4 +21,46 @@ IDENTIFIER   | a            |   2, 12
 KEYWORD      | else         |   2, 14   
 IDENTIFIER   | b            |   2, 19   
 NEWLINE      |              |   4, 1    
+DEDENT       | 4            |   4, 1    
+IDENTIFIER   | min          |   4, 1    
+OPERATOR     | =            |   4, 5    
+PARENS       | (            |   4, 7    
+IDENTIFIER   | a            |   4, 8    
+OPERATOR     | :            |   4, 9    
+IDENTIFIER   | Number       |   4, 11   
+NEWLINE      | ,            |   4, 1    
+IDENTIFIER   | b            |   4, 19   
+OPERATOR     | :            |   4, 20   
+IDENTIFIER   | Number       |   4, 22   
+PARENS       | )            |   4, 28   
+OPERATOR     | ->           |   4, 30   
+NEWLINE      |              |   5, 1    
+INDENT       | 4            |   5, 1    
+KEYWORD      | if           |   5, 2    
+IDENTIFIER   | a            |   5, 5    
+OPERATOR     | <            |   5, 7    
+IDENTIFIER   | b            |   5, 9    
+NEWLINE      | ,            |   5, 1    
+IDENTIFIER   | a            |   5, 12   
+KEYWORD      | else         |   5, 14   
+IDENTIFIER   | b            |   5, 19   
+NEWLINE      |              |   7, 1    
+DEDENT       | 4            |   7, 1    
+IDENTIFIER   | floor        |   7, 1    
+OPERATOR     | =            |   7, 7    
+PARENS       | (            |   7, 9    
+IDENTIFIER   | n            |   7, 10   
+OPERATOR     | :            |   7, 11   
+IDENTIFIER   | Number       |   7, 13   
+PARENS       | )            |   7, 19   
+OPERATOR     | ->           |   7, 21   
+NEWLINE      |              |   8, 1    
+INDENT       | 4            |   8, 1    
+IDENTIFIER   | n            |   8, 2    
+OPERATOR     | -            |   8, 4    
+PARENS       | (            |   8, 6    
+IDENTIFIER   | n            |   8, 7    
+OPERATOR     | %            |   8, 9    
+NUMBER       | 1            |   8, 11   
+PARENS       | )            |   8, 12   
 --undefined--

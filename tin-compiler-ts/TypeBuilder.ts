@@ -30,7 +30,7 @@ import {
 import { type } from "os";
 import { TypeDef } from "./Parser";
 import { Symbol } from "./Scope";
-import { NamedType } from "./Types";
+import { NamedType, TypeOfTypes } from "./Types";
 import { SquareTypeToValueLambdaType } from "./Types";
 import {
    OptionalType,
@@ -66,7 +66,30 @@ export class TypeBuilder {
       } else if (node instanceof SquareTypeToValueLambda) {
          this.buildSquareTypeToValueLambda(node, scope);
       } else if (node instanceof SquareTypeToTypeLambda) {
-         this.build(node.returnType, scope);
+         const innerScope = scope.innerScopeOf(node, true);
+         for (let param of node.parameterTypes) {
+            if (
+               param instanceof Assignment &&
+               param.isParameter &&
+               param.lhs instanceof Identifier
+            ) {
+               innerScope.declareType(
+                  param.lhs.value,
+                  new GenericNamedType(
+                     param.lhs.value,
+                     param.type
+                        ? this.context.translator.translate(
+                             param.type,
+                             innerScope
+                          )
+                        : undefined
+                  )
+               );
+            }
+         }
+         this.build(node.returnType, innerScope, {
+            assignedName: options.assignedName,
+         });
       } else if (node instanceof WhileLoop) {
          this.buildWhileLoop(node, scope);
       } else if (node instanceof IfStatement) {
@@ -115,7 +138,7 @@ export class TypeBuilder {
       } else if (node instanceof Select) {
          this.buildSelect(node, scope);
       } else if (node instanceof TypeDef) {
-         this.buildTypeDef(node, scope);
+         this.buildTypeDef(node, scope, options);
       } else if (node instanceof BinaryExpression) {
          this.build(node.left, scope);
          this.build(node.right, scope);
@@ -229,11 +252,17 @@ export class TypeBuilder {
       this.build(node.callee, scope);
    }
 
-   buildTypeDef(node: TypeDef, scope: Scope) {
+   buildTypeDef(
+      node: TypeDef,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       const innerScope = scope.innerScopeOf(node, true);
+      node.name = options.assignedName;
       for (let param of node.fieldDefs) {
          if (param.defaultValue) this.build(param.defaultValue, innerScope);
-         if (param.type) this.build(param.type, innerScope);
+         if (param.type)
+            this.build(param.type, innerScope, { assignedName: "ISTYPE" });
       }
    }
 
@@ -281,7 +310,9 @@ export class TypeBuilder {
          scope,
          options
       );
-      node.type = inferredType;
+      if (inferredType instanceof RoundValueToValueLambdaType) {
+         node.type = inferredType;
+      }
    }
 
    buildSquareTypeToValueLambda(node: SquareTypeToValueLambda, scope: Scope) {
@@ -337,8 +368,14 @@ export class TypeBuilder {
          }
          return;
       }
-      this.build(node.value, scope);
-      let rhsType = this.context.inferencer.infer(node.value, scope);
+      let rhsType = this.context.inferencer.infer(node.value, scope, {
+         assignedName:
+            node.lhs instanceof Identifier ? node.lhs.value : undefined,
+      });
+      this.build(node.value, scope, {
+         assignedName:
+            node.lhs instanceof Identifier ? node.lhs.value : undefined,
+      });
       if (!node.type) {
          if (rhsType instanceof LiteralType) {
             rhsType = rhsType.type;
@@ -367,10 +404,21 @@ export class TypeBuilder {
       }
       if (
          node.lhs instanceof Identifier &&
-         (node.isTypeLevel || node.lhs.isTypeLevel) &&
-         node.lhs.value
+         node.lhs.value &&
+         (node.isTypeLevel ||
+            node.lhs.isTypeLevel ||
+            this.context.inferencer.isCapitalized(
+               options.assignedName || "lowercase"
+            ) ||
+            rhsType instanceof TypeOfTypes)
       ) {
          if (node.value instanceof RoundTypeToTypeLambda) {
+            scope.declareType(
+               node.lhs.value,
+               this.context.translator.translate(node.value, scope)
+            );
+         } else if (node.value instanceof RoundValueToValueLambda) {
+            node.value.isTypeLambda = true;
             scope.declareType(
                node.lhs.value,
                this.context.translator.translate(node.value, scope)

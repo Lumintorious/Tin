@@ -132,7 +132,6 @@ export class TypeTranslator {
             }
             const innerScope2 = scope.innerScopeOf(node, true);
             innerScope2.run = this.context.run;
-            innerScope2.declareType("T", new NamedType("T"));
             const genericParameters = node.parameterTypes.map((p) => {
                const param = this.translate(p, innerScope2);
                if (param instanceof GenericNamedType) {
@@ -175,7 +174,7 @@ export class TypeTranslator {
                }
                return new ParamType(fieldType, f.name, f.defaultValue);
             });
-            return new StructType(fieldTypes);
+            return new StructType(node.name, fieldTypes);
          case "RoundApply":
             if (!(node instanceof RoundApply)) {
                return new Type();

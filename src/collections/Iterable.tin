@@ -1,35 +1,32 @@
 Iterator = [T] => type:
-	next: () => T?
-	consumeAll = (t: (String) => Nothing) ->
-		print("Hello")
+	next: () -> T?
 
 Accessible = [T] => type:
-	at: (index: Number) => T
-	length: () => Number
+	at: (index: Number) -> T
+	length: () -> Number
 
-makeString: (Any) => String = external
+makeString: (Any) -> String = external
 
 ToString = type:
-	toString: (this: Any) => String
+	toString: (this: Any) -> String
 
 stringOf = (obj: Any) ->
 	if obj :: ToString,
-		debug(obj.toString())
 		obj.toString()
 	else
 		makeString(obj)
 
 Iterable = [T] => type:
-	forEach: ((T) => Nothing) => Nothing
-	mkString: (separator: String, left: String, right: String) => String
-	count: ((T) => Boolean) => Number
-	getIterator: () => Iterator[T]
+	forEach: ((T) -> Nothing) -> Nothing
+	mkString: (separator: String, left: String, right: String) -> String
+	count: ((T) -> Boolean) -> Number
+	getIterator: () -> Iterator[T]
 
-makeIterable = [T] -> (getIterator: () => Iterator[T]) ->
-	forEach = (fn: (T) => Nothing) ->
+makeIterable = [T] -> (getIterator: () -> Iterator[T]) ->
+	forEach = (fn: (T) -> Nothing) ->
 		iterator = getIterator()
 		current = iterator.next()
-		while current != nothing do
+		while current != nothing,
 			fn(current)
 			current = iterator.next()
 	mkString = (separator: String = ", ", left: String = "", right: String = "") ->
@@ -39,7 +36,7 @@ makeIterable = [T] -> (getIterator: () => Iterator[T]) ->
 			set string = "{string}{comma}{t}"
 		forEach(fn)
 		"{left}{string}{right}"
-	count = (pred: (T) => Boolean) ->
+	count = (pred: (T) -> Boolean) ->
 		num = 0
 		fn = (t: T) ->
 			if pred(t), set num = num + 1

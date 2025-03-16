@@ -129,29 +129,29 @@ function makeString(obj) {
 	}
 
 	if (typeof obj === 'object') {
-		let result = '';
+		let result = '(';
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
-			if (++number > 1) {
-				result += " & "
-			}
-			result += componentKey + "("
+			// if (++number > 1) {
+			// 	result += " & "
+			// }
+			// result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += /* makeString(key) + '=' +  */makeString(component[key]) + ',';
+					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
 				}
 			}
-			if (result.length > 1 && result[result.length - 1] === ",") {
-				result = result.slice(0, -1); // Remove trailing comma and space
+			if (result.length > 1 && result[result.length - 2] === ",") {
+				result = result.slice(0, -2); // Remove trailing comma and space
 			}
-			result += ")"
+			result += ", "
 		}
-		if (result.length > 1 && result[result.length - 1] === ")") {
-			result = result.slice(0, -1); // Remove trailing comma and space
+		if (result.length > 1 && result[result.length - 2] === ",") {
+			result = result.slice(0, -2); // Remove trailing comma and space
 		}
 		return result + ')';
 	}
@@ -169,6 +169,12 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var max/* (Number, Number) => Number*/ = function(a, b) {
+export var max/* (Number, Number) -> Number*/ = function(a, b) {
 return ((a > b) ? (a) : (b)) 
+};
+export var min/* (Number, Number) -> Number*/ = function(a, b) {
+return ((a < b) ? (a) : (b)) 
+};
+export var floor/* (Number) -> Number*/ = function(n) {
+return n - (n["%"](1))
 }

@@ -163,7 +163,7 @@ KEYWORD      | while        |  25, 3
 IDENTIFIER   | l            |  25, 9    
 OPERATOR     | !=           |  25, 11   
 IDENTIFIER   | nothing      |  25, 14   
-KEYWORD      | do           |  25, 22   
+NEWLINE      | ,            |  25, 1    
 NEWLINE      |              |  26, 1    
 INDENT       | 12           |  26, 1    
 KEYWORD      | set          |  26, 4    
@@ -199,7 +199,7 @@ KEYWORD      | while        |  32, 3
 IDENTIFIER   | currentIndex |  32, 9    
 OPERATOR     | <            |  32, 22   
 IDENTIFIER   | index        |  32, 24   
-KEYWORD      | do           |  32, 30   
+NEWLINE      | ,            |  32, 1    
 NEWLINE      |              |  33, 1    
 INDENT       | 12           |  33, 1    
 KEYWORD      | if           |  33, 4    
@@ -268,20 +268,20 @@ PARENS       | (            |  41, 16
 PARENS       | )            |  41, 17   
 NEWLINE      |              |  42, 1    
 IDENTIFIER   | list         |  42, 2    
-OPERATOR     | :            |  42, 6    
-IDENTIFIER   | ListHead     |  42, 8    
-PARENS       | [            |  42, 16   
-IDENTIFIER   | T            |  42, 17   
-PARENS       | ]            |  42, 18   
-OPERATOR     | ?            |  42, 19   
-OPERATOR     | =            |  42, 21   
-IDENTIFIER   | nothing      |  42, 23   
+OPERATOR     | =            |  42, 7    
+IDENTIFIER   | nothing      |  42, 9    
+OPERATOR     | :            |  42, 16   
+IDENTIFIER   | ListHead     |  42, 18   
+PARENS       | [            |  42, 26   
+IDENTIFIER   | T            |  42, 27   
+PARENS       | ]            |  42, 28   
+OPERATOR     | ?            |  42, 29   
 NEWLINE      |              |  44, 1    
 KEYWORD      | while        |  44, 2    
 IDENTIFIER   | i            |  44, 8    
 OPERATOR     | >            |  44, 10   
 NUMBER       | 0            |  44, 12   
-KEYWORD      | do           |  44, 14   
+NEWLINE      | ,            |  44, 1    
 NEWLINE      |              |  45, 1    
 INDENT       | 8            |  45, 1    
 KEYWORD      | set          |  45, 3    
@@ -414,7 +414,7 @@ KEYWORD      | while        |  58, 2
 IDENTIFIER   | current      |  58, 8    
 OPERATOR     | !=           |  58, 16   
 IDENTIFIER   | nothing      |  58, 19   
-KEYWORD      | do           |  58, 27   
+NEWLINE      | ,            |  58, 1    
 NEWLINE      |              |  59, 1    
 INDENT       | 8            |  59, 1    
 KEYWORD      | set          |  59, 3    

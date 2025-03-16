@@ -211,7 +211,11 @@ export class LiteralType extends Type {
    }
 
    toString() {
-      return this.value;
+      if (this.type.name === "String") {
+         return `"${this.value}"`;
+      } else {
+         return this.value;
+      }
    }
 }
 
@@ -350,7 +354,7 @@ export class RoundValueToValueLambdaType extends Type {
       const paramsStr = this.params.map((t) => t.type.toString()).join(", ");
       return `${this.isGeneric ? "[" : "("}${paramsStr}${
          this.isGeneric ? "]" : ")"
-      } => ${this.returnType ? this.returnType.toString() : "undefined"}`;
+      } -> ${this.returnType ? this.returnType.toString() : "undefined"}`;
    }
 }
 
@@ -484,11 +488,57 @@ export class BinaryOpType extends Type {
    left: Type;
    operator: string;
    right: Type;
-   constructor(left: Type, operator: string, right: Type) {
+   constructor(left: Type, operator: string, right: Type, simplify = true) {
       super("BinaryOpType");
       this.left = left;
       this.operator = operator;
       this.right = right;
+      if (
+         simplify &&
+         (left instanceof BinaryOpType || right instanceof BinaryOpType)
+      ) {
+         const simplified = this.simplified();
+         if (simplified instanceof BinaryOpType) {
+            Object.assign(this, simplified);
+         }
+      }
+   }
+
+   getAllIntersectedTypes(): Set<Type> {
+      if (this.operator !== "&") {
+         return new Set();
+      }
+      let set = new Set<Type>();
+      if (this.left instanceof BinaryOpType && this.left.operator === "&") {
+         set = new Set([...set, ...this.left.getAllIntersectedTypes()]);
+      } else {
+         set.add(this.left);
+      }
+      if (this.right instanceof BinaryOpType && this.right.operator === "&") {
+         set = new Set([...set, ...this.right.getAllIntersectedTypes()]);
+      } else {
+         set.add(this.right);
+      }
+
+      return set;
+   }
+
+   simplified(): Type {
+      let types = this.getAllIntersectedTypes();
+      if (types.size === 1) {
+         return [...types][0];
+      } else if (types.size === 2) {
+         return new BinaryOpType([...types][0], this.operator, [...types][1]);
+      }
+      let type: Type | null = null;
+      for (let t of types) {
+         if (type === null) {
+            type = t;
+         } else {
+            type = new BinaryOpType(type, "&", t, false);
+         }
+      }
+      return type || this;
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
@@ -606,9 +656,10 @@ export class MarkerType extends Type {
 
 export class StructType extends Type {
    fields: ParamType[];
-   constructor(fields: ParamType[]) {
+   constructor(name: string | undefined, fields: ParamType[]) {
       super("StructType");
       this.fields = fields; // Array of { name, type } objects
+      this.name = name;
    }
 
    extends(other: Type, scope: Scope) {

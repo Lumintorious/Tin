@@ -11,7 +11,7 @@ import { getConstructorName, TypeErrorList, TypeChecker } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeBuilder } from "./TypeBuilder";
 import { TypeTranslator } from "./TypeTranslator";
-import { ParamType } from "./Types";
+import { ParamType, AnyType } from "./Types";
 import {
    AppliedGenericType,
    BinaryOpType,
@@ -304,6 +304,7 @@ export class Scope {
 
    lookupType(name: string, scopeName: string = ""): Type {
       if (this.typeSymbols.has(name)) {
+         (this.typeSymbols.get(name) as Type).name = name;
          return this.typeSymbols.get(name) as any;
       } else if (this.parent) {
          return this.parent.lookupType(name, this.name + "." + scopeName);
@@ -427,7 +428,7 @@ export class Scope {
                   f.defaultValue
                );
             });
-            return new StructType(mappedFields);
+            return new StructType(type.name, mappedFields);
          case "OptionalType":
             const optionalType = type as OptionalType;
             const newInnerType = this.resolveGenericTypes(
@@ -444,6 +445,8 @@ export class Scope {
                bType.operator,
                this.resolveGenericTypes(bType.right, parameters)
             );
+         case "Any":
+            return AnyType;
          default:
             throw new Error(
                "Can't handle type " +
@@ -471,6 +474,7 @@ export class Scope {
 export type RecursiveResolutionOptions = {
    firstPartOfIntersection?: Type;
    typeExpectedInPlace?: Type;
+   assignedName?: string;
 };
 
 export class TypePhaseContext {
@@ -527,7 +531,7 @@ export class TypePhaseContext {
       );
       const innerArrayScope = new Scope("inner-array", this.languageScope);
       innerArrayScope.declareType("T", new GenericNamedType("T"));
-      const arrayStruct = new StructType([
+      const arrayStruct = new StructType("Array", [
          new ParamType(
             new RoundValueToValueLambdaType(
                [],

@@ -1,5 +1,4 @@
 import {
-   AstNode,
    Identifier,
    Literal,
    Assignment,
@@ -30,7 +29,8 @@ import {
    RecursiveResolutionOptions,
 } from "./Scope";
 import { TypeErrorList } from "./TypeChecker";
-import { ParamType } from "./Types";
+import { ParamType, AnyTypeClass } from "./Types";
+import { AstNode, Statement, AppliedKeyword } from "./Parser";
 import {
    Type,
    NamedType,
@@ -63,8 +63,17 @@ export class TypeInferencer {
       if (type2 === NamedType.PRIMITIVE_TYPES.Nothing) {
          return new OptionalType(type1);
       }
+      if (type1 instanceof AnyTypeClass) {
+         return type2;
+      }
+      if (type2 instanceof AnyTypeClass) {
+         return type1;
+      }
       if (type1.isAssignableTo(type2, scope)) {
          return type2;
+      }
+      if (type2.isAssignableTo(type1, scope)) {
+         return type1;
       }
       return new BinaryOpType(type1, "|", type2);
    }
@@ -171,6 +180,9 @@ export class TypeInferencer {
             break;
          case "Group":
             inferredType = this.infer((node as Group).value, scope);
+            break;
+         case "AppliedKeyword":
+            inferredType = this.infer((node as AppliedKeyword).param, scope);
             break;
          default:
             throw new Error(
@@ -506,14 +518,64 @@ export class TypeInferencer {
 
    inferBlock(node: Block, scope: Scope) {
       // TO DO: change to find returns recursively
-      let innerScope = scope.innerScopeOf(node, true);
+      const inferencer = this;
+      function findReturns(node: Statement, thisScope: Scope, acc: Type[]) {
+         if (node instanceof AppliedKeyword && node.keyword === "return") {
+            acc.push(inferencer.infer(node.param, thisScope));
+         } else if (node instanceof Block) {
+            const innerScope = thisScope.innerScopeOf(node, true);
+            for (let statement of node.statements) {
+               findReturns(statement, innerScope, acc);
+            }
+            if (node.statements.length > 0) {
+               acc.push(
+                  inferencer.infer(
+                     node.statements[node.statements.length - 1],
+                     innerScope
+                  )
+               );
+            }
+         } else if (node instanceof IfStatement) {
+            const ifScope = thisScope.innerScopeOf(node);
+            findReturns(
+               node.trueBranch,
+               ifScope.innerScopeOf(node.trueBranch),
+               acc
+            );
+            if (node.falseBranch) {
+               findReturns(
+                  node.falseBranch,
+                  node.falseBranch instanceof Block
+                     ? ifScope.innerScopeOf(node.falseBranch, true)
+                     : ifScope,
+                  acc
+               );
+            }
+         } else if (node instanceof WhileLoop && node.eachLoop) {
+            findReturns(node.eachLoop, thisScope.innerScopeOf(node), acc);
+         } else if (node instanceof BinaryExpression) {
+            findReturns(node.left, thisScope, acc);
+            findReturns(node.right, thisScope, acc);
+         } else if (node instanceof UnaryOperator) {
+            findReturns(node.expression, thisScope, acc);
+         }
+      }
+
       if (node.statements.length === 0) {
          return new Type();
       }
-      return this.infer(
-         node.statements[node.statements.length - 1],
-         innerScope
-      );
+
+      const allFoundReturnsInside: Type[] = [];
+      findReturns(node, scope, allFoundReturnsInside);
+      let commonType: Type = AnyType;
+      for (let i = 0; i < allFoundReturnsInside.length; i++) {
+         commonType = this.deduceCommonType(
+            commonType,
+            allFoundReturnsInside[i],
+            scope
+         );
+      }
+      return commonType;
    }
 
    inferLiteral(node: Literal, scope: Scope) {
@@ -543,14 +605,17 @@ export class TypeInferencer {
          }
          return symbol.typeSymbol;
       } catch (e) {
-         this.context.errors.add(
-            `Could not find symbol '${node.value}'`,
-            undefined,
-            undefined,
-            node.position
+         throw new Error(
+            `Could not find symbol '${node.value}' - ` + scope.toPath()
          );
-         this.context.errors.throwAll();
-         return {} as any;
+         // this.context.errors.add(
+         //    `Could not find symbol '${node.value}'`,
+         //    undefined,
+         //    undefined,
+         //    node.position
+         // );
+         // this.context.errors.throwAll();
+         // return {} as any;
       }
    }
 
@@ -600,7 +665,7 @@ export class TypeInferencer {
       }
 
       if (node.operator === "&") {
-         return new BinaryOpType(leftType, "&", rightType);
+         return new BinaryOpType(leftType, "&", rightType).simplified();
       }
 
       if (node.operator === "|") {
@@ -659,6 +724,9 @@ export class TypeInferencer {
       scope: Scope,
       options: RecursiveResolutionOptions = {}
    ) {
+      if (options.assignedName && this.isCapitalized(options.assignedName)) {
+         return new TypeOfTypes();
+      }
       const innerScope = scope.innerScopeOf(node, true);
       innerScope.run = this.context.run;
       let paramsAsTypes: ParamType[] = [];

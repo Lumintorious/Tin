@@ -218,7 +218,9 @@ export class TypeChecker {
          scope,
          { typeExpectedInPlace: lambdaType }
       );
-      this.checkLambdaParamsValidity(type.params, scope);
+      if (type instanceof RoundValueToValueLambdaType) {
+         this.checkLambdaParamsValidity(type.params, scope);
+      }
       this.typeCheck(node.block, innerScope);
    }
 

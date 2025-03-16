@@ -172,7 +172,9 @@ const debug = (...args) => {
 import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var Cat = TIN_TYPE("Cat", "b675216d-556e-4a28-89d5-c54f0e65c20d", (_p0,_p1) => ({name: _p0,age: _p1}), {}); Cat._typeId = "Cat";;
-export var Mech = TIN_TYPE("Mech", "28259746-8953-4038-97bb-5f8bf5fd3dcf", (_p0,_p1) => ({name: _p0,version: _p1}), {}); Mech._typeId = "Mech";;
-export var cat/* Cat & Mech*/ = _TIN_INTERSECT_OBJECTS(Cat("Kitten", 12), Mech("Kittenator", 1.2));
-print(cat)
+import * as module2 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\lib\\Utils.tin.out.js";Object.entries(module2).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+export var list/* ListHead[Number]? & Iterable[Number] & Accessible[Number] & ToString*/ = List$of.call('Type', Number)(Array(0)([1, 2, 3, 4]));
+export var iter/* Iterator[Number]*/ = list.Iterable.getIterator();
+export var test/* Any?*/ = iter.Iterator.consumeAll.call(iter,print)

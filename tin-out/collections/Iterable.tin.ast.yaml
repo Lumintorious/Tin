@@ -32,115 +32,36 @@ statements:
           - tag: FieldDef
             name: next
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
-              returnType:
-                tag: Optional
-                doubleQuestionMark: false
-                expression:
-                  tag: Identifier
-                  value: T
-            isTypeLevel: true
-            position:
-              start:
-                line: 3
-                column: 1
-                absolute: 42
-              end:
-                line: 3
-                column: 1
-                absolute: 42
-          - tag: FieldDef
-            name: consumeAll
-            defaultValue:
               tag: RoundValueToValueLambda
               params:
-                - tag: Assignment
-                  isMutable: false
-                  isParameter: true
-                  lhs:
-                    tag: Identifier
-                    value: t
-                  type:
-                    tag: RoundTypeToTypeLambda
-                    parameterTypes:
-                      - tag: Assignment
-                        isMutable: false
-                        isParameter: true
-                        lhs:
-                          tag: Identifier
-                          value: String
-                        isDeclaration: false
-                        isTypeLevel: true
-                        position:
-                          start:
-                            line: 3
-                            column: 20
-                            absolute: 67
-                          end:
-                            line: 3
-                            column: 27
-                            absolute: 68
-                    returnType:
-                      tag: Identifier
-                      value: Nothing
-                  isDeclaration: false
-                  isTypeLevel: false
-                  position:
-                    start:
-                      line: 3
-                      column: 16
-                      absolute: 58
-                    end:
-                      line: 3
-                      column: 39
-                      absolute: 80
               block:
                 tag: Block
                 statements:
-                  - tag: RoundApply
-                    calledInsteadOfSquare: false
-                    paramOrder:
-                    isFirstParamThis: false
-                    isAnObjectCopy: false
-                    callee:
+                  - tag: Optional
+                    doubleQuestionMark: false
+                    expression:
                       tag: Identifier
-                      value: print
-                    args:
-                      0:
-                        - 
-                        - tag: Literal
-                          type: String
-                          value: Hello
-                          position:
-                            start:
-                              line: 4
-                              column: 9
-                              absolute: 100
-                            end:
-                              line: 4
-                              column: 17
-                              absolute: 101
+                      value: T
                     position:
                       start:
-                        line: 4
-                        column: 3
-                        absolute: 92
+                        line: 2
+                        column: 14
+                        absolute: 39
                       end:
-                        line: 6
+                        line: 4
                         column: 1
-                        absolute: 105
+                        absolute: 44
               explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 6
+                line: 4
                 column: 1
-                absolute: 105
+                absolute: 44
               end:
-                line: 6
+                line: 4
                 column: 1
-                absolute: 105
+                absolute: 44
     isDeclaration: true
     isTypeLevel: true
     position:
@@ -149,9 +70,9 @@ statements:
         column: 1
         absolute: 8
       end:
-        line: 6
+        line: 4
         column: 11
-        absolute: 115
+        absolute: 54
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -171,21 +92,21 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 6
+              line: 4
               column: 15
-              absolute: 120
+              absolute: 59
             end:
-              line: 6
+              line: 4
               column: 17
-              absolute: 121
+              absolute: 60
       returnType:
         tag: TypeDef
         fieldDefs:
           - tag: FieldDef
             name: at
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
+              tag: RoundValueToValueLambda
+              params:
                 - tag: Assignment
                   isMutable: false
                   isParameter: true
@@ -199,55 +120,79 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 7
+                      line: 5
                       column: 7
-                      absolute: 143
+                      absolute: 82
                     end:
-                      line: 7
+                      line: 5
                       column: 21
-                      absolute: 152
-              returnType:
-                tag: Identifier
-                value: T
+                      absolute: 91
+              block:
+                tag: Block
+                statements:
+                  - tag: Identifier
+                    value: T
+                    position:
+                      start:
+                        line: 5
+                        column: 25
+                        absolute: 96
+                      end:
+                        line: 6
+                        column: 1
+                        absolute: 98
+              explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 8
+                line: 6
                 column: 1
-                absolute: 159
+                absolute: 98
               end:
-                line: 8
+                line: 6
                 column: 1
-                absolute: 159
+                absolute: 98
           - tag: FieldDef
             name: length
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
-              returnType:
-                tag: Identifier
-                value: Number
+              tag: RoundValueToValueLambda
+              params:
+              block:
+                tag: Block
+                statements:
+                  - tag: Identifier
+                    value: Number
+                    position:
+                      start:
+                        line: 6
+                        column: 16
+                        absolute: 119
+                      end:
+                        line: 8
+                        column: 1
+                        absolute: 123
+              explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 10
+                line: 8
                 column: 1
-                absolute: 184
+                absolute: 123
               end:
-                line: 10
+                line: 8
                 column: 1
-                absolute: 184
+                absolute: 123
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
-        line: 6
+        line: 4
         column: 1
-        absolute: 115
+        absolute: 54
       end:
-        line: 10
+        line: 8
         column: 11
-        absolute: 194
+        absolute: 133
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -259,8 +204,8 @@ statements:
       type: Any
       value: 
     type:
-      tag: RoundTypeToTypeLambda
-      parameterTypes:
+      tag: RoundValueToValueLambda
+      params:
         - tag: Assignment
           isMutable: false
           isParameter: true
@@ -271,27 +216,39 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 10
+              line: 8
               column: 14
-              absolute: 200
+              absolute: 139
             end:
-              line: 10
+              line: 8
               column: 18
-              absolute: 201
-      returnType:
-        tag: Identifier
-        value: String
+              absolute: 140
+      block:
+        tag: Block
+        statements:
+          - tag: Identifier
+            value: String
+            position:
+              start:
+                line: 8
+                column: 22
+                absolute: 150
+              end:
+                line: 8
+                column: 30
+                absolute: 152
+      explicitType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
+        line: 8
+        column: 1
+        absolute: 133
+      end:
         line: 10
         column: 1
-        absolute: 194
-      end:
-        line: 12
-        column: 1
-        absolute: 226
+        absolute: 165
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -304,8 +261,8 @@ statements:
         - tag: FieldDef
           name: toString
           type:
-            tag: RoundTypeToTypeLambda
-            parameterTypes:
+            tag: RoundValueToValueLambda
+            params:
               - tag: Assignment
                 isMutable: false
                 isParameter: true
@@ -319,37 +276,49 @@ statements:
                 isTypeLevel: false
                 position:
                   start:
-                    line: 13
+                    line: 11
                     column: 13
-                    absolute: 260
+                    absolute: 199
                   end:
-                    line: 13
+                    line: 11
                     column: 23
-                    absolute: 266
-            returnType:
-              tag: Identifier
-              value: String
+                    absolute: 205
+            block:
+              tag: Block
+              statements:
+                - tag: Identifier
+                  value: String
+                  position:
+                    start:
+                      line: 11
+                      column: 27
+                      absolute: 215
+                    end:
+                      line: 13
+                      column: 1
+                      absolute: 219
+            explicitType: undefined
           isTypeLevel: true
           position:
             start:
-              line: 15
+              line: 13
               column: 1
-              absolute: 280
+              absolute: 219
             end:
-              line: 15
+              line: 13
               column: 1
-              absolute: 280
+              absolute: 219
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
-        line: 12
+        line: 10
         column: 1
-        absolute: 234
+        absolute: 173
       end:
-        line: 15
+        line: 13
         column: 9
-        absolute: 288
+        absolute: 227
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -372,13 +341,13 @@ statements:
           isTypeLevel: false
           position:
             start:
-              line: 15
+              line: 13
               column: 13
-              absolute: 295
+              absolute: 234
             end:
-              line: 15
+              line: 13
               column: 22
-              absolute: 301
+              absolute: 240
       block:
         tag: Block
         statements:
@@ -400,48 +369,6 @@ statements:
                   isFirstParamThis: false
                   isAnObjectCopy: false
                   callee:
-                    tag: Identifier
-                    value: debug
-                  args:
-                    0:
-                      - 
-                      - tag: RoundApply
-                        calledInsteadOfSquare: false
-                        paramOrder:
-                        isFirstParamThis: false
-                        isAnObjectCopy: false
-                        callee:
-                          tag: Select
-                          ammortized: false
-                          owner:
-                            tag: Identifier
-                            value: obj
-                          field: toString
-                        args:
-                        position:
-                          start:
-                            line: 17
-                            column: 9
-                            absolute: 339
-                          end:
-                            line: 17
-                            column: 24
-                            absolute: 351
-                  position:
-                    start:
-                      line: 17
-                      column: 3
-                      absolute: 335
-                    end:
-                      line: 18
-                      column: 1
-                      absolute: 353
-                - tag: RoundApply
-                  calledInsteadOfSquare: false
-                  paramOrder:
-                  isFirstParamThis: false
-                  isAnObjectCopy: false
-                  callee:
                     tag: Select
                     ammortized: false
                     owner:
@@ -451,13 +378,13 @@ statements:
                   args:
                   position:
                     start:
-                      line: 18
+                      line: 15
                       column: 3
-                      absolute: 358
+                      absolute: 272
                     end:
-                      line: 19
+                      line: 16
                       column: 1
-                      absolute: 371
+                      absolute: 285
             falseBranch:
               tag: Block
               statements:
@@ -476,43 +403,43 @@ statements:
                         value: obj
                         position:
                           start:
-                            line: 20
+                            line: 17
                             column: 14
-                            absolute: 394
+                            absolute: 308
                           end:
-                            line: 20
+                            line: 17
                             column: 18
-                            absolute: 395
+                            absolute: 309
                   position:
                     start:
-                      line: 20
+                      line: 17
                       column: 3
-                      absolute: 390
+                      absolute: 304
                     end:
-                      line: 22
+                      line: 19
                       column: 1
-                      absolute: 399
+                      absolute: 313
             position:
               start:
-                line: 16
+                line: 14
                 column: 2
-                absolute: 309
+                absolute: 248
               end:
-                line: 22
+                line: 19
                 column: 1
-                absolute: 399
+                absolute: 313
       explicitType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 15
+        line: 13
         column: 1
-        absolute: 288
+        absolute: 227
       end:
-        line: 22
+        line: 19
         column: 9
-        absolute: 407
+        absolute: 321
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -532,23 +459,23 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 22
+              line: 19
               column: 13
-              absolute: 412
+              absolute: 326
             end:
-              line: 22
+              line: 19
               column: 15
-              absolute: 413
+              absolute: 327
       returnType:
         tag: TypeDef
         fieldDefs:
           - tag: FieldDef
             name: forEach
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
-                - tag: RoundTypeToTypeLambda
-                  parameterTypes:
+              tag: RoundValueToValueLambda
+              params:
+                - tag: RoundValueToValueLambda
+                  params:
                     0:
                       tag: Assignment
                       isMutable: false
@@ -559,37 +486,59 @@ statements:
                       value: undefined
                       type: undefined
                       isDeclaration: false
-                  returnType:
-                    tag: Identifier
-                    value: Nothing
-                  isTypeLevel: true
+                  block:
+                    tag: Block
+                    statements:
+                      - tag: Identifier
+                        value: Nothing
+                        position:
+                          start:
+                            line: 20
+                            column: 19
+                            absolute: 363
+                          end:
+                            line: 20
+                            column: 27
+                            absolute: 364
                   position:
                     start:
-                      line: 23
+                      line: 20
                       column: 12
-                      absolute: 436
+                      absolute: 350
                     end:
-                      line: 23
+                      line: 20
                       column: 27
-                      absolute: 450
-              returnType:
-                tag: Identifier
-                value: Nothing
+                      absolute: 364
+              block:
+                tag: Block
+                statements:
+                  - tag: Identifier
+                    value: Nothing
+                    position:
+                      start:
+                        line: 20
+                        column: 31
+                        absolute: 375
+                      end:
+                        line: 21
+                        column: 1
+                        absolute: 377
+              explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 24
+                line: 21
                 column: 1
-                absolute: 463
+                absolute: 377
               end:
-                line: 24
+                line: 21
                 column: 1
-                absolute: 463
+                absolute: 377
           - tag: FieldDef
             name: mkString
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
+              tag: RoundValueToValueLambda
+              params:
                 - tag: Assignment
                   isMutable: false
                   isParameter: true
@@ -603,13 +552,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 24
+                      line: 21
                       column: 13
-                      absolute: 484
+                      absolute: 398
                     end:
-                      line: 24
+                      line: 21
                       column: 31
-                      absolute: 493
+                      absolute: 407
                 - tag: Assignment
                   isMutable: false
                   isParameter: true
@@ -623,13 +572,13 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 24
+                      line: 21
                       column: 32
-                      absolute: 498
+                      absolute: 412
                     end:
-                      line: 24
+                      line: 21
                       column: 45
-                      absolute: 507
+                      absolute: 421
                 - tag: Assignment
                   isMutable: false
                   isParameter: true
@@ -643,33 +592,45 @@ statements:
                   isTypeLevel: false
                   position:
                     start:
-                      line: 24
+                      line: 21
                       column: 46
-                      absolute: 513
+                      absolute: 427
                     end:
-                      line: 24
+                      line: 21
                       column: 60
-                      absolute: 522
-              returnType:
-                tag: Identifier
-                value: String
+                      absolute: 436
+              block:
+                tag: Block
+                statements:
+                  - tag: Identifier
+                    value: String
+                    position:
+                      start:
+                        line: 21
+                        column: 64
+                        absolute: 446
+                      end:
+                        line: 22
+                        column: 1
+                        absolute: 448
+              explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 25
+                line: 22
                 column: 1
-                absolute: 534
+                absolute: 448
               end:
-                line: 25
+                line: 22
                 column: 1
-                absolute: 534
+                absolute: 448
           - tag: FieldDef
             name: count
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
-                - tag: RoundTypeToTypeLambda
-                  parameterTypes:
+              tag: RoundValueToValueLambda
+              params:
+                - tag: RoundValueToValueLambda
+                  params:
                     0:
                       tag: Assignment
                       isMutable: false
@@ -680,75 +641,101 @@ statements:
                       value: undefined
                       type: undefined
                       isDeclaration: false
-                  returnType:
-                    tag: Identifier
-                    value: Boolean
-                  isTypeLevel: true
+                  block:
+                    tag: Block
+                    statements:
+                      - tag: Identifier
+                        value: Boolean
+                        position:
+                          start:
+                            line: 22
+                            column: 17
+                            absolute: 471
+                          end:
+                            line: 22
+                            column: 25
+                            absolute: 472
                   position:
                     start:
-                      line: 25
+                      line: 22
                       column: 10
-                      absolute: 544
+                      absolute: 458
                     end:
-                      line: 25
+                      line: 22
                       column: 25
-                      absolute: 558
-              returnType:
-                tag: Identifier
-                value: Number
+                      absolute: 472
+              block:
+                tag: Block
+                statements:
+                  - tag: Identifier
+                    value: Number
+                    position:
+                      start:
+                        line: 22
+                        column: 29
+                        absolute: 482
+                      end:
+                        line: 23
+                        column: 1
+                        absolute: 484
+              explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 26
+                line: 23
                 column: 1
-                absolute: 570
+                absolute: 484
               end:
-                line: 26
+                line: 23
                 column: 1
-                absolute: 570
+                absolute: 484
           - tag: FieldDef
             name: getIterator
             type:
-              tag: RoundTypeToTypeLambda
-              parameterTypes:
-              returnType:
-                tag: SquareApply
-                callee:
-                  tag: Identifier
-                  value: Iterator
-                typeArgs:
-                  - tag: Identifier
-                    value: T
+              tag: RoundValueToValueLambda
+              params:
+              block:
+                tag: Block
+                statements:
+                  - tag: SquareApply
+                    callee:
+                      tag: Identifier
+                      value: Iterator
+                    typeArgs:
+                      0:
+                        tag: Identifier
+                        value: T
                     position:
                       start:
-                        line: 26
-                        column: 30
-                        absolute: 600
+                        line: 23
+                        column: 21
+                        absolute: 512
                       end:
-                        line: 26
-                        column: 32
-                        absolute: 601
+                        line: 25
+                        column: 1
+                        absolute: 519
+              explicitType: undefined
             isTypeLevel: true
             position:
               start:
-                line: 28
+                line: 25
                 column: 1
-                absolute: 605
+                absolute: 519
               end:
-                line: 28
+                line: 25
                 column: 1
-                absolute: 605
+                absolute: 519
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
-        line: 22
+        line: 19
         column: 1
-        absolute: 407
+        absolute: 321
       end:
-        line: 28
+        line: 25
         column: 13
-        absolute: 617
+        absolute: 531
   - tag: Assignment
     isMutable: false
     isParameter: false
@@ -768,13 +755,13 @@ statements:
           isTypeLevel: true
           position:
             start:
-              line: 28
+              line: 25
               column: 17
-              absolute: 622
+              absolute: 536
             end:
-              line: 28
+              line: 25
               column: 19
-              absolute: 623
+              absolute: 537
       block:
         tag: Block
         statements:
@@ -789,25 +776,29 @@ statements:
                   value: getIterator
                 value: undefined
                 type:
-                  tag: RoundTypeToTypeLambda
-                  parameterTypes:
-                  returnType:
-                    tag: SquareApply
-                    callee:
-                      tag: Identifier
-                      value: Iterator
-                    typeArgs:
-                      - tag: Identifier
-                        value: T
+                  tag: RoundValueToValueLambda
+                  params:
+                  block:
+                    tag: Block
+                    statements:
+                      - tag: SquareApply
+                        callee:
+                          tag: Identifier
+                          value: Iterator
+                        typeArgs:
+                          0:
+                            tag: Identifier
+                            value: T
                         position:
                           start:
-                            line: 28
-                            column: 52
-                            absolute: 657
+                            line: 25
+                            column: 43
+                            absolute: 569
                           end:
-                            line: 28
-                            column: 54
-                            absolute: 658
+                            line: 25
+                            column: 55
+                            absolute: 573
+                  explicitType: undefined
                 isDeclaration: false
             block:
               tag: Block
@@ -828,8 +819,8 @@ statements:
                           tag: Identifier
                           value: fn
                         type:
-                          tag: RoundTypeToTypeLambda
-                          parameterTypes:
+                          tag: RoundValueToValueLambda
+                          params:
                             - tag: Assignment
                               isMutable: false
                               isParameter: true
@@ -840,27 +831,39 @@ statements:
                               isTypeLevel: true
                               position:
                                 start:
-                                  line: 29
+                                  line: 26
                                   column: 18
-                                  absolute: 682
+                                  absolute: 596
                                 end:
-                                  line: 29
+                                  line: 26
                                   column: 20
-                                  absolute: 683
-                          returnType:
-                            tag: Identifier
-                            value: Nothing
+                                  absolute: 597
+                          block:
+                            tag: Block
+                            statements:
+                              - tag: Identifier
+                                value: Nothing
+                                position:
+                                  start:
+                                    line: 26
+                                    column: 24
+                                    absolute: 608
+                                  end:
+                                    line: 26
+                                    column: 32
+                                    absolute: 609
+                          explicitType: undefined
                         isDeclaration: false
                         isTypeLevel: false
                         position:
                           start:
-                            line: 29
+                            line: 26
                             column: 13
-                            absolute: 678
+                            absolute: 592
                           end:
-                            line: 29
+                            line: 26
                             column: 32
-                            absolute: 695
+                            absolute: 609
                     block:
                       tag: Block
                       statements:
@@ -884,13 +887,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 30
+                              line: 27
                               column: 3
-                              absolute: 710
+                              absolute: 624
                             end:
-                              line: 31
+                              line: 28
                               column: 1
-                              absolute: 728
+                              absolute: 642
                         - tag: Assignment
                           isMutable: false
                           isParameter: false
@@ -915,13 +918,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 31
+                              line: 28
                               column: 3
-                              absolute: 737
+                              absolute: 651
                             end:
-                              line: 32
+                              line: 29
                               column: 1
-                              absolute: 757
+                              absolute: 671
                         - tag: WhileLoop
                           condition:
                             tag: BinaryExpression
@@ -950,22 +953,22 @@ statements:
                                       value: current
                                       position:
                                         start:
-                                          line: 33
+                                          line: 30
                                           column: 7
-                                          absolute: 801
+                                          absolute: 713
                                         end:
-                                          line: 33
+                                          line: 30
                                           column: 15
-                                          absolute: 802
+                                          absolute: 714
                                 position:
                                   start:
-                                    line: 33
+                                    line: 30
                                     column: 4
-                                    absolute: 793
+                                    absolute: 705
                                   end:
-                                    line: 34
+                                    line: 31
                                     column: 1
-                                    absolute: 804
+                                    absolute: 716
                               - tag: Assignment
                                 isMutable: false
                                 isParameter: false
@@ -990,34 +993,34 @@ statements:
                                 isTypeLevel: false
                                 position:
                                   start:
-                                    line: 34
+                                    line: 31
                                     column: 4
-                                    absolute: 814
+                                    absolute: 726
                                   end:
-                                    line: 35
+                                    line: 32
                                     column: 1
-                                    absolute: 834
+                                    absolute: 746
                           position:
                             start:
-                              line: 32
+                              line: 29
                               column: 3
-                              absolute: 764
+                              absolute: 678
                             end:
-                              line: 35
+                              line: 32
                               column: 2
-                              absolute: 835
+                              absolute: 747
                     explicitType: undefined
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 29
+                      line: 26
                       column: 2
-                      absolute: 672
+                      absolute: 586
                     end:
-                      line: 35
+                      line: 32
                       column: 10
-                      absolute: 843
+                      absolute: 755
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -1044,13 +1047,13 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 35
+                            line: 32
                             column: 14
-                            absolute: 856
+                            absolute: 768
                           end:
-                            line: 35
+                            line: 32
                             column: 39
-                            absolute: 872
+                            absolute: 784
                       - tag: Assignment
                         isMutable: false
                         isParameter: true
@@ -1068,13 +1071,13 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 35
+                            line: 32
                             column: 40
-                            absolute: 877
+                            absolute: 789
                           end:
-                            line: 35
+                            line: 32
                             column: 58
-                            absolute: 891
+                            absolute: 803
                       - tag: Assignment
                         isMutable: false
                         isParameter: true
@@ -1092,13 +1095,13 @@ statements:
                         isTypeLevel: false
                         position:
                           start:
-                            line: 35
+                            line: 32
                             column: 59
-                            absolute: 897
+                            absolute: 809
                           end:
-                            line: 35
+                            line: 32
                             column: 78
-                            absolute: 911
+                            absolute: 823
                     block:
                       tag: Block
                       statements:
@@ -1116,13 +1119,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 36
+                              line: 33
                               column: 3
-                              absolute: 924
+                              absolute: 836
                             end:
-                              line: 37
+                              line: 34
                               column: 1
-                              absolute: 931
+                              absolute: 843
                         - tag: Assignment
                           isMutable: false
                           isParameter: false
@@ -1145,13 +1148,13 @@ statements:
                                 isTypeLevel: false
                                 position:
                                   start:
-                                    line: 37
+                                    line: 34
                                     column: 9
-                                    absolute: 940
+                                    absolute: 852
                                   end:
-                                    line: 37
+                                    line: 34
                                     column: 14
-                                    absolute: 944
+                                    absolute: 856
                             block:
                               tag: Block
                               statements:
@@ -1184,13 +1187,13 @@ statements:
                                   isTypeLevel: false
                                   position:
                                     start:
-                                      line: 38
+                                      line: 35
                                       column: 4
-                                      absolute: 957
+                                      absolute: 869
                                     end:
-                                      line: 39
+                                      line: 36
                                       column: 1
-                                      absolute: 996
+                                      absolute: 908
                                 - tag: Change
                                   lhs:
                                     tag: Identifier
@@ -1240,25 +1243,25 @@ statements:
                                       value: 
                                   position:
                                     start:
-                                      line: 39
+                                      line: 36
                                       column: 4
-                                      absolute: 1002
+                                      absolute: 914
                                     end:
-                                      line: 40
+                                      line: 37
                                       column: 1
-                                      absolute: 1034
+                                      absolute: 946
                             explicitType: undefined
                           isDeclaration: true
                           isTypeLevel: false
                           position:
                             start:
-                              line: 37
+                              line: 34
                               column: 3
-                              absolute: 935
+                              absolute: 847
                             end:
-                              line: 40
+                              line: 37
                               column: 10
-                              absolute: 1043
+                              absolute: 955
                         - tag: RoundApply
                           calledInsteadOfSquare: false
                           paramOrder:
@@ -1274,22 +1277,22 @@ statements:
                                 value: fn
                                 position:
                                   start:
-                                    line: 40
+                                    line: 37
                                     column: 11
-                                    absolute: 1046
+                                    absolute: 958
                                   end:
-                                    line: 40
+                                    line: 37
                                     column: 14
-                                    absolute: 1047
+                                    absolute: 959
                           position:
                             start:
-                              line: 40
+                              line: 37
                               column: 3
-                              absolute: 1043
+                              absolute: 955
                             end:
-                              line: 41
+                              line: 38
                               column: 1
-                              absolute: 1049
+                              absolute: 961
                         - tag: BinaryExpression
                           left:
                             tag: BinaryExpression
@@ -1334,25 +1337,25 @@ statements:
                             value: 
                           position:
                             start:
-                              line: 41
+                              line: 38
                               column: 3
-                              absolute: 1052
+                              absolute: 964
                             end:
-                              line: 42
+                              line: 39
                               column: 1
-                              absolute: 1076
+                              absolute: 988
                     explicitType: undefined
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 35
+                      line: 32
                       column: 2
-                      absolute: 843
+                      absolute: 755
                     end:
-                      line: 42
+                      line: 39
                       column: 7
-                      absolute: 1082
+                      absolute: 994
                 - tag: Assignment
                   isMutable: false
                   isParameter: false
@@ -1369,8 +1372,8 @@ statements:
                           tag: Identifier
                           value: pred
                         type:
-                          tag: RoundTypeToTypeLambda
-                          parameterTypes:
+                          tag: RoundValueToValueLambda
+                          params:
                             - tag: Assignment
                               isMutable: false
                               isParameter: true
@@ -1381,27 +1384,39 @@ statements:
                               isTypeLevel: true
                               position:
                                 start:
-                                  line: 42
+                                  line: 39
                                   column: 18
-                                  absolute: 1094
+                                  absolute: 1006
                                 end:
-                                  line: 42
+                                  line: 39
                                   column: 20
-                                  absolute: 1095
-                          returnType:
-                            tag: Identifier
-                            value: Boolean
+                                  absolute: 1007
+                          block:
+                            tag: Block
+                            statements:
+                              - tag: Identifier
+                                value: Boolean
+                                position:
+                                  start:
+                                    line: 39
+                                    column: 24
+                                    absolute: 1018
+                                  end:
+                                    line: 39
+                                    column: 32
+                                    absolute: 1019
+                          explicitType: undefined
                         isDeclaration: false
                         isTypeLevel: false
                         position:
                           start:
-                            line: 42
+                            line: 39
                             column: 11
-                            absolute: 1090
+                            absolute: 1002
                           end:
-                            line: 42
+                            line: 39
                             column: 32
-                            absolute: 1107
+                            absolute: 1019
                     block:
                       tag: Block
                       statements:
@@ -1419,13 +1434,13 @@ statements:
                           isTypeLevel: false
                           position:
                             start:
-                              line: 43
+                              line: 40
                               column: 3
-                              absolute: 1117
+                              absolute: 1029
                             end:
-                              line: 44
+                              line: 41
                               column: 1
-                              absolute: 1123
+                              absolute: 1035
                         - tag: Assignment
                           isMutable: false
                           isParameter: false
@@ -1448,13 +1463,13 @@ statements:
                                 isTypeLevel: false
                                 position:
                                   start:
-                                    line: 44
+                                    line: 41
                                     column: 9
-                                    absolute: 1132
+                                    absolute: 1044
                                   end:
-                                    line: 44
+                                    line: 41
                                     column: 14
-                                    absolute: 1136
+                                    absolute: 1048
                             block:
                               tag: Block
                               statements:
@@ -1494,25 +1509,25 @@ statements:
                                     value: null
                                   position:
                                     start:
-                                      line: 45
+                                      line: 42
                                       column: 4
-                                      absolute: 1146
+                                      absolute: 1058
                                     end:
-                                      line: 46
+                                      line: 43
                                       column: 1
-                                      absolute: 1175
+                                      absolute: 1087
                             explicitType: undefined
                           isDeclaration: true
                           isTypeLevel: false
                           position:
                             start:
-                              line: 44
+                              line: 41
                               column: 3
-                              absolute: 1127
+                              absolute: 1039
                             end:
-                              line: 46
+                              line: 43
                               column: 10
-                              absolute: 1184
+                              absolute: 1096
                         - tag: RoundApply
                           calledInsteadOfSquare: false
                           paramOrder:
@@ -1528,45 +1543,45 @@ statements:
                                 value: fn
                                 position:
                                   start:
-                                    line: 46
+                                    line: 43
                                     column: 11
-                                    absolute: 1187
+                                    absolute: 1099
                                   end:
-                                    line: 46
+                                    line: 43
                                     column: 14
-                                    absolute: 1188
+                                    absolute: 1100
                           position:
                             start:
-                              line: 46
+                              line: 43
                               column: 3
-                              absolute: 1184
+                              absolute: 1096
                             end:
-                              line: 47
+                              line: 44
                               column: 1
-                              absolute: 1190
+                              absolute: 1102
                         - tag: Identifier
                           value: num
                           position:
                             start:
-                              line: 47
+                              line: 44
                               column: 3
-                              absolute: 1195
+                              absolute: 1107
                             end:
-                              line: 48
+                              line: 45
                               column: 1
-                              absolute: 1197
+                              absolute: 1109
                     explicitType: undefined
                   isDeclaration: true
                   isTypeLevel: false
                   position:
                     start:
-                      line: 42
+                      line: 39
                       column: 2
-                      absolute: 1082
+                      absolute: 994
                     end:
-                      line: 48
+                      line: 45
                       column: 10
-                      absolute: 1206
+                      absolute: 1118
                 - tag: RoundApply
                   calledInsteadOfSquare: false
                   paramOrder:
@@ -1582,13 +1597,13 @@ statements:
                         value: T
                         position:
                           start:
-                            line: 48
+                            line: 45
                             column: 11
-                            absolute: 1208
+                            absolute: 1120
                           end:
-                            line: 48
+                            line: 45
                             column: 13
-                            absolute: 1209
+                            absolute: 1121
                   args:
                     0:
                       - 
@@ -1596,72 +1611,72 @@ statements:
                         value: forEach
                         position:
                           start:
-                            line: 48
+                            line: 45
                             column: 14
-                            absolute: 1217
+                            absolute: 1129
                           end:
-                            line: 48
+                            line: 45
                             column: 22
-                            absolute: 1218
+                            absolute: 1130
                     1:
                       - 
                       - tag: Identifier
                         value: mkString
                         position:
                           start:
-                            line: 48
+                            line: 45
                             column: 23
-                            absolute: 1227
+                            absolute: 1139
                           end:
-                            line: 48
+                            line: 45
                             column: 32
-                            absolute: 1228
+                            absolute: 1140
                     2:
                       - 
                       - tag: Identifier
                         value: count
                         position:
                           start:
-                            line: 48
+                            line: 45
                             column: 33
-                            absolute: 1234
+                            absolute: 1146
                           end:
-                            line: 48
+                            line: 45
                             column: 39
-                            absolute: 1235
+                            absolute: 1147
                     3:
                       - 
                       - tag: Identifier
                         value: getIterator
                         position:
                           start:
-                            line: 48
+                            line: 45
                             column: 40
-                            absolute: 1247
+                            absolute: 1159
                           end:
-                            line: 48
+                            line: 45
                             column: 52
-                            absolute: 1248
+                            absolute: 1160
                   position:
                     start:
-                      line: 48
+                      line: 45
                       column: 2
-                      absolute: 1206
+                      absolute: 1118
                     end:
-                      line: 49
+                      line: 46
                       column: 1
-                      absolute: 1250
+                      absolute: 1162
             position:
               start:
-                line: 28
+                line: 25
                 column: 23
-                absolute: 628
+                absolute: 542
               end: 0
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 28
+        line: 25
         column: 1
-        absolute: 617
+        absolute: 531
       end: 0

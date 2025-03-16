@@ -169,20 +169,19 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "fb67d3b6-7aad-48d2-894a-054f0d765d18", (_p0,_p1 = function(t) {
+export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "65ee98d7-7c19-4142-8401-4786a5c7a961", (_p0,_p1 = function(t) {
 return print("Hello")
 }) => ({next: _p0,consumeAll: _p1}), {}); Iterator._typeId = "Iterator";;
-export var Accessible = /* [] */(T) => TIN_TYPE("Accessible", "efe1e1e3-c34d-4857-896f-997996a3fd89", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
+export var Accessible = /* [] */(T) => TIN_TYPE("Accessible", "6c838d52-e4e6-4e8d-9a3f-f138ca01eefb", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
 ;
-export var ToString = TIN_TYPE("ToString", "6e22f571-f576-456d-b84d-cf8cf9ed6b38", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
-export var stringOf/* (Any) => String*/ = function(obj) {
-return ((ToString.__is_child(obj) ) ? ((function(){debug(obj.ToString.toString.call(obj));
-return obj.ToString.toString.call(obj)}).call(this)) : (makeString(obj))) 
+export var ToString = TIN_TYPE("ToString", "9e7c5dfb-6af3-4b6d-8cbf-6b4b442926d9", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export var stringOf/* (Any) -> String*/ = function(obj) {
+return ((ToString.__is_child(obj) ) ? (obj.ToString.toString.call(obj,)) : (makeString(obj))) 
 };
-export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "df1e7783-3efb-40f2-80b3-a5c9ab0bedad", (_p0,_p1,_p2,_p3) => ({forEach: _p0,mkString: _p1,count: _p2,getIterator: _p3}), {}); Iterable._typeId = "Iterable";;
-export var makeIterable/* [T] => (() => Iterator[T]) => Iterable[T]*/ = function(T) {
+export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "2d81304e-7c5b-49d2-910d-c67c2e617e35", (_p0,_p1,_p2,_p3) => ({forEach: _p0,mkString: _p1,count: _p2,getIterator: _p3}), {}); Iterable._typeId = "Iterable";;
+export var makeIterable/* [T] => (() -> Iterator[T]) -> Iterable[T]*/ = function(T) {
 return function(getIterator) {
-var forEach/* ((T) => Nothing) => Nothing*/ = function(fn) {
+var forEach/* ((T) -> Nothing) -> Any?*/ = function(fn) {
 var iterator/* Iterator[T]*/ = getIterator();
 var current/* T?*/ = iterator.Iterator.next();
 while (current != nothing) {
@@ -190,18 +189,18 @@ while (current != nothing) {
 current = iterator.Iterator.next() 
 }
 };
-var mkString/* (String, String, String) => String*/ = function(separator = ", ", left = "", right = "") {
+var mkString/* (String, String, String) -> String*/ = function(separator = ", ", left = "", right = "") {
 var string/* String*/ = "";
-var fn/* (T) => Any*/ = function(t) {
+var fn/* (T) -> Any*/ = function(t) {
 var comma/* String*/ = ((string == "") ? ("") : (separator)) ;
 return string = "" + string + "" + comma + "" + t + ""
 };
 forEach(fn);
 return "" + left + "" + string + "" + right + ""
 };
-var count/* ((T) => Boolean) => Number*/ = function(pred) {
+var count/* ((T) -> Boolean) -> Number*/ = function(pred) {
 var num/* Number*/ = 0;
-var fn/* (T) => Any?*/ = function(t) {
+var fn/* (T) -> Any?*/ = function(t) {
 return ((pred(t)) ? (num = num + 1) : (null)) 
 };
 forEach(fn);

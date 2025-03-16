@@ -1,58 +1,29 @@
-KEYWORD      | import       |   1, 1    
-IDENTIFIER   | collections  |   1, 8    
-OPERATOR     | /            |   1, 19   
-IDENTIFIER   | List         |   1, 20   
 NEWLINE      |              |   2, 1    
 NEWLINE      |              |   4, 1    
-IDENTIFIER   | Cat          |   4, 1    
-OPERATOR     | =            |   4, 5    
-KEYWORD      | type         |   4, 7    
-OPERATOR     | :            |   4, 11   
+IDENTIFIER   | list         |   4, 1    
+OPERATOR     | =            |   4, 6    
+IDENTIFIER   | List@of      |   4, 8    
+PARENS       | [            |   4, 15   
+IDENTIFIER   | Number       |   4, 16   
+PARENS       | ]            |   4, 22   
+PARENS       | (            |   4, 23   
+NUMBER       | 1            |   4, 24   
+NEWLINE      | ,            |   4, 1    
+NUMBER       | 2            |   4, 27   
+NEWLINE      | ,            |   4, 1    
+NUMBER       | 3            |   4, 30   
+NEWLINE      | ,            |   4, 1    
+NUMBER       | 4            |   4, 33   
+PARENS       | )            |   4, 34   
 NEWLINE      |              |   5, 1    
-INDENT       | 4            |   5, 1    
-IDENTIFIER   | name         |   5, 2    
-OPERATOR     | :            |   5, 6    
-IDENTIFIER   | String       |   5, 8    
+IDENTIFIER   | iter         |   5, 1    
+OPERATOR     | =            |   5, 6    
+IDENTIFIER   | list         |   5, 8    
+OPERATOR     | .            |   5, 12   
+IDENTIFIER   | getIterator  |   5, 13   
+PARENS       | (            |   5, 24   
+PARENS       | )            |   5, 25   
 NEWLINE      |              |   6, 1    
-IDENTIFIER   | age          |   6, 2    
-OPERATOR     | :            |   6, 5    
-IDENTIFIER   | Number       |   6, 7    
-NEWLINE      |              |   8, 1    
-DEDENT       | 4            |   8, 1    
-IDENTIFIER   | Mech         |   8, 1    
-OPERATOR     | =            |   8, 6    
-KEYWORD      | type         |   8, 8    
-OPERATOR     | :            |   8, 12   
-NEWLINE      |              |   9, 1    
-INDENT       | 4            |   9, 1    
-IDENTIFIER   | name         |   9, 2    
-OPERATOR     | :            |   9, 6    
-IDENTIFIER   | String       |   9, 8    
-NEWLINE      |              |  10, 1    
-IDENTIFIER   | version      |  10, 2    
-OPERATOR     | :            |  10, 9    
-IDENTIFIER   | Number       |  10, 11   
-NEWLINE      |              |  12, 1    
-DEDENT       | 4            |  12, 1    
-IDENTIFIER   | cat          |  12, 1    
-OPERATOR     | =            |  12, 5    
-IDENTIFIER   | Cat          |  12, 7    
-PARENS       | (            |  12, 10   
-STRING       | Kitten       |  12, 11   
-NEWLINE      | ,            |  12, 1    
-NUMBER       | 12           |  12, 21   
-PARENS       | )            |  12, 23   
-OPERATOR     | &            |  12, 25   
-IDENTIFIER   | Mech         |  12, 27   
-PARENS       | (            |  12, 31   
-STRING       | Kittenator   |  12, 32   
-NEWLINE      | ,            |  12, 1    
-NUMBER       | 1.2          |  12, 46   
-PARENS       | )            |  12, 49   
-NEWLINE      |              |  14, 1    
-IDENTIFIER   | print        |  14, 1    
-PARENS       | (            |  14, 6    
-IDENTIFIER   | cat          |  14, 7    
-PARENS       | )            |  14, 10   
-NEWLINE      |              |  17, 1    
+NEWLINE      |              |   7, 1    
+NEWLINE      |              |  11, 1    
 --undefined--

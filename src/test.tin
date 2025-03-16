@@ -1,16 +1,8 @@
-import collections/List
+# import collections/List
 # import lib/Utils
+print("Hello world")
+# test = iter.consumeAll(print)
+# print()
 
-Cat = type:
-	name: String
-	age: Number
-
-Mech = type:
-	name: String
-	version: Number
-
-cat = Cat("Kitten", 12) & Mech("Kittenator", 1.2)
-
-print(cat)
 
 

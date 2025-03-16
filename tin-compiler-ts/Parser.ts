@@ -354,9 +354,10 @@ const PRECEDENCE: { [_: string]: number } = {
    ":": 101,
    ".": 100, // Field access
    "?.": 100, // Field access
-   "**": 10, // Exponentiation
+   "**": 11, // Exponentiation
    "*": 10, // Multiplication
    "/": 10, // Division
+   "%": 10, // Division
    "+": 9, // Addition
    "-": 9, // Subtraction
    "<": 7, // Less than
@@ -393,11 +394,11 @@ export class Parser {
          }
       }
       const endPos = this.positionNow();
-      AstNode.toCheckForPosition
-         .filter((node) => !node.position)
-         .forEach((node) => {
-            console.log(node.tag + " MISSING POSITION");
-         });
+      // AstNode.toCheckForPosition
+      //    .filter((node) => !node.position)
+      //    .forEach((node) => {
+      //       console.log(node.tag + " MISSING POSITION");
+      //    });
       return new Block(this.body).fromTo(startPos, endPos);
    }
 
@@ -761,13 +762,14 @@ export class Parser {
 
       // Now check for the arrow (-> / =>) indicating the function body
       let specifiedType;
-      if (this.peek().value === ":") {
+      if (this.peek() && this.peek().value === ":") {
          this.consume("OPERATOR", ":");
          specifiedType = this.parseExpression();
       }
       if (
-         this.peek().value != "->" &&
-         this.peek().value != "=>" &&
+         (!this.peek() ||
+            (this.peek().value != "->" &&
+               (this.peek().value != "=>" || !isSquare))) &&
          groupCatch !== undefined
       ) {
          this.omit("NEWLINE");
@@ -807,10 +809,24 @@ export class Parser {
                this.positionNow()
             );
          } else {
-            return new RoundTypeToTypeLambda(parameters, returnType).fromTo(
-               lambdaStart,
-               this.positionNow()
-            );
+            let block: Block;
+            if (body instanceof Block) {
+               block = body;
+            } else {
+               block = new Block([body]).fromTo(
+                  lambdaStart,
+                  this.positionNow()
+               );
+            }
+            return new RoundValueToValueLambda(
+               parameters,
+               block,
+               specifiedType
+            ).fromTo(lambdaStart, this.positionNow());
+            // return new RoundTypeToTypeLambda(parameters, returnType).fromTo(
+            //    lambdaStart,
+            //    this.positionNow()
+            // );
          }
       }
    }
@@ -826,7 +842,7 @@ export class Parser {
          this.consume("OPERATOR", ";");
          thirdPart = this.parseExpression();
       }
-      this.consume("KEYWORD", "do");
+      this.consume("OPERATOR", ",");
       const action = this.parseExpression();
       if (secondPart !== undefined && thirdPart !== undefined) {
          return new WhileLoop(firstPart, secondPart, thirdPart, action);
@@ -880,7 +896,7 @@ export class Parser {
       } else if (keyword.value === "make") {
          return new Make(expression);
       } else if (keyword.value === "return") {
-         return expression;
+         return new AppliedKeyword("return", expression);
       } else if (expression instanceof Assignment && keyword.value === "mut") {
          expression.isMutable = true;
          return expression;

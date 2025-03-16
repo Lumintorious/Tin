@@ -83,7 +83,7 @@ function translate(
          (!isAssignment &&
          args &&
          args.returnLast &&
-         !(last instanceof WhileLoop)
+         !(last instanceof WhileLoop || last instanceof AppliedKeyword)
             ? "return "
             : "") + `${translate(last, scope)}`,
       ].join(";\n");
@@ -193,34 +193,31 @@ function translate(
 
       // Identifier
    } else if (term instanceof Identifier) {
-      // if (term.value === "this") {
-      //    return "$this";
-      // }
       return term.value.replaceAll("@", "$").replaceAll(".", "$");
 
       // RoundValueToValueLambda
    } else if (term instanceof RoundValueToValueLambda) {
-      const params = term.isFirstParamThis()
-         ? term.params.slice(1, term.params.length)
-         : term.params;
-      return `function(${params
-         .map((p) => translate(p, scope.innerScopeOf(term, true)))
-         .join(", ")}) {\n${translate(
-         term.block,
-         scope.innerScopeOf(term, true),
-         {
-            returnLast: true,
-         }
-      )}\n}`;
-
-      //RoundTypeToTypeLambda
-   } else if (term instanceof RoundTypeToTypeLambda) {
-      return `TIN_LAMBDA_TYPE("Lambda", [${term.parameterTypes
-         .map((t) => translate(t, scope.innerScopeOf(term, true)))
-         .join(", ")}], ${translate(
-         term.returnType,
-         scope.innerScopeOf(term, true)
-      )})`;
+      if (!term.isTypeLambda) {
+         const params = term.isFirstParamThis()
+            ? term.params.slice(1, term.params.length)
+            : term.params;
+         return `function(${params
+            .map((p) => translate(p, scope.innerScopeOf(term, true)))
+            .join(", ")}) {\n${translate(
+            term.block,
+            scope.innerScopeOf(term, true),
+            {
+               returnLast: true,
+            }
+         )}\n}`;
+      } else {
+         return `TIN_LAMBDA_TYPE("Lambda", [${term.params
+            .map((t) => translate(t, scope.innerScopeOf(term, true)))
+            .join(", ")}], ${translate(
+            term.block,
+            scope.innerScopeOf(term, true)
+         )})`;
+      }
 
       // SquareTypeToTypeLambda
    } else if (term instanceof SquareTypeToTypeLambda) {
@@ -300,7 +297,7 @@ function translate(
       let open = takesVarargs ? "(Array(0)([" : "(";
       const close = takesVarargs ? "]))" : ")";
       if (term.isFirstParamThis && term.callee instanceof Select) {
-         open = ".call(" + translate(term.callee.owner, scope);
+         open = ".call(" + translate(term.callee.owner, scope) + ",";
       }
       return (
          translate(term.callee, scope) +

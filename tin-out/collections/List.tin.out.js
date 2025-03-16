@@ -172,12 +172,12 @@ const debug = (...args) => {
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "d52062c9-38e5-4dc3-bc4c-f2d69d799a03", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
+export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "894a22a2-f098-4380-bac1-1a1ef5b922bb", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)), Accessible.call('Type', T)), ToString));
-export var List$iterator/* [T] => (ListHead[T]?) => Iterator[T]*/ = function(T) {
+export var List$iterator/* [T] => (ListHead[T]?) -> Iterator[T]*/ = function(T) {
 return function(list) {
 var currentList/* ListHead[T]?*/ = list;
-var nextF/* () => T?*/ = function() {
+var nextF/* () -> Any?*/ = function() {
 return ((currentList != nothing) ? ((function(){var result/* T*/ = currentList.ListHead.value;
 currentList = currentList.ListHead.rest;
 return result}).call(this)) : (nothing)) 
@@ -185,9 +185,9 @@ return result}).call(this)) : (nothing))
 return Iterator.call('Type', T)(nextF)
 }
 };
-export var List$accessible/* [T] => (ListHead[T]) => Accessible[T]*/ = function(T) {
+export var List$accessible/* [T] => (ListHead[T]) -> Accessible[T]*/ = function(T) {
 return function(list) {
-var length/* () => Number*/ = function() {
+var length/* () -> Number*/ = function() {
 var num/* Number*/ = 0;
 var l/* ListHead[T]*/ = list;
 while (l != nothing) {
@@ -195,7 +195,7 @@ while (l != nothing) {
 };
 return num
 };
-var at/* (Number) => T*/ = function(index) {
+var at/* (Number) -> T*/ = function(index) {
 var currentIndex/* Number*/ = 0;
 var l/* ListHead[T]*/ = list;
 while (currentIndex < index) {
@@ -204,13 +204,13 @@ currentIndex = currentIndex + 1
 };
 return l.ListHead.value
 };
-return Accessible.call('Type', T)(at, length)
+return (Accessible.call('Type', T)(at, length))
 }
 };
-export var List$of/* [T] => (Array[T]) => ListHead[T]? & Iterable[T] & Accessible[T] & ToString*/ = function(T) {
+export var List$of/* [T] => (Array[T]) -> ListHead[T]? & Iterable[T] & Accessible[T] & ToString*/ = function(T) {
 return function(arr) {
 var i/* Number*/ = arr.Array.length();
-var list/* ListHead[T]?*/ = nothing;
+var list/* ListHead[T]?*/ = (nothing) /* as ListHead.call('Type', T) */;
 while (i > 0) {
  i = i - 1;
 list = ListHead.call('Type', T)(arr.Array.at(i), list) 
@@ -218,13 +218,13 @@ list = ListHead.call('Type', T)(arr.Array.at(i), list)
 var iterable/* Iterable[T]*/ = makeIterable.call('Type', T)(function() {
 return List$iterator.call('Type', T)(list)
 });
-var toStr/* (Any) => String*/ = function() {
+var toStr/* (Any) -> String*/ = function() {
 return iterable.Iterable.mkString(",", "List(", ")")
 };
-return _TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(list, iterable), List$accessible.call('Type', T)(list)), ToString(toStr))
+return (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(list, iterable), List$accessible.call('Type', T)(list)), ToString(toStr)))
 }
 };
-export var List$fromIterator/* [T] => (() => Iterator[T]) => ListHead[T]? & Iterable[T]*/ = function(T) {
+export var List$fromIterator/* [T] => (() -> Iterator[T]) -> ListHead[T]? & Iterable[T]*/ = function(T) {
 return function(getIterator) {
 var list/* ListHead[T]?*/ = nothing;
 var iterator/* Iterator[T]*/ = getIterator();
@@ -233,8 +233,8 @@ while (current != nothing) {
  list = ListHead.call('Type', T)(current, list);
 current = iterator.Iterator.next() 
 };
-return _TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(function() {
+return (_TIN_INTERSECT_OBJECTS(list, makeIterable.call('Type', T)(function() {
 return List$iterator.call('Type', T)(list)
-}))
+})))
 }
 }
