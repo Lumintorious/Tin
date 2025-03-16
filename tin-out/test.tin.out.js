@@ -169,12 +169,14 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
-			globalThis[key] = value;
-	  });;
-import * as module2 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\lib\\Utils.tin.out.js";Object.entries(module2).forEach(([key, value]) => {
-			globalThis[key] = value;
-	  });;
-export var list/* ListHead[Number]? & Iterable[Number] & Accessible[Number] & ToString*/ = List$of.call('Type', Number)(Array(0)([1, 2, 3, 4]));
-export var iter/* Iterator[Number]*/ = list.Iterable.getIterator();
-export var test/* Any?*/ = iter.Iterator.consumeAll.call(iter,print)
+;
+export var Cat = TIN_TYPE("Cat", "223a001a-f102-4959-95cc-7e239352b137", (_p0) => ({name: _p0}), {}); Cat._typeId = "Cat";;
+export var ToString = TIN_TYPE("ToString", "64e0a4f4-1e1f-4890-ac52-441500dff586", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export var stringOf/* Nothing*/ = function(obj) {
+return ((ToString.__is_child(obj) ) ? (obj.ToString.toString.call(obj,)) : (makeString(obj))) 
+};
+export var func/* Nothing*/ = function(other) {
+return "Hi"
+};
+export var x/* ToString*/ = ToString(func);
+print(x.ToString.toString.call(x,))

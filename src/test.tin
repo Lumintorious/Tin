@@ -1,8 +1,21 @@
-# import collections/List
+# import collections/Iterable
 # import lib/Utils
-print("Hello world")
-# test = iter.consumeAll(print)
-# print()
 
+makeString: (Any) -> String = external
 
+Cat = type:
+	name: String
+	useCat = (this: Cat) -> this.name
 
+ToString = type:
+	toString: (this: Any) -> String
+
+stringOf = (obj: Any) ->
+	if obj :: ToString,
+		obj.toString()
+	else
+		makeString(obj)
+
+func = (this: String, other: String) -> "Hi"
+x = ToString(func)
+print(x.toString())

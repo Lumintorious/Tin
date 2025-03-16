@@ -107,7 +107,6 @@ export class TypeTranslator {
                throw new Error("Weird type");
             }
             const innerScope = scope.innerScopeOf(node, true);
-            innerScope.run = this.context.run;
             // innerScope.declareType("T", new NamedType("T"));
             const type = new RoundValueToValueLambdaType(
                node.params.map((p) =>
@@ -131,7 +130,6 @@ export class TypeTranslator {
                throw new Error("Weird type");
             }
             const innerScope2 = scope.innerScopeOf(node, true);
-            innerScope2.run = this.context.run;
             const genericParameters = node.parameterTypes.map((p) => {
                const param = this.translate(p, innerScope2);
                if (param instanceof GenericNamedType) {

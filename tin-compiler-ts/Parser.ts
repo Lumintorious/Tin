@@ -4,9 +4,11 @@ import { RoundValueToValueLambdaType, Type } from "./Types";
 const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
+   static currentNumber = 0;
    readonly tag: string;
    position?: TokenPos;
    isTypeLevel?: boolean;
+   id: number = AstNode.currentNumber++;
    constructor(tag: string) {
       this.tag = tag;
       AstNode.toCheckForPosition.push(this);

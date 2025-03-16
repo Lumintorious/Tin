@@ -19,6 +19,7 @@ import {
    SquareTypeToTypeLambdaType,
    BinaryOpType,
    RoundValueToValueLambdaType,
+   AnyType,
 } from "./Types";
 import {
    Select,
@@ -30,7 +31,7 @@ import {
 import { type } from "os";
 import { TypeDef } from "./Parser";
 import { Symbol } from "./Scope";
-import { NamedType, TypeOfTypes } from "./Types";
+import { NamedType, TypeOfTypes, AnyTypeClass } from "./Types";
 import { SquareTypeToValueLambdaType } from "./Types";
 import {
    OptionalType,
@@ -74,15 +75,17 @@ export class TypeBuilder {
                param.lhs instanceof Identifier
             ) {
                innerScope.declareType(
-                  param.lhs.value,
-                  new GenericNamedType(
+                  new Symbol(
                      param.lhs.value,
-                     param.type
-                        ? this.context.translator.translate(
-                             param.type,
-                             innerScope
-                          )
-                        : undefined
+                     new GenericNamedType(
+                        param.lhs.value,
+                        param.type
+                           ? this.context.translator.translate(
+                                param.type,
+                                innerScope
+                             )
+                           : undefined
+                     )
                   )
                );
             }
@@ -111,7 +114,7 @@ export class TypeBuilder {
                   leftType.type
                );
                symbol.shadowing = innerScope.lookup(node.condition.left.value);
-               trueScope.declare(node.condition.left.value, symbol);
+               trueScope.declare(symbol);
             }
          }
          if (
@@ -122,7 +125,6 @@ export class TypeBuilder {
                this.context.translator.translate(node.condition.type, trueScope)
             );
             trueScope.declare(
-               node.condition.term.value,
                new Symbol(
                   node.condition.term.value,
                   presumedType,
@@ -260,13 +262,16 @@ export class TypeBuilder {
       const innerScope = scope.innerScopeOf(node, true);
       node.name = options.assignedName;
       for (let param of node.fieldDefs) {
-         if (param.defaultValue) this.build(param.defaultValue, innerScope);
+         if (param.defaultValue && scope.iteration == "RESOLUTION") {
+            this.build(param.defaultValue, innerScope);
+         }
          if (param.type)
             this.build(param.type, innerScope, { assignedName: "ISTYPE" });
       }
    }
 
    buildSelect(node: Select, scope: Scope) {
+      // if (scope.iteration === "DECLARATION") return;
       this.context.inferencer.infer(node, scope); // To assign ownerComponent
       let parentType = this.context.inferencer.infer(node.owner, scope);
 
@@ -304,14 +309,17 @@ export class TypeBuilder {
             }
          }
       });
-      this.build(node.block, innerScope);
-      const inferredType = this.context.inferencer.inferRoundValueToValueLambda(
-         node,
-         scope,
-         options
-      );
-      if (inferredType instanceof RoundValueToValueLambdaType) {
-         node.type = inferredType;
+      if (scope.iteration === "RESOLUTION") {
+         this.build(node.block, innerScope);
+         const inferredType =
+            this.context.inferencer.inferRoundValueToValueLambda(
+               node,
+               scope,
+               options
+            );
+         if (inferredType instanceof RoundValueToValueLambdaType) {
+            node.type = inferredType;
+         }
       }
    }
 
@@ -321,7 +329,7 @@ export class TypeBuilder {
          const type = this.context.translator.translate(p, innerScope);
          if (type instanceof GenericNamedType) {
             if (!innerScope.hasTypeSymbol(type.name)) {
-               innerScope.declareType(type.name, type);
+               innerScope.declareType(new Symbol(type.name, type));
             }
          }
       });
@@ -350,10 +358,7 @@ export class TypeBuilder {
          options.typeExpectedInPlace &&
          node.isParameter
       ) {
-         scope.declare(
-            lhs.value,
-            new Symbol(lhs.value, options.typeExpectedInPlace)
-         );
+         scope.declare(new Symbol(lhs.value, options.typeExpectedInPlace));
       }
 
       // Means it's a parameter
@@ -364,15 +369,27 @@ export class TypeBuilder {
                this.context.translator.translate(node.type, scope),
                node
             );
-            scope.declare(node.lhs.value, symbol);
+            scope.declare(symbol, true);
          }
          return;
       }
-      let rhsType = this.context.inferencer.infer(node.value, scope, {
+      // const temporarySymbol = new Symbol("", AnyType);
+      // if (node.lhs instanceof Identifier) {
+      //    temporarySymbol.name = node.lhs.value;
+      //    if (
+      //       node.lhs.isTypeLevel ||
+      //       this.context.inferencer.isCapitalized(node.lhs.value)
+      //    ) {
+      //       scope.declareType(temporarySymbol);
+      //    } else {
+      //       scope.declare(temporarySymbol);
+      //    }
+      // }
+      this.build(node.value, scope, {
          assignedName:
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
       });
-      this.build(node.value, scope, {
+      let rhsType = this.context.inferencer.infer(node.value, scope, {
          assignedName:
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
       });
@@ -380,7 +397,11 @@ export class TypeBuilder {
          if (rhsType instanceof LiteralType) {
             rhsType = rhsType.type;
          }
-         scope.mapAst(node, rhsType ? rhsType : new Type());
+         scope.mapAst(
+            node,
+            "TYPE",
+            new Symbol(undefined as any, rhsType ? rhsType : new Type())
+         );
       } else {
          let nodeType = scope.resolveNamedType(
             this.context.translator.translate(node.type, scope)
@@ -414,14 +435,18 @@ export class TypeBuilder {
       ) {
          if (node.value instanceof RoundTypeToTypeLambda) {
             scope.declareType(
-               node.lhs.value,
-               this.context.translator.translate(node.value, scope)
+               new Symbol(
+                  node.lhs.value,
+                  this.context.translator.translate(node.value, scope)
+               )
             );
          } else if (node.value instanceof RoundValueToValueLambda) {
             node.value.isTypeLambda = true;
             scope.declareType(
-               node.lhs.value,
-               this.context.translator.translate(node.value, scope)
+               new Symbol(
+                  node.lhs.value,
+                  this.context.translator.translate(node.value, scope)
+               )
             );
          } else {
             const symbolToDeclare = this.context.translator.translate(
@@ -449,7 +474,7 @@ export class TypeBuilder {
                symbolToDeclare.returnType.name = node.lhs.value;
             }
             if (!scope.hasTypeSymbol(node.lhs.value)) {
-               scope.declareType(node.lhs.value, symbolToDeclare);
+               scope.declareType(new Symbol(node.lhs.value, symbolToDeclare));
             }
          }
          return;
@@ -464,7 +489,7 @@ export class TypeBuilder {
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
          if (!scope.hasSymbol(lhs.value)) {
-            scope.declare(lhs.value, symbol);
+            scope.declare(symbol);
             node.symbol = symbol;
          }
       }
@@ -486,7 +511,7 @@ export class TypeBuilder {
          if (leftType instanceof OptionalType) {
             const symbol = new Symbol(node.condition.left.value, leftType.type);
             symbol.shadowing = innerScope.lookup(node.condition.left.value);
-            innerScope.declare(node.condition.left.value, symbol);
+            innerScope.declare(symbol);
          }
       }
       if (node.start) {

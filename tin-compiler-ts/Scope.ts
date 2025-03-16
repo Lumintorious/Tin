@@ -31,7 +31,7 @@ export class Symbol {
    name: string;
    typeSymbol: Type;
    ast?: Term;
-   run: number = 0;
+   iteration: Iteration = "DECLARATION";
    position?: TokenPos;
    index?: number;
    parentComponent?: Type; // If a field on type ABC, then parentComponent is ABC
@@ -60,29 +60,32 @@ export class Symbol {
       this.name = template.name;
       this.typeSymbol = template.typeSymbol;
       this.ast = template.ast;
-      this.run = template.run;
+      this.iteration = template.iteration;
       this.position = template.position;
       this.index = template.index;
    }
 }
 
+export type Iteration = "DECLARATION" | "RESOLUTION";
+
 export class Scope {
-   static maxRuns: number = 1;
    name: string;
    parent?: Scope;
    symbols: Map<string, Symbol> = new Map();
-   typeSymbols: Map<string, Type> = new Map();
+   typeSymbols: Map<string, Symbol> = new Map();
    symbolsByAst: Map<AstNode, Symbol> = new Map();
-   typeSymbolsByAst: Map<AstNode, Type> = new Map();
+   typeSymbolsByAst: Map<AstNode, Symbol> = new Map();
    childrenByAst: Map<Number, Scope> = new Map();
    currentIndex: number = 0;
-   run: number = 0;
+   iteration: Iteration = "DECLARATION";
    static currentKey = 0;
+   static currentId = 0;
+   id: number = Scope.currentId++;
    constructor(name: string, parent?: Scope) {
       this.name = name;
       this.parent = parent;
       if (parent) {
-         this.run = parent.run;
+         this.iteration = parent.iteration;
       }
    }
 
@@ -95,19 +98,16 @@ export class Scope {
       this.currentIndex = this.currentIndex + scope.currentIndex;
    }
 
-   setRun(runNumber: number) {
-      this.run = runNumber;
+   setIteration(iteration: Iteration) {
+      this.iteration = iteration;
       this.childrenByAst.forEach((v) => {
-         v.setRun(runNumber);
+         v.setIteration(iteration);
       });
    }
 
    innerScopeOf(astNode: AstNode, canCreate: boolean = false): Scope {
       const ast = astNode as any;
-      if (!ast.key) {
-         ast.key = Scope.currentKey++;
-      }
-      let child = this.childrenByAst.get(ast.key);
+      let child = this.childrenByAst.get(ast.id);
       if (!child && !canCreate) {
          try {
             child = this.parent?.innerScopeOf(astNode);
@@ -121,9 +121,9 @@ export class Scope {
       if (child) {
          return child;
       } else {
-         const child = new Scope(astNode.tag, this);
-         child.run = this.run;
-         this.childrenByAst.set(ast.key, child);
+         const child = new Scope(astNode.tag + astNode.id, this);
+         child.setIteration(this.iteration);
+         this.childrenByAst.set(ast.id, child);
          return child;
       }
    }
@@ -136,39 +136,43 @@ export class Scope {
       let str = "";
       let now: Scope | undefined = this;
       while (now !== undefined) {
-         str = now.name + "." + str;
+         str = now.name + "/" + this.id + "." + str;
          now = now.parent;
       }
       return str.substring(0, str.length - 1);
    }
 
-   mapAst(astNode: AstNode, symbol: Symbol | Type) {
-      if (symbol instanceof Symbol) {
+   mapAst(astNode: AstNode, kind: "TERM" | "TYPE", symbol: Symbol) {
+      if (kind === "TERM") {
          this.symbolsByAst.set(astNode, symbol);
-      } else if (symbol instanceof Type) {
+      } else {
          this.typeSymbolsByAst.set(astNode, symbol);
       }
    }
 
    // Define a new symbol in the current scope
-   declare(name: string, symbol: Symbol, redeclare: boolean = false) {
+   declare(symbol: Symbol, redeclare: boolean = false) {
+      const name = symbol.name;
       if (this.symbols.has(name)) {
          const existingSymbol = this.symbols.get(name);
          if (existingSymbol?.typeSymbol instanceof UncheckedType) {
             existingSymbol.rewriteFrom(symbol);
             return;
-         } else if (existingSymbol && existingSymbol.run == this.run) {
+         } else if (
+            existingSymbol &&
+            existingSymbol.iteration == this.iteration
+         ) {
             if (!redeclare) {
                throw new Error(`Symbol ${name} is already declared.`);
             }
          } else {
-            symbol.run = this.run;
+            symbol.iteration = this.iteration;
          }
       }
-      // console.log(
-      //    `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
-      // );
-      symbol.run = this.run;
+      console.log(
+         `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
+      );
+      symbol.iteration = this.iteration;
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
       }
@@ -189,18 +193,20 @@ export class Scope {
       }
    }
 
-   declareType(name: string, typeSymbol: Type) {
+   declareType(symbol: Symbol) {
+      const name = symbol.name;
+      const typeSymbol = symbol.typeSymbol;
       if (this.typeSymbols.has(name)) {
          const existingSymbol = this.typeSymbols.get(name);
-         if (existingSymbol && existingSymbol.run == this.run) {
+         if (existingSymbol && existingSymbol.iteration == this.iteration) {
             throw new Error(`Symbol ${name} is already declared.`);
          } else {
-            typeSymbol.run = this.run;
+            symbol.iteration = this.iteration;
          }
       }
       typeSymbol.name = name;
-      // console.log(name + ": " + typeSymbol);
-      typeSymbol.run = this.run;
+      console.log(name + ": " + typeSymbol + "  -  " + this.toPath());
+      symbol.iteration = this.iteration;
       if (
          typeSymbol instanceof SquareTypeToTypeLambdaType &&
          typeSymbol.returnType instanceof StructType
@@ -220,7 +226,7 @@ export class Scope {
                )
             )
          );
-         this.declare(constructorName, constructorSymbol);
+         this.declare(constructorSymbol);
       } else if (typeSymbol instanceof StructType) {
          const constructorName = getConstructorName(name);
          const constructorSymbol = new Symbol(
@@ -230,14 +236,14 @@ export class Scope {
                new NamedType(name)
             )
          );
-         this.declare(constructorName, constructorSymbol);
+         this.declare(constructorSymbol);
       } else if (typeSymbol instanceof MarkerType) {
          const constructorName = getConstructorName(name);
          const constructorSymbol = new Symbol(
             constructorName,
             new RoundValueToValueLambdaType([], new NamedType(name))
          );
-         this.declare(constructorName, constructorSymbol);
+         this.declare(constructorSymbol);
       } else if (
          typeSymbol instanceof RoundValueToValueLambdaType &&
          typeSymbol.returnType instanceof StructType
@@ -252,14 +258,14 @@ export class Scope {
                typeSymbol
             ).named(constructorName)
          );
-         this.declare(constructorName, constructorSymbol);
+         this.declare(constructorSymbol);
       }
 
       typeSymbol.name = name;
       if (!typeSymbol.index) {
          typeSymbol.index = this.currentIndex++;
       }
-      this.typeSymbols.set(name, typeSymbol);
+      this.typeSymbols.set(name, symbol);
    }
 
    // Lookup a symbol, check parent scope if not found
@@ -302,15 +308,22 @@ export class Scope {
       );
    }
 
-   lookupType(name: string, scopeName: string = ""): Type {
+   lookupType(name: string, scopeName: string = ""): Symbol {
       if (this.typeSymbols.has(name)) {
-         (this.typeSymbols.get(name) as Type).name = name;
          return this.typeSymbols.get(name) as any;
       } else if (this.parent) {
-         return this.parent.lookupType(name, this.name + "." + scopeName);
+         return this.parent.lookupType(
+            name,
+            this.name + "/" + this.id + "." + scopeName
+         );
       }
       throw new Error(
-         `Type Symbol ${name} not found. Scope = ` + this.name + "." + scopeName
+         `Type Symbol ${name} not found. Scope = ` +
+            this.name +
+            "." +
+            scopeName +
+            ". Iteration = " +
+            this.iteration
       );
    }
 
@@ -327,9 +340,9 @@ export class Scope {
       );
    }
 
-   resolveNamedType(type: Type) {
+   resolveNamedType(type: Type): Type {
       if (type instanceof NamedType) {
-         const realType = this.lookupType(type.name);
+         const realType = this.lookupType(type.name).typeSymbol;
          realType.name = type.name;
          return realType;
       } else {
@@ -505,10 +518,12 @@ export class TypePhaseContext {
          this.fileScope.absorbAllFrom(s);
       });
       for (const t in NamedType.PRIMITIVE_TYPES) {
-         this.languageScope.typeSymbols.set(t, NamedType.PRIMITIVE_TYPES[t]);
+         this.languageScope.typeSymbols.set(
+            t,
+            new Symbol(t, NamedType.PRIMITIVE_TYPES[t])
+         );
       }
       this.languageScope.declare(
-         "print",
          new Symbol(
             "print",
             new RoundValueToValueLambdaType(
@@ -519,7 +534,6 @@ export class TypePhaseContext {
          )
       );
       this.languageScope.declare(
-         "debug",
          new Symbol(
             "debug",
             new RoundValueToValueLambdaType(
@@ -530,12 +544,12 @@ export class TypePhaseContext {
          )
       );
       const innerArrayScope = new Scope("inner-array", this.languageScope);
-      innerArrayScope.declareType("T", new GenericNamedType("T"));
+      innerArrayScope.declareType(new Symbol("T", new GenericNamedType("T")));
       const arrayStruct = new StructType("Array", [
          new ParamType(
             new RoundValueToValueLambdaType(
                [],
-               this.languageScope.lookupType("Number")
+               this.languageScope.lookupType("Number").typeSymbol
             ),
             "length"
          ),
@@ -553,9 +567,8 @@ export class TypePhaseContext {
       );
       arrayStruct.name = "Array";
       arrayLambdaType.name = "Array";
-      this.languageScope.declareType("Array", arrayLambdaType);
+      this.languageScope.declareType(new Symbol("Array", arrayLambdaType));
       this.languageScope.declare(
-         "Array@of",
          new Symbol(
             "Array@of",
             new SquareTypeToValueLambdaType(
@@ -578,7 +591,6 @@ export class TypePhaseContext {
          true
       );
       this.languageScope.declare(
-         "copy",
          new Symbol(
             "copy",
             new SquareTypeToValueLambdaType(
@@ -592,7 +604,6 @@ export class TypePhaseContext {
          )
       );
       this.languageScope.declare(
-         "nothing",
          new Symbol(
             "nothing",
             NamedType.PRIMITIVE_TYPES.Nothing,
@@ -600,10 +611,12 @@ export class TypePhaseContext {
          )
       );
 
+      this.languageScope.setIteration("DECLARATION");
+      this.fileScope.setIteration("DECLARATION"); // Recursive
       this.builder.build(ast, this.fileScope);
       this.run = 1;
-      this.languageScope.setRun(1);
-      this.fileScope.setRun(1); // Recursive
+      this.languageScope.setIteration("RESOLUTION");
+      this.fileScope.setIteration("RESOLUTION"); // Recursive
       this.builder.build(ast, this.fileScope);
       return this;
    }

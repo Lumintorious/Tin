@@ -29,7 +29,7 @@ import {
    RecursiveResolutionOptions,
 } from "./Scope";
 import { TypeErrorList } from "./TypeChecker";
-import { ParamType, AnyTypeClass } from "./Types";
+import { ParamType, AnyTypeClass, UncheckedType } from "./Types";
 import { AstNode, Statement, AppliedKeyword } from "./Parser";
 import {
    Type,
@@ -204,7 +204,7 @@ export class TypeInferencer {
       const innerScope = scope.innerScopeOf(node);
       const trueBranchType = this.infer(
          node.trueBranch,
-         innerScope.innerScopeOf(node.trueBranch)
+         innerScope.innerScopeOf(node.trueBranch, true)
       );
       let falseBranchType = NamedType.PRIMITIVE_TYPES.Nothing;
       if (node.falseBranch !== undefined) {
@@ -214,12 +214,6 @@ export class TypeInferencer {
    }
 
    inferTypeDef(node: TypeDef, scope: Scope): Type {
-      const innerScope = scope.innerScopeOf(node, true);
-      node.fieldDefs.forEach((fd) => {
-         if (fd.defaultValue) {
-            this.context.builder.build(fd.defaultValue, innerScope);
-         }
-      });
       return new TypeOfTypes();
    }
 
@@ -344,14 +338,6 @@ export class TypeInferencer {
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
       ) {
-         const mappings: { [_: string]: Type } = {};
-         this.fillInSquareApplyParamsOnRoundApply(
-            calleeType.returnType,
-            calleeType,
-            node,
-            scope,
-            mappings
-         );
          const squareArgs = node.autoFilledSquareParams;
 
          const calledArgs = squareArgs;
@@ -376,7 +362,7 @@ export class TypeInferencer {
       throw new Error(
          `Not calling a function. Object ${
             node.callee.tag
-         } is of type ${calleeType.toString()}`
+         } is of type ${calleeType.toString()} - ${node.position?.start.line}`
       );
    }
 
@@ -415,7 +401,7 @@ export class TypeInferencer {
          ownerType = ownerType.resolved;
       }
       if (ownerType instanceof NamedType) {
-         ownerType = scope.lookupType(ownerType.name);
+         ownerType = scope.lookupType(ownerType.name).typeSymbol;
       }
       const fields = this.getAllKnownFields(ownerType, scope);
       const found = findField(node.field, fields);
@@ -453,6 +439,9 @@ export class TypeInferencer {
       }
 
       if (type instanceof NamedType) {
+         if (type.isPrimitive()) {
+            return new Map([]);
+         }
          return this.getAllKnownFields(scope.resolveNamedType(type), scope);
       }
       if (type instanceof StructType) {
@@ -505,6 +494,8 @@ export class TypeInferencer {
          return new Map([]);
       } else if (type instanceof RoundValueToValueLambdaType) {
          return new Map([]);
+      } else if (type instanceof AnyTypeClass) {
+         return new Map([]);
       } else {
          throw new Error(
             "Could not deduce fields of type " +
@@ -536,10 +527,12 @@ export class TypeInferencer {
                );
             }
          } else if (node instanceof IfStatement) {
-            const ifScope = thisScope.innerScopeOf(node);
+            const ifScope = thisScope.innerScopeOf(node, true);
             findReturns(
                node.trueBranch,
-               ifScope.innerScopeOf(node.trueBranch),
+               node.trueBranch instanceof Block
+                  ? ifScope.innerScopeOf(node.trueBranch, true)
+                  : ifScope,
                acc
             );
             if (node.falseBranch) {
@@ -586,7 +579,10 @@ export class TypeInferencer {
       if (node.type === "Void") {
          return NamedType.PRIMITIVE_TYPES.Nothing;
       }
-      return new LiteralType(String(node.value), scope.lookupType(node.type));
+      return new LiteralType(
+         String(node.value),
+         scope.lookupType(node.type).typeSymbol
+      );
    }
 
    inferIdentifier(node: Identifier, scope: Scope) {
@@ -625,7 +621,7 @@ export class TypeInferencer {
       StringAnyString: ["+"],
    };
 
-   inferBinaryExpression(node: BinaryExpression, scope: Scope) {
+   inferBinaryExpression(node: BinaryExpression, scope: Scope): Type {
       const leftType = this.infer(node.left, scope);
       const rightType = this.infer(node.right, scope);
       // Here, you would define the logic to determine the resulting type based on the operator
@@ -633,10 +629,10 @@ export class TypeInferencer {
       const Number = scope.lookupType("Number");
       const String = scope.lookupType("String");
       const Boolean = scope.lookupType("Boolean");
-      if (leftType.isAssignableTo(String, scope)) {
+      if (leftType.isAssignableTo(String.typeSymbol, scope)) {
          const entry = this.DEFINED_OPERATIONS.StringAnyString;
          if (entry.includes(node.operator)) {
-            return String;
+            return String.typeSymbol;
          }
       }
       if (node.operator === "?:") {
@@ -645,22 +641,22 @@ export class TypeInferencer {
          return this.deduceCommonType(leftType, rightType, scope);
       }
       if (
-         (leftType.isAssignableTo(Number, scope) &&
-            rightType.isAssignableTo(Number, scope),
+         (leftType.isAssignableTo(Number.typeSymbol, scope) &&
+            rightType.isAssignableTo(Number.typeSymbol, scope),
          scope)
       ) {
          const entry = this.DEFINED_OPERATIONS.NumberNumberNumber;
          if (entry.includes(node.operator)) {
-            return Number;
+            return Number.typeSymbol;
          }
       }
       if (
-         leftType.isAssignableTo(Number, scope) &&
-         rightType.isAssignableTo(Number, scope)
+         leftType.isAssignableTo(Number.typeSymbol, scope) &&
+         rightType.isAssignableTo(Number.typeSymbol, scope)
       ) {
          const entry = this.DEFINED_OPERATIONS.NumberNumberBoolean;
          if (entry.includes(node.operator)) {
-            return Boolean;
+            return Boolean.typeSymbol;
          }
       }
 
@@ -681,10 +677,12 @@ export class TypeInferencer {
       node.parameterTypes.forEach((p) => {
          if (p instanceof Assignment && p.lhs instanceof Identifier) {
             paramScope.declareType(
-               p.lhs.value,
-               new GenericNamedType(
+               new Symbol(
                   p.lhs.value,
-                  p.value ? this.infer(p.value, scope) : undefined
+                  new GenericNamedType(
+                     p.lhs.value,
+                     p.value ? this.infer(p.value, scope) : undefined
+                  )
                )
             );
          }
@@ -702,22 +700,6 @@ export class TypeInferencer {
       return type;
    }
 
-   // func = [T, X] -> (thing: T, other: X) -> 2
-   // func(12, "Hello")
-   // T: Number, X: String
-   fillInSquareApplyParamsOnRoundApply(
-      roundLambda: RoundValueToValueLambdaType,
-      squareLambda: SquareTypeToValueLambdaType,
-      roundApply: RoundApply,
-      scope: Scope,
-      mappings: { [_: string]: Type }
-   ) {
-      // for(let calledParam of)
-      // console.log(roundLambda);
-      // console.log(squareLambda);
-      // console.log(roundApply);
-   }
-
    // (i: Number) -> i + 2
    inferRoundValueToValueLambda(
       node: RoundValueToValueLambda,
@@ -728,7 +710,6 @@ export class TypeInferencer {
          return new TypeOfTypes();
       }
       const innerScope = scope.innerScopeOf(node, true);
-      innerScope.run = this.context.run;
       let paramsAsTypes: ParamType[] = [];
       // Check for Varargs expected type
       if (
@@ -740,7 +721,7 @@ export class TypeInferencer {
       ) {
          const param = node.params[0];
          const paramType = new AppliedGenericType(
-            innerScope.lookupType("Array"),
+            innerScope.lookupType("Array").typeSymbol,
             [
                this.context.translator.translate(
                   node.params[0].type.expression,
@@ -753,7 +734,6 @@ export class TypeInferencer {
          if (param instanceof Assignment && param.lhs instanceof Identifier) {
             if (!innerScope.hasSymbol(param.lhs.value)) {
                innerScope.declare(
-                  param.lhs.value,
                   new Symbol(param.lhs.value, paramType, param)
                );
             }
@@ -785,7 +765,9 @@ export class TypeInferencer {
          const params = [];
          node.params.forEach((p) => {
             if (p instanceof Assignment && p.lhs instanceof Identifier) {
-               innerScope.declareType(p.lhs.value, new NamedType(p.lhs.value));
+               innerScope.declareType(
+                  new Symbol(p.lhs.value, new NamedType(p.lhs.value))
+               );
             }
          });
          const returnType = this.context.translator.translate(
@@ -799,6 +781,9 @@ export class TypeInferencer {
          );
          return lambdaType;
       } else {
+         // if (scope.iteration === "DECLARATION") {
+         //    return new UncheckedType();
+         // }
          const returnType = this.infer(node.block, innerScope);
          if (node.explicitType) {
             const explicitType = this.context.translator.translate(

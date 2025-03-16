@@ -60,6 +60,22 @@ export class UncheckedType extends Type {
    constructor() {
       super("Unchecked");
    }
+
+   isAssignableTo(other: Type, scope: Scope): boolean {
+      return false;
+   }
+
+   extends(other: Type, scope: Scope): boolean {
+      return false;
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return false;
+   }
+
+   toString(): string {
+      return "Unchecked";
+   }
 }
 
 export class AnyTypeClass extends Type {
@@ -130,7 +146,7 @@ export class NamedType extends Type {
       ) {
          return true;
       }
-      if (realType instanceof NamedType) {
+      if (realType.typeSymbol instanceof NamedType) {
          if (super.isAssignableTo(other, scope)) {
             return true;
          }
@@ -142,9 +158,9 @@ export class NamedType extends Type {
          }
          return false;
       }
-      realType.name = this.name;
+      realType.typeSymbol.name = this.name;
 
-      return realType.isAssignableTo(other, scope);
+      return realType.typeSymbol.isAssignableTo(other, scope);
    }
 
    extends(other: Type, scope: Scope) {

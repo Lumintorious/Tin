@@ -6,3 +6,5 @@ min = (a: Number, b: Number) ->
 
 floor = (n: Number) ->
 	n - (n % 1)
+
+	

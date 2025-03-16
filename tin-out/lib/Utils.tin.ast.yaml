@@ -1,21 +1,28 @@
+id: 105
 tag: Block
 statements:
-  - tag: Assignment
+  - id: 69
+    tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
+      id: 50
       tag: Identifier
       value: max
     value:
+      id: 68
       tag: RoundValueToValueLambda
       params:
-        - tag: Assignment
+        - id: 54
+          tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
+            id: 51
             tag: Identifier
             value: a
           type:
+            id: 52
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -29,13 +36,16 @@ statements:
               line: 1
               column: 18
               absolute: 17
-        - tag: Assignment
+        - id: 59
+          tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
+            id: 56
             tag: Identifier
             value: b
           type:
+            id: 57
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -50,22 +60,29 @@ statements:
               column: 29
               absolute: 28
       block:
+        id: 67
         tag: Block
         statements:
-          - tag: IfStatement
+          - id: 66
+            tag: IfStatement
             condition:
+              id: 63
               tag: BinaryExpression
               left:
+                id: 61
                 tag: Identifier
                 value: a
               operator: >
               right:
+                id: 62
                 tag: Identifier
                 value: b
             trueBranch:
+              id: 64
               tag: Identifier
               value: a
             falseBranch:
+              id: 65
               tag: Identifier
               value: b
             position:
@@ -89,22 +106,28 @@ statements:
         line: 4
         column: 4
         absolute: 59
-  - tag: Assignment
+  - id: 89
+    tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
+      id: 70
       tag: Identifier
       value: min
     value:
+      id: 88
       tag: RoundValueToValueLambda
       params:
-        - tag: Assignment
+        - id: 74
+          tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
+            id: 71
             tag: Identifier
             value: a
           type:
+            id: 72
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -118,13 +141,16 @@ statements:
               line: 4
               column: 18
               absolute: 73
-        - tag: Assignment
+        - id: 79
+          tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
+            id: 76
             tag: Identifier
             value: b
           type:
+            id: 77
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -139,22 +165,29 @@ statements:
               column: 29
               absolute: 84
       block:
+        id: 87
         tag: Block
         statements:
-          - tag: IfStatement
+          - id: 86
+            tag: IfStatement
             condition:
+              id: 83
               tag: BinaryExpression
               left:
+                id: 81
                 tag: Identifier
                 value: a
               operator: <
               right:
+                id: 82
                 tag: Identifier
                 value: b
             trueBranch:
+              id: 84
               tag: Identifier
               value: a
             falseBranch:
+              id: 85
               tag: Identifier
               value: b
             position:
@@ -178,22 +211,28 @@ statements:
         line: 7
         column: 6
         absolute: 117
-  - tag: Assignment
+  - id: 104
+    tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
+      id: 90
       tag: Identifier
       value: floor
     value:
+      id: 103
       tag: RoundValueToValueLambda
       params:
-        - tag: Assignment
+        - id: 94
+          tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
+            id: 91
             tag: Identifier
             value: n
           type:
+            id: 92
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -208,22 +247,29 @@ statements:
               column: 20
               absolute: 131
       block:
+        id: 102
         tag: Block
         statements:
-          - tag: BinaryExpression
+          - id: 101
+            tag: BinaryExpression
             left:
+              id: 96
               tag: Identifier
               value: n
             operator: -
             right:
+              id: 100
               tag: Group
               value:
+                id: 99
                 tag: BinaryExpression
                 left:
+                  id: 97
                   tag: Identifier
                   value: n
                 operator: %
                 right:
+                  id: 98
                   tag: Literal
                   type: Number
                   value: 1

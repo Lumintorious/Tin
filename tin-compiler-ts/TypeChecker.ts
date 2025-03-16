@@ -59,10 +59,10 @@ export class TypeChecker {
    resolvedGeneric(type: AppliedGenericType, scope: Scope): Type {
       let callee = type.callee;
       if (callee instanceof Identifier) {
-         callee = scope.lookupType(callee.value);
+         callee = scope.lookupType(callee.value).typeSymbol;
       }
       if (callee instanceof NamedType) {
-         callee = scope.lookupType(callee.name);
+         callee = scope.lookupType(callee.name).typeSymbol;
       }
       if (callee && callee instanceof RoundValueToValueLambdaType) {
          const actualParams = type.parameterTypes;
