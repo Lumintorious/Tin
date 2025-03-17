@@ -10,15 +10,38 @@ import path from "node:path";
 import { TypePhaseContext } from "./Scope";
 
 Error.stackTraceLimit = 40;
-const SRC_PATH = path.resolve(process.cwd(), "src");
-const OUT_PATH = path.resolve(process.cwd(), "tin-out");
+const isTesting = process.argv.includes("--test");
+const SRC_PATH = path.resolve(process.cwd(), isTesting ? "tests" : "src");
+const OUT_PATH = path.resolve(
+   process.cwd(),
+   isTesting ? "tin-out-tests" : "tin-out"
+);
+if (!process.argv.includes("--verbose")) {
+   const log = console.log;
+   console.log = (message) => {
+      if (!String(message).startsWith("#")) {
+         log(message);
+      }
+   };
+} else {
+   const log = console.log;
+   console.log = (message) => {
+      if (String(message).startsWith("#")) {
+         log(message.substring(1).trim());
+      } else {
+         log(message);
+      }
+   };
+}
 
 function fromSrcToOut(pathStr: string) {
    if (pathStr.startsWith(SRC_PATH)) {
       pathStr = pathStr.substring(SRC_PATH.length + 1);
       return path.resolve(OUT_PATH, pathStr);
    }
-   throw new Error("Src Path wasn't in /src");
+   throw new Error(
+      "Src Path wasn't in the correct directory, was in " + pathStr
+   );
 }
 
 function tokenTablePrint(tokens: Token[]) {
@@ -149,7 +172,7 @@ function objectToYAML(obj: object, omitFields: string[] = [], indentLevel = 0) {
 }
 
 function fullPath(pathStr: string) {
-   return path.resolve(process.cwd(), "src", pathStr);
+   return path.resolve(process.cwd(), isTesting ? "tests" : "src", pathStr);
 }
 
 async function getImports(
@@ -197,7 +220,6 @@ async function compile(
       // READ
       const inputContents: string = await files.readFile(inputFile, "utf-8");
       ensureParentDirs(fromSrcToOut(inputFile));
-
       // LEXER
       const tokens = lexerPhase(inputContents);
       await files.writeFile(
@@ -222,7 +244,15 @@ async function compile(
       );
       const context = new TypePhaseContext(inputFile, ast, scopes);
       context.checker.typeCheck(ast, context.fileScope);
-      context.errors.throwAll();
+      const errors = context.errors.getErrors();
+      if (errors) {
+         if (isTesting) {
+            return Promise.reject(new Error(errors));
+         } else {
+            console.error("\x1b[31m" + errors + "\x1b[0m");
+            process.exit(-1);
+         }
+      }
 
       // TRANSLATION
       const translatedString = translateFile(ast, context.fileScope);
@@ -261,5 +291,78 @@ async function compile(
    }
 }
 
-const allPath = path.resolve(process.cwd(), "src", inputFile);
-void compile(allPath, true, new Map());
+async function run() {
+   const allPath = path.resolve(
+      process.cwd(),
+      isTesting ? "tests" : "src",
+      inputFile
+   );
+   if (isTesting) {
+      const folderPath = path.resolve(process.cwd(), "tests");
+      const files = fs.readdirSync(folderPath, {
+         recursive: true,
+         withFileTypes: true,
+      });
+      let errorsAmount = 0;
+      async function doTest(pathStr: string, file: fs.Dirent) {
+         if (file.name.endsWith(".tin")) {
+            const fileNameShort = file.name;
+            const fileName = path.resolve(pathStr, fileNameShort);
+            const log = console.log;
+            const nameToLog = fileName.substring(folderPath.length + 1);
+            console.log = () => {};
+            try {
+               process.stdout.write("\x1b[34m[ ] " + nameToLog + "\x1b[0m");
+               console.log = () => {};
+               await compile(fileName, false, new Map());
+               console.log = log;
+               process.stdout.write("\r\x1b[K");
+               process.stdout.write(`\x1b[32m[✓] ${nameToLog}\x1b[0m\n`);
+            } catch (e) {
+               if (e instanceof Error) {
+                  errorsAmount++;
+                  console.log = log;
+                  process.stdout.write("\r\x1b[K");
+                  process.stdout.write(
+                     `\x1b[31m[x] ${nameToLog}\n    ${e.message.replaceAll(
+                        "\n",
+                        "\n    "
+                     )}\x1b[0m\n`
+                  );
+               }
+            }
+         } else if (file.isDirectory()) {
+            const name = path.resolve(pathStr, file.name);
+            const files = fs.readdirSync(name, {
+               recursive: true,
+               withFileTypes: true,
+            });
+            files.sort((a, b) => (a.isDirectory() ? 0 : 1));
+            for (let file of files) {
+               await doTest(name, file);
+            }
+         }
+      }
+      files.sort((a, b) => (b.isDirectory() ? -1 : 1));
+      for (let file of files) {
+         await doTest(folderPath, file);
+      }
+      if (errorsAmount) {
+         process.stdout.write(
+            `\n\x1b[41m====> Oh, there ${
+               errorsAmount === 1 ? "is" : "are"
+            } ${errorsAmount} ${
+               errorsAmount === 1 ? "test failure" : "test failures"
+            }.\x1b[0m`
+         );
+      } else {
+         process.stdout.write(
+            `\n\x1b[42m====> Great, all tests passed!\x1b[0m`
+         );
+      }
+   } else {
+      void compile(allPath, true, new Map());
+   }
+}
+
+run();

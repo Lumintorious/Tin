@@ -1,5 +1,5 @@
 import { TokenPos } from "./Lexer";
-import { SquareTypeToValueLambda, SquareApply } from "./Parser";
+import { SquareTypeToValueLambda, SquareApply, WhileLoop } from "./Parser";
 import {
    SquareTypeToTypeLambda,
    Change,
@@ -19,7 +19,6 @@ import { ParamType } from "./Types";
 import { RoundValueToValueLambda, TypeDef } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
 import {
-   AnyType,
    AppliedGenericType,
    BinaryOpType,
    GenericNamedType,
@@ -98,6 +97,21 @@ export class TypeChecker {
       this.typeCheck(node.value, scope);
       const leftType = this.context.inferencer.infer(node.lhs, scope);
       const rightType = this.context.inferencer.infer(node.value, scope);
+      // if (node.lhs instanceof Identifier) {
+      //    let symbol = scope.lookup(node.lhs.value);
+      //    if (symbol.shadowing) {
+      //       symbol = symbol.shadowing;
+      //       scope.remove(symbol.name);
+      //    }
+      //    if (!symbol.isMutable) {
+      //       this.context.errors.add(
+      //          `Setting of mutable ${node.lhs.value}`,
+      //          rightType,
+      //          rightType,
+      //          node.position
+      //       );
+      //    }
+      // }
       if (!rightType.isAssignableTo(leftType, scope)) {
          if (node.lhs instanceof Identifier) {
             const symbol = scope.lookup(node.lhs.value);
@@ -149,7 +163,7 @@ export class TypeChecker {
       } else if (node instanceof SquareTypeToValueLambda) {
          this.typeCheckSquareTypeToValueLambda(node, scope);
       } else if (node instanceof SquareTypeToTypeLambda) {
-         this.typeCheck(node.returnType, scope);
+         this.typeCheck(node.returnType, scope.innerScopeOf(node));
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node);
          const trueScope = innerScope.innerScopeOf(node.trueBranch);
@@ -157,6 +171,12 @@ export class TypeChecker {
          this.typeCheck(node.trueBranch, trueScope);
          if (node.falseBranch) {
             this.typeCheck(node.falseBranch, innerScope);
+         }
+      } else if (node instanceof WhileLoop) {
+         const innerScope = scope.innerScopeOf(node);
+         this.typeCheck(node.condition, innerScope);
+         if (node.eachLoop) {
+            this.typeCheck(node.eachLoop, innerScope);
          }
       } else if (node instanceof RoundTypeToTypeLambda) {
          this.checkLambdaParamsValidity(
@@ -267,7 +287,9 @@ export class TypeChecker {
       } catch (e) {
          // It's ok, it wasn't a type lambda
       }
-      const calleeType = this.context.inferencer.infer(apply.callee, scope);
+      const calleeType = scope.resolveNamedType(
+         this.context.inferencer.infer(apply.callee, scope)
+      );
       if (!(calleeType instanceof SquareTypeToValueLambdaType)) {
          throw new Error(
             "Cannot call non-square lambda with square parameters, was " +
@@ -344,11 +366,11 @@ export class TypeChecker {
 
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
-         apply.args.forEach((p, i) => {
-            this.typeCheck(p[1], scope, {
-               typeExpectedInPlace: params[i]?.type,
-            });
-         });
+         // apply.args.forEach((p, i) => {
+         //    this.typeCheck(p[1], scope, {
+         //       typeExpectedInPlace: params[i]?.type,
+         //    });
+         // });
          if (
             params[0] &&
             params[0].type instanceof AppliedGenericType &&
@@ -493,7 +515,9 @@ export class TypeChecker {
             options.typeExpectedInPlace instanceof RoundValueToValueLambdaType
          ) {
             appliedType = this.context.inferencer.infer(applyArg[1], scope, {
-               typeExpectedInPlace: options.typeExpectedInPlace.params[i].type,
+               typeExpectedInPlace:
+                  options.typeExpectedInPlace.params[i + hasThisParamIncrement]
+                     .type,
             });
          } else {
             appliedType = this.context.inferencer.infer(applyArg[1], scope);
@@ -571,6 +595,17 @@ export class TypeErrorList {
       position?: TokenPos,
       errorForStack?: Error
    ) {
+      for (let error of this.errors) {
+         if (
+            error.hint === hint &&
+            (expectedType === undefined ||
+               expectedType.toString() === error.expectedType?.toString()) &&
+            (insertedType === undefined ||
+               insertedType.toString() === error.insertedType?.toString())
+         ) {
+            return;
+         }
+      }
       this.errors.push({
          hint,
          expectedType,
@@ -580,7 +615,7 @@ export class TypeErrorList {
       });
    }
 
-   throwAll(showStack = true) {
+   getErrors(showStack = true) {
       if (this.errors.length > 0) {
          const message =
             "There are type errors:\n" +
@@ -596,8 +631,7 @@ export class TypeErrorList {
                      }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}`
                )
                .join("\n");
-         console.error("\x1b[31m" + message + " \x1b[0m");
-         process.exit(-1);
+         return message;
       }
    }
 }

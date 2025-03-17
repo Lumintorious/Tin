@@ -19,7 +19,6 @@ import {
    SquareTypeToTypeLambdaType,
    BinaryOpType,
    RoundValueToValueLambdaType,
-   AnyType,
 } from "./Types";
 import {
    Select,
@@ -29,7 +28,7 @@ import {
    Identifier,
 } from "./Parser";
 import { type } from "os";
-import { TypeDef } from "./Parser";
+import { TypeDef, AppliedKeyword } from "./Parser";
 import { Symbol } from "./Scope";
 import { NamedType, TypeOfTypes, AnyTypeClass } from "./Types";
 import { SquareTypeToValueLambdaType } from "./Types";
@@ -48,11 +47,18 @@ export class TypeBuilder {
    }
 
    // Walk through the AST and infer types for definitions
+   private buildCache = new Set<string>();
    build(
       node: AstNode,
       scope: Scope,
       options: RecursiveResolutionOptions = {}
    ) {
+      const cachedString = `${node.id}.${scope.id}.${scope.iteration}`;
+      if (this.buildCache.has(cachedString)) {
+         return;
+      } else {
+         this.buildCache.add(cachedString);
+      }
       if (node instanceof Assignment) {
          this.buildSymbolForAssignment(node, scope, options);
       } else if (node instanceof Block) {
@@ -62,6 +68,8 @@ export class TypeBuilder {
          );
       } else if (node instanceof RoundApply) {
          this.buildRoundApply(node, scope);
+      } else if (node instanceof AppliedKeyword) {
+         this.build(node.param, scope);
       } else if (node instanceof RoundValueToValueLambda) {
          this.buildRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
@@ -245,9 +253,10 @@ export class TypeBuilder {
             }
          }
       } else {
+         const thisOffset = calleeType?.params?.[0]?.name === "this" ? 1 : 0;
          node.args.forEach((statement, i) =>
             this.build(statement[1], scope, {
-               typeExpectedInPlace: calleeType?.params?.[i]?.type,
+               typeExpectedInPlace: calleeType?.params?.[i + thisOffset]?.type,
             })
          );
       }
@@ -341,14 +350,14 @@ export class TypeBuilder {
       options: RecursiveResolutionOptions
    ) {
       // If it's not a declaration
-      if (
-         this.context.run == 0 &&
-         node.lhs instanceof Identifier &&
-         scope.hasSymbol(node.lhs.value)
-      ) {
-         node.isDeclaration = false;
-         return;
-      }
+      // if (
+      //    this.context.run == 0 &&
+      //    node.lhs instanceof Identifier &&
+      //    scope.hasSymbol(node.lhs.value)
+      // ) {
+      //    node.isDeclaration = false;
+      //    return;
+      // }
 
       const lhs = node.lhs;
       // When lambda like (i) -> i + 1 with i having an expected type
@@ -357,7 +366,11 @@ export class TypeBuilder {
          options.typeExpectedInPlace &&
          node.isParameter
       ) {
-         scope.declare(new Symbol(lhs.value, options.typeExpectedInPlace));
+         scope.declare(
+            new Symbol(lhs.value, options.typeExpectedInPlace).mutable(
+               node.isMutable
+            )
+         );
       }
 
       // Means it's a parameter
@@ -368,22 +381,10 @@ export class TypeBuilder {
                this.context.translator.translate(node.type, scope),
                node
             );
-            scope.declare(symbol, true);
+            scope.declare(symbol.mutable(node.isMutable), true);
          }
          return;
       }
-      // const temporarySymbol = new Symbol("", AnyType);
-      // if (node.lhs instanceof Identifier) {
-      //    temporarySymbol.name = node.lhs.value;
-      //    if (
-      //       node.lhs.isTypeLevel ||
-      //       this.context.inferencer.isCapitalized(node.lhs.value)
-      //    ) {
-      //       scope.declareType(temporarySymbol);
-      //    } else {
-      //       scope.declare(temporarySymbol);
-      //    }
-      // }
       this.build(node.value, scope, {
          assignedName:
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
@@ -472,9 +473,9 @@ export class TypeBuilder {
                symbolToDeclare.name = node.lhs.value;
                symbolToDeclare.returnType.name = node.lhs.value;
             }
-            if (!scope.hasTypeSymbol(node.lhs.value)) {
-               scope.declareType(new Symbol(node.lhs.value, symbolToDeclare));
-            }
+            // if (!scope.hasTypeSymbol(node.lhs.value)) {
+            scope.declareType(new Symbol(node.lhs.value, symbolToDeclare));
+            // }
          }
          return;
       }
@@ -487,10 +488,10 @@ export class TypeBuilder {
 
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
-         if (!scope.hasSymbol(lhs.value)) {
-            scope.declare(symbol);
-            node.symbol = symbol;
-         }
+         // if (!scope.hasSymbol(lhs.value)) {
+         scope.declare(symbol.mutable(node.isMutable));
+         node.symbol = symbol;
+         // }
       }
    }
 

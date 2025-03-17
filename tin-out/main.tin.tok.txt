@@ -1,0 +1,67 @@
+KEYWORD      | import       |   1, 1    
+IDENTIFIER   | collections  |   1, 8    
+OPERATOR     | /            |   1, 19   
+IDENTIFIER   | Map          |   1, 20   
+NEWLINE      |              |   3, 1    
+IDENTIFIER   | Cat          |   3, 1    
+OPERATOR     | =            |   3, 5    
+KEYWORD      | type         |   3, 7    
+OPERATOR     | :            |   3, 11   
+NEWLINE      |              |   4, 1    
+INDENT       | 4            |   4, 1    
+IDENTIFIER   | name         |   4, 2    
+OPERATOR     | :            |   4, 6    
+IDENTIFIER   | String       |   4, 8    
+NEWLINE      |              |   6, 1    
+DEDENT       | 4            |   6, 1    
+IDENTIFIER   | Dog          |   6, 1    
+OPERATOR     | =            |   6, 5    
+KEYWORD      | type         |   6, 7    
+OPERATOR     | :            |   6, 11   
+NEWLINE      |              |   7, 1    
+INDENT       | 4            |   7, 1    
+IDENTIFIER   | breed        |   7, 2    
+OPERATOR     | :            |   7, 7    
+IDENTIFIER   | String       |   7, 9    
+NEWLINE      |              |   8, 1    
+IDENTIFIER   | woof         |   8, 2    
+OPERATOR     | =            |   8, 7    
+PARENS       | (            |   8, 9    
+IDENTIFIER   | this         |   8, 10   
+OPERATOR     | :            |   8, 14   
+IDENTIFIER   | Dog          |   8, 16   
+PARENS       | )            |   8, 19   
+OPERATOR     | ->           |   8, 21   
+NEWLINE      |              |   9, 1    
+INDENT       | 8            |   9, 1    
+IDENTIFIER   | print        |   9, 3    
+PARENS       | (            |   9, 8    
+IDENTIFIER   | this         |   9, 9    
+OPERATOR     | .            |   9, 13   
+IDENTIFIER   | breed        |   9, 14   
+PARENS       | )            |   9, 19   
+NEWLINE      |              |  10, 1    
+IDENTIFIER   | this         |  10, 3    
+NEWLINE      |              |  12, 1    
+DEDENT       | 8            |  12, 1    
+DEDENT       | 4            |  12, 1    
+IDENTIFIER   | what         |  12, 1    
+OPERATOR     | =            |  12, 6    
+IDENTIFIER   | Cat          |  12, 8    
+PARENS       | (            |  12, 11   
+STRING       | Kitty        |  12, 12   
+PARENS       | )            |  12, 19   
+OPERATOR     | &            |  12, 21   
+IDENTIFIER   | Dog          |  12, 23   
+PARENS       | (            |  12, 26   
+STRING       | Spotted      |  12, 27   
+PARENS       | )            |  12, 36   
+NEWLINE      |              |  13, 1    
+IDENTIFIER   | whatt        |  13, 1    
+OPERATOR     | =            |  13, 7    
+IDENTIFIER   | what         |  13, 9    
+OPERATOR     | .            |  13, 13   
+IDENTIFIER   | woof         |  13, 14   
+PARENS       | (            |  13, 18   
+PARENS       | )            |  13, 19   
+--undefined--

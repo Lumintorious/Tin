@@ -1,27 +1,40 @@
-function TIN_TYPE(typeId, constructorRaw, descriptor) {
+const __tin_varargs_marker = Symbol();
+
+// Object.prototype._copy = function (...args) {
+// 	const keys = Object.keys(this).flatMap(k => Object.keys(this[k]));
+// 	let i = 0;
+// 	const copyObj = {};
+// 	for (let arg of args) {
+// 		copyObj[keys[i]] = arg
+// 		i++;
+// 	}
+// 	return { ...this, ...copyObj }
+// }
+
+function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		if (result !== undefined) {
-			result.__tin_typeIds = [typeId]
-		}
-		return result;
+		return {
+			[typeId]: result
+		};
 	}
 	constructor._tinFields = descriptor;
-	constructor._tinTypeId = typeId;
-	constructor["&"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
-	constructor["|"] = () => {
-		return TIN_TYPE("", () => null, {})
-	}
+	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
-	constructor.__is_child = (obj) =>
-		obj.__tin_typeIds.includes(typeId)
+	constructor.__is_child = (obj) => {
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(typeId)
+	}
 
 	return constructor;
 }
+
+function TIN_LAMBDA_TYPE(typeId, paramTypes, returnType) {
+	return { __is_child: (f) => typeof f === "function" };
+}
+
+// function _TIN_MAKE_LAMBDA(type)
 
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj1 === undefined) {
@@ -30,9 +43,28 @@ const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj2 === undefined) {
 		return obj1
 	}
-	const result = { ...obj1, ...obj2 }
-	result.__tin_typeIds = [...(obj1.__tin_typeIds ?? []), ... (obj2.__tin_typeIds ?? [])]
-	return result
+	const commonModules = [];
+	for (let key of Reflect.ownKeys(obj1)) {
+		if (Reflect.ownKeys(obj2).includes(key)) {
+			commonModules.push(key)
+		}
+	}
+	const newObj = { ...obj1 };
+	const obj1Keys = Reflect.ownKeys(obj1)
+	const obj2Keys = Reflect.ownKeys(obj2)
+	for (let key of obj2Keys) {
+		if (obj1Keys.includes(key)) {
+			const obj2Module = obj2[key]
+			for (let originalKey of Reflect.ownKeys(obj2Module)) {
+				if (obj2Module[originalKey] !== undefined) {
+					newObj[key][originalKey] = obj2Module[originalKey]
+				}
+			}
+		} else {
+			newObj[key] = obj2[key]
+		}
+	}
+	return newObj
 }
 
 const _TIN_UNION_OBJECTS = function (obj1, obj2) {
@@ -41,22 +73,34 @@ const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 
 const nothing = undefined;
 
-const Type = TIN_TYPE("", (i) => null, {})
-const Int = TIN_TYPE("", (i) => Number(i), {})
-const String = TIN_TYPE("", (i) => String(i), {})
-const Void = TIN_TYPE("", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", (args) => ({
+const Type = TIN_TYPE("", "", (i) => null, {})
+const Int = TIN_TYPE("", "", (i) => Number(i), {})
+const String = TIN_TYPE("", "", (i) => String(i), {})
+const Void = TIN_TYPE("", "", (i) => null, {})
+const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
 	length() {
 		return args.length;
 	},
 	at(index) {
 		return args[index]
 	},
+	[__tin_varargs_marker]: true,
 	toString() {
 		const parts = args.map(x => JSON.stringify(x)).join(", ")
 		return "Array(" + parts + ")"
 	}
 }), {})
+
+const Array$of = (t) => (args) => args
+Array._typeId = "Array"
+
+const copy = (T) => (obj) => {
+	const newObj = {};
+	for (let key of Reflect.ownKeys(obj)) {
+		newObj[key] = { ...obj[key] }
+	}
+	return newObj;
+}
 
 function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
@@ -71,26 +115,42 @@ function makeString(obj) {
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return obj;
 
-	if (obj.__tin_typeIds.includes("Array")) {
-		let result = '[';
-		for (let i = 0; i < obj.length(); i++) {
-			result += obj.at(i) + (i === obj.length() - 1 ? "" : ", ")
+	if (typeof obj === 'function') {
+		return 'λ'
+	}
+
+	if (Reflect.ownKeys(obj).includes("Array")) {
+		let result = 'Array(';
+		for (let i = 0; i < obj.Array.length(); i++) {
+			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
-		return result + "]"
+		return result + ")"
 	}
 
 	if (typeof obj === 'object') {
-		let result = 'data(';
-		for (let key in obj) {
-			if (obj.hasOwnProperty(key)) {
-				if (typeof obj[key] === "function" || key.startsWith("__")) {
-					continue
+		let result = '(';
+		let number = 0;
+		for (let componentKey of Reflect.ownKeys(obj)) {
+			const component = obj[componentKey]
+			// if (++number > 1) {
+			// 	result += " & "
+			// }
+			// result += componentKey + "("
+			for (let key in component) {
+				if (component.hasOwnProperty(key)) {
+					if (key.startsWith("__")) {
+						continue
+					}
+					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
 				}
-				result += makeString(key) + '=' + makeString(obj[key]) + ',';
 			}
+			if (result.length > 1 && result[result.length - 2] === ",") {
+				result = result.slice(0, -2); // Remove trailing comma and space
+			}
+			result += ", "
 		}
-		if (result.length > 1) {
-			result = result.slice(0, -1); // Remove trailing comma and space
+		if (result.length > 1 && result[result.length - 2] === ",") {
+			result = result.slice(0, -2); // Remove trailing comma and space
 		}
 		return result + ')';
 	}
@@ -108,23 +168,20 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-import * as module0 from "./collections.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
-			globalThis[key] = value;
-	  });;
-import * as module1 from "./refinements.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
+import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
 			globalThis[key] = value;
 	  });;
 ;
 export var Roll = _TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(_TIN_UNION_OBJECTS(1, 2), 3), 4), 5), 6);
 export var dicePerPlayer/* Number*/ = 5;
-export var Cup = TIN_TYPE("7994abc2-225f-4ede-8d8b-36c93215d229", (_p0) => ({dice: _p0}), {});
-export var rollDice/* () => Roll*/ = function() {
+export var Cup = TIN_TYPE("Cup", "81745c5a-9df7-458c-8fad-f45f4f6a40c7", (_p0) => ({dice: _p0}), {}); Cup._typeId = "Cup";;
+export var rollDice/* () -> Roll*/ = function() {
 return (getRandomInt(1, 7)) /* as Roll */
 };
-export var rollCup/* () => Cup*/ = function() {
+export var rollCup/* () -> Struct(Cup)*/ = function() {
 return Cup(Array(0)([rollDice(), rollDice(), rollDice(), rollDice(), rollDice()]))
 };
-export var binomialCoefficient/* (Number, Number) => Number*/ = function(n, k) {
+export var binomialCoefficient/* (n:Number, k:Number) -> Number*/ = function(n, k) {
 return ((k > n) ? (0) : ((function(){var coefficient/* Number*/ = 1;
 var i/* Number*/ = 0;
 while (i < k) {
@@ -133,34 +190,34 @@ i = i + 1
 };
 return coefficient})())) 
 };
-export var binomialProbability/* (Number, Number, Number) => Number*/ = function(k, n, p) {
+export var binomialProbability/* (k:Number, n:Number, p:Number) -> Number*/ = function(k, n, p) {
 var pComplement/* Number*/ = 1 - p;
 var nMinusK/* Number*/ = n - k;
 var coefficient/* Number*/ = binomialCoefficient(n, k);
-return coefficient * (p ** k) * (pComplement ** nMinusK)
+return (coefficient * (p ** k) * (pComplement ** nMinusK))
 };
-export var getFaceCount/* (Number, Cup) => Number*/ = function(bidFace, cup) {
+export var getFaceCount/* (bidFace:Number, cup:Cup) -> Number*/ = function(bidFace, cup) {
 var i/* Number*/ = 0;
 var count/* Number*/ = 0;
-while (i < cup.dice.length()) {
- ((cup.dice.at(i) == bidFace) ? (count = count + 1) : (null)) ;
+while (i < cup.Cup.dice.Array.length()) {
+ ((cup.Cup.dice.Array.at(i) == bidFace) ? (count = count + 1) : (null)) ;
 i = i + 1 
 };
-return count
+return (count)
 };
-export var bidProbability/* (Number, Number, Cup, Number) => Number*/ = function(bidCount, bidFace, myCup, totalCups) {
+export var bidProbability/* (bidCount:Number, bidFace:Number, myCup:Cup, totalCups:Number) -> Number*/ = function(bidCount, bidFace, myCup, totalCups) {
 var totalDice/* Number*/ = totalCups * dicePerPlayer;
 var myFaceCount/* Number*/ = getFaceCount(bidFace, myCup);
-var neededElsewhere/* Number | 0*/ = ((bidCount > myFaceCount) ? (bidCount - myFaceCount) : (0)) ;
-var remainingDice/* Number*/ = totalDice - myCup.dice.length();
+var neededElsewhere/* Number*/ = ((bidCount > myFaceCount) ? (bidCount - myFaceCount) : (0)) ;
+var remainingDice/* Number*/ = totalDice - myCup.Cup.dice.Array.length();
 var probability/* Number*/ = 0;
-var i/* Number | 0*/ = neededElsewhere;
+var i/* Number*/ = neededElsewhere;
 while (i < remainingDice) {
  probability = probability + binomialProbability(i, remainingDice, 1 / 3);
 i = i + 1 
 };
-return probability
+return (probability)
 };
-export var myCup/* Cup*/ = rollCup();
-print(myCup.dice);
+export var myCup/* Struct(Cup)*/ = rollCup();
+print(myCup.Cup.dice);
 print(bidProbability(4, 3, Cup(Array(0)([3, 3, 4, 5, 1])), 2))

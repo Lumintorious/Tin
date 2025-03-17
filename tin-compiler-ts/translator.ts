@@ -72,6 +72,9 @@ function translate(
    }
    // AppliedKeywords
    if (term instanceof AppliedKeyword) {
+      if (term.keyword === "external" && term.param instanceof Literal) {
+         return "\n" + String(term.param.value) + "\n";
+      }
       return `${term.keyword} (${translate(term.param, scope)})`;
 
       // Block
@@ -136,7 +139,7 @@ function translate(
       ) {
          return "";
       }
-      let keyword = term.isDeclaration ? "var " : "";
+      let keyword = term.isDeclaration ? "let " : "";
       const scopeDots = [...(scope.toPath().matchAll(/\./g) || [])].length;
       const doExport = scopeDots < 2 && term.isDeclaration ? "export " : "";
       keyword = doExport + keyword;
@@ -177,7 +180,7 @@ function translate(
       // Literal
    } else if (term instanceof Literal) {
       if (term.type === "String") {
-         return `"${term.value}"`;
+         return `"${String(term.value).replaceAll(/[\r\n]+/g, "\\n")}"`;
       } else if (term.type === "Number" || term.type === "Boolean") {
          return `${term.value}`;
       } else {

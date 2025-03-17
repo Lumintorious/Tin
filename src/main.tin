@@ -1,0 +1,13 @@
+import collections/Map
+
+Cat = type:
+	name: String
+
+Dog = type:
+	breed: String
+	woof = (this: Dog) ->
+		print(this.breed)
+		this
+
+what = Cat("Kitty") & Dog("Spotted")
+whatt = what.woof()

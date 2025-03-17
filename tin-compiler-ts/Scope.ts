@@ -36,10 +36,16 @@ export class Symbol {
    index?: number;
    parentComponent?: Type; // If a field on type ABC, then parentComponent is ABC
    shadowing?: Symbol;
+   isMutable: boolean = false;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
       this.name = name;
       this.typeSymbol = typeSymbol;
       this.ast = ast;
+   }
+
+   mutable(mutable: boolean) {
+      this.isMutable = mutable;
+      return this;
    }
 
    located(start?: TokenPos, end?: TokenPos) {
@@ -52,15 +58,16 @@ export class Symbol {
    // Used to change all fields so the reference doesn't change
    // Happens only when filling in an UncheckedType symbol
    rewriteFrom(template: Symbol) {
-      if (!(template.typeSymbol instanceof UncheckedType)) {
-         throw new Error(
-            "Attempted to rewrite a checked type symbol. Only unchecked type symbols from run 0 can be rewritten in run 1."
-         );
-      }
+      // if (!(template.typeSymbol instanceof UncheckedType)) {
+      //    throw new Error(
+      //       "Attempted to rewrite a checked type symbol. Only unchecked type symbols from run 0 can be rewritten in run 1."
+      //    );
+      // }
       this.name = template.name;
       this.typeSymbol = template.typeSymbol;
       this.ast = template.ast;
       this.iteration = template.iteration;
+      this.shadowing = template.shadowing;
       this.position = template.position;
       this.index = template.index;
    }
@@ -115,13 +122,19 @@ export class Scope {
       }
       if (!child && !canCreate) {
          throw new Error(
-            "Could not find child scope " + this.toPath() + " -- " + astNode.tag
+            "Could not find child scope " +
+               this.toPath() +
+               " -- " +
+               astNode.tag +
+               "(" +
+               astNode.id +
+               ")"
          );
       }
       if (child) {
          return child;
       } else {
-         const child = new Scope(astNode.tag + astNode.id, this);
+         const child = new Scope(`${astNode.tag}(n${astNode.id}, `, this);
          child.setIteration(this.iteration);
          this.childrenByAst.set(ast.id, child);
          return child;
@@ -136,7 +149,7 @@ export class Scope {
       let str = "";
       let now: Scope | undefined = this;
       while (now !== undefined) {
-         str = now.name + "/" + this.id + "." + str;
+         str = now.name + "s" + this.id + ")." + str;
          now = now.parent;
       }
       return str.substring(0, str.length - 1);
@@ -153,6 +166,16 @@ export class Scope {
    // Define a new symbol in the current scope
    declare(symbol: Symbol, redeclare: boolean = false) {
       const name = symbol.name;
+      console.log(
+         `# \x1b[36m${name.padStart(
+            10,
+            " "
+         )}\x1b[37m: \x1b[33m${symbol.typeSymbol
+            .toString()
+            .padEnd(25, " ")} \x1b[30m# ${
+            this.toPath() + " - " + this.iteration
+         }\x1b[0m`
+      );
       if (this.symbols.has(name)) {
          const existingSymbol = this.symbols.get(name);
          if (existingSymbol?.typeSymbol instanceof UncheckedType) {
@@ -169,9 +192,6 @@ export class Scope {
             symbol.iteration = this.iteration;
          }
       }
-      console.log(
-         `${name}: ${symbol.typeSymbol.toString()} @ ${this.toPath()}`
-      );
       symbol.iteration = this.iteration;
       if (!symbol.index) {
          symbol.index = this.currentIndex++;
@@ -205,7 +225,16 @@ export class Scope {
          }
       }
       typeSymbol.name = name;
-      console.log(name + ": " + typeSymbol + "  -  " + this.toPath());
+      console.log(
+         "# " +
+            "\x1b[36m" +
+            name.padStart(10, " ") +
+            "\x1b[37m: \x1b[33m" +
+            typeSymbol.toString().padEnd(25, " ") +
+            " \x1b[30m# " +
+            this.toPath() +
+            "\x1b[0m"
+      );
       symbol.iteration = this.iteration;
       if (
          typeSymbol instanceof SquareTypeToTypeLambdaType &&
@@ -273,7 +302,10 @@ export class Scope {
       if (this.symbols.has(name)) {
          return this.symbols.get(name) as Symbol;
       } else if (this.parent) {
-         return this.parent.lookup(name, this.name + "." + scopeName);
+         return this.parent.lookup(
+            name,
+            this.name + "s" + this.id + ")." + scopeName
+         );
       }
       throw new Error(
          `Symbol ${name} not found. ${[...this.symbols.keys()]}; Scope = ` +
@@ -460,6 +492,8 @@ export class Scope {
             );
          case "Any":
             return AnyType;
+         case "Unchecked":
+            return type;
          default:
             throw new Error(
                "Can't handle type " +
@@ -506,8 +540,8 @@ export class TypePhaseContext {
       existingFileScopes: Scope[] = []
    ) {
       this.fileName = fileName;
-      this.languageScope = new Scope("Language");
-      this.fileScope = new Scope("File", this.languageScope);
+      this.languageScope = new Scope("Language(");
+      this.fileScope = new Scope("File(", this.languageScope);
       this.builder = new TypeBuilder(this);
       this.inferencer = new TypeInferencer(this);
       this.translator = new TypeTranslator(this);

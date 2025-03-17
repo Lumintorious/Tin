@@ -6,8 +6,9 @@
    "type": "module",
    "scripts": {
       "oldDev": " npx tsx --watch tin-compiler-ts/compiler.ts test",
-      "dev": "nodemon --quiet --watch ./tin-compiler-ts/ --watch ./src/**/* --ext js,tin,ts --exec npx tsx ./tin-compiler-ts/compiler.ts test --run",
-      "test": "echo \"Error: no test specified\" && exit 1"
+      "dev": "nodemon --quiet --watch ./tin-compiler-ts/ --watch ./src/**/* --ext js,tin,ts --exec npx tsx ./tin-compiler-ts/compiler.ts main --run",
+      "devVerbose": "nodemon --quiet --watch ./tin-compiler-ts/ --watch ./src/**/* --ext js,tin,ts --exec \"npx tsx ./tin-compiler-ts/compiler.ts main --run --verbose\"",
+      "test": "npx tsx ./tin-compiler-ts/compiler.ts --test"
    },
    "author": "Lumintorious",
    "license": "ISC",

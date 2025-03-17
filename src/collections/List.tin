@@ -7,7 +7,7 @@ ListHead = [T] => type:
 List = [T] => (ListHead[T] & Iterable[T] & Accessible[T] & ToString)?
 
 List@iterator = [T] -> (list: ListHead[T]?) ->
-	mutable currentList: ListHead[T]? = list
+	currentList: ListHead[T]? ~= list
 	nextF = () ->
 		if currentList != nothing,
 			result = currentList.value
@@ -45,7 +45,7 @@ List@of = [T] -> (arr: Array[T]) ->
 		set i = i - 1
 		list = ListHead[T](arr.at(i), list)
 
-	iterable = makeIterable[T](() -> List@iterator[T](list))
+	iterable = Iterable[T](() -> List@iterator[T](list))
 	toStr = (this: Any) -> iterable.mkString(",", "List(", ")")
 		
 	return list & iterable & List@accessible[T](list) & ToString(toStr)
@@ -59,4 +59,4 @@ List@fromIterator = [T] -> (getIterator: () => Iterator[T]) ->
 		set list = ListHead[T](current, list)
 		set current = iterator.next()
 
-	return list & makeIterable[T](() -> List@iterator[T](list))
+	return list & Iterable[T](() -> List@iterator[T](list))

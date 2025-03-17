@@ -1,0 +1,62 @@
+import collections/Iterable
+
+ListHead = [T] => type:
+	value: T
+	rest: ListHead[T]?
+
+List = [T] => (ListHead[T] & Iterable[T] & Accessible[T] & ToString)?
+
+List@iterator = [T] -> (list: ListHead[T]?) ->
+	mutable currentList: ListHead[T]? = list
+	nextF = () ->
+		if currentList != nothing,
+			result = currentList.value
+			set currentList = currentList.rest
+			result
+		else
+			nothing
+
+	Iterator[T](nextF)
+
+List@accessible = [T] -> (list: ListHead[T]) ->
+	length = () ->
+		num = 0
+		l = list
+		while l != nothing,
+			set num = num + 1
+		num
+
+	at = (index: Number) ->
+		currentIndex = 0
+		l = list
+		while currentIndex < index,
+			if l != nothing,
+				set l = l.rest
+			set currentIndex = currentIndex + 1
+		l.value
+
+	return Accessible[T](at, length)
+
+List@of = [T] -> (arr: Array[T]) ->
+	i = arr.length()
+	list = nothing: ListHead[T]?
+
+	while i > 0,
+		set i = i - 1
+		list = ListHead[T](arr.at(i), list)
+
+	iterable = makeIterable[T](() -> List@iterator[T](list))
+	toStr = (this: Any) -> iterable.mkString(",", "List(", ")")
+		
+	return list & iterable & List@accessible[T](list) & ToString(toStr)
+
+List@fromIterator = [T] -> (getIterator: () => Iterator[T]) ->
+	list: ListHead[T]? = nothing
+	iterator = getIterator()
+	current = iterator.next()
+	
+	while current != nothing,
+		set list = ListHead[T](current, list)
+		set current = iterator.next()
+
+	return list & makeIterable[T](() -> List@iterator[T](list))

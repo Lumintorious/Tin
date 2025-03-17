@@ -169,12 +169,18 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-;
-export var Cat = TIN_TYPE("Cat", "49ac7d2e-79ed-48b9-b6be-1f66645b8abf", (_p0,_p1 = function() {
+import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+import * as module2 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\lib\\Utils.tin.out.js";Object.entries(module2).forEach(([key, value]) => {
+			globalThis[key] = value;
+	  });;
+export var Cat = TIN_TYPE("Cat", "ef003db1-a9b8-44df-91ec-6c86e8bec97c", (_p0,_p1 = function() {
 return print(this.Cat.name)
 }) => ({name: _p0,useCat: _p1}), {}); Cat._typeId = "Cat";;
-export var ToString = TIN_TYPE("ToString", "39ea9208-3989-4568-8aa2-6789b73d78da", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
-export var stringOf/* (Any) -> String*/ = function(obj) {
-print("hi");
-return ((ToString.__is_child(obj) ) ? (obj.ToString.toString.call(obj,)) : (makeString(obj))) 
-}
+ToString = TIN_TYPE("ToString", "7aa25052-a097-4197-a9a1-d5d7c1639401", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export var x/* ToString*/ = ToString(function() {
+return "Sup"
+});
+print(x.ToString.toString.call(x,));
+export var l/* ListHead[Number]? & Iterable[Number] & Accessible[Number] & ToString*/ = List$of(0)(Array(0)([1, 2, 3, 4]))

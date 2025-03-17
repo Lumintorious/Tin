@@ -1,0 +1,449 @@
+NEWLINE      |              |   2, 1    
+IDENTIFIER   | v            |   2, 1    
+OPERATOR     | =            |   2, 3    
+NUMBER       | 1            |   2, 5    
+NEWLINE      |              |   3, 1    
+IDENTIFIER   | vv           |   3, 1    
+OPERATOR     | :            |   3, 3    
+IDENTIFIER   | Number       |   3, 5    
+OPERATOR     | =            |   3, 12   
+NUMBER       | 1.1          |   3, 14   
+NEWLINE      |              |   4, 1    
+IDENTIFIER   | s            |   4, 1    
+OPERATOR     | =            |   4, 3    
+STRING       | string, can be spliced like  |   4, 5    
+OPERATOR     | +            |   4, 5    
+IDENTIFIER   | v            |   4, 35   
+OPERATOR     | +            |   4, 5    
+STRING       |              |   4, 5    
+NEWLINE      |              |   5, 1    
+IDENTIFIER   | same         |   5, 1    
+OPERATOR     | =            |   5, 6    
+NUMBER       | 1            |   5, 8    
+NEWLINE      | ,            |   5, 1    
+IDENTIFIER   | line         |   5, 11   
+OPERATOR     | =            |   5, 16   
+NUMBER       | 2            |   5, 18   
+NEWLINE      |              |   7, 1    
+NEWLINE      |              |   8, 1    
+IDENTIFIER   | String@anything |   8, 1    
+OPERATOR     | =            |   8, 17   
+STRING       | Works        |   8, 19   
+NEWLINE      |              |  10, 1    
+NEWLINE      |              |  11, 1    
+IDENTIFIER   | m            |  11, 1    
+OPERATOR     | =            |  11, 3    
+NUMBER       | 1            |  11, 5    
+NEWLINE      |              |  12, 1    
+KEYWORD      | set          |  12, 1    
+IDENTIFIER   | m            |  12, 5    
+OPERATOR     | =            |  12, 7    
+NUMBER       | 1            |  12, 9    
+NEWLINE      |              |  14, 1    
+NEWLINE      |              |  15, 1    
+IDENTIFIER   | x            |  15, 1    
+OPERATOR     | =            |  15, 3    
+NUMBER       | 1            |  15, 5    
+OPERATOR     | +            |  15, 7    
+NUMBER       | 2            |  15, 9    
+NEWLINE      |              |  16, 1    
+IDENTIFIER   | y            |  16, 1    
+OPERATOR     | =            |  16, 3    
+NUMBER       | 12           |  16, 5    
+OPERATOR     | /            |  16, 8    
+NUMBER       | 3            |  16, 10   
+NEWLINE      |              |  18, 1    
+NEWLINE      |              |  19, 1    
+IDENTIFIER   | number       |  19, 1    
+OPERATOR     | :            |  19, 7    
+IDENTIFIER   | Number       |  19, 9    
+OPERATOR     | =            |  19, 16   
+NUMBER       | 1            |  19, 18   
+NEWLINE      |              |  20, 1    
+IDENTIFIER   | string       |  20, 1    
+OPERATOR     | :            |  20, 7    
+IDENTIFIER   | String       |  20, 9    
+OPERATOR     | =            |  20, 16   
+STRING       | str          |  20, 18   
+NEWLINE      |              |  21, 1    
+IDENTIFIER   | boolean      |  21, 1    
+OPERATOR     | :            |  21, 8    
+IDENTIFIER   | Boolean      |  21, 10   
+OPERATOR     | =            |  21, 18   
+KEYWORD      | false        |  21, 20   
+NEWLINE      |              |  22, 1    
+IDENTIFIER   | empty        |  22, 1    
+OPERATOR     | :            |  22, 6    
+IDENTIFIER   | Nothing      |  22, 8    
+OPERATOR     | =            |  22, 16   
+IDENTIFIER   | nothing      |  22, 18   
+NEWLINE      |              |  23, 1    
+IDENTIFIER   | any          |  23, 1    
+OPERATOR     | :            |  23, 4    
+IDENTIFIER   | Any          |  23, 6    
+OPERATOR     | =            |  23, 10   
+STRING       | str          |  23, 12   
+NEWLINE      |              |  25, 1    
+NEWLINE      |              |  26, 1    
+IDENTIFIER   | maybeFull    |  26, 1    
+OPERATOR     | :            |  26, 10   
+IDENTIFIER   | Number       |  26, 12   
+OPERATOR     | ?            |  26, 18   
+OPERATOR     | =            |  26, 20   
+NUMBER       | 10           |  26, 22   
+NEWLINE      |              |  27, 1    
+IDENTIFIER   | maybeEmpty   |  27, 1    
+OPERATOR     | :            |  27, 11   
+IDENTIFIER   | Number       |  27, 13   
+OPERATOR     | ?            |  27, 19   
+OPERATOR     | =            |  27, 21   
+IDENTIFIER   | nothing      |  27, 23   
+NEWLINE      |              |  29, 1    
+NEWLINE      |              |  30, 1    
+IDENTIFIER   | f            |  30, 1    
+OPERATOR     | =            |  30, 3    
+PARENS       | (            |  30, 5    
+IDENTIFIER   | n            |  30, 6    
+OPERATOR     | :            |  30, 7    
+IDENTIFIER   | Number       |  30, 9    
+PARENS       | )            |  30, 15   
+OPERATOR     | ->           |  30, 17   
+IDENTIFIER   | n            |  30, 20   
+OPERATOR     | +            |  30, 22   
+NUMBER       | 1            |  30, 24   
+NEWLINE      |              |  31, 1    
+IDENTIFIER   | ff           |  31, 1    
+OPERATOR     | =            |  31, 4    
+PARENS       | (            |  31, 6    
+IDENTIFIER   | n            |  31, 7    
+OPERATOR     | :            |  31, 8    
+IDENTIFIER   | Number       |  31, 10   
+PARENS       | )            |  31, 16   
+OPERATOR     | ->           |  31, 18   
+NEWLINE      |              |  32, 1    
+INDENT       | 4            |  32, 1    
+IDENTIFIER   | n            |  32, 2    
+OPERATOR     | +            |  32, 4    
+NUMBER       | 2            |  32, 6    
+NEWLINE      |              |  34, 1    
+NEWLINE      |              |  35, 1    
+DEDENT       | 4            |  35, 1    
+IDENTIFIER   | print        |  35, 1    
+PARENS       | (            |  35, 6    
+STRING       | Hello World  |  35, 7    
+PARENS       | )            |  35, 20   
+NEWLINE      |              |  37, 1    
+NEWLINE      |              |  38, 1    
+IDENTIFIER   | F            |  38, 1    
+OPERATOR     | =            |  38, 3    
+PARENS       | (            |  38, 5    
+IDENTIFIER   | Number       |  38, 6    
+PARENS       | )            |  38, 12   
+OPERATOR     | ->           |  38, 14   
+IDENTIFIER   | Number       |  38, 17   
+NEWLINE      |              |  39, 1    
+IDENTIFIER   | FNamed       |  39, 1    
+OPERATOR     | =            |  39, 8    
+PARENS       | (            |  39, 10   
+IDENTIFIER   | first        |  39, 11   
+OPERATOR     | :            |  39, 16   
+IDENTIFIER   | Number       |  39, 18   
+NEWLINE      | ,            |  39, 1    
+IDENTIFIER   | second       |  39, 26   
+OPERATOR     | :            |  39, 32   
+IDENTIFIER   | Number       |  39, 34   
+PARENS       | )            |  39, 40   
+OPERATOR     | ->           |  39, 42   
+IDENTIFIER   | Number       |  39, 45   
+NEWLINE      |              |  41, 1    
+NEWLINE      |              |  42, 1    
+IDENTIFIER   | f            |  42, 1    
+PARENS       | (            |  42, 2    
+IDENTIFIER   | n            |  42, 3    
+OPERATOR     | =            |  42, 5    
+NUMBER       | 24           |  42, 7    
+PARENS       | )            |  42, 9    
+NEWLINE      |              |  44, 1    
+NEWLINE      |              |  45, 1    
+KEYWORD      | if           |  45, 1    
+IDENTIFIER   | v            |  45, 4    
+OPERATOR     | >            |  45, 6    
+NUMBER       | 0            |  45, 8    
+NEWLINE      | ,            |  45, 1    
+NEWLINE      |              |  46, 1    
+INDENT       | 4            |  46, 1    
+IDENTIFIER   | print        |  46, 2    
+PARENS       | (            |  46, 7    
+STRING       | Works        |  46, 8    
+PARENS       | )            |  46, 15   
+NEWLINE      |              |  47, 1    
+DEDENT       | 4            |  47, 1    
+KEYWORD      | else         |  47, 1    
+NEWLINE      |              |  48, 1    
+INDENT       | 4            |  48, 1    
+IDENTIFIER   | print        |  48, 2    
+PARENS       | (            |  48, 7    
+STRING       | Doesn't work |  48, 8    
+PARENS       | )            |  48, 22   
+NEWLINE      |              |  50, 1    
+DEDENT       | 4            |  50, 1    
+IDENTIFIER   | ifelse       |  50, 1    
+OPERATOR     | :            |  50, 7    
+IDENTIFIER   | Number       |  50, 9    
+OPERATOR     | =            |  50, 16   
+KEYWORD      | if           |  50, 18   
+IDENTIFIER   | v            |  50, 21   
+OPERATOR     | >            |  50, 23   
+NUMBER       | 0            |  50, 25   
+NEWLINE      | ,            |  50, 1    
+NUMBER       | 1            |  50, 28   
+KEYWORD      | else         |  50, 30   
+NUMBER       | 2            |  50, 35   
+NEWLINE      |              |  52, 1    
+NEWLINE      |              |  53, 1    
+IDENTIFIER   | i            |  53, 1    
+OPERATOR     | =            |  53, 3    
+NUMBER       | 0            |  53, 5    
+NEWLINE      |              |  54, 1    
+KEYWORD      | while        |  54, 1    
+IDENTIFIER   | i            |  54, 7    
+OPERATOR     | <            |  54, 9    
+NUMBER       | 3            |  54, 11   
+NEWLINE      | ,            |  54, 1    
+NEWLINE      |              |  55, 1    
+INDENT       | 4            |  55, 1    
+IDENTIFIER   | print        |  55, 2    
+PARENS       | (            |  55, 7    
+IDENTIFIER   | i            |  55, 8    
+PARENS       | )            |  55, 9    
+NEWLINE      |              |  57, 1    
+NEWLINE      |              |  58, 1    
+DEDENT       | 4            |  58, 1    
+IDENTIFIER   | Cat          |  58, 1    
+OPERATOR     | =            |  58, 5    
+KEYWORD      | type         |  58, 7    
+OPERATOR     | :            |  58, 11   
+NEWLINE      |              |  59, 1    
+INDENT       | 4            |  59, 1    
+IDENTIFIER   | name         |  59, 2    
+OPERATOR     | :            |  59, 6    
+IDENTIFIER   | String       |  59, 8    
+NEWLINE      |              |  60, 1    
+IDENTIFIER   | age          |  60, 2    
+OPERATOR     | :            |  60, 5    
+IDENTIFIER   | Number       |  60, 7    
+OPERATOR     | =            |  60, 14   
+NUMBER       | 1            |  60, 16   
+NEWLINE      |              |  62, 1    
+DEDENT       | 4            |  62, 1    
+IDENTIFIER   | Mech         |  62, 1    
+OPERATOR     | =            |  62, 6    
+KEYWORD      | type         |  62, 8    
+OPERATOR     | :            |  62, 12   
+NEWLINE      |              |  63, 1    
+INDENT       | 4            |  63, 1    
+IDENTIFIER   | name         |  63, 2    
+OPERATOR     | :            |  63, 6    
+IDENTIFIER   | String       |  63, 8    
+NEWLINE      |              |  64, 1    
+IDENTIFIER   | version      |  64, 2    
+OPERATOR     | :            |  64, 9    
+IDENTIFIER   | Number       |  64, 11   
+NEWLINE      |              |  66, 1    
+DEDENT       | 4            |  66, 1    
+IDENTIFIER   | test         |  66, 1    
+OPERATOR     | =            |  66, 6    
+NUMBER       | 0            |  66, 8    
+NEWLINE      |              |  68, 1    
+NEWLINE      |              |  69, 1    
+IDENTIFIER   | kitty        |  69, 1    
+OPERATOR     | =            |  69, 7    
+IDENTIFIER   | Cat          |  69, 9    
+PARENS       | (            |  69, 12   
+STRING       | Kitty        |  69, 13   
+NEWLINE      | ,            |  69, 1    
+NUMBER       | 1            |  69, 22   
+PARENS       | )            |  69, 23   
+NEWLINE      |              |  70, 1    
+IDENTIFIER   | mech         |  70, 1    
+OPERATOR     | =            |  70, 6    
+IDENTIFIER   | Mech         |  70, 8    
+PARENS       | (            |  70, 12   
+STRING       | Iodized Steel |  70, 13   
+NEWLINE      | ,            |  70, 1    
+NUMBER       | 3.0          |  70, 30   
+PARENS       | )            |  70, 33   
+NEWLINE      |              |  72, 1    
+NEWLINE      |              |  73, 1    
+IDENTIFIER   | kitty        |  73, 1    
+OPERATOR     | .            |  73, 6    
+IDENTIFIER   | name         |  73, 7    
+NEWLINE      |              |  74, 1    
+IDENTIFIER   | mech         |  74, 1    
+OPERATOR     | .            |  74, 5    
+IDENTIFIER   | version      |  74, 6    
+NEWLINE      |              |  76, 1    
+NEWLINE      |              |  77, 1    
+IDENTIFIER   | MechaCat     |  77, 1    
+OPERATOR     | =            |  77, 10   
+IDENTIFIER   | Mech         |  77, 12   
+OPERATOR     | &            |  77, 17   
+IDENTIFIER   | Cat          |  77, 19   
+NEWLINE      |              |  78, 1    
+IDENTIFIER   | MechOrCat    |  78, 1    
+OPERATOR     | =            |  78, 11   
+IDENTIFIER   | Mech         |  78, 13   
+OPERATOR     | |            |  78, 18   
+IDENTIFIER   | Cat          |  78, 20   
+NEWLINE      |              |  80, 1    
+NEWLINE      |              |  81, 1    
+IDENTIFIER   | mechaCat     |  81, 1    
+OPERATOR     | =            |  81, 10   
+IDENTIFIER   | Cat          |  81, 12   
+PARENS       | (            |  81, 15   
+STRING       | MechaCat     |  81, 16   
+NEWLINE      | ,            |  81, 1    
+NUMBER       | 10           |  81, 28   
+PARENS       | )            |  81, 30   
+OPERATOR     | &            |  81, 32   
+IDENTIFIER   | Mech         |  81, 34   
+PARENS       | (            |  81, 38   
+STRING       | Oxidized Copper |  81, 39   
+NEWLINE      | ,            |  81, 1    
+NUMBER       | 1.4          |  81, 58   
+PARENS       | )            |  81, 61   
+NEWLINE      |              |  83, 1    
+NEWLINE      |              |  84, 1    
+IDENTIFIER   | mechaCat     |  84, 1    
+OPERATOR     | .            |  84, 9    
+IDENTIFIER   | version      |  84, 10   
+NEWLINE      |              |  85, 1    
+NEWLINE      |              |  87, 1    
+NEWLINE      |              |  88, 1    
+IDENTIFIER   | mechaCat     |  88, 1    
+OPERATOR     | :            |  88, 9    
+IDENTIFIER   | Cat          |  88, 10   
+OPERATOR     | .            |  88, 13   
+IDENTIFIER   | name         |  88, 14   
+OPERATOR     | ==           |  88, 19   
+STRING       | MechaCat     |  88, 22   
+NEWLINE      |              |  89, 1    
+IDENTIFIER   | mechaCat     |  89, 1    
+OPERATOR     | :            |  89, 9    
+IDENTIFIER   | Mech         |  89, 10   
+OPERATOR     | .            |  89, 14   
+IDENTIFIER   | name         |  89, 15   
+OPERATOR     | ==           |  89, 20   
+STRING       | OxidizedCopper |  89, 23   
+NEWLINE      |              |  91, 1    
+NEWLINE      |              |  92, 1    
+IDENTIFIER   | any          |  92, 1    
+OPERATOR     | :            |  92, 4    
+IDENTIFIER   | Any          |  92, 6    
+OPERATOR     | =            |  92, 10   
+IDENTIFIER   | kitty        |  92, 12   
+NEWLINE      |              |  93, 1    
+KEYWORD      | if           |  93, 1    
+IDENTIFIER   | any          |  93, 4    
+OPERATOR     | ::           |  93, 8    
+IDENTIFIER   | Cat          |  93, 11   
+NEWLINE      | ,            |  93, 1    
+NEWLINE      |              |  94, 1    
+INDENT       | 4            |  94, 1    
+IDENTIFIER   | print        |  94, 2    
+PARENS       | (            |  94, 7    
+IDENTIFIER   | any          |  94, 8    
+OPERATOR     | .            |  94, 11   
+IDENTIFIER   | name         |  94, 12   
+PARENS       | )            |  94, 16   
+NEWLINE      |              |  96, 1    
+NEWLINE      |              |  97, 1    
+DEDENT       | 4            |  97, 1    
+IDENTIFIER   | maybeCat     |  97, 1    
+OPERATOR     | :            |  97, 9    
+IDENTIFIER   | Cat          |  97, 11   
+OPERATOR     | ?            |  97, 14   
+OPERATOR     | =            |  97, 16   
+IDENTIFIER   | kitty        |  97, 18   
+NEWLINE      |              |  98, 1    
+KEYWORD      | if           |  98, 1    
+IDENTIFIER   | maybeCat     |  98, 4    
+OPERATOR     | !=           |  98, 13   
+IDENTIFIER   | nothing      |  98, 16   
+NEWLINE      | ,            |  98, 1    
+NEWLINE      |              |  99, 1    
+INDENT       | 4            |  99, 1    
+IDENTIFIER   | print        |  99, 2    
+PARENS       | (            |  99, 7    
+IDENTIFIER   | maybeCat     |  99, 8    
+OPERATOR     | .            |  99, 16   
+IDENTIFIER   | age          |  99, 17   
+PARENS       | )            |  99, 20   
+NEWLINE      |              | 101, 1    
+NEWLINE      |              | 102, 1    
+DEDENT       | 4            | 102, 1    
+IDENTIFIER   | arr          | 102, 1    
+OPERATOR     | =            | 102, 5    
+IDENTIFIER   | Array@of     | 102, 7    
+PARENS       | (            | 102, 15   
+NUMBER       | 1            | 102, 16   
+NEWLINE      | ,            | 102, 1    
+NUMBER       | 2            | 102, 19   
+NEWLINE      | ,            | 102, 1    
+NUMBER       | 3            | 102, 22   
+NEWLINE      | ,            | 102, 1    
+NUMBER       | 4            | 102, 25   
+PARENS       | )            | 102, 26   
+NEWLINE      |              | 103, 1    
+IDENTIFIER   | arr          | 103, 1    
+OPERATOR     | .            | 103, 4    
+IDENTIFIER   | at           | 103, 5    
+PARENS       | (            | 103, 7    
+NUMBER       | 0            | 103, 8    
+PARENS       | )            | 103, 9    
+NEWLINE      |              | 104, 1    
+IDENTIFIER   | arr          | 104, 1    
+OPERATOR     | .            | 104, 4    
+IDENTIFIER   | length       | 104, 5    
+PARENS       | (            | 104, 11   
+PARENS       | )            | 104, 12   
+NEWLINE      |              | 106, 1    
+NEWLINE      |              | 107, 1    
+IDENTIFIER   | varargs      | 107, 1    
+OPERATOR     | =            | 107, 9    
+PARENS       | (            | 107, 11   
+IDENTIFIER   | n            | 107, 12   
+OPERATOR     | :            | 107, 13   
+IDENTIFIER   | Array        | 107, 15   
+PARENS       | [            | 107, 20   
+IDENTIFIER   | Number       | 107, 21   
+PARENS       | ]            | 107, 27   
+PARENS       | )            | 107, 28   
+OPERATOR     | ->           | 107, 30   
+IDENTIFIER   | n            | 107, 33   
+OPERATOR     | .            | 107, 34   
+IDENTIFIER   | at           | 107, 35   
+PARENS       | (            | 107, 37   
+NUMBER       | 0            | 107, 38   
+PARENS       | )            | 107, 39   
+NEWLINE      |              | 108, 1    
+IDENTIFIER   | varargs      | 108, 1    
+PARENS       | (            | 108, 8    
+NUMBER       | 1            | 108, 9    
+NEWLINE      | ,            | 108, 1    
+NUMBER       | 2            | 108, 12   
+NEWLINE      | ,            | 108, 1    
+NUMBER       | 3            | 108, 15   
+PARENS       | )            | 108, 16   
+NEWLINE      |              | 109, 1    
+IDENTIFIER   | varargs      | 109, 1    
+PARENS       | (            | 109, 8    
+IDENTIFIER   | Array@of     | 109, 9    
+PARENS       | (            | 109, 17   
+NUMBER       | 1            | 109, 18   
+NEWLINE      | ,            | 109, 1    
+NUMBER       | 2            | 109, 21   
+PARENS       | )            | 109, 22   
+PARENS       | )            | 109, 23   
+NEWLINE      |              | 111, 1    
+--undefined--

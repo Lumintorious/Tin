@@ -103,6 +103,16 @@ export class AnyTypeClass extends Type {
 
 export const AnyType = new AnyTypeClass();
 
+export class ThisType extends Type {
+   constructor() {
+      super("This");
+   }
+
+   toString(): string {
+      return "This";
+   }
+}
+
 export class TypeOfTypes extends Type {
    constructor() {
       super("TypeOfTypes");
@@ -341,6 +351,7 @@ export class RoundValueToValueLambdaType extends Type {
 
    extends(other: Type, scope: Scope) {
       if (!(other instanceof RoundValueToValueLambdaType)) return false;
+      if (other.params.length !== this.params.length) return false;
       // Check if parameter types are contravariant
       const paramCheck =
          this.params.length === other.params.length &&
@@ -367,7 +378,9 @@ export class RoundValueToValueLambdaType extends Type {
       if (this.name) {
          return this.name;
       }
-      const paramsStr = this.params.map((t) => t.type.toString()).join(", ");
+      const paramsStr = this.params
+         .map((t) => `${t.name ? t.name + ":" : ""}${t.type.toString()}`)
+         .join(", ");
       return `${this.isGeneric ? "[" : "("}${paramsStr}${
          this.isGeneric ? "]" : ")"
       } -> ${this.returnType ? this.returnType.toString() : "undefined"}`;
@@ -405,7 +418,7 @@ export class SquareTypeToValueLambdaType extends Type {
    toString(): string {
       return `[${this.paramTypes
          .map((p) => p.toString())
-         .join(", ")}] => ${this.returnType.toString()}`;
+         .join(", ")}] -> ${this.returnType.toString()}`;
    }
 }
 
@@ -705,11 +718,10 @@ export class StructType extends Type {
    }
 
    toString() {
-      return (
-         this.name ??
-         `StructType(${this.fields.map(
-            (f) => `${f.name}::${f.type.toString()}`
-         )})`
-      );
+      return this.name
+         ? "Struct(" + this.name + ")"
+         : `StructType(${this.fields.map(
+              (f) => `${f.name}::${f.type.toString()}`
+           )})`;
    }
 }

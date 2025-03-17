@@ -78,6 +78,7 @@ const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
 const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
+	_rawArray: args,
 	length() {
 		return args.length;
 	},
@@ -121,9 +122,8 @@ function makeString(obj) {
 
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = 'Array(';
-		console.dir(obj)
 		for (let i = 0; i < obj.Array.length(); i++) {
-			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
+			result += makeString(obj.Array.at(i)) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
 		return result + ")"
 	}

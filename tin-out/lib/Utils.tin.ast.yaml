@@ -1,28 +1,28 @@
-id: 105
+id: 866
 tag: Block
 statements:
-  - id: 69
+  - id: 793
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 50
+      id: 774
       tag: Identifier
       value: max
     value:
-      id: 68
+      id: 792
       tag: RoundValueToValueLambda
       params:
-        - id: 54
+        - id: 778
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 51
+            id: 775
             tag: Identifier
             value: a
           type:
-            id: 52
+            id: 776
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -36,16 +36,16 @@ statements:
               line: 1
               column: 18
               absolute: 17
-        - id: 59
+        - id: 783
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 56
+            id: 780
             tag: Identifier
             value: b
           type:
-            id: 57
+            id: 781
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -60,29 +60,29 @@ statements:
               column: 29
               absolute: 28
       block:
-        id: 67
+        id: 791
         tag: Block
         statements:
-          - id: 66
+          - id: 790
             tag: IfStatement
             condition:
-              id: 63
+              id: 787
               tag: BinaryExpression
               left:
-                id: 61
+                id: 785
                 tag: Identifier
                 value: a
               operator: >
               right:
-                id: 62
+                id: 786
                 tag: Identifier
                 value: b
             trueBranch:
-              id: 64
+              id: 788
               tag: Identifier
               value: a
             falseBranch:
-              id: 65
+              id: 789
               tag: Identifier
               value: b
             position:
@@ -106,28 +106,28 @@ statements:
         line: 4
         column: 4
         absolute: 59
-  - id: 89
+  - id: 813
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 70
+      id: 794
       tag: Identifier
       value: min
     value:
-      id: 88
+      id: 812
       tag: RoundValueToValueLambda
       params:
-        - id: 74
+        - id: 798
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 71
+            id: 795
             tag: Identifier
             value: a
           type:
-            id: 72
+            id: 796
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -141,16 +141,16 @@ statements:
               line: 4
               column: 18
               absolute: 73
-        - id: 79
+        - id: 803
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 76
+            id: 800
             tag: Identifier
             value: b
           type:
-            id: 77
+            id: 801
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -165,29 +165,29 @@ statements:
               column: 29
               absolute: 84
       block:
-        id: 87
+        id: 811
         tag: Block
         statements:
-          - id: 86
+          - id: 810
             tag: IfStatement
             condition:
-              id: 83
+              id: 807
               tag: BinaryExpression
               left:
-                id: 81
+                id: 805
                 tag: Identifier
                 value: a
               operator: <
               right:
-                id: 82
+                id: 806
                 tag: Identifier
                 value: b
             trueBranch:
-              id: 84
+              id: 808
               tag: Identifier
               value: a
             falseBranch:
-              id: 85
+              id: 809
               tag: Identifier
               value: b
             position:
@@ -211,28 +211,28 @@ statements:
         line: 7
         column: 6
         absolute: 117
-  - id: 104
+  - id: 828
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 90
+      id: 814
       tag: Identifier
       value: floor
     value:
-      id: 103
+      id: 827
       tag: RoundValueToValueLambda
       params:
-        - id: 94
+        - id: 818
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 91
+            id: 815
             tag: Identifier
             value: n
           type:
-            id: 92
+            id: 816
             tag: Identifier
             value: Number
           isDeclaration: false
@@ -247,29 +247,29 @@ statements:
               column: 20
               absolute: 131
       block:
-        id: 102
+        id: 826
         tag: Block
         statements:
-          - id: 101
+          - id: 825
             tag: BinaryExpression
             left:
-              id: 96
+              id: 820
               tag: Identifier
               value: n
             operator: -
             right:
-              id: 100
+              id: 824
               tag: Group
               value:
-                id: 99
+                id: 823
                 tag: BinaryExpression
                 left:
-                  id: 97
+                  id: 821
                   tag: Identifier
                   value: n
                 operator: %
                 right:
-                  id: 98
+                  id: 822
                   tag: Literal
                   type: Number
                   value: 1
@@ -278,7 +278,10 @@ statements:
                 line: 8
                 column: 2
                 absolute: 138
-              end: 0
+              end:
+                line: 10
+                column: 1
+                absolute: 152
       explicitType: undefined
     isDeclaration: true
     isTypeLevel: false
@@ -287,4 +290,229 @@ statements:
         line: 7
         column: 1
         absolute: 117
+      end:
+        line: 10
+        column: 8
+        absolute: 159
+  - id: 842
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 829
+      tag: Identifier
+      value: ceiling
+    value:
+      id: 841
+      tag: RoundValueToValueLambda
+      params:
+        - id: 833
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 830
+            tag: Identifier
+            value: n
+          type:
+            id: 831
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 10
+              column: 12
+              absolute: 164
+            end:
+              line: 10
+              column: 22
+              absolute: 173
+      block:
+        id: 840
+        tag: Block
+        statements:
+          - id: 839
+            tag: BinaryExpression
+            left:
+              id: 837
+              tag: RoundApply
+              calledInsteadOfSquare: false
+              paramOrder:
+              isFirstParamThis: false
+              isAnObjectCopy: false
+              callee:
+                id: 835
+                tag: Identifier
+                value: floor
+              args:
+                - 0: 
+                  1:
+                    id: 836
+                    tag: Identifier
+                    value: n
+            operator: +
+            right:
+              id: 838
+              tag: Literal
+              type: Number
+              value: 1
+            position:
+              start:
+                line: 11
+                column: 2
+                absolute: 184
+              end:
+                line: 13
+                column: 1
+                absolute: 195
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 10
+        column: 1
+        absolute: 159
+      end:
+        line: 13
+        column: 9
+        absolute: 203
+  - id: 859
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 843
+      tag: Identifier
+      value: absolute
+    value:
+      id: 858
+      tag: RoundValueToValueLambda
+      params:
+        - id: 847
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 844
+            tag: Identifier
+            value: n
+          type:
+            id: 845
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 13
+              column: 13
+              absolute: 208
+            end:
+              line: 13
+              column: 23
+              absolute: 217
+      block:
+        id: 857
+        tag: Block
+        statements:
+          - id: 856
+            tag: IfStatement
+            condition:
+              id: 851
+              tag: BinaryExpression
+              left:
+                id: 849
+                tag: Identifier
+                value: n
+              operator: <
+              right:
+                id: 850
+                tag: Literal
+                type: Number
+                value: 0
+            trueBranch:
+              id: 854
+              tag: BinaryExpression
+              left:
+                id: 852
+                tag: Literal
+                type: Number
+                value: 0
+              operator: -
+              right:
+                id: 853
+                tag: Identifier
+                value: n
+            falseBranch:
+              id: 855
+              tag: Identifier
+              value: n
+            position:
+              start:
+                line: 14
+                column: 2
+                absolute: 225
+              end:
+                line: 16
+                column: 1
+                absolute: 249
+      explicitType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 13
+        column: 1
+        absolute: 203
+      end:
+        line: 16
+        column: 3
+        absolute: 251
+  - id: 862
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 860
+      tag: Identifier
+      value: pi
+    value:
+      id: 861
+      tag: Literal
+      type: Number
+      value: 3.141592653589793
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 16
+        column: 1
+        absolute: 251
+      end:
+        line: 17
+        column: 1
+        absolute: 273
+  - id: 865
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 863
+      tag: Identifier
+      value: e
+    value:
+      id: 864
+      tag: Literal
+      type: Number
+      value: 2.718281828459045
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 17
+        column: 1
+        absolute: 274
       end: 0

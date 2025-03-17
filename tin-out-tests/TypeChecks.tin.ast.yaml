@@ -1,0 +1,134 @@
+id: 359
+tag: Block
+statements:
+  - id: 344
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 337
+      tag: Identifier
+      value: Tp
+    value:
+      id: 343
+      tag: TypeDef
+      fieldDefs:
+        - id: 341
+          tag: FieldDef
+          name: value
+          type:
+            id: 339
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 4
+              column: 1
+              absolute: 30
+            end:
+              line: 4
+              column: 1
+              absolute: 30
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 1
+        column: 1
+        absolute: 2
+      end:
+        line: 4
+        column: 2
+        absolute: 31
+  - id: 347
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 345
+      tag: Identifier
+      value: a
+    value:
+      id: 346
+      tag: Literal
+      type: Number
+      value: 1
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 4
+        column: 1
+        absolute: 31
+      end:
+        line: 5
+        column: 1
+        absolute: 37
+  - id: 358
+    tag: IfStatement
+    condition:
+      id: 350
+      tag: TypeCheck
+      term:
+        id: 348
+        tag: Identifier
+        value: a
+      type:
+        id: 349
+        tag: Identifier
+        value: Tp
+    trueBranch:
+      id: 356
+      tag: Block
+      statements:
+        - id: 355
+          tag: RoundApply
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          callee:
+            id: 351
+            tag: Identifier
+            value: print
+          args:
+            0:
+              - 
+              - id: 354
+                tag: Select
+                ammortized: false
+                owner:
+                  id: 352
+                  tag: Identifier
+                  value: a
+                field: value
+                position:
+                  start:
+                    line: 6
+                    column: 8
+                    absolute: 58
+                  end:
+                    line: 6
+                    column: 16
+                    absolute: 65
+          position:
+            start:
+              line: 6
+              column: 2
+              absolute: 56
+            end:
+              line: 7
+              column: 1
+              absolute: 90
+    falseBranch:
+      id: 357
+      tag: Literal
+      type: Void
+      value: null
+    position:
+      start:
+        line: 5
+        column: 1
+        absolute: 39
+      end: 0

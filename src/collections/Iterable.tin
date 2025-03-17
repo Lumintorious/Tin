@@ -17,30 +17,26 @@ stringOf = (obj: Any) ->
 		makeString(obj)
 
 Iterable = [T] => type:
-	forEach: ((T) -> Nothing) -> Nothing
-	mkString: (separator: String, left: String, right: String) -> String
-	count: ((T) -> Boolean) -> Number
 	getIterator: () -> Iterator[T]
 
-makeIterable = [T] -> (getIterator: () -> Iterator[T]) ->
-	forEach = (fn: (T) -> Nothing) ->
-		iterator = getIterator()
+	forEach = (this: Iterable[T], fn: (T) -> Nothing) ->
+		iterator = this.getIterator()
 		current = iterator.next()
 		while current != nothing,
 			fn(current)
-			current = iterator.next()
-	mkString = (separator: String = ", ", left: String = "", right: String = "") ->
+			set current = iterator.next()
+
+	mkString = (this: Iterable[T], separator: String, left: String, right: String) ->
 		string = ""
 		fn = (t: T) ->
 			comma = if string == "", "" else separator
 			set string = "{string}{comma}{t}"
-		forEach(fn)
+		this.forEach(fn)
 		"{left}{string}{right}"
-	count = (pred: (T) -> Boolean) ->
+
+	count = (this: Iterable[T], pred: (T) -> Boolean) ->
 		num = 0
-		fn = (t: T) ->
-			if pred(t), set num = num + 1
-		forEach(fn)
+		this.forEach((t: T) -> if pred(t), set num = num + 1)
 		num
-	Iterable[T](forEach, mkString, count, getIterator)
+
 	

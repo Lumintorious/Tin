@@ -1,0 +1,283 @@
+id: 49
+tag: Block
+statements:
+  - id: 0
+    tag: Import
+    path: collections/Map
+    position:
+      start:
+        line: 1
+        column: 1
+        absolute: 6
+      end:
+        line: 3
+        column: 1
+        absolute: 26
+  - id: 8
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1
+      tag: Identifier
+      value: Cat
+    value:
+      id: 7
+      tag: TypeDef
+      fieldDefs:
+        - id: 5
+          tag: FieldDef
+          name: name
+          type:
+            id: 3
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 6
+              column: 1
+              absolute: 56
+            end:
+              line: 6
+              column: 1
+              absolute: 56
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 3
+        column: 1
+        absolute: 29
+      end:
+        line: 6
+        column: 4
+        absolute: 59
+  - id: 32
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 9
+      tag: Identifier
+      value: Dog
+    value:
+      id: 31
+      tag: TypeDef
+      fieldDefs:
+        - id: 13
+          tag: FieldDef
+          name: breed
+          type:
+            id: 11
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 8
+              column: 1
+              absolute: 85
+            end:
+              line: 8
+              column: 1
+              absolute: 85
+        - id: 29
+          tag: FieldDef
+          name: woof
+          defaultValue:
+            id: 27
+            tag: RoundValueToValueLambda
+            params:
+              - id: 18
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  id: 15
+                  tag: Identifier
+                  value: this
+                type:
+                  id: 16
+                  tag: Identifier
+                  value: Dog
+                isDeclaration: false
+                isTypeLevel: false
+                position:
+                  start:
+                    line: 8
+                    column: 10
+                    absolute: 98
+                  end:
+                    line: 8
+                    column: 20
+                    absolute: 104
+            block:
+              id: 26
+              tag: Block
+              statements:
+                - id: 24
+                  tag: RoundApply
+                  calledInsteadOfSquare: false
+                  paramOrder:
+                  isFirstParamThis: false
+                  isAnObjectCopy: false
+                  callee:
+                    id: 20
+                    tag: Identifier
+                    value: print
+                  args:
+                    0:
+                      - 
+                      - id: 23
+                        tag: Select
+                        ammortized: false
+                        owner:
+                          id: 21
+                          tag: Identifier
+                          value: this
+                        field: breed
+                        position:
+                          start:
+                            line: 9
+                            column: 9
+                            absolute: 121
+                          end:
+                            line: 9
+                            column: 20
+                            absolute: 128
+                  position:
+                    start:
+                      line: 9
+                      column: 3
+                      absolute: 116
+                    end:
+                      line: 10
+                      column: 1
+                      absolute: 130
+                - id: 25
+                  tag: Identifier
+                  value: this
+                  position:
+                    start:
+                      line: 10
+                      column: 3
+                      absolute: 136
+                    end:
+                      line: 12
+                      column: 1
+                      absolute: 140
+            explicitType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 12
+              column: 1
+              absolute: 140
+            end:
+              line: 12
+              column: 1
+              absolute: 140
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 6
+        column: 1
+        absolute: 59
+      end:
+        line: 12
+        column: 5
+        absolute: 144
+  - id: 41
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 33
+      tag: Identifier
+      value: what
+    value:
+      id: 40
+      tag: BinaryExpression
+      left:
+        id: 36
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        paramOrder:
+        isFirstParamThis: false
+        isAnObjectCopy: false
+        callee:
+          id: 34
+          tag: Identifier
+          value: Cat
+        args:
+          - 0: 
+            1:
+              id: 35
+              tag: Literal
+              type: String
+              value: Kitty
+      operator: &
+      right:
+        id: 39
+        tag: RoundApply
+        calledInsteadOfSquare: false
+        paramOrder:
+        isFirstParamThis: false
+        isAnObjectCopy: false
+        callee:
+          id: 37
+          tag: Identifier
+          value: Dog
+        args:
+          - 0: 
+            1:
+              id: 38
+              tag: Literal
+              type: String
+              value: Spotted
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 12
+        column: 1
+        absolute: 144
+      end:
+        line: 13
+        column: 1
+        absolute: 178
+  - id: 48
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 42
+      tag: Identifier
+      value: whatt
+    value:
+      id: 47
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      isAnObjectCopy: false
+      callee:
+        id: 46
+        tag: Select
+        ammortized: false
+        owner:
+          id: 43
+          tag: Identifier
+          value: what
+        field: woof
+      args:
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 13
+        column: 1
+        absolute: 183
+      end: 0

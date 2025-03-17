@@ -13,9 +13,21 @@ import {
    Optional,
    Group,
    Term,
+   SquareTypeToValueLambda,
+   Block,
 } from "./Parser";
-import { TypePhaseContext, Scope, Symbol } from "./Scope";
-import { ParamType, AnyType } from "./Types";
+import {
+   TypePhaseContext,
+   Scope,
+   Symbol,
+   RecursiveResolutionOptions,
+} from "./Scope";
+import {
+   ParamType,
+   AnyType,
+   SquareTypeToValueLambdaType,
+   ThisType,
+} from "./Types";
 import { Identifier } from "./Parser";
 import {
    Type,
@@ -44,7 +56,9 @@ export class TypeTranslator {
    translate(node: AstNode, scope: Scope): Type {
       switch (node.tag) {
          case "Identifier":
-            // return scope.lookupType((node as Identifier).value);
+            if ((node as Identifier).value === "This") {
+               return new ThisType();
+            }
             return new NamedType((node as Identifier).value);
          case "Literal":
             const literal = node as Literal;
@@ -95,7 +109,8 @@ export class TypeTranslator {
                node.parameterTypes.map((p) => {
                   let translated = this.translateRoundTypeToTypeLambdaParameter(
                      p,
-                     scope
+                     scope,
+                     {}
                   );
                   return translated;
                }),
@@ -110,7 +125,11 @@ export class TypeTranslator {
             // innerScope.declareType("T", new NamedType("T"));
             const type = new RoundValueToValueLambdaType(
                node.params.map((p) =>
-                  this.translateRoundTypeToTypeLambdaParameter(p, innerScope)
+                  this.translateRoundTypeToTypeLambdaParameter(
+                     p,
+                     innerScope,
+                     {}
+                  )
                ),
                this.translate(node.block.statements[0], innerScope),
                node.isTypeLambda
@@ -142,6 +161,26 @@ export class TypeTranslator {
                genericParameters,
                this.translate(node.returnType, innerScope2)
             );
+         case "SquareTypeToValueLambda":
+            // return new RoundValueToValueLambdaType(node.params.map(p => this.translate(p, scope/)))
+            if (!(node instanceof SquareTypeToValueLambda)) {
+               throw new Error("Weird type");
+            }
+            const innerScopeX = scope.innerScopeOf(node, true);
+            const genericParametersX = node.parameterTypes.map((p) => {
+               const param = this.translate(p, innerScopeX);
+               if (param instanceof GenericNamedType) {
+                  return param;
+               } else {
+                  throw new Error("Expected Generic parameter, but it wasn't");
+               }
+            });
+            return new SquareTypeToValueLambdaType(
+               genericParametersX,
+               this.translate(node.block, innerScopeX)
+            );
+         case "Block":
+            return this.translate((node as Block).statements[0], scope);
          case "SquareApply":
             if (!(node instanceof SquareApply)) {
                return new Type();
@@ -178,7 +217,8 @@ export class TypeTranslator {
                return new Type();
             }
             throw new Error(
-               "Was type apply, but not isTypeRoundValueToValueLambda. "
+               "Was type apply, but not isTypeRoundValueToValueLambda. got " +
+                  node.tag
             );
          case "BinaryExpression":
             if (!(node instanceof BinaryExpression)) {
@@ -205,7 +245,8 @@ export class TypeTranslator {
 
    translateRoundTypeToTypeLambdaParameter(
       node: Term,
-      scope: Scope
+      scope: Scope,
+      options: RecursiveResolutionOptions
    ): ParamType {
       if (node instanceof Identifier && node.isTypeLevel) {
          const explicitType = this.translate(node, scope);
@@ -216,7 +257,7 @@ export class TypeTranslator {
             node.type = node.lhs;
             return new ParamType(this.translate(node, scope));
          }
-         if (!node.type && !node.value) {
+         if (!node.type && !node.value && !options?.typeExpectedInPlace) {
             throw new Error(
                "Cannot deduce type from typeless, valueless parameter."
             );
@@ -227,7 +268,11 @@ export class TypeTranslator {
          }
          let inferredType;
          if (node.value) {
-            inferredType = this.context.inferencer.infer(node.value, scope);
+            inferredType = this.context.inferencer.infer(
+               node.value,
+               scope,
+               options
+            );
          }
          const name = node.lhs.value;
          const value = node.value;

@@ -88,6 +88,7 @@ export class Lexer {
       ];
       this.operators = [
          "...",
+         "```",
          "??",
          "?:",
          "?.",
@@ -95,6 +96,7 @@ export class Lexer {
          "=>",
          "&&",
          "::",
+         "~=",
          "==",
          "!=",
          ">=",

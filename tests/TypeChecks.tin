@@ -1,0 +1,6 @@
+Tp = type:
+	value: String
+
+a = 1
+if a :: Tp,
+	print(a.value) # Should give no error

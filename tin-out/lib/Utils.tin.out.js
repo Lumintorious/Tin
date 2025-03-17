@@ -177,4 +177,12 @@ return ((a < b) ? (a) : (b))
 };
 export var floor/* (Number) -> Number*/ = function(n) {
 return n - (n["%"](1))
-}
+};
+export var ceiling/* (Number) -> Number*/ = function(n) {
+return floor(n) + 1
+};
+export var absolute/* (Number) -> Number*/ = function(n) {
+return ((n < 0) ? (0 - n) : (n)) 
+};
+export var pi/* Number*/ = 3.141592653589793;
+export var e/* Number*/ = 2.718281828459045

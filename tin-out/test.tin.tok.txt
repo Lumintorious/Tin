@@ -1,99 +1,91 @@
+KEYWORD      | import       |   1, 1    
+IDENTIFIER   | collections  |   1, 8    
+OPERATOR     | /            |   1, 19   
+IDENTIFIER   | List         |   1, 20   
 NEWLINE      |              |   2, 1    
+KEYWORD      | import       |   2, 1    
+IDENTIFIER   | lib          |   2, 8    
+OPERATOR     | /            |   2, 11   
+IDENTIFIER   | Utils        |   2, 12   
 NEWLINE      |              |   4, 1    
-IDENTIFIER   | makeString   |   4, 1    
+IDENTIFIER   | Cat          |   4, 1    
+OPERATOR     | =            |   4, 5    
+KEYWORD      | type         |   4, 7    
 OPERATOR     | :            |   4, 11   
-PARENS       | (            |   4, 13   
-IDENTIFIER   | Any          |   4, 14   
-PARENS       | )            |   4, 17   
-OPERATOR     | ->           |   4, 19   
-IDENTIFIER   | String       |   4, 22   
-OPERATOR     | =            |   4, 29   
-KEYWORD      | external     |   4, 31   
+NEWLINE      |              |   5, 1    
+INDENT       | 4            |   5, 1    
+IDENTIFIER   | name         |   5, 2    
+OPERATOR     | :            |   5, 6    
+IDENTIFIER   | String       |   5, 8    
 NEWLINE      |              |   6, 1    
-IDENTIFIER   | Cat          |   6, 1    
-OPERATOR     | =            |   6, 5    
-KEYWORD      | type         |   6, 7    
-OPERATOR     | :            |   6, 11   
+IDENTIFIER   | useCat       |   6, 2    
+OPERATOR     | =            |   6, 9    
+PARENS       | (            |   6, 11   
+IDENTIFIER   | this         |   6, 12   
+OPERATOR     | :            |   6, 16   
+IDENTIFIER   | Cat          |   6, 18   
+PARENS       | )            |   6, 21   
+OPERATOR     | ->           |   6, 23   
 NEWLINE      |              |   7, 1    
-INDENT       | 4            |   7, 1    
-IDENTIFIER   | name         |   7, 2    
-OPERATOR     | :            |   7, 6    
-IDENTIFIER   | String       |   7, 8    
-NEWLINE      |              |   8, 1    
-IDENTIFIER   | useCat       |   8, 2    
-OPERATOR     | =            |   8, 9    
-PARENS       | (            |   8, 11   
-IDENTIFIER   | this         |   8, 12   
-OPERATOR     | :            |   8, 16   
-IDENTIFIER   | Cat          |   8, 18   
-PARENS       | )            |   8, 21   
-OPERATOR     | ->           |   8, 23   
+INDENT       | 8            |   7, 1    
+IDENTIFIER   | print        |   7, 3    
+PARENS       | (            |   7, 8    
+IDENTIFIER   | this         |   7, 9    
+OPERATOR     | .            |   7, 13   
+IDENTIFIER   | name         |   7, 14   
+PARENS       | )            |   7, 18   
 NEWLINE      |              |   9, 1    
-INDENT       | 8            |   9, 1    
-IDENTIFIER   | print        |   9, 3    
-PARENS       | (            |   9, 8    
-IDENTIFIER   | this         |   9, 9    
-OPERATOR     | .            |   9, 13   
-IDENTIFIER   | name         |   9, 14   
-PARENS       | )            |   9, 18   
-NEWLINE      |              |  11, 1    
-DEDENT       | 8            |  11, 1    
-DEDENT       | 4            |  11, 1    
-IDENTIFIER   | ToString     |  11, 1    
-OPERATOR     | =            |  11, 10   
-KEYWORD      | type         |  11, 12   
-OPERATOR     | :            |  11, 16   
+DEDENT       | 8            |   9, 1    
+DEDENT       | 4            |   9, 1    
+IDENTIFIER   | ToString     |   9, 1    
+OPERATOR     | =            |   9, 10   
+KEYWORD      | type         |   9, 12   
+OPERATOR     | :            |   9, 16   
+NEWLINE      |              |  10, 1    
+INDENT       | 4            |  10, 1    
+IDENTIFIER   | toString     |  10, 2    
+OPERATOR     | :            |  10, 10   
+PARENS       | (            |  10, 12   
+IDENTIFIER   | this         |  10, 13   
+OPERATOR     | :            |  10, 17   
+IDENTIFIER   | Any          |  10, 19   
+PARENS       | )            |  10, 22   
+OPERATOR     | ->           |  10, 24   
+IDENTIFIER   | String       |  10, 27   
 NEWLINE      |              |  12, 1    
-INDENT       | 4            |  12, 1    
-IDENTIFIER   | toString     |  12, 2    
-OPERATOR     | :            |  12, 10   
-PARENS       | (            |  12, 12   
-IDENTIFIER   | this         |  12, 13   
-OPERATOR     | :            |  12, 17   
-IDENTIFIER   | Any          |  12, 19   
-PARENS       | )            |  12, 22   
-OPERATOR     | ->           |  12, 24   
-IDENTIFIER   | String       |  12, 27   
-NEWLINE      |              |  14, 1    
-DEDENT       | 4            |  14, 1    
-IDENTIFIER   | stringOf     |  14, 1    
-OPERATOR     | =            |  14, 10   
-PARENS       | (            |  14, 12   
-IDENTIFIER   | obj          |  14, 13   
-OPERATOR     | :            |  14, 16   
-IDENTIFIER   | Any          |  14, 18   
-PARENS       | )            |  14, 21   
-OPERATOR     | ->           |  14, 23   
+DEDENT       | 4            |  12, 1    
+IDENTIFIER   | x            |  12, 1    
+OPERATOR     | =            |  12, 3    
+IDENTIFIER   | ToString     |  12, 5    
+PARENS       | (            |  12, 13   
+PARENS       | (            |  12, 14   
+IDENTIFIER   | this         |  12, 15   
+OPERATOR     | :            |  12, 19   
+IDENTIFIER   | Any          |  12, 21   
+PARENS       | )            |  12, 24   
+OPERATOR     | ->           |  12, 26   
+STRING       | Sup          |  12, 29   
+PARENS       | )            |  12, 34   
+NEWLINE      |              |  13, 1    
+IDENTIFIER   | print        |  13, 1    
+PARENS       | (            |  13, 6    
+IDENTIFIER   | x            |  13, 7    
+OPERATOR     | .            |  13, 8    
+IDENTIFIER   | toString     |  13, 9    
+PARENS       | (            |  13, 17   
+PARENS       | )            |  13, 18   
+PARENS       | )            |  13, 19   
 NEWLINE      |              |  15, 1    
-INDENT       | 4            |  15, 1    
-IDENTIFIER   | print        |  15, 2    
-PARENS       | (            |  15, 7    
-STRING       | hi           |  15, 8    
-PARENS       | )            |  15, 12   
-NEWLINE      |              |  16, 1    
-KEYWORD      | if           |  16, 2    
-IDENTIFIER   | obj          |  16, 5    
-OPERATOR     | ::           |  16, 9    
-IDENTIFIER   | ToString     |  16, 12   
-NEWLINE      | ,            |  16, 1    
-NEWLINE      |              |  17, 1    
-INDENT       | 8            |  17, 1    
-IDENTIFIER   | obj          |  17, 3    
-OPERATOR     | .            |  17, 6    
-IDENTIFIER   | toString     |  17, 7    
-PARENS       | (            |  17, 15   
-PARENS       | )            |  17, 16   
-NEWLINE      |              |  18, 1    
-DEDENT       | 8            |  18, 1    
-KEYWORD      | else         |  18, 2    
-NEWLINE      |              |  19, 1    
-INDENT       | 8            |  19, 1    
-IDENTIFIER   | makeString   |  19, 3    
-PARENS       | (            |  19, 13   
-IDENTIFIER   | obj          |  19, 14   
-PARENS       | )            |  19, 17   
-NEWLINE      |              |  21, 1    
-NEWLINE      |              |  22, 1    
-NEWLINE      |              |  23, 1    
-NEWLINE      |              |  24, 1    
+IDENTIFIER   | l            |  15, 1    
+OPERATOR     | =            |  15, 3    
+IDENTIFIER   | List@of      |  15, 5    
+PARENS       | (            |  15, 12   
+NUMBER       | 1            |  15, 13   
+NEWLINE      | ,            |  15, 1    
+NUMBER       | 2            |  15, 16   
+NEWLINE      | ,            |  15, 1    
+NUMBER       | 3            |  15, 19   
+NEWLINE      | ,            |  15, 1    
+NUMBER       | 4            |  15, 22   
+PARENS       | )            |  15, 23   
 --undefined--

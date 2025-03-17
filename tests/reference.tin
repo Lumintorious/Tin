@@ -1,0 +1,110 @@
+# Declarations
+v = 1
+vv: Number = 1.1
+s = "string, can be spliced like {v}"
+same = 1, line = 2
+
+# @ is a valid character for identifiers
+String@anything = "Works"
+
+# Mutation
+m = 1
+set m = 1 # 'm = 1' won't work
+
+# Operations
+x = 1 + 2
+y = 12 / 3
+
+# Primitives
+number: Number = 1
+string: String = "str"
+boolean: Boolean = false
+empty: Nothing = nothing # keyword
+any: Any = "str"
+
+# Optional
+maybeFull: Number? = 10
+maybeEmpty: Number? = nothing
+
+# Lambdas
+f = (n: Number) -> n + 1
+ff = (n: Number) ->
+	n + 2
+
+# Lambda Calls
+print("Hello World")
+
+# Lambda Types
+F = (Number) -> Number
+FNamed = (first: Number, second: Number) -> Number
+
+# Named Lambda Calls
+f(n = 24)
+
+# If
+if v > 0,
+	print("Works")
+else
+	print("Doesn't work")
+
+ifelse: Number = if v > 0, 1 else 2 # resolved as expression
+
+# While
+i = 0
+while i < 3,
+	print(i)
+
+# Data
+Cat = type:
+	name: String
+	age: Number = 1
+
+Mech = type:
+	name: String
+	version: Number
+
+test = 0 # Look into this bug
+
+# Constructing
+kitty = Cat("Kitty", 1)
+mech = Mech("Iodized Steel", 3.0)
+
+# Access
+kitty.name
+mech.version
+
+# Composed types
+MechaCat = Mech & Cat
+MechOrCat = Mech | Cat
+
+# Composing objects
+mechaCat = Cat("MechaCat", 10) & Mech("Oxidized Copper", 1.4)
+
+# Accessing on composed objects
+mechaCat.version # works by default
+# mechaCat.name # won't work, name is both on Cat AND Mech
+
+# Casted access, depens on compiletime type
+mechaCat:Cat.name == "MechaCat"
+mechaCat:Mech.name == "OxidizedCopper"
+
+# Type Checks
+any: Any = kitty
+if any :: Cat,
+	print(any.name) # any is 'Cat' in this scope
+
+# Nothing Checks
+maybeCat: Cat? = kitty
+if maybeCat != nothing,
+	print(maybeCat.age) # maybeCat is never nothing here
+
+# Arrays
+arr = Array@of(1, 2, 3, 4)
+arr.at(0)
+arr.length()
+
+# Varargs
+varargs = (n: Array[Number]) -> n.at(0)
+varargs(1, 2, 3)
+varargs(Array@of(1, 2))
+

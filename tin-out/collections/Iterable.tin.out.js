@@ -78,6 +78,7 @@ const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
 const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
+	_rawArray: args,
 	length() {
 		return args.length;
 	},
@@ -121,9 +122,8 @@ function makeString(obj) {
 
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = 'Array(';
-		console.dir(obj)
 		for (let i = 0; i < obj.Array.length(); i++) {
-			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
+			result += makeString(obj.Array.at(i)) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
 		return result + ")"
 	}
@@ -169,43 +169,32 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Iterator = /* [] */(T) => TIN_TYPE("Iterator", "65ee98d7-7c19-4142-8401-4786a5c7a961", (_p0,_p1 = function(t) {
-return print("Hello")
-}) => ({next: _p0,consumeAll: _p1}), {}); Iterator._typeId = "Iterator";;
-export var Accessible = /* [] */(T) => TIN_TYPE("Accessible", "6c838d52-e4e6-4e8d-9a3f-f138ca01eefb", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
+export let Iterator = /* [] */(T) => TIN_TYPE("Iterator", "bf209d1a-4be6-4c78-9e78-e71520574db0", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
+export let Accessible = /* [] */(T) => TIN_TYPE("Accessible", "34a0c64a-fa0a-461c-8ac6-d2af118e9c99", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
 ;
-export var ToString = TIN_TYPE("ToString", "9e7c5dfb-6af3-4b6d-8cbf-6b4b442926d9", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
-export var stringOf/* (Any) -> String*/ = function(obj) {
+export let ToString = TIN_TYPE("ToString", "4ff6d008-2135-431f-8178-22e7dc71e060", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export let stringOf/* (obj:Any) -> String*/ = function(obj) {
 return ((ToString.__is_child(obj) ) ? (obj.ToString.toString.call(obj,)) : (makeString(obj))) 
 };
-export var Iterable = /* [] */(T) => TIN_TYPE("Iterable", "2d81304e-7c5b-49d2-910d-c67c2e617e35", (_p0,_p1,_p2,_p3) => ({forEach: _p0,mkString: _p1,count: _p2,getIterator: _p3}), {}); Iterable._typeId = "Iterable";;
-export var makeIterable/* [T] => (() -> Iterator[T]) -> Iterable[T]*/ = function(T) {
-return function(getIterator) {
-var forEach/* ((T) -> Nothing) -> Any?*/ = function(fn) {
-var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator.Iterator.next();
+export let Iterable = /* [] */(T) => TIN_TYPE("Iterable", "671e382e-e461-439c-b413-154dde864faa", (_p0,_p1 = function(fn) {
+let iterator/* Iterator[T]*/ = this.Iterable.getIterator();
+let current/* T?*/ = iterator.Iterator.next();
 while (current != nothing) {
  fn(current);
 current = iterator.Iterator.next() 
 }
-};
-var mkString/* (String, String, String) -> String*/ = function(separator = ", ", left = "", right = "") {
-var string/* String*/ = "";
-var fn/* (T) -> Any*/ = function(t) {
-var comma/* String*/ = ((string == "") ? ("") : (separator)) ;
+},_p2 = function(separator, left, right) {
+let string/* String*/ = "";
+let fn/* (t:T) -> Any*/ = function(t) {
+let comma/* String*/ = ((string == "") ? ("") : (separator)) ;
 return string = "" + string + "" + comma + "" + t + ""
 };
-forEach(fn);
+this.Iterable.forEach.call(this,fn);
 return "" + left + "" + string + "" + right + ""
-};
-var count/* ((T) -> Boolean) -> Number*/ = function(pred) {
-var num/* Number*/ = 0;
-var fn/* (T) -> Any?*/ = function(t) {
+},_p3 = function(pred) {
+let num/* Number*/ = 0;
+this.Iterable.forEach.call(this,function(t) {
 return ((pred(t)) ? (num = num + 1) : (null)) 
-};
-forEach(fn);
+});
 return num
-};
-return Iterable.call('Type', T)(forEach, mkString, count, getIterator)
-}
-}
+}) => ({getIterator: _p0,forEach: _p1,mkString: _p2,count: _p3}), {}); Iterable._typeId = "Iterable";

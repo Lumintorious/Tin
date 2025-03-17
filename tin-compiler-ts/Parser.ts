@@ -62,6 +62,11 @@ export class Assignment extends AstNode {
             !lhs.value.includes("@");
       }
    }
+
+   mutable(mutable: boolean) {
+      this.isMutable = mutable;
+      return this;
+   }
 }
 
 // EXPRESSIONS
@@ -351,6 +356,14 @@ export class Make extends Term {
    }
 }
 
+export class ExternalCodeSplice extends Statement {
+   contents: string;
+   constructor(contents: string) {
+      super("ExternalCodeSplice");
+      this.contents = contents;
+   }
+}
+
 const PRECEDENCE: { [_: string]: number } = {
    "?:": 110, // Walrus
    ":": 101,
@@ -375,6 +388,7 @@ const PRECEDENCE: { [_: string]: number } = {
    "==": 0, // Equality
    "::": 0, // Type Check
    "=": 0, // Assignment
+   "~=": 0, // Assignment
 };
 
 export class Parser {
@@ -447,8 +461,8 @@ export class Parser {
          token = this.peek();
       }
 
-      if (token.tag === "NEWLINE") {
-         this.consume("NEWLINE"); // Ignore newlines
+      if (!token || token.tag === "NEWLINE") {
+         token && this.consume("NEWLINE"); // Ignore newlines
          return null; // Empty statement
       }
 
@@ -555,6 +569,7 @@ export class Parser {
       const whileLoopStart = this.positionNow();
       while (
          (!stopAtEquals || !this.is("=")) &&
+         (!stopAtEquals || !this.is("~=")) &&
          (!stopAtDot || !this.is(".")) &&
          this.peek() &&
          this.isBinaryOperator(this.peek())
@@ -588,34 +603,35 @@ export class Parser {
 
          // Combine into a binary expression
 
-         if (operator === "=" && left.tag === "Select") {
-            left = new Assignment(left, right, false).fromTo(
-               left.position,
-               this.peek().position
-            );
+         if ((operator === "=" || operator === "~=") && left.tag === "Select") {
+            left = new Assignment(left, right, false)
+               .mutable(operator === "~=")
+               .fromTo(left.position, this.peek().position);
             break;
          }
 
          if (
-            operator === "=" &&
+            (operator === "=" || operator === "~=") &&
             left instanceof Cast &&
             left.tag === "Cast" &&
             left.expression.tag === "Identifier"
          ) {
-            left = new Assignment(
-               left.expression,
-               right,
-               true,
-               left.type
-            ).fromTo(left.position, this.peek().position);
+            left = new Assignment(left.expression, right, true, left.type)
+               .mutable(operator === "~=")
+               .fromTo(left.position, this.peek().position);
             break;
          }
 
-         if (operator === "=" && left.tag === "Identifier") {
-            left = new Assignment(left, right, true).fromTo(
-               left.position,
-               this.peek()?.position ?? new CodePoint(-1, -1, -1)
-            );
+         if (
+            (operator === "=" || operator === "~=") &&
+            left.tag === "Identifier"
+         ) {
+            left = new Assignment(left, right, true)
+               .mutable(operator === "~=")
+               .fromTo(
+                  left.position,
+                  this.peek()?.position ?? new CodePoint(-1, -1, -1)
+               );
             break;
          }
 
@@ -860,6 +876,7 @@ export class Parser {
       this.consume("OPERATOR", ",");
       const trueBranch = this.parseExpression();
       let falseBranch: Term;
+      this.omit("NEWLINE");
       if (this.is("else")) {
          this.consume("KEYWORD", "else");
          falseBranch = this.parseExpression();
@@ -965,7 +982,14 @@ export class Parser {
          return this.parseString(token);
       }
       if (token.value === "external") {
-         return new Literal("", "Any");
+         if (this.peek().tag === "STRING") {
+            return new AppliedKeyword(
+               "external",
+               new Literal(this.consume().value, "String")
+            );
+         } else {
+            return new Literal("", "Any");
+         }
       }
       if (token.value === "true" || token.value === "false") {
          return new Literal(token.value, "Boolean");
