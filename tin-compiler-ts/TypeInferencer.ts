@@ -330,24 +330,25 @@ export class TypeInferencer {
    inferRoundApply(node: RoundApply, scope: Scope): Type {
       let calleeType = scope.resolveNamedType(this.infer(node.callee, scope));
 
-      if (
-         node.callee instanceof Identifier &&
-         this.isCapitalized(node.callee.value)
-      ) {
-         const type = scope.resolveNamedType(
-            this.context.translator.translate(node.callee, scope)
-         );
-         if (type instanceof StructType) {
-            return type;
-         } else if (type instanceof MarkerType) {
-            return type;
-         } else {
-            throw new Error(
-               "Cannot call constructor function for non struct-type. Was " +
-                  type.toString()
-            );
-         }
-      } else if (calleeType instanceof RoundValueToValueLambdaType) {
+      // if (
+      //    node.callee instanceof Identifier &&
+      //    this.isCapitalized(node.callee.value)
+      // ) {
+      //    const type = scope.resolveNamedType(
+      //       this.context.translator.translate(node.callee, scope)
+      //    );
+      //    if (type instanceof StructType) {
+      //       return type;
+      //    } else if (type instanceof MarkerType) {
+      //       return type;
+      //    } else {
+      //       throw new Error(
+      //          "Cannot call constructor function for non struct-type. Was " +
+      //             type.toString()
+      //       );
+      //    }
+      // } else
+      if (calleeType instanceof RoundValueToValueLambdaType) {
          if (calleeType.returnType instanceof ThisType) {
             if (node.callee instanceof Select) {
                return this.infer(node.callee.owner, scope);

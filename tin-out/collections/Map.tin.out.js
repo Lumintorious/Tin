@@ -177,8 +177,8 @@ import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\col
 	const JsMap = globalThis.Map;
 
 ;
-export let MapOps = /* [] */(K, V) => TIN_TYPE("MapOps", "3b8a0aa9-abcc-40a1-9bdb-bbcf2e7eb991", (_p0,_p1,_p2) => ({put: _p0,get: _p1,remove: _p2}), {}); MapOps._typeId = "MapOps";;
-export let MapEntry = /* [] */(A, B) => TIN_TYPE("MapEntry", "77a5b341-fa45-46ca-a90c-b44d16db3781", (_p0,_p1) => ({key: _p0,value: _p1}), {}); MapEntry._typeId = "MapEntry";;
+export let MapOps = /* [] */(K, V) => TIN_TYPE("MapOps", "7ee943ea-6752-4007-869d-c75c770e4a3b", (_p0,_p1,_p2) => ({put: _p0,get: _p1,remove: _p2}), {}); MapOps._typeId = "MapOps";;
+export let MapEntry = /* [] */(A, B) => TIN_TYPE("MapEntry", "d676fc65-9546-4a29-b447-f64c7061abd7", (_p0,_p1) => ({key: _p0,value: _p1}), {}); MapEntry._typeId = "MapEntry";;
 export let Map = /* [] */(K, V) => _TIN_INTERSECT_OBJECTS(MapOps.call('Type', K, V), Iterable.call('Type', MapEntry.call('Type', K, V)));
 export let Map$entry/* [A, B] -> (key:A, value:B) -> MapEntry[A, B]*/ = function(A, B) {
 return function(key, value) {
@@ -186,14 +186,23 @@ return MapEntry.call('Type', A, B)(key, value)
 }
 };
 ;
+export let Map$create/* [K, V] -> Map[K, V]*/ = function(K, V) {
+return Map$of.call('Type', K, V)(Array(0)([]))
+};
 
 
 	const Map$of = (K, V) => (args) => {
 		const map = new JsMap(args.Array._rawArray.map(p => [p.MapEntry.key, p.MapEntry.value]))
 		const ops = MapOps(K, V)(
-			(key, value) => map.put(key, value), 
+			function(key, value)  {
+				map.set(key, value);
+				return this;
+			}, 
 			(key) => map.get(key),
-			(key) => map.delete(key)
+			function (key) {
+				map.delete(key);
+				return this;
+			}
 		)
 		const getIterator = () => {
 			const jsIterator = map.keys();
@@ -213,7 +222,4 @@ return MapEntry.call('Type', A, B)(key, value)
 	}
 
 ;
-export let x/* Map[Number, String]*/ = Map$of.call('Type', Number, String)(Array(0)([Map$entry(0)(1, "One"), Map$entry(0)(2, "Two")]));
-x.Iterable.forEach.call(x,function(p) {
-return print(p.MapEntry.value)
-})
+export let y/* Number*/ = 1 + 4

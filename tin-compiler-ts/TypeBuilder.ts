@@ -187,6 +187,10 @@ export class TypeBuilder {
                expectedParams[0].type.callee instanceof NamedType &&
                expectedParams[0].type.callee.name === "Array"
             ) {
+               if (appliedParams.length === 0) {
+                  node.takesVarargs = true;
+                  return;
+               }
                let firstAppliedParamType = this.context.inferencer.infer(
                   appliedParams[0][1],
                   scope
@@ -282,6 +286,7 @@ export class TypeBuilder {
    buildSelect(node: Select, scope: Scope) {
       // if (scope.iteration === "DECLARATION") return;
       this.context.inferencer.infer(node, scope); // To assign ownerComponent
+      this.build(node.owner, scope);
       let parentType = this.context.inferencer.infer(node.owner, scope);
 
       let ammortized = false;
@@ -489,7 +494,7 @@ export class TypeBuilder {
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
          // if (!scope.hasSymbol(lhs.value)) {
-         scope.declare(symbol.mutable(node.isMutable));
+         scope.declare(symbol.mutable(node.isMutable), true);
          node.symbol = symbol;
          // }
       }

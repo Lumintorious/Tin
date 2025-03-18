@@ -518,6 +518,7 @@ export class Parser {
       return result.fromTo(start.position, end.position); // Return a function application node
    }
 
+   isOnNewLine = false;
    parseExpression(precedence = 0, stopAtEquals = false, stopAtDot = false) {
       const startPos = this.positionNow();
       const result = this.parseExpressionRaw(
@@ -573,7 +574,30 @@ export class Parser {
          (!stopAtDot || !this.is(".")) &&
          this.peek() &&
          this.isBinaryOperator(this.peek())
+         // this.peek().tag === "NEWLINE" ||
+         // !this.peek(1) ||
+         // this.peek(1).tag === "INDENT" ||
+         // this.peek(1).tag === "DEDENT")
       ) {
+         // if (
+         //    this.isOnNewLine &&
+         //    ((this.peek().tag === "NEWLINE" &&
+         //       (!this.peek(1) || this.peek(1).tag === "DEDENT")) ||
+         //       this.peek().tag === "DEDENT")
+         // ) {
+         //    break;
+         // }
+         // if (
+         //    this.peek().tag === "NEWLINE" &&
+         //    (!this.peek(1) || this.peek(1).tag === "INDENT")
+         // ) {
+         //    this.omit("NEWLINE");
+         //    this.omit("INDENT");
+         //    this.isOnNewLine = true;
+         // }
+         if (!this.peek()) {
+            break;
+         }
          const operator = this.peek().value;
          const operatorPrecedence = PRECEDENCE[operator];
          const thisLoopStart = this.positionNow();
@@ -693,6 +717,11 @@ export class Parser {
          }
          left = left.fromTo(whileLoopStart, this.positionNow());
       }
+
+      // if (this.isOnNewLine) {
+      //    this.consume("NEWLINE");
+      //    this.consume("DEDENT");
+      // }
 
       if (this.peek() && this.peek().value === "?") {
          this.consume("OPERATOR");

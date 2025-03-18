@@ -151,7 +151,11 @@ export class TypeChecker {
             this.typeCheck.bind(this)(c, innerScope)
          );
       } else if (node instanceof Assignment && node.value) {
-         this.typeCheck(node.value, scope);
+         const options: RecursiveResolutionOptions = {};
+         if (node.lhs instanceof Identifier) {
+            options.assignedName = node.lhs.value;
+         }
+         this.typeCheck(node.value, scope, options);
       } else if (node instanceof Change) {
          this.typeCheckChange(node as Change, scope);
       } else if (node instanceof RoundApply) {
@@ -219,6 +223,8 @@ export class TypeChecker {
          this.typeCheck(node.right, scope, {
             firstPartOfIntersection: leftType,
          });
+      } else if (node instanceof Select) {
+         this.typeCheck(node.owner, scope);
       }
    }
 
@@ -230,8 +236,19 @@ export class TypeChecker {
       const innerScope = scope.innerScopeOf(node);
       node.params.forEach((p) => this.typeCheck(p, innerScope));
       const lambdaType = this.context.inferencer.infer(node, scope, options);
+      if (
+         options.assignedName &&
+         this.context.inferencer.isCapitalized(options.assignedName)
+      ) {
+         return;
+      }
       if (!(lambdaType instanceof RoundValueToValueLambdaType)) {
-         throw new Error("Calling non-lambda");
+         throw new Error(
+            "Calling non-lambda, was " +
+               lambdaType.toString() +
+               " - " +
+               node.position?.start.line
+         );
       }
       let type = this.context.inferencer.inferRoundValueToValueLambda(
          node,
@@ -324,28 +341,28 @@ export class TypeChecker {
    ) {
       this.typeCheck(apply.callee, scope);
       let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
-      if (
-         apply.callee instanceof Identifier &&
-         this.context.inferencer.isCapitalized(apply.callee.value)
-      ) {
-         const type = scope.resolveNamedType(
-            this.context.translator.translate(apply.callee, scope)
-         );
-         if (type instanceof StructType) {
-            typeSymbol = new RoundValueToValueLambdaType(
-               type.fields.map(
-                  (f) => new ParamType(f.type, f.name, f.defaultValue)
-               ),
-               type
-            );
-         } else if (type instanceof MarkerType) {
-            typeSymbol = new RoundValueToValueLambdaType([], type);
-         } else {
-            throw new Error(
-               "Cannot call constructor function for non struct-type"
-            );
-         }
-      }
+      // if (
+      //    apply.callee instanceof Identifier &&
+      //    this.context.inferencer.isCapitalized(apply.callee.value)
+      // ) {
+      //    const type = scope.resolveNamedType(
+      //       this.context.translator.translate(apply.callee, scope)
+      //    );
+      //    if (type instanceof StructType) {
+      //       typeSymbol = new RoundValueToValueLambdaType(
+      //          type.fields.map(
+      //             (f) => new ParamType(f.type, f.name, f.defaultValue)
+      //          ),
+      //          type
+      //       );
+      //    } else if (type instanceof MarkerType) {
+      //       typeSymbol = new RoundValueToValueLambdaType([], type);
+      //    } else {
+      //       throw new Error(
+      //          "Cannot call constructor function for non struct-type"
+      //       );
+      //    }
+      // }
 
       let mappings: { [_: string]: Type } = {};
       if (
@@ -366,11 +383,12 @@ export class TypeChecker {
 
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
-         // apply.args.forEach((p, i) => {
-         //    this.typeCheck(p[1], scope, {
-         //       typeExpectedInPlace: params[i]?.type,
-         //    });
-         // });
+         const hasThis = params.length > 0 && params[0].name === "this";
+         apply.args.forEach((p, i) => {
+            this.typeCheck(p[1], scope, {
+               typeExpectedInPlace: params[i + (hasThis ? 1 : 0)]?.type,
+            });
+         });
          if (
             params[0] &&
             params[0].type instanceof AppliedGenericType &&
@@ -379,10 +397,15 @@ export class TypeChecker {
             const expectedType = scope.resolveNamedType(
                params[0].type.parameterTypes[0]
             );
+            if (apply.args.length === 0) {
+               apply.takesVarargs = true;
+               return;
+            }
             const firstArgType = () =>
                scope.resolveAppliedGenericTypes(
                   this.context.inferencer.infer(apply.args[0][1], scope)
                );
+
             if (
                apply.args.length > 0 &&
                firstArgType().isAssignableTo(

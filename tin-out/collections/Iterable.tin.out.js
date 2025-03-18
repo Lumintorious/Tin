@@ -169,19 +169,19 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export let Iterator = /* [] */(T) => TIN_TYPE("Iterator", "bf209d1a-4be6-4c78-9e78-e71520574db0", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
-export let Accessible = /* [] */(T) => TIN_TYPE("Accessible", "34a0c64a-fa0a-461c-8ac6-d2af118e9c99", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
+export let Iterator = /* [] */(T) => TIN_TYPE("Iterator", "976a0905-b406-4d1c-99dd-307ccbf7d555", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
+export let Accessible = /* [] */(T) => TIN_TYPE("Accessible", "9de8870f-d4be-4a46-9ec2-8061defd1589", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
 ;
-export let ToString = TIN_TYPE("ToString", "4ff6d008-2135-431f-8178-22e7dc71e060", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
+export let ToString = TIN_TYPE("ToString", "969b6705-8f6a-452b-a041-e023826edc95", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
 export let stringOf/* (obj:Any) -> String*/ = function(obj) {
-return ((ToString.__is_child(obj) ) ? (obj.ToString.toString.call(obj,)) : (makeString(obj))) 
+return ((ToString.__is_child(obj) ) ? (((() => { const _owner = obj; return _owner.ToString.toString.call(_owner,)})())) : (makeString(obj))) 
 };
-export let Iterable = /* [] */(T) => TIN_TYPE("Iterable", "671e382e-e461-439c-b413-154dde864faa", (_p0,_p1 = function(fn) {
-let iterator/* Iterator[T]*/ = this.Iterable.getIterator();
-let current/* T?*/ = iterator.Iterator.next();
+export let Iterable = /* [] */(T) => TIN_TYPE("Iterable", "a066ee08-ba55-4fb5-ba22-863609a75ba7", (_p0,_p1 = function(fn) {
+let iterator/* Iterator[T]*/ = ((() => { const _owner = this; return _owner.Iterable.getIterator.call(_owner,)})());
+let current/* T?*/ = ((() => { const _owner = iterator; return _owner.Iterator.next.call(_owner,)})());
 while (current != nothing) {
  fn(current);
-current = iterator.Iterator.next() 
+current = ((() => { const _owner = iterator; return _owner.Iterator.next.call(_owner,)})()) 
 }
 },_p2 = function(separator, left, right) {
 let string/* String*/ = "";
@@ -189,12 +189,12 @@ let fn/* (t:T) -> Any*/ = function(t) {
 let comma/* String*/ = ((string == "") ? ("") : (separator)) ;
 return string = "" + string + "" + comma + "" + t + ""
 };
-this.Iterable.forEach.call(this,fn);
+((() => { const _owner = this; return _owner.Iterable.forEach.call(_owner,fn)})());
 return "" + left + "" + string + "" + right + ""
 },_p3 = function(pred) {
 let num/* Number*/ = 0;
-this.Iterable.forEach.call(this,function(t) {
+((() => { const _owner = this; return _owner.Iterable.forEach.call(_owner,function(t) {
 return ((pred(t)) ? (num = num + 1) : (null)) 
-});
+})})());
 return num
 }) => ({getIterator: _p0,forEach: _p1,mkString: _p2,count: _p3}), {}); Iterable._typeId = "Iterable";

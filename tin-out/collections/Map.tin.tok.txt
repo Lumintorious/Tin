@@ -31,7 +31,7 @@ OPERATOR     | :            |   6, 21
 IDENTIFIER   | V            |   6, 23   
 PARENS       | )            |   6, 24   
 OPERATOR     | ->           |   6, 26   
-IDENTIFIER   | Nothing      |   6, 29   
+IDENTIFIER   | This         |   6, 29   
 NEWLINE      |              |   7, 1    
 IDENTIFIER   | get          |   7, 2    
 OPERATOR     | :            |   7, 5    
@@ -52,7 +52,7 @@ OPERATOR     | :            |   8, 14
 IDENTIFIER   | K            |   8, 16   
 PARENS       | )            |   8, 17   
 OPERATOR     | ->           |   8, 19   
-IDENTIFIER   | Nothing      |   8, 22   
+IDENTIFIER   | This         |   8, 22   
 NEWLINE      |              |  10, 1    
 DEDENT       | 4            |  10, 1    
 IDENTIFIER   | MapEntry     |  10, 1    
@@ -161,14 +161,37 @@ IDENTIFIER   | V            |  18, 60
 PARENS       | ]            |  18, 61   
 OPERATOR     | =            |  18, 63   
 KEYWORD      | external     |  18, 65   
-NEWLINE      |              |  20, 1    
-KEYWORD      | external     |  20, 1    
+NEWLINE      |              |  19, 1    
+IDENTIFIER   | Map@create   |  19, 1    
+OPERATOR     | =            |  19, 12   
+PARENS       | [            |  19, 14   
+IDENTIFIER   | K            |  19, 15   
+NEWLINE      | ,            |  19, 1    
+IDENTIFIER   | V            |  19, 18   
+PARENS       | ]            |  19, 19   
+OPERATOR     | ->           |  19, 21   
+IDENTIFIER   | Map@of       |  19, 24   
+PARENS       | [            |  19, 30   
+IDENTIFIER   | K            |  19, 31   
+NEWLINE      | ,            |  19, 1    
+IDENTIFIER   | V            |  19, 34   
+PARENS       | ]            |  19, 35   
+PARENS       | (            |  19, 36   
+PARENS       | )            |  19, 37   
+NEWLINE      |              |  21, 1    
+KEYWORD      | external     |  21, 1    
 STRING       | 	const Map$of = (K, V) => (args) => {
 		const map = new JsMap(args.Array._rawArray.map(p => [p.MapEntry.key, p.MapEntry.value]))
 		const ops = MapOps(K, V)(
-			(key, value) => map.put(key, value), 
+			function(key, value)  {
+				map.set(key, value);
+				return this;
+			}, 
 			(key) => map.get(key),
-			(key) => map.delete(key)
+			function (key) {
+				map.delete(key);
+				return this;
+			}
 		)
 		const getIterator = () => {
 			const jsIterator = map.keys();
@@ -186,51 +209,13 @@ STRING       | 	const Map$of = (K, V) => (args) => {
 
 		return _TIN_INTERSECT_OBJECTS(ops, Iterable(MapEntry(K, V))(getIterator));
 	}
- |  20, 10   
+ |  21, 10   
 NEWLINE      |              |  22, 1    
-IDENTIFIER   | x            |  22, 1    
+IDENTIFIER   | y            |  22, 1    
 OPERATOR     | =            |  22, 3    
-IDENTIFIER   | Map@of       |  22, 5    
-PARENS       | [            |  22, 11   
-IDENTIFIER   | Number       |  22, 12   
-NEWLINE      | ,            |  22, 1    
-IDENTIFIER   | String       |  22, 20   
-PARENS       | ]            |  22, 26   
-PARENS       | (            |  22, 27   
-NEWLINE      |              |  23, 1    
-INDENT       | 4            |  23, 1    
-IDENTIFIER   | Map@entry    |  23, 2    
-PARENS       | (            |  23, 11   
-NUMBER       | 1            |  23, 12   
-NEWLINE      | ,            |  23, 1    
-STRING       | One          |  23, 15   
-PARENS       | )            |  23, 20   
-NEWLINE      | ,            |  23, 1    
+NUMBER       | 1            |  22, 5    
+OPERATOR     | +            |  22, 7    
+NUMBER       | 4            |  22, 9    
 NEWLINE      |              |  24, 1    
-IDENTIFIER   | Map@entry    |  24, 2    
-PARENS       | (            |  24, 11   
-NUMBER       | 2            |  24, 12   
-NEWLINE      | ,            |  24, 1    
-STRING       | Two          |  24, 15   
-PARENS       | )            |  24, 20   
-NEWLINE      |              |  25, 1    
-DEDENT       | 4            |  25, 1    
-PARENS       | )            |  25, 1    
 NEWLINE      |              |  26, 1    
-IDENTIFIER   | x            |  26, 1    
-OPERATOR     | .            |  26, 2    
-IDENTIFIER   | forEach      |  26, 3    
-PARENS       | (            |  26, 10   
-PARENS       | (            |  26, 11   
-IDENTIFIER   | p            |  26, 12   
-PARENS       | )            |  26, 13   
-OPERATOR     | ->           |  26, 15   
-IDENTIFIER   | print        |  26, 18   
-PARENS       | (            |  26, 23   
-IDENTIFIER   | p            |  26, 24   
-OPERATOR     | .            |  26, 25   
-IDENTIFIER   | value        |  26, 26   
-PARENS       | )            |  26, 31   
-PARENS       | )            |  26, 32   
-NEWLINE      |              |  28, 1    
 --undefined--

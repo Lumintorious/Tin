@@ -494,6 +494,8 @@ export class Scope {
             return AnyType;
          case "Unchecked":
             return type;
+         case "This":
+            return type;
          default:
             throw new Error(
                "Can't handle type " +

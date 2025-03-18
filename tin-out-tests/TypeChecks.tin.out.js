@@ -78,6 +78,7 @@ const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
 const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
+	_rawArray: args,
 	length() {
 		return args.length;
 	},
@@ -122,7 +123,7 @@ function makeString(obj) {
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = 'Array(';
 		for (let i = 0; i < obj.Array.length(); i++) {
-			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
+			result += makeString(obj.Array.at(i)) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
 		return result + ")"
 	}
@@ -168,6 +169,6 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var Tp = TIN_TYPE("Tp", "5d69ff1c-e8c4-4de3-bd6f-be7db35eca5b", (_p0) => ({value: _p0}), {}); Tp._typeId = "Tp";;
-export var a/* Number*/ = 1;
+export let Tp = TIN_TYPE("Tp", "ff7c759a-5e72-4bb9-b970-3e38fc1749d6", (_p0) => ({value: _p0}), {}); Tp._typeId = "Tp";;
+export let a/* Number*/ = 1;
 ((Tp.__is_child(a) ) ? (print(a.Tp.value)) : (null)) 

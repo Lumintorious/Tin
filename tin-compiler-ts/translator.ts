@@ -299,22 +299,38 @@ function translate(
       const takesVarargs = term.takesVarargs;
       let open = takesVarargs ? "(Array(0)([" : "(";
       const close = takesVarargs ? "]))" : ")";
-      if (term.isFirstParamThis && term.callee instanceof Select) {
-         open = ".call(" + translate(term.callee.owner, scope) + ",";
+      let openWrapper = "";
+      let closeWrapper = "";
+      let callee = term.callee;
+      if (term.callee instanceof Select) {
+         openWrapper =
+            "((() => { const _owner = " +
+            translate(term.callee.owner, scope) +
+            "; return ";
+         closeWrapper = "})())";
+         callee = new Select(
+            new Identifier("_owner"),
+            term.callee.field,
+            term.callee.ammortized
+         );
+         open = ".call(" + translate((callee as Select).owner, scope) + ",";
+         (callee as Select).ownerComponent = term.callee.ownerComponent;
+         (callee as Select).isTypeLevel = term.callee.isTypeLevel;
       }
       return (
-         translate(term.callee, scope) +
+         openWrapper +
+         translate(callee, scope) +
          (term.calledInsteadOfSquare || term.autoFilledSquareParams
             ? "(0)"
             : "") +
-         (term.isAnObjectCopy ? "._copy" : "") +
          open +
          args
             .map((arg) => {
                return !arg ? "undefined" : translate(arg[1], scope);
             })
             .join(", ") +
-         close
+         close +
+         closeWrapper
       );
 
       // SquareApply

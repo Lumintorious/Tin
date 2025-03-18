@@ -1,23 +1,23 @@
-id: 359
+id: 365
 tag: Block
 statements:
-  - id: 344
+  - id: 350
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 337
+      id: 343
       tag: Identifier
       value: Tp
     value:
-      id: 343
+      id: 349
       tag: TypeDef
       fieldDefs:
-        - id: 341
+        - id: 347
           tag: FieldDef
           name: value
           type:
-            id: 339
+            id: 345
             tag: Identifier
             value: String
           isTypeLevel: true
@@ -41,16 +41,16 @@ statements:
         line: 4
         column: 2
         absolute: 31
-  - id: 347
+  - id: 353
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 345
+      id: 351
       tag: Identifier
       value: a
     value:
-      id: 346
+      id: 352
       tag: Literal
       type: Number
       value: 1
@@ -65,41 +65,41 @@ statements:
         line: 5
         column: 1
         absolute: 37
-  - id: 358
+  - id: 364
     tag: IfStatement
     condition:
-      id: 350
+      id: 356
       tag: TypeCheck
       term:
-        id: 348
+        id: 354
         tag: Identifier
         value: a
       type:
-        id: 349
+        id: 355
         tag: Identifier
         value: Tp
     trueBranch:
-      id: 356
+      id: 362
       tag: Block
       statements:
-        - id: 355
+        - id: 361
           tag: RoundApply
           calledInsteadOfSquare: false
           paramOrder:
           isFirstParamThis: false
           isAnObjectCopy: false
           callee:
-            id: 351
+            id: 357
             tag: Identifier
             value: print
           args:
             0:
               - 
-              - id: 354
+              - id: 360
                 tag: Select
                 ammortized: false
                 owner:
-                  id: 352
+                  id: 358
                   tag: Identifier
                   value: a
                 field: value
@@ -122,7 +122,7 @@ statements:
               column: 1
               absolute: 90
     falseBranch:
-      id: 357
+      id: 363
       tag: Literal
       type: Void
       value: null

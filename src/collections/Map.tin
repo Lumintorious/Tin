@@ -5,9 +5,9 @@ external "
 "
 
 MapOps = [K, V] => type:
-	put: (key: K, value: V) -> Nothing
+	put: (key: K, value: V) -> This
 	get: (key: K) -> V?
-	remove: (key: K) -> Nothing
+	remove: (key: K) -> This
 
 MapEntry = [A, B] => type:
 	key: A
@@ -18,14 +18,21 @@ Map = [K, V] => MapOps[K, V] & Iterable[MapEntry[K, V]]
 Map@entry = [A, B] -> (key: A, value: B) -> MapEntry[A, B](key, value)
 	
 Map@of: [K, V] -> (pairs: Array[MapEntry[K, B]]) -> Map[K, V] = external
+Map@create = [K, V] -> Map@of[K, V]()
  
 external "
 	const Map$of = (K, V) => (args) => \{
 		const map = new JsMap(args.Array._rawArray.map(p => [p.MapEntry.key, p.MapEntry.value]))
 		const ops = MapOps(K, V)(
-			(key, value) => map.put(key, value), 
+			function(key, value)  \{
+				map.set(key, value);
+				return this;
+			\}, 
 			(key) => map.get(key),
-			(key) => map.delete(key)
+			function (key) \{
+				map.delete(key);
+				return this;
+			\}
 		)
 		const getIterator = () => \{
 			const jsIterator = map.keys();
@@ -44,10 +51,7 @@ external "
 		return _TIN_INTERSECT_OBJECTS(ops, Iterable(MapEntry(K, V))(getIterator));
 	\}
 "
+y = 1 + 4
 
-x = Map@of[Number, String](
-	Map@entry(1, "One"),
-	Map@entry(2, "Two")
-)
-x.forEach((p) -> print(p.value))
+# s = x.put(3, "Three")
 

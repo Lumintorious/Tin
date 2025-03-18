@@ -171,11 +171,4 @@ const debug = (...args) => {
 ;
 import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Map.tin.out.js";Object.entries(module1).forEach(([key, value]) => {
 			globalThis[key] = value;
-	  });;
-export let Cat = TIN_TYPE("Cat", "1b6977d9-d333-477f-8d63-3bf1c3785d55", (_p0) => ({name: _p0}), {}); Cat._typeId = "Cat";;
-export let Dog = TIN_TYPE("Dog", "c83916d1-de06-48f0-bfb0-39dfb68d65cc", (_p0,_p1 = function() {
-print(this.Dog.breed);
-return this
-}) => ({breed: _p0,woof: _p1}), {}); Dog._typeId = "Dog";;
-export let what/* Struct(Cat) & Struct(Dog)*/ = _TIN_INTERSECT_OBJECTS(Cat("Kitty"), Dog("Spotted"));
-export let whatt/* Struct(Cat) & Struct(Dog)*/ = what.Dog.woof.call(what,)
+	  });

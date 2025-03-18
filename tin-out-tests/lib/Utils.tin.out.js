@@ -78,6 +78,7 @@ const Int = TIN_TYPE("", "", (i) => Number(i), {})
 const String = TIN_TYPE("", "", (i) => String(i), {})
 const Void = TIN_TYPE("", "", (i) => null, {})
 const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
+	_rawArray: args,
 	length() {
 		return args.length;
 	},
@@ -122,7 +123,7 @@ function makeString(obj) {
 	if (Reflect.ownKeys(obj).includes("Array")) {
 		let result = 'Array(';
 		for (let i = 0; i < obj.Array.length(); i++) {
-			result += obj.Array.at(i) + (i === obj.Array.length() - 1 ? "" : ", ")
+			result += makeString(obj.Array.at(i)) + (i === obj.Array.length() - 1 ? "" : ", ")
 		}
 		return result + ")"
 	}
@@ -168,20 +169,20 @@ const debug = (...args) => {
 
 // COMPILED TIN
 ;
-export var max/* (a:Number, b:Number) -> Number*/ = function(a, b) {
+export let max/* (a:Number, b:Number) -> Number*/ = function(a, b) {
 return ((a > b) ? (a) : (b)) 
 };
-export var min/* (a:Number, b:Number) -> Number*/ = function(a, b) {
+export let min/* (a:Number, b:Number) -> Number*/ = function(a, b) {
 return ((a < b) ? (a) : (b)) 
 };
-export var floor/* (n:Number) -> Number*/ = function(n) {
+export let floor/* (n:Number) -> Number*/ = function(n) {
 return n - (n["%"](1))
 };
-export var ceiling/* (n:Number) -> Number*/ = function(n) {
+export let ceiling/* (n:Number) -> Number*/ = function(n) {
 return floor(n) + 1
 };
-export var absolute/* (n:Number) -> Number*/ = function(n) {
+export let absolute/* (n:Number) -> Number*/ = function(n) {
 return ((n < 0) ? (0 - n) : (n)) 
 };
-export var pi/* Number*/ = 3.141592653589793;
-export var e/* Number*/ = 2.718281828459045
+export let pi/* Number*/ = 3.141592653589793;
+export let e/* Number*/ = 2.718281828459045
