@@ -9,7 +9,6 @@ import {
    IfStatement,
    BinaryExpression,
    TypeCheck,
-   RoundTypeToTypeLambda,
    Change,
    Literal,
 } from "./Parser";
@@ -438,14 +437,7 @@ export class TypeBuilder {
             ) ||
             rhsType instanceof TypeOfTypes)
       ) {
-         if (node.value instanceof RoundTypeToTypeLambda) {
-            scope.declareType(
-               new Symbol(
-                  node.lhs.value,
-                  this.context.translator.translate(node.value, scope)
-               )
-            );
-         } else if (node.value instanceof RoundValueToValueLambda) {
+         if (node.value instanceof RoundValueToValueLambda) {
             node.value.isTypeLambda = true;
             scope.declareType(
                new Symbol(

@@ -3,7 +3,6 @@ import {
    Literal,
    Assignment,
    UnaryOperator,
-   RoundTypeToTypeLambda,
    RoundValueToValueLambda,
    SquareTypeToTypeLambda,
    SquareApply,
@@ -101,21 +100,6 @@ export class TypeTranslator {
                throw Error("Not right type");
             }
             return node;
-         case "RoundTypeToTypeLambda":
-            if (!(node instanceof RoundTypeToTypeLambda)) {
-               throw Error("Not right type");
-            }
-            return new RoundValueToValueLambdaType(
-               node.parameterTypes.map((p) => {
-                  let translated = this.translateRoundTypeToTypeLambdaParameter(
-                     p,
-                     scope,
-                     {}
-                  );
-                  return translated;
-               }),
-               this.translate(node.returnType, scope)
-            );
          case "RoundValueToValueLambda":
             // return new RoundValueToValueLambdaType(node.params.map(p => this.translate(p, scope/)))
             if (!(node instanceof RoundValueToValueLambda)) {

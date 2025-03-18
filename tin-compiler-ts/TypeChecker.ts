@@ -6,7 +6,6 @@ import {
    Block,
    Assignment,
    IfStatement,
-   RoundTypeToTypeLambda,
    RoundApply,
    Select,
    Identifier,
@@ -182,17 +181,19 @@ export class TypeChecker {
          if (node.eachLoop) {
             this.typeCheck(node.eachLoop, innerScope);
          }
-      } else if (node instanceof RoundTypeToTypeLambda) {
-         this.checkLambdaParamsValidity(
-            (
-               this.context.translator.translate(
-                  node,
-                  scope
-               ) as RoundValueToValueLambdaType
-            ).params,
-            scope
-         );
-      } else if (node instanceof TypeDef) {
+      }
+      // if (node instanceof RoundTypeToTypeLambda) {
+      //    this.checkLambdaParamsValidity(
+      //       (
+      //          this.context.translator.translate(
+      //             node,
+      //             scope
+      //          ) as RoundValueToValueLambdaType
+      //       ).params,
+      //       scope
+      //    );
+      // } else
+      else if (node instanceof TypeDef) {
          const innerScope = scope.innerScopeOf(node);
          node.fieldDefs.forEach((fd) => {
             if (fd.defaultValue) {

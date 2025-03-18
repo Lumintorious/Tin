@@ -151,18 +151,6 @@ export class RoundValueToValueLambda extends Term {
    }
 }
 
-// (Number) => String
-export class RoundTypeToTypeLambda extends Term {
-   parameterTypes: Term[];
-   returnType: Term;
-   constructor(parameterTypes: Term[], returnType: Term) {
-      super("RoundTypeToTypeLambda");
-      this.parameterTypes = parameterTypes;
-      this.returnType = returnType;
-      this.isTypeLevel = true;
-   }
-}
-
 // [T] -> 1 + 2
 export class SquareTypeToValueLambda extends Term {
    parameterTypes: Term[];

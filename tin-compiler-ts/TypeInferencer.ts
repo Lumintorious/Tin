@@ -3,7 +3,6 @@ import {
    Literal,
    Assignment,
    UnaryOperator,
-   RoundTypeToTypeLambda,
    RoundValueToValueLambda,
    SquareTypeToTypeLambda,
    SquareApply,
@@ -720,33 +719,33 @@ export class TypeInferencer {
       return new BinaryOpType(leftType, node.operator, rightType);
    }
 
-   inferRoundTypeToTypeLambda(node: RoundTypeToTypeLambda, scope: Scope) {
-      const paramScope = scope.innerScopeOf(node);
-      node.parameterTypes.forEach((p) => {
-         if (p instanceof Assignment && p.lhs instanceof Identifier) {
-            paramScope.declareType(
-               new Symbol(
-                  p.lhs.value,
-                  new GenericNamedType(
-                     p.lhs.value,
-                     p.value ? this.infer(p.value, scope) : undefined
-                  )
-               )
-            );
-         }
-      });
-      const type = new TypeRoundValueToValueLambda(
-         node.parameterTypes.map((p) => {
-            if (p instanceof Assignment && p.lhs instanceof Identifier) {
-               return this.context.translator.translate(p.lhs, paramScope);
-            } else {
-               throw new Error("Params weren't assignment types");
-            }
-         }),
-         this.infer(node.returnType, paramScope)
-      );
-      return type;
-   }
+   // inferRoundTypeToTypeLambda(node: RoundTypeToTypeLambda, scope: Scope) {
+   //    const paramScope = scope.innerScopeOf(node);
+   //    node.parameterTypes.forEach((p) => {
+   //       if (p instanceof Assignment && p.lhs instanceof Identifier) {
+   //          paramScope.declareType(
+   //             new Symbol(
+   //                p.lhs.value,
+   //                new GenericNamedType(
+   //                   p.lhs.value,
+   //                   p.value ? this.infer(p.value, scope) : undefined
+   //                )
+   //             )
+   //          );
+   //       }
+   //    });
+   //    const type = new TypeRoundValueToValueLambda(
+   //       node.parameterTypes.map((p) => {
+   //          if (p instanceof Assignment && p.lhs instanceof Identifier) {
+   //             return this.context.translator.translate(p.lhs, paramScope);
+   //          } else {
+   //             throw new Error("Params weren't assignment types");
+   //          }
+   //       }),
+   //       this.infer(node.returnType, paramScope)
+   //    );
+   //    return type;
+   // }
 
    // (i: Number) -> i + 2
    inferRoundValueToValueLambda(

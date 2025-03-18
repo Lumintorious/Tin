@@ -177,8 +177,8 @@ import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\col
 	const JsMap = globalThis.Map;
 
 ;
-export let MapOps = /* [] */(K, V) => TIN_TYPE("MapOps", "7ee943ea-6752-4007-869d-c75c770e4a3b", (_p0,_p1,_p2) => ({put: _p0,get: _p1,remove: _p2}), {}); MapOps._typeId = "MapOps";;
-export let MapEntry = /* [] */(A, B) => TIN_TYPE("MapEntry", "d676fc65-9546-4a29-b447-f64c7061abd7", (_p0,_p1) => ({key: _p0,value: _p1}), {}); MapEntry._typeId = "MapEntry";;
+export let MapOps = /* [] */(K, V) => TIN_TYPE("MapOps", "f7b94365-c737-4526-bea3-6c95b35de6cb", (_p0,_p1,_p2) => ({put: _p0,get: _p1,remove: _p2}), {}); MapOps._typeId = "MapOps";;
+export let MapEntry = /* [] */(A, B) => TIN_TYPE("MapEntry", "fc111840-c8f6-4c46-b04e-b4923f673f3a", (_p0,_p1) => ({key: _p0,value: _p1}), {}); MapEntry._typeId = "MapEntry";;
 export let Map = /* [] */(K, V) => _TIN_INTERSECT_OBJECTS(MapOps.call('Type', K, V), Iterable.call('Type', MapEntry.call('Type', K, V)));
 export let Map$entry/* [A, B] -> (key:A, value:B) -> MapEntry[A, B]*/ = function(A, B) {
 return function(key, value) {
