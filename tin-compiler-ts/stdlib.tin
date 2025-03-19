@@ -1,0 +1,35 @@
+Type = type:
+	tag: String
+	check = (o: Any) -> false
+	checkDeep = (o: Any) -> false
+
+RefData = type:
+	get: () -> Type
+
+RefType@create = (tag: String, get: () -> Type) ->
+	Type(tag) & RefData(get)
+
+Field = type:
+	name: String
+	tpe: Type
+	defaultValue: (() -> Any)?
+
+Parameter = type:
+	name: String?
+	tpe: Type
+	defaultValue: (() -> Any)?
+
+StructData = type:
+	name: String
+	fields: Array[Field]
+
+Lambda = Type & type:
+	name: String?
+	params: Array[Field]
+
+l = Type("Hi") & Lambda(params = Array@of(1))
+
+print(l.tag)
+
+jsonify: (obj: Any) -> String = external
+dejsonify: (json: String) -> Any = external

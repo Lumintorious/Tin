@@ -1,5 +1,5 @@
 import { TokenPos } from "./Lexer";
-import { AstNode, Term, RoundValueToValueLambda } from "./Parser";
+import { AstNode, Term, RoundValueToValueLambda, TypeDef } from "./Parser";
 import { Symbol, Scope } from "./Scope";
 
 export class Type {
@@ -15,6 +15,10 @@ export class Type {
       if (tag === "Unknown") {
          throw new Error("Abstract Type initialization");
       }
+   }
+
+   buildConstructor(): Type | undefined {
+      return undefined;
    }
 
    named(name: string): this {
@@ -130,7 +134,6 @@ export class NamedType extends Type {
       String: new NamedType("String"),
       Boolean: new NamedType("Boolean"),
       Nothing: new NamedType("Nothing"),
-      Type: new NamedType("Type"),
       Any: AnyType,
    };
 
@@ -336,6 +339,7 @@ export class RoundValueToValueLambdaType extends Type {
    returnType: Type;
    isFirstParamThis: boolean = false;
    isGeneric?: boolean;
+   expectedPreviousInIntersection?: Type;
    constructor(params: ParamType[], returnType: Type, isGeneric?: boolean) {
       super("RoundValueToValueLambdaType");
       for (let param of params) {
@@ -381,7 +385,10 @@ export class RoundValueToValueLambdaType extends Type {
       const paramsStr = this.params
          .map((t) => `${t.name ? t.name + ":" : ""}${t.type.toString()}`)
          .join(", ");
-      return `${this.isGeneric ? "[" : "("}${paramsStr}${
+      const previousExpected = this.expectedPreviousInIntersection
+         ? "&:" + this.expectedPreviousInIntersection.toString() + ", "
+         : "";
+      return `${this.isGeneric ? "[" : "("}${previousExpected}${paramsStr}${
          this.isGeneric ? "]" : ")"
       } -> ${this.returnType ? this.returnType.toString() : "undefined"}`;
    }
@@ -429,6 +436,19 @@ export class SquareTypeToTypeLambdaType extends Type {
       super("SquareTypeToTypeLambdaType");
       this.paramTypes = paramTypes;
       this.returnType = returnType;
+   }
+
+   buildConstructor(): Type | undefined {
+      if (!(this.returnType instanceof StructType) || !this.name) {
+         return;
+      }
+      return new SquareTypeToValueLambdaType(
+         this.paramTypes,
+         new RoundValueToValueLambdaType(
+            this.returnType.fields,
+            new AppliedGenericType(new NamedType(this.name), this.paramTypes)
+         )
+      );
    }
 
    toString(): string {
@@ -530,6 +550,40 @@ export class BinaryOpType extends Type {
          if (simplified instanceof BinaryOpType) {
             Object.assign(this, simplified);
          }
+      }
+   }
+
+   buildConstructor(): Type | undefined {
+      const allTypes = [...this.getAllIntersectedTypes()];
+      const lastType = allTypes[allTypes.length - 1];
+      lastType.name = this.name;
+      if (this.operator !== "&" || !(lastType instanceof StructType)) {
+         return;
+      }
+      const constructor = lastType.buildConstructor();
+      if (!(constructor instanceof RoundValueToValueLambdaType)) {
+         return;
+      }
+      constructor.name = this.name;
+      (lastType.ast as TypeDef).name = this.name;
+      const expectedType = this.getAllTypesIntersected(
+         allTypes.slice(0, allTypes.length - 1)
+      );
+      constructor.expectedPreviousInIntersection = expectedType;
+      return constructor;
+   }
+
+   getAllTypesIntersected(types: Type[], index = 0): Type {
+      if (types.length === 0) {
+         throw new Error("Attempted to unite a list of 0 types.");
+      } else if (types.length === 1) {
+         return types[0];
+      } else {
+         return new BinaryOpType(
+            types[index],
+            "&",
+            this.getAllTypesIntersected(types, index + 1)
+         );
       }
    }
 
@@ -689,6 +743,17 @@ export class StructType extends Type {
       super("StructType");
       this.fields = fields; // Array of { name, type } objects
       this.name = name;
+   }
+
+   buildConstructor(): Type | undefined {
+      if (!this.name) {
+         return;
+      }
+
+      return new RoundValueToValueLambdaType(
+         this.fields,
+         new NamedType(this.name)
+      );
    }
 
    extends(other: Type, scope: Scope) {

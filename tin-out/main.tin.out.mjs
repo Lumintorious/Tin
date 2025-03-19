@@ -1,24 +1,19 @@
 const __tin_varargs_marker = Symbol();
 
-// Object.prototype._copy = function (...args) {
-// 	const keys = Object.keys(this).flatMap(k => Object.keys(this[k]));
-// 	let i = 0;
-// 	const copyObj = {};
-// 	for (let arg of args) {
-// 		copyObj[keys[i]] = arg
-// 		i++;
-// 	}
-// 	return { ...this, ...copyObj }
-// }
+const TIN_TYPE_CACHE = new Map()
 
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
+	const symbol = Symbol(typeHash);
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
 		return {
-			[typeId]: result
+			[symbol]: result
 		};
 	}
-	constructor._tinFields = descriptor;
+	TIN_TYPE_CACHE.set(typeHash, constructor)
+	constructor._symbol = symbol;
+	globalThis[symbol] = constructor;
+	constructor.descriptor = descriptor;
 	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
@@ -30,13 +25,24 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	return constructor;
 }
 
-function TIN_LAMBDA_TYPE(typeId, paramTypes, returnType) {
-	return { __is_child: (f) => typeof f === "function" };
+function TIN_LAMBDA(typeId, lambda, type) {
+	lambda.type = type;
+	lambda.typeId = typeId;
+	return lambda;
 }
 
 // function _TIN_MAKE_LAMBDA(type)
 
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
+	if (obj1._typeId && obj2._typeId) {
+		if (obj2.descriptor.Type.tag === "Struct") {
+			const clone = (...args) => obj2(...args)
+			Object.assign(clone, obj2, obj1)
+			return clone
+		}
+		return {}
+	}
+
 	if (obj1 === undefined) {
 		return obj2
 	}
@@ -73,10 +79,9 @@ const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 
 const nothing = undefined;
 
-const Type = TIN_TYPE("", "", (i) => null, {})
-const Int = TIN_TYPE("", "", (i) => Number(i), {})
-const String = TIN_TYPE("", "", (i) => String(i), {})
-const Void = TIN_TYPE("", "", (i) => null, {})
+// const Int = TIN_TYPE("", "", (i) => Number(i), {})
+// const String = TIN_TYPE("", "", (i) => String(i), {})
+// const Void = TIN_TYPE("", "", (i) => null, {})
 const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
 	_rawArray: args,
 	length() {
@@ -133,16 +138,12 @@ function makeString(obj) {
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
-			// if (++number > 1) {
-			// 	result += " & "
-			// }
-			// result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
+					result += globalThis[componentKey]._typeId + "." + key + "=" + makeString(component[key]) + ', ';
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {
@@ -167,4 +168,80 @@ const debug = (...args) => {
 	console.log(...args)
 }
 
+const jsonify = (obj) => {
+	return JSON.stringify(obj, (key, value) => {
+		if (typeof key === "symbol") {
+			return undefined; // Skip if needed
+		}
+		if (typeof value === "object" && value !== null) {
+			// Convert symbol keys to strings
+			const newObj = {};
+			Object.getOwnPropertySymbols(value).forEach(sym => {
+				newObj[`#${String(sym.description)}`] = value[sym];
+			});
+			return { ...value, ...newObj };
+		}
+		return value;
+	}, 2);
+}
+
+const dejsonify = function (json) {
+	return JSON.parse(json, function (key, value) {
+		if (typeof key === "string" && key.startsWith("#")) {
+			const description = key.slice(1);
+			const sym = TIN_TYPE_CACHE.get(description)._symbol;
+			this[sym] = value; // Attach symbol key to the object
+			return undefined;  // Prevent duplicate normal key
+		}
+		return value;
+	});
+}
+
 // COMPILED TIN
+;
+import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
+				globalThis[key] = value;
+		  });;
+export var a/* Number*/ = 1;
+export var PetOwner = TIN_TYPE("PetOwner", "ffc82a39-fd47-48b7-9c4f-31e9fb0760a3", (_p0) => ({cat: _p0}), {
+			Type: {
+				tag: "Struct",
+				name: "PetOwner",
+					fields: [
+						{
+				Field: {
+					name: "cat",
+					type: () => Cat,
+					defaultValue: () => { return (undefined)},
+				}
+			},
+			]
+			}
+		});
+export var Cat = TIN_TYPE("Cat", "7b76fb2f-7d71-41b1-b082-01b25b1dd9fb", (_p0) => ({name: _p0}), {
+			Type: {
+				tag: "Struct",
+				name: "Cat",
+					fields: [
+						{
+				Field: {
+					name: "name",
+					type: () => String,
+					defaultValue: () => { return (undefined)},
+				}
+			},
+			]
+			}
+		});
+export var cat/* Cat*/ = Cat("Kitten");
+export var main/* () -> Nothing*/ = TIN_LAMBDA("8cf1ab60-2d64-49ae-bf07-59848b9201a2", function() {
+return print(cat)
+}, {
+			Type: {
+				tag: "Lambda",
+				name: undefined,
+				parameters: [],
+				returnType: () => Nothing
+			}
+		});
+print(l)

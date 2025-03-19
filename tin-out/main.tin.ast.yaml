@@ -1,15 +1,237 @@
-id: 1
+id: 215
 tag: Block
 statements:
-  - id: 0
-    tag: Import
-    path: collections/Map
+  - id: 183
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 181
+      tag: Identifier
+      value: a
+    value:
+      id: 182
+      tag: Literal
+      type: Number
+      value: 1
+    isDeclaration: true
+    isTypeLevel: false
     position:
       start:
-        line: 1
+        line: 3
         column: 1
-        absolute: 6
+        absolute: 29
       end:
-        line: 2
+        line: 5
+        column: 9
+        absolute: 45
+  - id: 191
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 184
+      tag: Identifier
+      value: PetOwner
+    value:
+      id: 190
+      tag: TypeDef
+      fieldDefs:
+        - id: 188
+          tag: FieldDef
+          name: cat
+          type:
+            id: 186
+            tag: Identifier
+            value: Cat
+          isTypeLevel: true
+          position:
+            start:
+              line: 8
+              column: 1
+              absolute: 68
+            end:
+              line: 8
+              column: 1
+              absolute: 68
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 5
         column: 1
-        absolute: 24
+        absolute: 45
+      end:
+        line: 8
+        column: 4
+        absolute: 71
+  - id: 199
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 192
+      tag: Identifier
+      value: Cat
+    value:
+      id: 198
+      tag: TypeDef
+      fieldDefs:
+        - id: 196
+          tag: FieldDef
+          name: name
+          type:
+            id: 194
+            tag: Identifier
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 11
+              column: 1
+              absolute: 98
+            end:
+              line: 11
+              column: 1
+              absolute: 98
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 8
+        column: 1
+        absolute: 71
+      end:
+        line: 11
+        column: 4
+        absolute: 101
+  - id: 204
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 200
+      tag: Identifier
+      value: cat
+    value:
+      id: 203
+      tag: RoundApply
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      isAnObjectCopy: false
+      callee:
+        id: 201
+        tag: Identifier
+        value: Cat
+      args:
+        - 0: name
+          1:
+            id: 202
+            tag: Literal
+            type: String
+            value: Kitten
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 11
+        column: 1
+        absolute: 101
+      end:
+        line: 13
+        column: 5
+        absolute: 132
+  - id: 211
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 205
+      tag: Identifier
+      value: main
+    value:
+      id: 210
+      tag: RoundValueToValueLambda
+      params:
+      block:
+        id: 209
+        tag: Block
+        statements:
+          - id: 208
+            tag: RoundApply
+            calledInsteadOfSquare: false
+            paramOrder:
+            isFirstParamThis: false
+            isAnObjectCopy: false
+            callee:
+              id: 206
+              tag: Identifier
+              value: print
+            args:
+              0:
+                - 
+                - id: 207
+                  tag: Identifier
+                  value: cat
+                  position:
+                    start:
+                      line: 14
+                      column: 8
+                      absolute: 152
+                    end:
+                      line: 14
+                      column: 12
+                      absolute: 153
+            position:
+              start:
+                line: 14
+                column: 2
+                absolute: 148
+              end:
+                line: 16
+                column: 1
+                absolute: 159
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 13
+        column: 1
+        absolute: 132
+      end:
+        line: 16
+        column: 6
+        absolute: 164
+  - id: 214
+    tag: RoundApply
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    callee:
+      id: 212
+      tag: Identifier
+      value: print
+    args:
+      0:
+        - 
+        - id: 213
+          tag: Identifier
+          value: l
+          position:
+            start:
+              line: 16
+              column: 7
+              absolute: 166
+            end:
+              line: 16
+              column: 9
+              absolute: 167
+    position:
+      start:
+        line: 16
+        column: 1
+        absolute: 164
+      end: 0

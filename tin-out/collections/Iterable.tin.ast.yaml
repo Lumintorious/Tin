@@ -1,24 +1,24 @@
-id: 461
+id: 485
 tag: Block
 statements:
-  - id: 188
+  - id: 212
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 174
+      id: 198
       tag: Identifier
       value: Iterator
     value:
-      id: 187
+      id: 211
       tag: SquareTypeToTypeLambda
       parameterTypes:
-        - id: 176
+        - id: 200
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 175
+            id: 199
             tag: Identifier
             value: T
           isDeclaration: false
@@ -33,25 +33,25 @@ statements:
               column: 15
               absolute: 14
       returnType:
-        id: 186
+        id: 210
         tag: TypeDef
         fieldDefs:
-          - id: 184
+          - id: 208
             tag: FieldDef
             name: next
             type:
-              id: 182
+              id: 206
               tag: RoundValueToValueLambda
               params:
               block:
-                id: 181
+                id: 205
                 tag: Block
                 statements:
-                  - id: 180
+                  - id: 204
                     tag: Optional
                     doubleQuestionMark: false
                     expression:
-                      id: 179
+                      id: 203
                       tag: Identifier
                       value: T
                     position:
@@ -85,24 +85,24 @@ statements:
         line: 4
         column: 11
         absolute: 54
-  - id: 213
+  - id: 237
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 189
+      id: 213
       tag: Identifier
       value: Accessible
     value:
-      id: 212
+      id: 236
       tag: SquareTypeToTypeLambda
       parameterTypes:
-        - id: 191
+        - id: 215
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 190
+            id: 214
             tag: Identifier
             value: T
           isDeclaration: false
@@ -117,26 +117,26 @@ statements:
               column: 17
               absolute: 60
       returnType:
-        id: 211
+        id: 235
         tag: TypeDef
         fieldDefs:
-          - id: 203
+          - id: 227
             tag: FieldDef
             name: at
             type:
-              id: 201
+              id: 225
               tag: RoundValueToValueLambda
               params:
-                - id: 197
+                - id: 221
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 194
+                    id: 218
                     tag: Identifier
                     value: index
                   type:
-                    id: 195
+                    id: 219
                     tag: Identifier
                     value: Number
                   isDeclaration: false
@@ -151,10 +151,10 @@ statements:
                       column: 21
                       absolute: 91
               block:
-                id: 200
+                id: 224
                 tag: Block
                 statements:
-                  - id: 199
+                  - id: 223
                     tag: Identifier
                     value: T
                     position:
@@ -164,31 +164,31 @@ statements:
                         absolute: 96
                       end:
                         line: 6
-                        column: 1
-                        absolute: 98
+                        column: 8
+                        absolute: 105
               explicitType: undefined
             isTypeLevel: true
             position:
               start:
                 line: 6
-                column: 1
-                absolute: 98
+                column: 2
+                absolute: 105
               end:
                 line: 6
-                column: 1
-                absolute: 98
-          - id: 209
+                column: 8
+                absolute: 105
+          - id: 233
             tag: FieldDef
             name: length
             type:
-              id: 207
+              id: 231
               tag: RoundValueToValueLambda
               params:
               block:
-                id: 206
+                id: 230
                 tag: Block
                 statements:
-                  - id: 205
+                  - id: 229
                     tag: Identifier
                     value: Number
                     position:
@@ -222,29 +222,29 @@ statements:
         line: 8
         column: 11
         absolute: 133
-  - id: 223
+  - id: 247
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 214
+      id: 238
       tag: Identifier
       value: makeString
     value:
-      id: 222
+      id: 246
       tag: Literal
       type: Any
       value: 
     type:
-      id: 220
+      id: 244
       tag: RoundValueToValueLambda
       params:
-        - id: 216
+        - id: 240
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 215
+            id: 239
             tag: Identifier
             value: Any
           isDeclaration: false
@@ -259,10 +259,10 @@ statements:
               column: 18
               absolute: 140
       block:
-        id: 219
+        id: 243
         tag: Block
         statements:
-          - id: 218
+          - id: 242
             tag: Identifier
             value: String
             position:
@@ -284,37 +284,37 @@ statements:
         absolute: 133
       end:
         line: 10
-        column: 1
-        absolute: 165
-  - id: 238
+        column: 9
+        absolute: 173
+  - id: 262
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 224
+      id: 248
       tag: Identifier
       value: ToString
     value:
-      id: 237
+      id: 261
       tag: TypeDef
       fieldDefs:
-        - id: 235
+        - id: 259
           tag: FieldDef
           name: toString
           type:
-            id: 233
+            id: 257
             tag: RoundValueToValueLambda
             params:
-              - id: 229
+              - id: 253
                 tag: Assignment
                 isMutable: false
                 isParameter: true
                 lhs:
-                  id: 226
+                  id: 250
                   tag: Identifier
                   value: this
                 type:
-                  id: 227
+                  id: 251
                   tag: Identifier
                   value: Any
                 isDeclaration: false
@@ -329,10 +329,10 @@ statements:
                     column: 23
                     absolute: 205
             block:
-              id: 232
+              id: 256
               tag: Block
               statements:
-                - id: 231
+                - id: 255
                   tag: Identifier
                   value: String
                   position:
@@ -366,28 +366,28 @@ statements:
         line: 13
         column: 9
         absolute: 227
-  - id: 261
+  - id: 285
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 239
+      id: 263
       tag: Identifier
       value: stringOf
     value:
-      id: 260
+      id: 284
       tag: RoundValueToValueLambda
       params:
-        - id: 243
+        - id: 267
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 240
+            id: 264
             tag: Identifier
             value: obj
           type:
-            id: 241
+            id: 265
             tag: Identifier
             value: Any
           isDeclaration: false
@@ -402,38 +402,38 @@ statements:
               column: 22
               absolute: 240
       block:
-        id: 259
+        id: 283
         tag: Block
         statements:
-          - id: 258
+          - id: 282
             tag: IfStatement
             condition:
-              id: 247
+              id: 271
               tag: TypeCheck
               term:
-                id: 245
+                id: 269
                 tag: Identifier
                 value: obj
               type:
-                id: 246
+                id: 270
                 tag: Identifier
                 value: ToString
             trueBranch:
-              id: 253
+              id: 277
               tag: Block
               statements:
-                - id: 252
+                - id: 276
                   tag: RoundApply
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
                   isAnObjectCopy: false
                   callee:
-                    id: 251
+                    id: 275
                     tag: Select
                     ammortized: false
                     owner:
-                      id: 248
+                      id: 272
                       tag: Identifier
                       value: obj
                     field: toString
@@ -445,26 +445,26 @@ statements:
                       absolute: 272
                     end:
                       line: 16
-                      column: 1
-                      absolute: 285
+                      column: 2
+                      absolute: 286
             falseBranch:
-              id: 257
+              id: 281
               tag: Block
               statements:
-                - id: 256
+                - id: 280
                   tag: RoundApply
                   calledInsteadOfSquare: false
                   paramOrder:
                   isFirstParamThis: false
                   isAnObjectCopy: false
                   callee:
-                    id: 254
+                    id: 278
                     tag: Identifier
                     value: makeString
                   args:
                     0:
                       - 
-                      - id: 255
+                      - id: 279
                         tag: Identifier
                         value: obj
                         position:
@@ -506,24 +506,24 @@ statements:
         line: 19
         column: 9
         absolute: 321
-  - id: 460
+  - id: 484
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 262
+      id: 286
       tag: Identifier
       value: Iterable
     value:
-      id: 459
+      id: 483
       tag: SquareTypeToTypeLambda
       parameterTypes:
-        - id: 264
+        - id: 288
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 263
+            id: 287
             tag: Identifier
             value: T
           isDeclaration: false
@@ -538,29 +538,29 @@ statements:
               column: 15
               absolute: 327
       returnType:
-        id: 458
+        id: 482
         tag: TypeDef
         fieldDefs:
-          - id: 273
+          - id: 297
             tag: FieldDef
             name: getIterator
             type:
-              id: 271
+              id: 295
               tag: RoundValueToValueLambda
               params:
               block:
-                id: 270
+                id: 294
                 tag: Block
                 statements:
-                  - id: 269
+                  - id: 293
                     tag: SquareApply
                     callee:
-                      id: 267
+                      id: 291
                       tag: Identifier
                       value: Iterator
                     typeArgs:
                       0:
-                        id: 268
+                        id: 292
                         tag: Identifier
                         value: T
                     position:
@@ -570,43 +570,43 @@ statements:
                         absolute: 366
                       end:
                         line: 22
-                        column: 1
-                        absolute: 373
+                        column: 9
+                        absolute: 381
               explicitType: undefined
             isTypeLevel: true
             position:
               start:
                 line: 22
-                column: 1
-                absolute: 373
+                column: 2
+                absolute: 381
               end:
                 line: 22
-                column: 1
-                absolute: 373
-          - id: 325
+                column: 9
+                absolute: 381
+          - id: 349
             tag: FieldDef
             name: forEach
             defaultValue:
-              id: 323
+              id: 347
               tag: RoundValueToValueLambda
               params:
-                - id: 280
+                - id: 304
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 275
+                    id: 299
                     tag: Identifier
                     value: this
                   type:
-                    id: 278
+                    id: 302
                     tag: SquareApply
                     callee:
-                      id: 276
+                      id: 300
                       tag: Identifier
                       value: Iterable
                     typeArgs:
-                      - id: 277
+                      - id: 301
                         tag: Identifier
                         value: T
                         position:
@@ -629,24 +629,24 @@ statements:
                       line: 22
                       column: 31
                       absolute: 403
-                - id: 290
+                - id: 314
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 282
+                    id: 306
                     tag: Identifier
                     value: fn
                   type:
-                    id: 288
+                    id: 312
                     tag: RoundValueToValueLambda
                     params:
-                      - id: 284
+                      - id: 308
                         tag: Assignment
                         isMutable: false
                         isParameter: true
                         lhs:
-                          id: 283
+                          id: 307
                           tag: Identifier
                           value: T
                         isDeclaration: false
@@ -661,10 +661,10 @@ statements:
                             column: 39
                             absolute: 411
                     block:
-                      id: 287
+                      id: 311
                       tag: Block
                       statements:
-                        - id: 286
+                        - id: 310
                           tag: Identifier
                           value: Nothing
                           position:
@@ -689,30 +689,30 @@ statements:
                       column: 51
                       absolute: 423
               block:
-                id: 322
+                id: 346
                 tag: Block
                 statements:
-                  - id: 298
+                  - id: 322
                     tag: Assignment
                     isMutable: false
                     isParameter: false
                     lhs:
-                      id: 292
+                      id: 316
                       tag: Identifier
                       value: iterator
                     value:
-                      id: 297
+                      id: 321
                       tag: RoundApply
                       calledInsteadOfSquare: false
                       paramOrder:
                       isFirstParamThis: false
                       isAnObjectCopy: false
                       callee:
-                        id: 296
+                        id: 320
                         tag: Select
                         ammortized: false
                         owner:
-                          id: 293
+                          id: 317
                           tag: Identifier
                           value: this
                         field: getIterator
@@ -726,29 +726,29 @@ statements:
                         absolute: 438
                       end:
                         line: 24
-                        column: 1
-                        absolute: 461
-                  - id: 305
+                        column: 10
+                        absolute: 470
+                  - id: 329
                     tag: Assignment
                     isMutable: false
                     isParameter: false
                     lhs:
-                      id: 299
+                      id: 323
                       tag: Identifier
                       value: current
                     value:
-                      id: 304
+                      id: 328
                       tag: RoundApply
                       calledInsteadOfSquare: false
                       paramOrder:
                       isFirstParamThis: false
                       isAnObjectCopy: false
                       callee:
-                        id: 303
+                        id: 327
                         tag: Select
                         ammortized: false
                         owner:
-                          id: 300
+                          id: 324
                           tag: Identifier
                           value: iterator
                         field: next
@@ -762,40 +762,40 @@ statements:
                         absolute: 470
                       end:
                         line: 25
-                        column: 1
-                        absolute: 490
-                  - id: 321
+                        column: 8
+                        absolute: 497
+                  - id: 345
                     tag: WhileLoop
                     condition:
-                      id: 308
+                      id: 332
                       tag: BinaryExpression
                       left:
-                        id: 306
+                        id: 330
                         tag: Identifier
                         value: current
                       operator: !=
                       right:
-                        id: 307
+                        id: 331
                         tag: Identifier
                         value: nothing
                     action:
-                      id: 320
+                      id: 344
                       tag: Block
                       statements:
-                        - id: 311
+                        - id: 335
                           tag: RoundApply
                           calledInsteadOfSquare: false
                           paramOrder:
                           isFirstParamThis: false
                           isAnObjectCopy: false
                           callee:
-                            id: 309
+                            id: 333
                             tag: Identifier
                             value: fn
                           args:
                             0:
                               - 
-                              - id: 310
+                              - id: 334
                                 tag: Identifier
                                 value: current
                                 position:
@@ -814,27 +814,27 @@ statements:
                               absolute: 524
                             end:
                               line: 27
-                              column: 1
-                              absolute: 535
-                        - id: 319
+                              column: 7
+                              absolute: 541
+                        - id: 343
                           tag: Change
                           lhs:
-                            id: 312
+                            id: 336
                             tag: Identifier
                             value: current
                           value:
-                            id: 317
+                            id: 341
                             tag: RoundApply
                             calledInsteadOfSquare: false
                             paramOrder:
                             isFirstParamThis: false
                             isAnObjectCopy: false
                             callee:
-                              id: 316
+                              id: 340
                               tag: Select
                               ammortized: false
                               owner:
-                                id: 313
+                                id: 337
                                 tag: Identifier
                                 value: iterator
                               field: next
@@ -846,8 +846,8 @@ statements:
                               absolute: 541
                             end:
                               line: 29
-                              column: 1
-                              absolute: 571
+                              column: 2
+                              absolute: 572
                     position:
                       start:
                         line: 25
@@ -868,30 +868,30 @@ statements:
                 line: 29
                 column: 10
                 absolute: 580
-          - id: 407
+          - id: 431
             tag: FieldDef
             name: mkString
             defaultValue:
-              id: 405
+              id: 429
               tag: RoundValueToValueLambda
               params:
-                - id: 332
+                - id: 356
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 327
+                    id: 351
                     tag: Identifier
                     value: this
                   type:
-                    id: 330
+                    id: 354
                     tag: SquareApply
                     callee:
-                      id: 328
+                      id: 352
                       tag: Identifier
                       value: Iterable
                     typeArgs:
-                      - id: 329
+                      - id: 353
                         tag: Identifier
                         value: T
                         position:
@@ -914,16 +914,16 @@ statements:
                       line: 29
                       column: 32
                       absolute: 602
-                - id: 337
+                - id: 361
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 334
+                    id: 358
                     tag: Identifier
                     value: separator
                   type:
-                    id: 335
+                    id: 359
                     tag: Identifier
                     value: String
                   isDeclaration: false
@@ -937,16 +937,16 @@ statements:
                       line: 29
                       column: 51
                       absolute: 621
-                - id: 342
+                - id: 366
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 339
+                    id: 363
                     tag: Identifier
                     value: left
                   type:
-                    id: 340
+                    id: 364
                     tag: Identifier
                     value: String
                   isDeclaration: false
@@ -960,16 +960,16 @@ statements:
                       line: 29
                       column: 65
                       absolute: 635
-                - id: 347
+                - id: 371
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 344
+                    id: 368
                     tag: Identifier
                     value: right
                   type:
-                    id: 345
+                    id: 369
                     tag: Identifier
                     value: String
                   isDeclaration: false
@@ -984,19 +984,19 @@ statements:
                       column: 80
                       absolute: 650
               block:
-                id: 404
+                id: 428
                 tag: Block
                 statements:
-                  - id: 351
+                  - id: 375
                     tag: Assignment
                     isMutable: false
                     isParameter: false
                     lhs:
-                      id: 349
+                      id: 373
                       tag: Identifier
                       value: string
                     value:
-                      id: 350
+                      id: 374
                       tag: Literal
                       type: String
                       value: 
@@ -1009,30 +1009,30 @@ statements:
                         absolute: 663
                       end:
                         line: 31
-                        column: 1
-                        absolute: 670
-                  - id: 384
+                        column: 5
+                        absolute: 674
+                  - id: 408
                     tag: Assignment
                     isMutable: false
                     isParameter: false
                     lhs:
-                      id: 352
+                      id: 376
                       tag: Identifier
                       value: fn
                     value:
-                      id: 383
+                      id: 407
                       tag: RoundValueToValueLambda
                       params:
-                        - id: 356
+                        - id: 380
                           tag: Assignment
                           isMutable: false
                           isParameter: true
                           lhs:
-                            id: 353
+                            id: 377
                             tag: Identifier
                             value: t
                           type:
-                            id: 354
+                            id: 378
                             tag: Identifier
                             value: T
                           isDeclaration: false
@@ -1047,40 +1047,40 @@ statements:
                               column: 14
                               absolute: 683
                       block:
-                        id: 382
+                        id: 406
                         tag: Block
                         statements:
-                          - id: 365
+                          - id: 389
                             tag: Assignment
                             isMutable: false
                             isParameter: false
                             lhs:
-                              id: 358
+                              id: 382
                               tag: Identifier
                               value: comma
                             value:
-                              id: 364
+                              id: 388
                               tag: IfStatement
                               condition:
-                                id: 361
+                                id: 385
                                 tag: BinaryExpression
                                 left:
-                                  id: 359
+                                  id: 383
                                   tag: Identifier
                                   value: string
                                 operator: ==
                                 right:
-                                  id: 360
+                                  id: 384
                                   tag: Literal
                                   type: String
                                   value: 
                               trueBranch:
-                                id: 362
+                                id: 386
                                 tag: Literal
                                 type: String
                                 value: 
                               falseBranch:
-                                id: 363
+                                id: 387
                                 tag: Identifier
                                 value: separator
                             isDeclaration: true
@@ -1092,67 +1092,67 @@ statements:
                                 absolute: 696
                               end:
                                 line: 33
-                                column: 1
-                                absolute: 735
-                          - id: 381
+                                column: 7
+                                absolute: 741
+                          - id: 405
                             tag: Change
                             lhs:
-                              id: 366
+                              id: 390
                               tag: Identifier
                               value: string
                             value:
-                              id: 379
+                              id: 403
                               tag: BinaryExpression
                               left:
-                                id: 377
+                                id: 401
                                 tag: BinaryExpression
                                 left:
-                                  id: 375
+                                  id: 399
                                   tag: BinaryExpression
                                   left:
-                                    id: 373
+                                    id: 397
                                     tag: BinaryExpression
                                     left:
-                                      id: 371
+                                      id: 395
                                       tag: BinaryExpression
                                       left:
-                                        id: 369
+                                        id: 393
                                         tag: BinaryExpression
                                         left:
-                                          id: 367
+                                          id: 391
                                           tag: Literal
                                           type: String
                                           value: 
                                         operator: +
                                         right:
-                                          id: 368
+                                          id: 392
                                           tag: Identifier
                                           value: string
                                       operator: +
                                       right:
-                                        id: 370
+                                        id: 394
                                         tag: Literal
                                         type: String
                                         value: 
                                     operator: +
                                     right:
-                                      id: 372
+                                      id: 396
                                       tag: Identifier
                                       value: comma
                                   operator: +
                                   right:
-                                    id: 374
+                                    id: 398
                                     tag: Literal
                                     type: String
                                     value: 
                                 operator: +
                                 right:
-                                  id: 376
+                                  id: 400
                                   tag: Identifier
                                   value: t
                               operator: +
                               right:
-                                id: 378
+                                id: 402
                                 tag: Literal
                                 type: String
                                 value: 
@@ -1163,8 +1163,8 @@ statements:
                                 absolute: 741
                               end:
                                 line: 34
-                                column: 1
-                                absolute: 773
+                                column: 3
+                                absolute: 775
                       explicitType: undefined
                     isDeclaration: true
                     isTypeLevel: false
@@ -1177,25 +1177,25 @@ statements:
                         line: 34
                         column: 7
                         absolute: 779
-                  - id: 390
+                  - id: 414
                     tag: RoundApply
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
                     isAnObjectCopy: false
                     callee:
-                      id: 389
+                      id: 413
                       tag: Select
                       ammortized: false
                       owner:
-                        id: 385
+                        id: 409
                         tag: Identifier
                         value: this
                       field: forEach
                     args:
                       0:
                         - 
-                        - id: 387
+                        - id: 411
                           tag: Identifier
                           value: fn
                           position:
@@ -1214,60 +1214,60 @@ statements:
                         absolute: 779
                       end:
                         line: 35
-                        column: 1
-                        absolute: 793
-                  - id: 403
+                        column: 4
+                        absolute: 796
+                  - id: 427
                     tag: BinaryExpression
                     left:
-                      id: 401
+                      id: 425
                       tag: BinaryExpression
                       left:
-                        id: 399
+                        id: 423
                         tag: BinaryExpression
                         left:
-                          id: 397
+                          id: 421
                           tag: BinaryExpression
                           left:
-                            id: 395
+                            id: 419
                             tag: BinaryExpression
                             left:
-                              id: 393
+                              id: 417
                               tag: BinaryExpression
                               left:
-                                id: 391
+                                id: 415
                                 tag: Literal
                                 type: String
                                 value: 
                               operator: +
                               right:
-                                id: 392
+                                id: 416
                                 tag: Identifier
                                 value: left
                             operator: +
                             right:
-                              id: 394
+                              id: 418
                               tag: Literal
                               type: String
                               value: 
                           operator: +
                           right:
-                            id: 396
+                            id: 420
                             tag: Identifier
                             value: string
                         operator: +
                         right:
-                          id: 398
+                          id: 422
                           tag: Literal
                           type: String
                           value: 
                       operator: +
                       right:
-                        id: 400
+                        id: 424
                         tag: Identifier
                         value: right
                     operator: +
                     right:
-                      id: 402
+                      id: 426
                       tag: Literal
                       type: String
                       value: 
@@ -1278,8 +1278,8 @@ statements:
                         absolute: 796
                       end:
                         line: 37
-                        column: 1
-                        absolute: 822
+                        column: 2
+                        absolute: 823
               explicitType: undefined
             isTypeLevel: true
             position:
@@ -1291,30 +1291,30 @@ statements:
                 line: 37
                 column: 7
                 absolute: 828
-          - id: 456
+          - id: 480
             tag: FieldDef
             name: count
             defaultValue:
-              id: 454
+              id: 478
               tag: RoundValueToValueLambda
               params:
-                - id: 414
+                - id: 438
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 409
+                    id: 433
                     tag: Identifier
                     value: this
                   type:
-                    id: 412
+                    id: 436
                     tag: SquareApply
                     callee:
-                      id: 410
+                      id: 434
                       tag: Identifier
                       value: Iterable
                     typeArgs:
-                      - id: 411
+                      - id: 435
                         tag: Identifier
                         value: T
                         position:
@@ -1337,24 +1337,24 @@ statements:
                       line: 37
                       column: 29
                       absolute: 850
-                - id: 424
+                - id: 448
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 416
+                    id: 440
                     tag: Identifier
                     value: pred
                   type:
-                    id: 422
+                    id: 446
                     tag: RoundValueToValueLambda
                     params:
-                      - id: 418
+                      - id: 442
                         tag: Assignment
                         isMutable: false
                         isParameter: true
                         lhs:
-                          id: 417
+                          id: 441
                           tag: Identifier
                           value: T
                         isDeclaration: false
@@ -1369,10 +1369,10 @@ statements:
                             column: 39
                             absolute: 860
                     block:
-                      id: 421
+                      id: 445
                       tag: Block
                       statements:
-                        - id: 420
+                        - id: 444
                           tag: Identifier
                           value: Boolean
                           position:
@@ -1397,19 +1397,19 @@ statements:
                       column: 51
                       absolute: 872
               block:
-                id: 453
+                id: 477
                 tag: Block
                 statements:
-                  - id: 428
+                  - id: 452
                     tag: Assignment
                     isMutable: false
                     isParameter: false
                     lhs:
-                      id: 426
+                      id: 450
                       tag: Identifier
                       value: num
                     value:
-                      id: 427
+                      id: 451
                       tag: Literal
                       type: Number
                       value: 0
@@ -1422,89 +1422,89 @@ statements:
                         absolute: 882
                       end:
                         line: 39
-                        column: 1
-                        absolute: 888
-                  - id: 451
+                        column: 7
+                        absolute: 894
+                  - id: 475
                     tag: RoundApply
                     calledInsteadOfSquare: false
                     paramOrder:
                     isFirstParamThis: false
                     isAnObjectCopy: false
                     callee:
-                      id: 450
+                      id: 474
                       tag: Select
                       ammortized: false
                       owner:
-                        id: 429
+                        id: 453
                         tag: Identifier
                         value: this
                       field: forEach
                     args:
                       0:
                         - 
-                        - id: 448
+                        - id: 472
                           tag: RoundValueToValueLambda
                           params:
                             0:
-                              id: 434
+                              id: 458
                               tag: Assignment
                               isMutable: false
                               isParameter: true
                               lhs:
-                                id: 431
+                                id: 455
                                 tag: Identifier
                                 value: t
                               value: undefined
                               type:
-                                id: 432
+                                id: 456
                                 tag: Identifier
                                 value: T
                               isDeclaration: false
                           block:
-                            id: 447
+                            id: 471
                             tag: Block
                             statements:
-                              - id: 446
+                              - id: 470
                                 tag: IfStatement
                                 condition:
-                                  id: 438
+                                  id: 462
                                   tag: RoundApply
                                   calledInsteadOfSquare: false
                                   paramOrder:
                                   isFirstParamThis: false
                                   isAnObjectCopy: false
                                   callee:
-                                    id: 436
+                                    id: 460
                                     tag: Identifier
                                     value: pred
                                   args:
                                     - 0: 
                                       1:
-                                        id: 437
+                                        id: 461
                                         tag: Identifier
                                         value: t
                                 trueBranch:
-                                  id: 444
+                                  id: 468
                                   tag: Change
                                   lhs:
-                                    id: 439
+                                    id: 463
                                     tag: Identifier
                                     value: num
                                   value:
-                                    id: 442
+                                    id: 466
                                     tag: BinaryExpression
                                     left:
-                                      id: 440
+                                      id: 464
                                       tag: Identifier
                                       value: num
                                     operator: +
                                     right:
-                                      id: 441
+                                      id: 465
                                       tag: Literal
                                       type: Number
                                       value: 1
                                 falseBranch:
-                                  id: 445
+                                  id: 469
                                   tag: Literal
                                   type: Void
                                   value: null
@@ -1533,9 +1533,9 @@ statements:
                         absolute: 894
                       end:
                         line: 40
-                        column: 1
-                        absolute: 945
-                  - id: 452
+                        column: 6
+                        absolute: 950
+                  - id: 476
                     tag: Identifier
                     value: num
                     position:
@@ -1545,8 +1545,8 @@ statements:
                         absolute: 950
                       end:
                         line: 42
-                        column: 1
-                        absolute: 954
+                        column: 2
+                        absolute: 955
               explicitType: undefined
             isTypeLevel: true
             position:

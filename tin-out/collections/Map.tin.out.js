@@ -1,24 +1,16 @@
 const __tin_varargs_marker = Symbol();
 
-// Object.prototype._copy = function (...args) {
-// 	const keys = Object.keys(this).flatMap(k => Object.keys(this[k]));
-// 	let i = 0;
-// 	const copyObj = {};
-// 	for (let arg of args) {
-// 		copyObj[keys[i]] = arg
-// 		i++;
-// 	}
-// 	return { ...this, ...copyObj }
-// }
-
 function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
+	const symbol = Symbol();
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
 		return {
-			[typeId]: result
+			[symbol]: result
 		};
 	}
-	constructor._tinFields = descriptor;
+	constructor._symbol = symbol;
+	globalThis[symbol] = constructor;
+	constructor.descriptor = descriptor;
 	constructor._typeId = typeId;
 	constructor.toString = () => {
 		return descriptor.toString()
@@ -30,8 +22,10 @@ function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
 	return constructor;
 }
 
-function TIN_LAMBDA_TYPE(typeId, paramTypes, returnType) {
-	return { __is_child: (f) => typeof f === "function" };
+function TIN_LAMBDA(typeId, lambda, type) {
+	lambda.type = type;
+	lambda.typeId = typeId;
+	return lambda;
 }
 
 // function _TIN_MAKE_LAMBDA(type)
@@ -133,16 +127,12 @@ function makeString(obj) {
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
-			// if (++number > 1) {
-			// 	result += " & "
-			// }
-			// result += componentKey + "("
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += componentKey + "." + key + "=" + makeString(component[key]) + ', ';
+					result += globalThis[componentKey]._typeId + "." + key + "=" + makeString(component[key]) + ', ';
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {
@@ -177,16 +167,126 @@ import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\col
 	const JsMap = globalThis.Map;
 
 ;
-export let MapOps = /* [] */(K, V) => TIN_TYPE("MapOps", "f7b94365-c737-4526-bea3-6c95b35de6cb", (_p0,_p1,_p2) => ({put: _p0,get: _p1,remove: _p2}), {}); MapOps._typeId = "MapOps";;
-export let MapEntry = /* [] */(A, B) => TIN_TYPE("MapEntry", "fc111840-c8f6-4c46-b04e-b4923f673f3a", (_p0,_p1) => ({key: _p0,value: _p1}), {}); MapEntry._typeId = "MapEntry";;
-export let Map = /* [] */(K, V) => _TIN_INTERSECT_OBJECTS(MapOps.call('Type', K, V), Iterable.call('Type', MapEntry.call('Type', K, V)));
-export let Map$entry/* [A, B] -> (key:A, value:B) -> MapEntry[A, B]*/ = function(A, B) {
-return function(key, value) {
+export var MapOps = /* [] */(K, V) => TIN_TYPE("MapOps", "dda21daf-1de3-4161-9dc0-8e37fcd9e190", (_p0,_p1,_p2) => ({put: _p0,get: _p1,remove: _p2}), {
+		Type: {
+			tag: "Struct",
+			name: "MapOps",
+				fields: [
+					{
+			Field: {
+				name: "put",
+				type: {
+		Type: {
+			tag: "Lambda",
+			name: undefined,
+			parameters: [{
+			Field: {
+				name: "key",
+				type: () => K,
+				defaultValue: () => { return (undefined);},
+			}
+		},,{
+			Field: {
+				name: "value",
+				type: () => V,
+				defaultValue: () => { return (undefined);},
+			}
+		},],
+			returnType: ???
+		}
+	},
+				defaultValue: () => { return (undefined);},
+			}
+		},,{
+			Field: {
+				name: "get",
+				type: {
+		Type: {
+			tag: "Lambda",
+			name: undefined,
+			parameters: [{
+			Field: {
+				name: "key",
+				type: () => K,
+				defaultValue: () => { return (undefined);},
+			}
+		},],
+			returnType: ???
+		}
+	},
+				defaultValue: () => { return (undefined);},
+			}
+		},,{
+			Field: {
+				name: "remove",
+				type: {
+		Type: {
+			tag: "Lambda",
+			name: undefined,
+			parameters: [{
+			Field: {
+				name: "key",
+				type: () => K,
+				defaultValue: () => { return (undefined);},
+			}
+		},],
+			returnType: ???
+		}
+	},
+				defaultValue: () => { return (undefined);},
+			}
+		},
+		]
+		}
+	}); MapOps._typeId = "MapOps";;
+export var MapEntry = /* [] */(A, B) => TIN_TYPE("MapEntry", "159437a6-00b0-4e07-90ef-6bd895c5cc16", (_p0,_p1) => ({key: _p0,value: _p1}), {
+		Type: {
+			tag: "Struct",
+			name: "MapEntry",
+				fields: [
+					{
+			Field: {
+				name: "key",
+				type: () => A,
+				defaultValue: () => { return (undefined);},
+			}
+		},,{
+			Field: {
+				name: "value",
+				type: () => B,
+				defaultValue: () => { return (undefined);},
+			}
+		},
+		]
+		}
+	}); MapEntry._typeId = "MapEntry";;
+export var Map = /* [] */(K, V) => _TIN_INTERSECT_OBJECTS(MapOps.call('Type', K, V), Iterable.call('Type', MapEntry.call('Type', K, V)));
+export var Map$entry/* [A, B] -> (key:A, value:B) -> MapEntry[A, B]*/ = function(A, B) {
+return TIN_LAMBDA("cf6527db-279d-4ffa-ae66-9ce298acc682", function(key, value) {
 return MapEntry.call('Type', A, B)(key, value)
-}
+}, {
+		Type: {
+			tag: "Lambda",
+			name: undefined,
+			parameters: [{
+			Field: {
+				name: "key",
+				type: () => A,
+				defaultValue: () => { return (undefined);},
+			}
+		},,{
+			Field: {
+				name: "value",
+				type: () => B,
+				defaultValue: () => { return (undefined);},
+			}
+		},],
+			returnType: ???
+		}
+	})
 };
 ;
-export let Map$create/* [K, V] -> Map[K, V]*/ = function(K, V) {
+export var Map$create/* [K, V] -> Map[K, V]*/ = function(K, V) {
 return Map$of.call('Type', K, V)(Array(0)([]))
 };
 
@@ -221,5 +321,3 @@ return Map$of.call('Type', K, V)(Array(0)([]))
 		return _TIN_INTERSECT_OBJECTS(ops, Iterable(MapEntry(K, V))(getIterator));
 	}
 
-;
-export let y/* Number*/ = 1 + 4

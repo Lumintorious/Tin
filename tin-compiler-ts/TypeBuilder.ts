@@ -322,6 +322,9 @@ export class TypeBuilder {
             }
          }
       });
+      if (options.assignedName) {
+         node.name = options.assignedName;
+      }
       this.build(node.block, innerScope);
       const inferredType = this.context.inferencer.inferRoundValueToValueLambda(
          node,

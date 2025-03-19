@@ -78,11 +78,7 @@ export class TypeInferencer {
    }
 
    private buildCache = new Map<string, Type>();
-   infer(
-      node: AstNode,
-      scope: Scope,
-      options: RecursiveResolutionOptions = {}
-   ) {
+   infer(node: Term, scope: Scope, options: RecursiveResolutionOptions = {}) {
       const cachedString = `${node.id}.${scope.id}.${scope.iteration}`;
       const cachedType = this.buildCache.get(cachedString);
       if (cachedType) {
@@ -197,6 +193,8 @@ export class TypeInferencer {
             inferredType = new Type(); // Unknown type by default
       }
       this.buildCache.set(cachedString, inferredType);
+      node.inferredType = inferredType;
+      inferredType.ast = node;
       return inferredType;
    }
 
@@ -402,11 +400,16 @@ export class TypeInferencer {
             for (const symbol of symbols) {
                if (symbol.name === fieldName) {
                   if (firstFind) {
-                     throw new Error(
-                        "Attempted to access field " +
-                           node.field +
-                           ", but type has multiple fields of that name. Try casting the object first."
-                     );
+                     if (type.toString() !== firstFind[0].toString()) {
+                        throw new Error(
+                           "Attempted to access field " +
+                              node.field +
+                              ", but type has multiple fields of that name. Try casting the object first. Clash at " +
+                              type.toString() +
+                              " and " +
+                              firstFind[0].toString()
+                        );
+                     }
                   }
                   firstFind = [type, symbol];
                }
@@ -415,7 +418,13 @@ export class TypeInferencer {
          return firstFind;
       }
 
-      let ownerType = this.infer(node.owner, scope);
+      let ownerType: Type;
+      if (node.owner instanceof Identifier && node.owner.isTypeIdentifier()) {
+         node.ownerComponent = "Type";
+         return new NamedType("Type");
+      } else {
+         ownerType = this.infer(node.owner, scope);
+      }
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
       }
@@ -428,13 +437,19 @@ export class TypeInferencer {
       if (ownerType instanceof NamedType) {
          ownerType = scope.lookupType(ownerType.name).typeSymbol;
       }
+      if (ownerType instanceof BinaryOpType && ownerType.operator === "&") {
+         ownerType = ownerType.simplified();
+      }
       const fields = this.getAllKnownFields(ownerType, scope);
+      console.log(fields);
       const found = findField(node.field, fields);
       if (!found) {
          throw new Error(
             `Field '${node.field}' could not be found on '` +
                ownerType.toString() +
-               "'"
+               "', fields found: [" +
+               [...fields.keys()] +
+               "]"
          );
       }
 
@@ -847,13 +862,6 @@ export class TypeInferencer {
          node.block.statements[0]
       ) {
          const params = [];
-         // node.params.forEach((p) => {
-         //    if (p instanceof Assignment && p.lhs instanceof Identifier) {
-         //       innerScope.declareType(
-         //          new Symbol(p.lhs.value, new NamedType(p.lhs.value))
-         //       );
-         //    }
-         // });
          const returnType = this.context.translator.translate(
             node.block.statements[0],
             innerScope
@@ -866,21 +874,6 @@ export class TypeInferencer {
          return lambdaType;
       } else {
          const returnType = this.infer(node.block, innerScope);
-         if (node.explicitType) {
-            const explicitType = this.context.translator.translate(
-               node.explicitType,
-               innerScope
-            );
-            if (!returnType.isAssignableTo(explicitType, scope)) {
-               this.context.errors.add(
-                  `Return type of lambda`,
-                  explicitType,
-                  returnType,
-                  node.position,
-                  new Error()
-               );
-            }
-         }
          const lambdaType = new RoundValueToValueLambdaType(
             paramsAsTypes,
             returnType

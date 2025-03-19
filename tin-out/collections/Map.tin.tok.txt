@@ -210,12 +210,5 @@ STRING       | 	const Map$of = (K, V) => (args) => {
 		return _TIN_INTERSECT_OBJECTS(ops, Iterable(MapEntry(K, V))(getIterator));
 	}
  |  21, 10   
-NEWLINE      |              |  22, 1    
-IDENTIFIER   | y            |  22, 1    
-OPERATOR     | =            |  22, 3    
-NUMBER       | 1            |  22, 5    
-OPERATOR     | +            |  22, 7    
-NUMBER       | 4            |  22, 9    
-NEWLINE      |              |  24, 1    
-NEWLINE      |              |  26, 1    
+NEWLINE      |              |  23, 1    
 --undefined--

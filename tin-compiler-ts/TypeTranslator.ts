@@ -52,7 +52,14 @@ export class TypeTranslator {
       this.context = context;
    }
 
-   translate(node: AstNode, scope: Scope): Type {
+   translate(node: Term, scope: Scope): Type {
+      const translatedType = this.translateRaw(node, scope);
+      node.translatedType = translatedType;
+      translatedType.ast = node;
+      return translatedType;
+   }
+
+   translateRaw(node: Term, scope: Scope): Type {
       switch (node.tag) {
          case "Identifier":
             if ((node as Identifier).value === "This") {

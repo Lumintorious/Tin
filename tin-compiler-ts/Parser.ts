@@ -73,6 +73,8 @@ export class Assignment extends AstNode {
 
 // Something that can be evaluated to a VALUE at runtime
 export class Term extends Statement {
+   inferredType?: Type;
+   translatedType?: Type;
    constructor(tag: string) {
       super(tag);
    }
@@ -129,14 +131,15 @@ export class WhileLoop extends Term {
 export class RoundValueToValueLambda extends Term {
    params: Term[];
    block: Block;
-   explicitType?: Term;
+   specifiedType?: Term;
    isTypeLambda?: boolean;
    type?: RoundValueToValueLambdaType;
-   constructor(params: Term[], block: Block, explicitType?: Term) {
+   name?: string;
+   constructor(params: Term[], block: Block, specifiedType?: Term) {
       super("RoundValueToValueLambda");
       this.params = params;
       this.block = block;
-      this.explicitType = explicitType;
+      this.specifiedType = specifiedType;
    }
 
    isFirstParamThis() {
@@ -256,6 +259,15 @@ export class Identifier extends Term {
       super("Identifier"); // tag of the AST node
       this.value = value; // Value of the literal (number, string, etc.)
       // this.isType = value.charAt(0) === value.charAt(0).toUpperCase()
+   }
+
+   isTypeIdentifier() {
+      const str = this.value;
+      return (
+         str.charAt(0) === str.charAt(0).toUpperCase() &&
+         !str.includes("@") &&
+         !str.includes(".")
+      );
    }
 }
 
@@ -507,7 +519,12 @@ export class Parser {
    }
 
    isOnNewLine = false;
-   parseExpression(precedence = 0, stopAtEquals = false, stopAtDot = false) {
+   parseExpression(
+      precedence = 0,
+      stopAtEquals = false,
+      stopAtDot = false,
+      stopAtArrow = false
+   ) {
       const startPos = this.positionNow();
       const result = this.parseExpressionRaw(
          precedence,
@@ -560,30 +577,21 @@ export class Parser {
          (!stopAtEquals || !this.is("=")) &&
          (!stopAtEquals || !this.is("~=")) &&
          (!stopAtDot || !this.is(".")) &&
-         this.peek() &&
-         this.isBinaryOperator(this.peek())
+         this.peek()
          // this.peek().tag === "NEWLINE" ||
          // !this.peek(1) ||
          // this.peek(1).tag === "INDENT" ||
          // this.peek(1).tag === "DEDENT")
       ) {
-         // if (
-         //    this.isOnNewLine &&
-         //    ((this.peek().tag === "NEWLINE" &&
-         //       (!this.peek(1) || this.peek(1).tag === "DEDENT")) ||
-         //       this.peek().tag === "DEDENT")
-         // ) {
-         //    break;
-         // }
-         // if (
-         //    this.peek().tag === "NEWLINE" &&
-         //    (!this.peek(1) || this.peek(1).tag === "INDENT")
-         // ) {
-         //    this.omit("NEWLINE");
-         //    this.omit("INDENT");
-         //    this.isOnNewLine = true;
-         // }
-         if (!this.peek()) {
+         while (this.peek()?.tag === "NEWLINE" && this.peek().value === "\n") {
+            this.consume("NEWLINE");
+            if (this.peek()?.tag === "INDENT") {
+               this.consume("INDENT");
+            } else if (this.peek()?.tag === "DEDENT") {
+               break; // Stop processing if dedented (expression ends)
+            }
+         }
+         if (!this.peek() || !this.isBinaryOperator(this.peek())) {
             break;
          }
          const operator = this.peek().value;
@@ -630,7 +638,7 @@ export class Parser {
          ) {
             left = new Assignment(left.expression, right, true, left.type)
                .mutable(operator === "~=")
-               .fromTo(left.position, this.peek().position);
+               .fromTo(left.position, this.peek()?.position);
             break;
          }
 
@@ -799,7 +807,7 @@ export class Parser {
       let specifiedType;
       if (this.peek() && this.peek().value === ":") {
          this.consume("OPERATOR", ":");
-         specifiedType = this.parseExpression();
+         specifiedType = this.parseExpression(0, false, false, true);
       }
       if (
          (!this.peek() ||

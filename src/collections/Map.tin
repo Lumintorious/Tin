@@ -51,7 +51,4 @@ external "
 		return _TIN_INTERSECT_OBJECTS(ops, Iterable(MapEntry(K, V))(getIterator));
 	\}
 "
-y = 1 + 4
-
-# s = x.put(3, "Three")
 

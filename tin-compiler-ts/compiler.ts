@@ -1,17 +1,29 @@
 import { Lexer, Token } from "./Lexer";
-import { Block, Parser, Import } from "./Parser";
+import { Block, Parser, Import, AstNode } from "./Parser";
 import fs from "node:fs";
 import { escape } from "node:querystring";
-import { translateFile } from "./translator.js";
+import { JavascriptTranslator } from "./JavascriptTranslator";
 import { TypeChecker } from "./TypeChecker";
 import { exec } from "node:child_process";
 import files from "node:fs/promises";
 import path from "node:path";
-import { TypePhaseContext } from "./Scope";
+import { Scope, TypePhaseContext } from "./Scope";
+import { Type, ParamType } from "./Types";
+import { GoTranslator } from "./GoTranslator";
+
+export type CompilerItem = AstNode | Type | ParamType | undefined;
+
+export interface OutputTranslator {
+   extension: string;
+   run(path: string): void;
+   translate(term: CompilerItem, scope: Scope, options: any): string;
+}
 
 Error.stackTraceLimit = 40;
 const isTesting = process.argv.includes("--test");
+const isCompilingToGo = process.argv.includes("--targetLanguage:go");
 const SRC_PATH = path.resolve(process.cwd(), isTesting ? "tests" : "src");
+const COMPILER_PATH = path.resolve(process.cwd(), "tin-compiler-ts");
 const OUT_PATH = path.resolve(
    process.cwd(),
    isTesting ? "tin-out-tests" : "tin-out"
@@ -33,10 +45,16 @@ if (!process.argv.includes("--verbose")) {
       }
    };
 }
+const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
+   ? new GoTranslator()
+   : new JavascriptTranslator();
 
 function fromSrcToOut(pathStr: string) {
    if (pathStr.startsWith(SRC_PATH)) {
       pathStr = pathStr.substring(SRC_PATH.length + 1);
+      return path.resolve(OUT_PATH, pathStr);
+   } else if (pathStr.startsWith(COMPILER_PATH)) {
+      pathStr = pathStr.substring(COMPILER_PATH.length + 1);
       return path.resolve(OUT_PATH, pathStr);
    }
    throw new Error(
@@ -177,15 +195,16 @@ function fullPath(pathStr: string) {
 
 async function getImports(
    ast: Block,
-   importsCache: Map<String, CompileResult>
+   importsCache: Map<String, CompileResult> = new Map()
 ): Promise<Map<String, CompileResult>> {
    const imports = importsCache;
    for (let i = 0; i < ast.statements.length; i++) {
       const statement = ast.statements[i];
       if (statement instanceof Import) {
          const path = fullPath(statement.path);
+         const rawPath = statement.path;
          statement.path = path;
-         if (!imports.has(path)) {
+         if (!imports.has(path) && !imports.has(rawPath)) {
             imports.set(
                path,
                await compile(statement.path + ".tin", false, importsCache)
@@ -218,7 +237,7 @@ async function compile(
 ): Promise<CompileResult> {
    try {
       // READ
-      const inputContents: string = await files.readFile(inputFile, "utf-8");
+      const inputContents: string = fs.readFileSync(inputFile, "utf-8");
       ensureParentDirs(fromSrcToOut(inputFile));
       // LEXER
       const tokens = lexerPhase(inputContents);
@@ -233,6 +252,10 @@ async function compile(
          fromSrcToOut(inputFile + ".ast.yaml"),
          objectToYAML(ast, ["position", "fromTo", "isTypeLevel", "position"])
       );
+
+      if (!inputFile.endsWith("stdlib.tin")) {
+         ast.statements = [new Import("stdlib"), ...ast.statements];
+      }
 
       // IMPORTS
       const imports = await getImports(ast, importsCache);
@@ -255,10 +278,18 @@ async function compile(
       }
 
       // TRANSLATION
-      const translatedString = translateFile(ast, context.fileScope);
+      const translatedString = OUTPUT_TRANSLATOR.translate(
+         ast,
+         context.fileScope,
+         { isTopLevel: true }
+      );
       await files.writeFile(
-         fromSrcToOut(inputFile + ".out.js"),
+         fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension),
          translatedString
+      );
+      console.log(
+         "Wrote " +
+            fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension)
       );
 
       console.log("\x1b[32mCompiled " + inputFile + "\x1b[0m");
@@ -267,17 +298,11 @@ async function compile(
          console.log(
             "========================= Output ============================"
          );
-         exec(
-            'cd "tin-out"' + " && node " + fromSrcToOut(inputFile + ".out.js"),
-            (_, out, err) => {
-               console.log(out);
-               if (err) {
-                  console.log(err);
-               }
-            }
+         OUTPUT_TRANSLATOR.run(
+            fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension)
          );
-      } else {
       }
+
       return {
          inputText: inputContents,
          tokens,
@@ -361,7 +386,12 @@ async function run() {
          );
       }
    } else {
-      void compile(allPath, true, new Map());
+      const stdlib = await compile(
+         path.resolve(process.cwd(), "tin-compiler-ts", "stdlib.tin"),
+         false,
+         new Map()
+      );
+      void compile(allPath, true, new Map([["stdlib", stdlib]]));
    }
 }
 

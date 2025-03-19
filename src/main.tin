@@ -1,1 +1,16 @@
-import collections/Map
+# import collections/Map
+
+a = 1
+
+PetOwner = type:
+	cat: Cat
+
+Cat = type:
+	name: String
+
+cat = Cat(name = "Kitten")
+
+main = () ->
+	print(cat)
+	 
+print(l)

@@ -216,6 +216,7 @@ export class Scope {
    declareType(symbol: Symbol) {
       const name = symbol.name;
       const typeSymbol = symbol.typeSymbol;
+      typeSymbol.name = name;
       if (this.typeSymbols.has(name)) {
          const existingSymbol = this.typeSymbols.get(name);
          if (existingSymbol && existingSymbol.iteration == this.iteration) {
@@ -224,7 +225,6 @@ export class Scope {
             symbol.iteration = this.iteration;
          }
       }
-      typeSymbol.name = name;
       console.log(
          "# " +
             "\x1b[36m" +
@@ -236,58 +236,9 @@ export class Scope {
             "\x1b[0m"
       );
       symbol.iteration = this.iteration;
-      if (
-         typeSymbol instanceof SquareTypeToTypeLambdaType &&
-         typeSymbol.returnType instanceof StructType
-      ) {
-         typeSymbol.name = name;
-         const constructorName = getConstructorName(name);
-         const constructorSymbol = new Symbol(
-            constructorName,
-            new SquareTypeToValueLambdaType(
-               typeSymbol.paramTypes,
-               new RoundValueToValueLambdaType(
-                  typeSymbol.returnType.fields,
-                  new AppliedGenericType(
-                     new NamedType(name),
-                     typeSymbol.paramTypes
-                  )
-               )
-            )
-         );
-         this.declare(constructorSymbol);
-      } else if (typeSymbol instanceof StructType) {
-         const constructorName = getConstructorName(name);
-         const constructorSymbol = new Symbol(
-            constructorName,
-            new RoundValueToValueLambdaType(
-               typeSymbol.fields,
-               new NamedType(name)
-            )
-         );
-         this.declare(constructorSymbol);
-      } else if (typeSymbol instanceof MarkerType) {
-         const constructorName = getConstructorName(name);
-         const constructorSymbol = new Symbol(
-            constructorName,
-            new RoundValueToValueLambdaType([], new NamedType(name))
-         );
-         this.declare(constructorSymbol);
-      } else if (
-         typeSymbol instanceof RoundValueToValueLambdaType &&
-         typeSymbol.returnType instanceof StructType
-      ) {
-         typeSymbol.name = name;
-         const constructorName = getConstructorName(name);
-         const structTypeSymbol = typeSymbol.returnType;
-         const constructorSymbol = new Symbol(
-            constructorName,
-            new RoundValueToValueLambdaType(
-               structTypeSymbol.fields,
-               typeSymbol
-            ).named(constructorName)
-         );
-         this.declare(constructorSymbol);
+      const constructor = typeSymbol.buildConstructor();
+      if (constructor) {
+         this.declare(new Symbol(name, constructor));
       }
 
       typeSymbol.name = name;

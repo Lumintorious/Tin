@@ -34,7 +34,12 @@ function TIN_LAMBDA(typeId, lambda, type) {
 // function _TIN_MAKE_LAMBDA(type)
 
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
-	if (obj1._typeId && obj1._typeId) {
+	if (obj1._typeId && obj2._typeId) {
+		if (obj2.descriptor.Type.tag === "Struct") {
+			const clone = (...args) => obj2(...args)
+			Object.assign(clone, obj2, obj1)
+			return clone
+		}
 		return {}
 	}
 
@@ -192,43 +197,4 @@ const dejsonify = function (json) {
 	});
 }
 
-	// COMPILED TIN
-	;
-import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\stdlib.tin.out.js"; Object.entries(module0).forEach(([key, value]) => {
-	globalThis[key] = value;
-});;
-export var PetOwner = TIN_TYPE("PetOwner", "bf50fcaa-4ea8-4c21-ace6-0b6a42ce74ff", (_p0) => ({ cat: _p0 }), {
-	Type: {
-		tag: "Struct",
-		name: "PetOwner",
-		fields: [
-			{
-				Field: {
-					name: "cat",
-					type: () => Cat,
-					defaultValue: () => { return (undefined) },
-				}
-			},
-		]
-	}
-});
-export var Cat = TIN_TYPE("Cat", "45660539-5e06-4fa6-809b-cff149a9277d", (_p0) => ({ name: _p0 }), {
-	Type: {
-		tag: "Struct",
-		name: "Cat",
-		fields: [
-			{
-				Field: {
-					name: "name",
-					type: () => String,
-					defaultValue: () => { return (undefined) },
-				}
-			},
-		]
-	}
-});
-export var cat/* Cat*/ = Cat("Kitten");
-print(cat[Cat._symbol].name);
-export var jsonCat/* String*/ = jsonify(cat);
-print(jsonCat);
-print(dejsonify(jsonCat))
+// COMPILED TIN

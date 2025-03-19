@@ -181,19 +181,7 @@ export class TypeChecker {
          if (node.eachLoop) {
             this.typeCheck(node.eachLoop, innerScope);
          }
-      }
-      // if (node instanceof RoundTypeToTypeLambda) {
-      //    this.checkLambdaParamsValidity(
-      //       (
-      //          this.context.translator.translate(
-      //             node,
-      //             scope
-      //          ) as RoundValueToValueLambdaType
-      //       ).params,
-      //       scope
-      //    );
-      // } else
-      else if (node instanceof TypeDef) {
+      } else if (node instanceof TypeDef) {
          const innerScope = scope.innerScopeOf(node);
          node.fieldDefs.forEach((fd) => {
             if (fd.defaultValue) {
@@ -235,6 +223,27 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       const innerScope = scope.innerScopeOf(node);
+
+      if (node.specifiedType) {
+         const explicitType = this.context.translator.translate(
+            node.specifiedType,
+            innerScope
+         );
+         const returnType = this.context.inferencer.infer(
+            node.block,
+            innerScope
+         );
+         if (!returnType.isAssignableTo(explicitType, scope)) {
+            this.context.errors.add(
+               `Return type of lambda`,
+               explicitType,
+               returnType,
+               node.position,
+               new Error()
+            );
+         }
+      }
+
       node.params.forEach((p) => this.typeCheck(p, innerScope));
       const lambdaType = this.context.inferencer.infer(node, scope, options);
       if (
@@ -342,29 +351,6 @@ export class TypeChecker {
    ) {
       this.typeCheck(apply.callee, scope);
       let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
-      // if (
-      //    apply.callee instanceof Identifier &&
-      //    this.context.inferencer.isCapitalized(apply.callee.value)
-      // ) {
-      //    const type = scope.resolveNamedType(
-      //       this.context.translator.translate(apply.callee, scope)
-      //    );
-      //    if (type instanceof StructType) {
-      //       typeSymbol = new RoundValueToValueLambdaType(
-      //          type.fields.map(
-      //             (f) => new ParamType(f.type, f.name, f.defaultValue)
-      //          ),
-      //          type
-      //       );
-      //    } else if (type instanceof MarkerType) {
-      //       typeSymbol = new RoundValueToValueLambdaType([], type);
-      //    } else {
-      //       throw new Error(
-      //          "Cannot call constructor function for non struct-type"
-      //       );
-      //    }
-      // }
-
       let mappings: { [_: string]: Type } = {};
       if (
          typeSymbol instanceof SquareTypeToValueLambdaType &&
@@ -390,6 +376,40 @@ export class TypeChecker {
                typeExpectedInPlace: params[i + (hasThis ? 1 : 0)]?.type,
             });
          });
+
+         if (typeSymbol.expectedPreviousInIntersection) {
+            if (!options.firstPartOfIntersection) {
+               this.context.errors.add(
+                  "Previous part of intersection (&), before '" +
+                     (apply.callee instanceof Identifier
+                        ? apply.callee.value
+                        : "Anonymous function") +
+                     "'",
+                  typeSymbol.expectedPreviousInIntersection,
+                  undefined,
+                  apply.position
+               );
+            } else {
+               if (
+                  !options.firstPartOfIntersection.isAssignableTo(
+                     typeSymbol.expectedPreviousInIntersection,
+                     scope
+                  )
+               ) {
+                  this.context.errors.add(
+                     "Previous part of intersection (&), before '" +
+                        (apply.callee instanceof Identifier
+                           ? apply.callee.value
+                           : "Anonymous function") +
+                        "'",
+                     typeSymbol.expectedPreviousInIntersection,
+                     options.typeExpectedInPlace,
+                     apply.position
+                  );
+               }
+            }
+         }
+
          if (
             params[0] &&
             params[0].type instanceof AppliedGenericType &&
