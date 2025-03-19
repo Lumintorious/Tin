@@ -5,12 +5,12 @@ a = 1
 PetOwner = type:
 	cat: Cat
 
-Cat = type:
+Animal = type:
+	canFly: Boolean
+
+Cat = Animal & type:
 	name: String
 
-cat = Cat(name = "Kitten")
+cat = Animal(false) & Cat(name = "Kitten")
 
-main = () ->
-	print(cat)
-	 
-print(l)
+	

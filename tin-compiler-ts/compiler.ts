@@ -45,9 +45,6 @@ if (!process.argv.includes("--verbose")) {
       }
    };
 }
-const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
-   ? new GoTranslator()
-   : new JavascriptTranslator();
 
 function fromSrcToOut(pathStr: string) {
    if (pathStr.startsWith(SRC_PATH)) {
@@ -276,6 +273,10 @@ async function compile(
             process.exit(-1);
          }
       }
+
+      const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
+         ? new GoTranslator()
+         : new JavascriptTranslator(importsCache.size === 0);
 
       // TRANSLATION
       const translatedString = OUTPUT_TRANSLATOR.translate(

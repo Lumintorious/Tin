@@ -262,12 +262,10 @@ export class Identifier extends Term {
    }
 
    isTypeIdentifier() {
-      const str = this.value;
-      return (
-         str.charAt(0) === str.charAt(0).toUpperCase() &&
-         !str.includes("@") &&
-         !str.includes(".")
-      );
+      const parts = this.value.split("@");
+      const lastPart = parts[parts.length - 1];
+
+      return lastPart.charAt(0) === lastPart.charAt(0).toUpperCase();
    }
 }
 

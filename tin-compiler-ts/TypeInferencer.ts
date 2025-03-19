@@ -314,11 +314,10 @@ export class TypeInferencer {
    }
 
    isCapitalized(str: string) {
-      return (
-         str.charAt(0) === str.charAt(0).toUpperCase() &&
-         !str.includes("@") &&
-         !str.includes(".")
-      );
+      const parts = str.split("@");
+      const lastPart = parts[parts.length - 1];
+
+      return lastPart.charAt(0) === lastPart.charAt(0).toUpperCase();
    }
 
    // func = [T, X] -> (thing: T, other: X) -> thing
@@ -441,7 +440,6 @@ export class TypeInferencer {
          ownerType = ownerType.simplified();
       }
       const fields = this.getAllKnownFields(ownerType, scope);
-      console.log(fields);
       const found = findField(node.field, fields);
       if (!found) {
          throw new Error(

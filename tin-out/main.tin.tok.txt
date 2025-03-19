@@ -14,41 +14,43 @@ OPERATOR     | :            |   6, 5
 IDENTIFIER   | Cat          |   6, 7    
 NEWLINE      |              |   8, 1    
 DEDENT       | 4            |   8, 1    
-IDENTIFIER   | Cat          |   8, 1    
-OPERATOR     | =            |   8, 5    
-KEYWORD      | type         |   8, 7    
-OPERATOR     | :            |   8, 11   
+IDENTIFIER   | Animal       |   8, 1    
+OPERATOR     | =            |   8, 8    
+KEYWORD      | type         |   8, 10   
+OPERATOR     | :            |   8, 14   
 NEWLINE      |              |   9, 1    
 INDENT       | 4            |   9, 1    
-IDENTIFIER   | name         |   9, 2    
-OPERATOR     | :            |   9, 6    
-IDENTIFIER   | String       |   9, 8    
+IDENTIFIER   | canFly       |   9, 2    
+OPERATOR     | :            |   9, 8    
+IDENTIFIER   | Boolean      |   9, 10   
 NEWLINE      |              |  11, 1    
 DEDENT       | 4            |  11, 1    
-IDENTIFIER   | cat          |  11, 1    
+IDENTIFIER   | Cat          |  11, 1    
 OPERATOR     | =            |  11, 5    
-IDENTIFIER   | Cat          |  11, 7    
-PARENS       | (            |  11, 10   
-IDENTIFIER   | name         |  11, 11   
-OPERATOR     | =            |  11, 16   
-STRING       | Kitten       |  11, 18   
-PARENS       | )            |  11, 26   
-NEWLINE      |              |  13, 1    
-IDENTIFIER   | main         |  13, 1    
-OPERATOR     | =            |  13, 6    
-PARENS       | (            |  13, 8    
-PARENS       | )            |  13, 9    
-OPERATOR     | ->           |  13, 11   
+IDENTIFIER   | Animal       |  11, 7    
+OPERATOR     | &            |  11, 14   
+KEYWORD      | type         |  11, 16   
+OPERATOR     | :            |  11, 20   
+NEWLINE      |              |  12, 1    
+INDENT       | 4            |  12, 1    
+IDENTIFIER   | name         |  12, 2    
+OPERATOR     | :            |  12, 6    
+IDENTIFIER   | String       |  12, 8    
 NEWLINE      |              |  14, 1    
-INDENT       | 4            |  14, 1    
-IDENTIFIER   | print        |  14, 2    
-PARENS       | (            |  14, 7    
-IDENTIFIER   | cat          |  14, 8    
-PARENS       | )            |  14, 11   
+DEDENT       | 4            |  14, 1    
+IDENTIFIER   | cat          |  14, 1    
+OPERATOR     | =            |  14, 5    
+IDENTIFIER   | Animal       |  14, 7    
+PARENS       | (            |  14, 13   
+KEYWORD      | false        |  14, 14   
+PARENS       | )            |  14, 19   
+OPERATOR     | &            |  14, 21   
+IDENTIFIER   | Cat          |  14, 23   
+PARENS       | (            |  14, 26   
+IDENTIFIER   | name         |  14, 27   
+OPERATOR     | =            |  14, 32   
+STRING       | Kitten       |  14, 34   
+PARENS       | )            |  14, 42   
 NEWLINE      |              |  16, 1    
-DEDENT       | 4            |  16, 1    
-IDENTIFIER   | print        |  16, 1    
-PARENS       | (            |  16, 6    
-IDENTIFIER   | l            |  16, 7    
-PARENS       | )            |  16, 8    
+INDENT       | 4            |  16, 1    
 --undefined--

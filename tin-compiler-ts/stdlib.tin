@@ -1,13 +1,8 @@
 Type = type:
-	tag: String
-	check = (o: Any) -> false
-	checkDeep = (o: Any) -> false
+	name: String
 
-RefData = type:
+RefType = Type & type:
 	get: () -> Type
-
-RefType@create = (tag: String, get: () -> Type) ->
-	Type(tag) & RefData(get)
 
 Field = type:
 	name: String
@@ -19,17 +14,14 @@ Parameter = type:
 	tpe: Type
 	defaultValue: (() -> Any)?
 
-StructData = type:
-	name: String
+Struct = Type & type:
 	fields: Array[Field]
 
 Lambda = Type & type:
 	name: String?
-	params: Array[Field]
+	params: Array[Parameter]
 
-l = Type("Hi") & Lambda(params = Array@of(1))
-
-print(l.tag)
+s = Type("S") & Struct(Array@of[Field]())
 
 jsonify: (obj: Any) -> String = external
 dejsonify: (json: String) -> Any = external

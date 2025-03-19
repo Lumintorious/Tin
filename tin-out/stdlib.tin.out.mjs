@@ -2,19 +2,18 @@ const __tin_varargs_marker = Symbol();
 
 const TIN_TYPE_CACHE = new Map()
 
-function TIN_TYPE(typeId, typeHash, constructorRaw, descriptor) {
-	const symbol = Symbol(typeHash);
+function TIN_TYPE(symbol, constructorRaw, descriptor) {
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
 		return {
 			[symbol]: result
 		};
 	}
-	TIN_TYPE_CACHE.set(typeHash, constructor)
+	TIN_TYPE_CACHE.set(symbol, constructor)
 	constructor._symbol = symbol;
 	globalThis[symbol] = constructor;
 	constructor.descriptor = descriptor;
-	constructor._typeId = typeId;
+	constructor._typeId = symbol.description;
 	constructor.toString = () => {
 		return descriptor.toString()
 	}
@@ -32,12 +31,15 @@ function TIN_LAMBDA(typeId, lambda, type) {
 }
 
 // function _TIN_MAKE_LAMBDA(type)
+Object.prototype._and = function (other) {
+	return _TIN_INTERSECT_OBJECTS(this, other)
+}
 
 const _TIN_INTERSECT_OBJECTS = function (obj1, obj2) {
 	if (obj1._typeId && obj2._typeId) {
 		if (obj2.descriptor.Type.tag === "Struct") {
 			const clone = (...args) => obj2(...args)
-			Object.assign(clone, obj2, obj1)
+			Object.assign(clone, obj1, obj2)
 			return clone
 		}
 		return {}
@@ -79,23 +81,29 @@ const _TIN_UNION_OBJECTS = function (obj1, obj2) {
 
 const nothing = undefined;
 
-// const Int = TIN_TYPE("", "", (i) => Number(i), {})
-// const String = TIN_TYPE("", "", (i) => String(i), {})
-// const Void = TIN_TYPE("", "", (i) => null, {})
-const Array = (T) => TIN_TYPE("Array", "", (args) => args[__tin_varargs_marker] ? args : ({
-	_rawArray: args,
-	length() {
-		return args.length;
-	},
-	at(index) {
-		return args[index]
-	},
-	[__tin_varargs_marker]: true,
-	toString() {
-		const parts = args.map(x => JSON.stringify(x)).join(", ")
-		return "Array(" + parts + ")"
+
+function arraySymbol() {
+	const cache = globalThis["_arraySymbol"];
+	if (!cache) {
+		globalThis["_arraySymbol"] = Symbol("Array");
+		return globalThis["_arraySymbol"]
 	}
-}), {})
+	return cache;
+}
+const Array = (function () {
+	const result = (T) => TIN_TYPE(arraySymbol(), (args) => args[__tin_varargs_marker] ? args : ({
+		_rawArray: args,
+		length() {
+			return args.length;
+		},
+		at(index) {
+			return args[index]
+		},
+		[__tin_varargs_marker]: true
+	}), {})
+	result._symbol = arraySymbol()
+	return result;
+})()
 
 const Array$of = (t) => (args) => args
 Array._typeId = "Array"
@@ -114,7 +122,7 @@ function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
-function makeString(obj) {
+function makeString(obj, sprawl = false) {
 	if (obj === null) return 'nothing';
 	if (typeof obj === 'undefined') return 'nothing';
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
@@ -125,36 +133,42 @@ function makeString(obj) {
 		return 'λ'
 	}
 
-	if (Reflect.ownKeys(obj).includes("Array")) {
+	if (Reflect.ownKeys(obj).includes(Array._symbol)) {
 		let result = 'Array(';
-		for (let i = 0; i < obj.Array.length(); i++) {
-			result += makeString(obj.Array.at(i)) + (i === obj.Array.length() - 1 ? "" : ", ")
+		for (let i = 0; i < obj[Array._symbol].length(); i++) {
+			result += makeString(obj[Array._symbol].at(i)) + (i === obj[Array._symbol].length() - 1 ? "" : ", ")
 		}
 		return result + ")"
 	}
 
 	if (typeof obj === 'object') {
-		let result = '(';
+		let result = sprawl ? '(' : "";
 		let number = 0;
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			const component = obj[componentKey]
+			if (!sprawl) {
+				result += componentKey.description + "("
+			}
 			for (let key in component) {
 				if (component.hasOwnProperty(key)) {
 					if (key.startsWith("__")) {
 						continue
 					}
-					result += globalThis[componentKey]._typeId + "." + key + "=" + makeString(component[key]) + ', ';
+					if (sprawl) {
+						result += componentKey.description + "."
+					}
+					result += key + "=" + makeString(component[key], sprawl) + ', ';
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {
 				result = result.slice(0, -2); // Remove trailing comma and space
 			}
-			result += ", "
+			result += sprawl ? ", " : ") & "
 		}
-		if (result.length > 1 && result[result.length - 2] === ",") {
-			result = result.slice(0, -2); // Remove trailing comma and space
+		if (result.length > 1 && ((sprawl && result[result.length - 2] === ",") || (!sprawl && result[result.length - 2] === "&"))) {
+			result = result.slice(0, sprawl ? -2 : -3); // Remove trailing comma and space
 		}
-		return result + ')';
+		return result + (sprawl ? ')' : "");
 	}
 
 	return ''; // For other types like functions, symbols, etc.
@@ -197,268 +211,23 @@ const dejsonify = function (json) {
 	});
 }
 
+function lazy(make) {
+	let value = undefined;
+	return function () {
+		if (!value) {
+			value = make();
+		}
+		return value;
+	}
+}
+
 // COMPILED TIN
 ;
-export var Type = TIN_TYPE("Type", "b97e0a1a-3518-465a-96a7-ee8ae0d52b38", (_p0,_p1 = TIN_LAMBDA("137f697e-ccfd-42c7-b9b6-0d624cf2fcae", function(o) {
-return false
-}, {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "o",
-					type: () => Any,
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		}),_p2 = TIN_LAMBDA("aaf0085c-5f93-4e45-91b2-c4b2643d8017", function(o) {
-return false
-}, {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "o",
-					type: () => Any,
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		})) => ({tag: _p0,check: _p1,checkDeep: _p2}), {
-			Type: {
-				tag: "Struct",
-				name: "Type",
-					fields: [
-						{
-				Field: {
-					name: "tag",
-					type: () => String,
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "check",
-					type: {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "o",
-					type: () => Any,
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		},
-					defaultValue: () => { return (TIN_LAMBDA("9a9d0eab-e66c-4d8f-8a6c-8d6e96475bbc", function(o) {
-return undefined
-}, {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "o",
-					type: () => Any,
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		}))},
-				}
-			},,{
-				Field: {
-					name: "checkDeep",
-					type: {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "o",
-					type: () => Any,
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		},
-					defaultValue: () => { return (TIN_LAMBDA("8063bbbb-9eb4-4a72-9809-47a322f4f260", function(o) {
-return undefined
-}, {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "o",
-					type: () => Any,
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		}))},
-				}
-			},
-			]
-			}
-		});
-export var RefData = TIN_TYPE("RefData", "79180a2c-bfb8-4223-9666-29ed00142499", (_p0) => ({get: _p0}), {
-			Type: {
-				tag: "Struct",
-				name: "RefData",
-					fields: [
-						{
-				Field: {
-					name: "get",
-					type: {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [],
-				returnType: () => Type
-			}
-		},
-					defaultValue: () => { return (undefined)},
-				}
-			},
-			]
-			}
-		});
-export var RefType$create/* (tag:String, get:() -> Type) -> Type & RefData*/ = TIN_LAMBDA("d08ddb62-26f6-4261-b3bf-4f9d51cea3d2", function(tag, get) {
-return _TIN_INTERSECT_OBJECTS(Type(tag), RefData(get))
-}, {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [{
-				Field: {
-					name: "tag",
-					type: () => String,
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "get",
-					type: {
-			Type: {
-				tag: "Lambda",
-				name: undefined,
-				parameters: [],
-				returnType: () => Type
-			}
-		},
-					defaultValue: () => { return (undefined)},
-				}
-			},],
-				returnType: {}
-			}
-		});
-export var Field = TIN_TYPE("Field", "151ad275-5b32-48a0-aa35-6ee6adff5b49", (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), {
-			Type: {
-				tag: "Struct",
-				name: "Field",
-					fields: [
-						{
-				Field: {
-					name: "name",
-					type: () => String,
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "tpe",
-					type: () => Type,
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "defaultValue",
-					type: {},
-					defaultValue: () => { return (undefined)},
-				}
-			},
-			]
-			}
-		});
-export var Parameter = TIN_TYPE("Parameter", "3a77df21-819f-47c4-ae99-93ffed1e2a1b", (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), {
-			Type: {
-				tag: "Struct",
-				name: "Parameter",
-					fields: [
-						{
-				Field: {
-					name: "name",
-					type: {},
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "tpe",
-					type: () => Type,
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "defaultValue",
-					type: {},
-					defaultValue: () => { return (undefined)},
-				}
-			},
-			]
-			}
-		});
-export var StructData = TIN_TYPE("StructData", "71d76d3f-9433-47e1-bea1-06379ef7d7c7", (_p0,_p1) => ({name: _p0,fields: _p1}), {
-			Type: {
-				tag: "Struct",
-				name: "StructData",
-					fields: [
-						{
-				Field: {
-					name: "name",
-					type: () => String,
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "fields",
-					type: {},
-					defaultValue: () => { return (undefined)},
-				}
-			},
-			]
-			}
-		});
-export var Lambda = _TIN_INTERSECT_OBJECTS(Type, TIN_TYPE("Lambda", "d0f3cbcf-ec9e-443f-9759-006fa7501c77", (_p0,_p1) => ({name: _p0,params: _p1}), {
-			Type: {
-				tag: "Struct",
-				name: "Lambda",
-					fields: [
-						{
-				Field: {
-					name: "name",
-					type: {},
-					defaultValue: () => { return (undefined)},
-				}
-			},,{
-				Field: {
-					name: "params",
-					type: {},
-					defaultValue: () => { return (undefined)},
-				}
-			},
-			]
-			}
-		}));
-export var l/* Type & Lambda*/ = _TIN_INTERSECT_OBJECTS(Type("Hi"), Lambda(undefined, Array$of(0)(Array(0)([1]))));
-print(l[Type._symbol].tag);
+export var Type = TIN_TYPE(Symbol("Type"), (_p0) => ({name: _p0}), {});
+export var RefType = {};
+export var Field = TIN_TYPE(Symbol("Field"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), {});
+export var Parameter = TIN_TYPE(Symbol("Parameter"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), {});
+export var Struct = {};
+export var Lambda = {};
+export var s/* Type & Struct*/ = {};
 ;

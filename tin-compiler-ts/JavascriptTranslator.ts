@@ -41,6 +41,10 @@ import { exec } from "node:child_process";
 
 export class JavascriptTranslator implements OutputTranslator {
    extension = "mjs";
+   isStdLib: boolean = false;
+   constructor(isStdLib: boolean = false) {
+      this.isStdLib = isStdLib;
+   }
 
    run(path: string): void {
       exec('cd "tin-out"' + " && node " + path, (_, out, err) => {
@@ -322,17 +326,17 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // RoundApply
       } else if (term instanceof RoundApply) {
-         let args: ([string, Term] | undefined)[] = [];
+         let params: ([string, Term] | undefined)[] = [];
          if (term.paramOrder.length === 0) {
-            args = term.args;
+            params = term.args;
          } else {
             for (let [from, to] of term.paramOrder) {
-               args[to] = term.args[from];
+               params[to] = term.args[from];
             }
          }
-         for (let i = 0; i < args.length; i++) {
-            if (!Object.hasOwn(args, i)) {
-               args[i] = undefined;
+         for (let i = 0; i < params.length; i++) {
+            if (!Object.hasOwn(params, i)) {
+               params[i] = undefined;
             }
          }
          // console.log(args);
@@ -358,6 +362,9 @@ export class JavascriptTranslator implements OutputTranslator {
             (callee as Select).ownerComponent = term.callee.ownerComponent;
             (callee as Select).isTypeLevel = term.callee.isTypeLevel;
          }
+         if (args.thisToPass) {
+            open = ".call(" + args.thisToPass + ", ";
+         }
          return (
             openWrapper +
             this.translate(callee, scope) +
@@ -365,7 +372,7 @@ export class JavascriptTranslator implements OutputTranslator {
                ? "(0)"
                : "") +
             open +
-            args
+            params
                .map((arg) => {
                   return !arg ? "undefined" : this.translate(arg[1], scope);
                })
@@ -385,12 +392,14 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // TypeDef
       } else if (term instanceof TypeDef) {
-         return `TIN_TYPE("${
-            term.name
-         }", "${randomUUID()}", ${this.createConstructor(
+         return `TIN_TYPE(Symbol("${term.name}"), ${this.createConstructor(
             term,
             scope
-         )}, ${this.translateType(term.translatedType, scope)})`;
+         )}, ${
+            this.isStdLib
+               ? "{}"
+               : this.translateType(term.translatedType, scope)
+         })`;
 
          // DataDef
       } else if (term instanceof DataDef) {
@@ -447,17 +456,14 @@ export class JavascriptTranslator implements OutputTranslator {
 			]`
          );
       } else if (type instanceof ParamType) {
-         return `{
-				Field: {
-					name: "${type.name ?? undefined}",
-					type: ${this.translateType(type.type, scope)},
-					defaultValue: () => { return (${
+         return `Parameter("${type.name ?? undefined}",
+					${this.translateType(type.type, scope)},
+					() => { return (${
                   type.defaultValue
                      ? this.translate(type.defaultValue, scope)
                      : undefined
-               })},
-				}
-			}`;
+               })})
+		`;
       } else if (type instanceof RoundValueToValueLambdaType) {
          return this.wrapType(
             "Lambda",
@@ -503,10 +509,17 @@ export class JavascriptTranslator implements OutputTranslator {
          );
       }
       if (term.operator === "&") {
-         return `_TIN_INTERSECT_OBJECTS(${this.translate(
+         if (this.isStdLib) {
+            return "{}";
+         }
+         return `(() => { const _left = ${this.translate(
             term.left,
             scope
-         )}, ${this.translate(term.right, scope)})`;
+         )}; return _TIN_INTERSECT_OBJECTS(_left, ${this.translate(
+            term.right,
+            scope,
+            { thisToPass: "_left" }
+         )});})()`;
       }
       if (term.operator === "?:") {
          return `${this.translate(term.left, scope)} ?? ${this.translate(

@@ -14,7 +14,6 @@ import {
    BinaryExpression,
 } from "./Parser";
 import { Scope, TypePhaseContext } from "./Scope";
-import { ParamType } from "./Types";
 import { RoundValueToValueLambda, TypeDef } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
 import {
@@ -25,6 +24,7 @@ import {
    MarkerType,
    NamedType,
    OptionalType,
+   ParamType,
    RoundValueToValueLambdaType,
    SquareTypeToTypeLambdaType,
    SquareTypeToValueLambdaType,
@@ -377,39 +377,6 @@ export class TypeChecker {
             });
          });
 
-         if (typeSymbol.expectedPreviousInIntersection) {
-            if (!options.firstPartOfIntersection) {
-               this.context.errors.add(
-                  "Previous part of intersection (&), before '" +
-                     (apply.callee instanceof Identifier
-                        ? apply.callee.value
-                        : "Anonymous function") +
-                     "'",
-                  typeSymbol.expectedPreviousInIntersection,
-                  undefined,
-                  apply.position
-               );
-            } else {
-               if (
-                  !options.firstPartOfIntersection.isAssignableTo(
-                     typeSymbol.expectedPreviousInIntersection,
-                     scope
-                  )
-               ) {
-                  this.context.errors.add(
-                     "Previous part of intersection (&), before '" +
-                        (apply.callee instanceof Identifier
-                           ? apply.callee.value
-                           : "Anonymous function") +
-                        "'",
-                     typeSymbol.expectedPreviousInIntersection,
-                     options.typeExpectedInPlace,
-                     apply.position
-                  );
-               }
-            }
-         }
-
          if (
             params[0] &&
             params[0].type instanceof AppliedGenericType &&
@@ -463,10 +430,14 @@ export class TypeChecker {
          const calleeType = this.context.inferencer.infer(apply.callee, scope);
          const paramOrder = this.typeCheckLambdaCall(
             apply,
+            typeSymbol,
             apply.args,
             params,
             scope,
-            { typeExpectedInPlace: calleeType },
+            {
+               typeExpectedInPlace: calleeType,
+               firstPartOfIntersection: options.firstPartOfIntersection,
+            },
             options?.firstPartOfIntersection !== undefined &&
                apply.callee instanceof Identifier
          );
@@ -476,12 +447,55 @@ export class TypeChecker {
 
    typeCheckLambdaCall(
       term: RoundApply,
+      typeSymbol: Type,
       applyArgs: [string, Term][], // Positional arguments, with possible names
       expectedParams: ParamType[], // Expected parameter definitions
       scope: Scope,
       options: RecursiveResolutionOptions,
       areAllOptional: boolean
    ): [number, number][] /* How to shuffle parameters when translating */ {
+      if (!(typeSymbol instanceof RoundValueToValueLambdaType)) {
+         throw new Error("Was not Lambda");
+      }
+      let thisParam: ParamType | undefined = typeSymbol.params[0];
+      if (thisParam.name !== "this") {
+         thisParam = undefined;
+      }
+      let checkedThis = false;
+      if (thisParam) {
+         checkedThis = true;
+         if (!options.firstPartOfIntersection) {
+            this.context.errors.add(
+               "Previous part of intersection (&), parameter 'this' of '" +
+                  (term.callee instanceof Identifier
+                     ? term.callee.value
+                     : "Anonymous function") +
+                  "'",
+               thisParam.type,
+               undefined,
+               term.position
+            );
+         } else {
+            if (
+               !options.firstPartOfIntersection.isAssignableTo(
+                  thisParam.type,
+                  scope
+               )
+            ) {
+               this.context.errors.add(
+                  "Previous part of intersection (&), parameter 'this' of '" +
+                     (term.callee instanceof Identifier
+                        ? term.callee.value
+                        : "Anonymous function") +
+                     "'",
+                  thisParam.type,
+                  options.typeExpectedInPlace,
+                  term.position
+               );
+            } else {
+            }
+         }
+      }
       const termName =
          term.callee instanceof Identifier
             ? term.callee.value
@@ -497,7 +511,7 @@ export class TypeChecker {
       let hasThisParamIncrement =
          expectedParams[0] && expectedParams[0].name === "this" ? 1 : 0;
 
-      if (hasThisParamIncrement === 1) {
+      if (hasThisParamIncrement === 1 && !checkedThis) {
          const expectedThisType = expectedParams[0].type;
          if (!(term.callee instanceof Select)) {
             this.context.errors.add(

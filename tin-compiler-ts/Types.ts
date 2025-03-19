@@ -339,7 +339,6 @@ export class RoundValueToValueLambdaType extends Type {
    returnType: Type;
    isFirstParamThis: boolean = false;
    isGeneric?: boolean;
-   expectedPreviousInIntersection?: Type;
    constructor(params: ParamType[], returnType: Type, isGeneric?: boolean) {
       super("RoundValueToValueLambdaType");
       for (let param of params) {
@@ -379,16 +378,10 @@ export class RoundValueToValueLambdaType extends Type {
    }
 
    toString() {
-      if (this.name) {
-         return this.name;
-      }
       const paramsStr = this.params
          .map((t) => `${t.name ? t.name + ":" : ""}${t.type.toString()}`)
          .join(", ");
-      const previousExpected = this.expectedPreviousInIntersection
-         ? "&:" + this.expectedPreviousInIntersection.toString() + ", "
-         : "";
-      return `${this.isGeneric ? "[" : "("}${previousExpected}${paramsStr}${
+      return `${this.isGeneric ? "[" : "("}${paramsStr}${
          this.isGeneric ? "]" : ")"
       } -> ${this.returnType ? this.returnType.toString() : "undefined"}`;
    }
@@ -569,7 +562,10 @@ export class BinaryOpType extends Type {
       const expectedType = this.getAllTypesIntersected(
          allTypes.slice(0, allTypes.length - 1)
       );
-      constructor.expectedPreviousInIntersection = expectedType;
+      constructor.params = [
+         new ParamType(expectedType, "this"),
+         ...constructor.params,
+      ];
       return constructor;
    }
 
