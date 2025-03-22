@@ -1,6 +1,6 @@
 import collections/Iterable
 
-ListHead = [T] => type:
+ListHead = [T] => data:
 	value: T
 	rest: ListHead[T]?
 
@@ -45,6 +45,7 @@ List@of = [T] -> (arr: Array[T]) ->
 		set i = i - 1
 		list = ListHead[T](arr.at(i), list)
 
+	ssss = Iterable[T]
 	iterable = Iterable[T](() -> List@iterator[T](list))
 	toStr = (this: Any) -> iterable.mkString(",", "List(", ")")
 		

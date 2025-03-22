@@ -21,13 +21,9 @@ import {
    Symbol,
    RecursiveResolutionOptions,
 } from "./Scope";
-import {
-   ParamType,
-   AnyType,
-   SquareTypeToValueLambdaType,
-   ThisType,
-} from "./Types";
+import { ParamType, SquareTypeToValueLambdaType, ThisType } from "./Types";
 import { Identifier } from "./Parser";
+import { AnyType } from "./Types";
 import {
    Type,
    NamedType,
@@ -64,6 +60,9 @@ export class TypeTranslator {
          case "Identifier":
             if ((node as Identifier).value === "This") {
                return new ThisType();
+            }
+            if ((node as Identifier).value === "Any") {
+               return AnyType;
             }
             return new NamedType((node as Identifier).value);
          case "Literal":

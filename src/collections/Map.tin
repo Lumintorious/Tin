@@ -4,18 +4,18 @@ external "
 	const JsMap = globalThis.Map;
 "
 
-MapOps = [K, V] => type:
+MapOps = [K, V] => data:
 	put: (key: K, value: V) -> This
 	get: (key: K) -> V?
 	remove: (key: K) -> This
 
-MapEntry = [A, B] => type:
+MapEntry = [A, B] => data:
 	key: A
 	value: B
 
 Map = [K, V] => MapOps[K, V] & Iterable[MapEntry[K, V]]
 
-Map@entry = [A, B] -> (key: A, value: B) -> MapEntry[A, B](key, value)
+# Map@entry = [A, B] -> (key: A, value: B) -> MapEntry[A, B](key, value)
 	
 Map@of: [K, V] -> (pairs: Array[MapEntry[K, B]]) -> Map[K, V] = external
 Map@create = [K, V] -> Map@of[K, V]()

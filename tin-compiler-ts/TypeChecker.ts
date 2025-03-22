@@ -16,6 +16,7 @@ import {
 import { Scope, TypePhaseContext } from "./Scope";
 import { RoundValueToValueLambda, TypeDef } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
+import { UncheckedType } from "./Types";
 import {
    AppliedGenericType,
    BinaryOpType,
@@ -223,14 +224,11 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       const innerScope = scope.innerScopeOf(node);
+      const returnType = this.context.inferencer.infer(node.block, innerScope);
 
       if (node.specifiedType) {
          const explicitType = this.context.translator.translate(
             node.specifiedType,
-            innerScope
-         );
-         const returnType = this.context.inferencer.infer(
-            node.block,
             innerScope
          );
          if (!returnType.isAssignableTo(explicitType, scope)) {
@@ -242,6 +240,15 @@ export class TypeChecker {
                new Error()
             );
          }
+      }
+      if (returnType instanceof UncheckedType) {
+         this.context.errors.add(
+            `Return type of recursive lambda was not explicitly specified`,
+            undefined,
+            returnType,
+            node.position,
+            new Error()
+         );
       }
 
       node.params.forEach((p) => this.typeCheck(p, innerScope));
@@ -352,21 +359,21 @@ export class TypeChecker {
       this.typeCheck(apply.callee, scope);
       let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
       let mappings: { [_: string]: Type } = {};
-      if (
-         typeSymbol instanceof SquareTypeToValueLambdaType &&
-         typeSymbol.returnType instanceof RoundValueToValueLambdaType
-      ) {
-         for (let i = 0; i < typeSymbol.paramTypes.length; i++) {
-            if (apply.autoFilledSquareParams) {
-               mappings[typeSymbol.paramTypes[i].name] =
-                  apply.autoFilledSquareParams[i];
-            }
-         }
-         typeSymbol = scope.resolveGenericTypes(
-            typeSymbol.returnType,
-            mappings
-         );
-      }
+      // if (
+      //    typeSymbol instanceof SquareTypeToValueLambdaType &&
+      //    typeSymbol.returnType instanceof RoundValueToValueLambdaType
+      // ) {
+      //    for (let i = 0; i < typeSymbol.paramTypes.length; i++) {
+      //       if (apply.autoFilledSquareParams) {
+      //          mappings[typeSymbol.paramTypes[i].name] =
+      //             apply.autoFilledSquareParams[i];
+      //       }
+      //    }
+      //    typeSymbol = scope.resolveGenericTypes(
+      //       typeSymbol.returnType,
+      //       mappings
+      //    );
+      // }
 
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
@@ -407,7 +414,7 @@ export class TypeChecker {
                   const gottenType = this.context.inferencer.infer(p[1], scope);
                   if (!gottenType.isAssignableTo(expectedType, scope)) {
                      this.context.errors.add(
-                        `Parameter ${i} of ${
+                        `Parameter ${i} of varargs ${
                            apply.callee instanceof Identifier
                               ? apply.callee.value
                               : "Anonymous function"
@@ -458,11 +465,11 @@ export class TypeChecker {
          throw new Error("Was not Lambda");
       }
       let thisParam: ParamType | undefined = typeSymbol.params[0];
-      if (thisParam.name !== "this") {
+      if (thisParam?.name !== "this") {
          thisParam = undefined;
       }
       let checkedThis = false;
-      if (thisParam) {
+      if (thisParam && !(term.callee instanceof Select)) {
          checkedThis = true;
          if (!options.firstPartOfIntersection) {
             this.context.errors.add(
@@ -489,7 +496,7 @@ export class TypeChecker {
                         : "Anonymous function") +
                      "'",
                   thisParam.type,
-                  options.typeExpectedInPlace,
+                  options.firstPartOfIntersection,
                   term.position
                );
             } else {
@@ -609,6 +616,11 @@ export class TypeChecker {
 
       for (let param of unfulfilledExpectedParams) {
          if (param.defaultValue) {
+            unfulfilledExpectedParams = unfulfilledExpectedParams.filter(
+               (p) => p !== param
+            );
+         }
+         if (param.type instanceof OptionalType) {
             unfulfilledExpectedParams = unfulfilledExpectedParams.filter(
                (p) => p !== param
             );

@@ -10,7 +10,9 @@ import {
    BinaryExpression,
    TypeCheck,
    Change,
-   Literal,
+   Term,
+   UnaryOperator,
+   Cast,
 } from "./Parser";
 import { Scope, TypePhaseContext, RecursiveResolutionOptions } from "./Scope";
 import {
@@ -18,6 +20,7 @@ import {
    SquareTypeToTypeLambdaType,
    BinaryOpType,
    RoundValueToValueLambdaType,
+   ParamType,
 } from "./Types";
 import {
    Select,
@@ -27,7 +30,7 @@ import {
    Identifier,
 } from "./Parser";
 import { type } from "os";
-import { TypeDef, AppliedKeyword } from "./Parser";
+import { TypeDef, AppliedKeyword, Literal, Group } from "./Parser";
 import { Symbol } from "./Scope";
 import { NamedType, TypeOfTypes, AnyTypeClass } from "./Types";
 import { SquareTypeToValueLambdaType } from "./Types";
@@ -69,6 +72,9 @@ export class TypeBuilder {
          this.buildRoundApply(node, scope);
       } else if (node instanceof AppliedKeyword) {
          this.build(node.param, scope);
+      } else if (node instanceof TypeCheck) {
+         this.build(node.term, scope);
+         this.build(node.type, scope);
       } else if (node instanceof RoundValueToValueLambda) {
          this.buildRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
@@ -149,26 +155,53 @@ export class TypeBuilder {
       } else if (node instanceof TypeDef) {
          this.buildTypeDef(node, scope, options);
       } else if (node instanceof BinaryExpression) {
-         this.build(node.left, scope);
-         this.build(node.right, scope);
+         this.buildBinaryExpression(node, scope, options);
       } else if (node instanceof Change) {
          this.build(node.lhs, scope);
          this.build(node.value, scope);
       } else if (node instanceof SquareApply) {
          this.build(node.callee, scope);
          // this.build(node., scope);
-      } else if (
-         node instanceof Import ||
-         node instanceof Literal ||
-         node instanceof Identifier
-      ) {
+      } else if (node instanceof Import) {
+      } else if (node instanceof Identifier) {
+         this.context.inferencer.inferIdentifier(node, scope, options);
+      } else if (node instanceof Literal) {
+         if (options.isTypeLevel) {
+            node.isTypeLiteral = true;
+            node.isTypeLevel = true;
+         }
+      } else if (node instanceof Cast) {
+         this.build(node.expression, scope);
+         this.build(node.type, scope);
+      } else if (node instanceof Group) {
+         this.build(node.value, scope);
       } else {
-         // console.error("Didn't build node of tag = " + node.tag);
       }
    }
 
+   buildBinaryExpression(
+      node: BinaryExpression,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
+      if (options.isTypeLevel) {
+         node.isTypeLevel = true;
+      }
+      this.build(node.left, scope, { isTypeLevel: options.isTypeLevel });
+      this.build(node.right, scope, { isTypeLevel: options.isTypeLevel });
+   }
+
    buildRoundApply(node: RoundApply, scope: Scope) {
-      const calleeType = this.context.inferencer.infer(node.callee, scope);
+      let calleeType;
+      try {
+         calleeType = this.context.inferencer.infer(node.callee, scope);
+      } catch (e) {
+         if (scope.iteration === "DECLARATION") {
+            return;
+         } else {
+            throw e;
+         }
+      }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
          // will be hanlded in TypeChecker
          if (
@@ -296,6 +329,133 @@ export class TypeBuilder {
       // const fields = this.context.inferencer.getAllKnownFields()
    }
 
+   convertToTailrec(
+      node: Term,
+      scope: Scope,
+      lambdaName: String,
+      lambdaParamsInOrder: ParamType[],
+      options: RecursiveResolutionOptions
+   ): Term {
+      if (node instanceof AppliedKeyword && node.keyword === "return") {
+      } else if (node instanceof Block) {
+         const innerScope = scope.innerScopeOf(node);
+         const statements = node.statements.map((s) =>
+            this.convertToTailrec(
+               s,
+               innerScope,
+               lambdaName,
+               lambdaParamsInOrder,
+               options
+            )
+         );
+         return new Block(statements);
+      } else if (node instanceof IfStatement) {
+         const innerScope = scope.innerScopeOf(node);
+         const trueScope = innerScope.innerScopeOf(node.trueBranch);
+         const falseScope = node.falseBranch
+            ? innerScope.innerScopeOf(node.falseBranch)
+            : innerScope;
+         const ifStatement = new IfStatement(
+            node.condition,
+            this.convertToTailrec(
+               node.trueBranch,
+               trueScope,
+               lambdaName,
+               lambdaParamsInOrder,
+               options
+            ),
+            node.falseBranch
+               ? this.convertToTailrec(
+                    node.falseBranch,
+                    falseScope,
+                    lambdaName,
+                    lambdaParamsInOrder,
+                    options
+                 )
+               : undefined
+         );
+         if (!(ifStatement.trueBranch instanceof Block)) {
+            ifStatement.trueBranch = new Block([ifStatement.trueBranch]);
+         }
+         if (
+            ifStatement.falseBranch &&
+            !(ifStatement.falseBranch instanceof Block)
+         ) {
+            ifStatement.falseBranch = new Block([ifStatement.falseBranch]);
+         }
+         return ifStatement;
+      } else if (node instanceof WhileLoop && node.eachLoop) {
+      } else if (node instanceof BinaryExpression) {
+      } else if (node instanceof UnaryOperator) {
+      } else if (
+         node instanceof RoundApply &&
+         node.callee instanceof Identifier &&
+         node.callee.value === lambdaName
+      ) {
+         const statements: Term[] = [];
+         for (let i = 0; i < lambdaParamsInOrder.length; i++) {
+            const paramType = lambdaParamsInOrder[i];
+            if (paramType.name !== undefined) {
+               statements.push(
+                  new Change(new Identifier(paramType.name), node.args[i][1])
+               );
+            }
+         }
+         return new Block(statements, true);
+      }
+      return node;
+   }
+
+   convertLambdaToTailrecIfPossible(
+      node: RoundValueToValueLambda,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ): RoundValueToValueLambda {
+      const innerScope = scope.innerScopeOf(node);
+      const returns: [Term, Type][] = [];
+      this.context.inferencer.findReturns(node.block, innerScope, returns);
+      let shouldConvert = false;
+      if (node.isTypeLambda || node.isTypeLevel) {
+         return node;
+      }
+      for (const [term, type] of returns) {
+         if (
+            !(term instanceof RoundApply) ||
+            !(term.callee instanceof Identifier) ||
+            term.callee.value != options.assignedName
+         ) {
+            continue;
+         }
+         shouldConvert = true;
+         break;
+      }
+
+      if (!shouldConvert || !options.assignedName) {
+         return node;
+      }
+
+      const block = this.convertToTailrec(
+         node.block,
+         innerScope,
+         options.assignedName,
+         node.params.map((s) =>
+            this.context.translator.translateRoundTypeToTypeLambdaParameter(
+               s,
+               innerScope,
+               {}
+            )
+         ),
+         {}
+      );
+      const newInnerBlock = new Block([
+         new WhileLoop(undefined, new Identifier("true"), undefined, block),
+      ]);
+      this.build(newInnerBlock, innerScope);
+      node.block = newInnerBlock;
+
+      return node;
+   }
+
    buildRoundValueToValueLambda(
       node: RoundValueToValueLambda,
       scope: Scope,
@@ -334,6 +494,7 @@ export class TypeBuilder {
       if (scope.iteration === "RESOLUTION") {
          if (inferredType instanceof RoundValueToValueLambdaType) {
             node.type = inferredType;
+            this.convertLambdaToTailrecIfPossible(node, scope, options);
          }
       }
    }
@@ -395,10 +556,14 @@ export class TypeBuilder {
       this.build(node.value, scope, {
          assignedName:
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
+         isTypeLevel:
+            node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
       });
       let rhsType = this.context.inferencer.infer(node.value, scope, {
          assignedName:
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
+         isTypeLevel:
+            node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
       });
       if (!node.type) {
          if (rhsType instanceof LiteralType) {

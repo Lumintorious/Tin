@@ -239,6 +239,7 @@ export class Scope {
       const constructor = typeSymbol.buildConstructor();
       if (constructor) {
          this.declare(new Symbol(name, constructor));
+         this.remove(name);
       }
 
       typeSymbol.name = name;
@@ -363,6 +364,11 @@ export class Scope {
       type: Type,
       parameters: { [genericName: string]: Type } = {}
    ): Type {
+      for (let param in parameters) {
+         if (!parameters[param]) {
+            throw new Error("Undefined type at " + param);
+         }
+      }
       switch (type.tag) {
          case "NamedType":
             if (type.name && Object.keys(parameters).includes(type.name)) {
@@ -475,6 +481,7 @@ export type RecursiveResolutionOptions = {
    firstPartOfIntersection?: Type;
    typeExpectedInPlace?: Type;
    assignedName?: string;
+   isTypeLevel?: boolean;
 };
 
 export class TypePhaseContext {
@@ -546,6 +553,21 @@ export class TypePhaseContext {
                new GenericNamedType("T")
             ),
             "at"
+         ),
+         new ParamType(
+            new RoundValueToValueLambdaType(
+               [
+                  new ParamType(
+                     new AppliedGenericType(new NamedType("Array"), [
+                        new GenericNamedType("T"),
+                     ])
+                  ),
+               ],
+               new AppliedGenericType(new NamedType("Array"), [
+                  new GenericNamedType("T"),
+               ])
+            ),
+            "and"
          ),
       ]);
       const arrayLambdaType = new SquareTypeToTypeLambdaType(

@@ -1,0 +1,39 @@
+{
+   "name": "tin-lang",
+   "displayName": "Tin Language",
+   "description": "Syntax highlighting for the Tin programming language.",
+   "version": "0.1.0",
+   "publisher": "your-name",
+   "engines": {
+      "vscode": "^1.50.0"
+   },
+   "main": "./extension.js",
+   "contributes": {
+      "languages": [
+         {
+            "id": "tin",
+            "extensions": [
+               ".tin"
+            ],
+            "aliases": [
+               "Tin"
+            ],
+            "icon": {
+               "light": "./logo.png",
+               "dark": "./logo.png"
+            },
+            "configuration": "./language-configuration.json"
+         }
+      ],
+      "grammars": [
+         {
+            "language": "tin",
+            "scopeName": "source.tin",
+            "path": "./syntaxes/tin.tmLanguage.json"
+         }
+      ]
+   },
+   "activationEvents": [
+      "onLanguage:tin"
+   ]
+}

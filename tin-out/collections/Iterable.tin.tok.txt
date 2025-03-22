@@ -4,7 +4,7 @@ PARENS       | [            |   1, 12
 IDENTIFIER   | T            |   1, 13   
 PARENS       | ]            |   1, 14   
 OPERATOR     | =>           |   1, 16   
-KEYWORD      | type         |   1, 19   
+KEYWORD      | data         |   1, 19   
 OPERATOR     | :            |   1, 23   
 NEWLINE      |              |   2, 1    
 INDENT       | 4            |   2, 1    
@@ -23,7 +23,7 @@ PARENS       | [            |   4, 14
 IDENTIFIER   | T            |   4, 15   
 PARENS       | ]            |   4, 16   
 OPERATOR     | =>           |   4, 18   
-KEYWORD      | type         |   4, 21   
+KEYWORD      | data         |   4, 21   
 OPERATOR     | :            |   4, 25   
 NEWLINE      |              |   5, 1    
 INDENT       | 4            |   5, 1    
@@ -57,7 +57,7 @@ KEYWORD      | external     |   8, 31
 NEWLINE      |              |  10, 1    
 IDENTIFIER   | ToString     |  10, 1    
 OPERATOR     | =            |  10, 10   
-KEYWORD      | type         |  10, 12   
+KEYWORD      | data         |  10, 12   
 OPERATOR     | :            |  10, 16   
 NEWLINE      |              |  11, 1    
 INDENT       | 4            |  11, 1    
@@ -112,7 +112,7 @@ PARENS       | [            |  19, 12
 IDENTIFIER   | T            |  19, 13   
 PARENS       | ]            |  19, 14   
 OPERATOR     | =>           |  19, 16   
-KEYWORD      | type         |  19, 19   
+KEYWORD      | data         |  19, 19   
 OPERATOR     | :            |  19, 23   
 NEWLINE      |              |  20, 1    
 INDENT       | 4            |  20, 1    
@@ -326,6 +326,13 @@ NUMBER       | 1            |  39, 54
 PARENS       | )            |  39, 55   
 NEWLINE      |              |  40, 1    
 IDENTIFIER   | num          |  40, 3    
-NEWLINE      |              |  42, 1    
-DEDENT       | 8            |  42, 1    
+NEWLINE      |              |  43, 1    
+DEDENT       | 8            |  43, 1    
+DEDENT       | 4            |  43, 1    
+IDENTIFIER   | print        |  43, 1    
+PARENS       | (            |  43, 6    
+STRING       | Loaded       |  43, 7    
+PARENS       | )            |  43, 15   
+NEWLINE      |              |  44, 1    
+INDENT       | 4            |  44, 1    
 --undefined--

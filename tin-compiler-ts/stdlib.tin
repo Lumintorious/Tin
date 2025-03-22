@@ -1,27 +1,79 @@
-Type = type:
-	name: String
+# Order in this file is important
+external "
+export const Any = _S(Symbol(\"Any\"), () => undefined, lazy(() => Type(\"Any\", (n) => true, (n) => true)));
+"
 
-RefType = Type & type:
-	get: () -> Type
+Type = data:
+	name: String 
+	check = (obj: Any) -> false: Boolean
+	checkIntegrity = (obj: Any) -> false: Boolean
+	is = (parent: Type) -> false: Boolean
 
-Field = type:
+Type@of: (obj: Any) -> Type = external
+
+Field = data:
 	name: String
 	tpe: Type
 	defaultValue: (() -> Any)?
 
-Parameter = type:
+Parameter = data:
 	name: String?
 	tpe: Type
 	defaultValue: (() -> Any)?
 
-Struct = Type & type:
+Intersection = Type & data:
+	left: Type
+	right: Type
+
+Union = Type & data:
+	left: Type
+	right: Type
+
+Struct = Type & data:
 	fields: Array[Field]
 
-Lambda = Type & type:
-	name: String?
+Lambda = Type & data:
 	params: Array[Parameter]
+	resultType: Type
 
-s = Type("S") & Struct(Array@of[Field]())
+RefType = Type & data:
+	get: () -> Type
+
+external "
+export const Null = _S(Symbol(\"Null\"), () => undefined, lazy(Type(\"Null\", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", (n) => typeof n === \"number\", (n) => typeof n === \"number\")));
+export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", (n) => typeof n === \"string\", (n) => typeof n === \"string\")));
+"
+
+Literal = Type & data:
+	value: String | Number | Boolean | Null
+	type: Type
+
+RefType@create = (name: String, get: () -> Type) ->
+	Type(name, get().check, get().checkIntegrity) & RefType(get)
 
 jsonify: (obj: Any) -> String = external
 dejsonify: (json: String) -> Any = external
+
+Intersection@of = (left: Type, right: Type) ->
+	check = (obj: Any) ->
+		left.check(obj) && right.check(obj)
+
+	checkIntegrity = (obj: Any) ->
+		left.checkIntegrity(obj) && right.checkIntegrity(obj)
+
+	Type("Intersection", check, checkIntegrity) & Intersection(left, right)
+
+Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+One = 1
+
+Union@values = [T] ->
+	go = (type: Type): Array[T] ->
+		if type :: Literal,
+			Array@of[T]((type.value): T)
+		else if type :: Union,
+			go(type.left).and(go(type.right))
+		else
+			Array@of[T]()
+	go(T)
+

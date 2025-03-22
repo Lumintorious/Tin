@@ -1,0 +1,103 @@
+{
+   "scopeName": "source.tin",
+   "patterns": [
+      {
+         "name": "comment.tin",
+         "match": "#.*?#|#.*?$"
+      },
+      {
+         "name": "keyword.control.tin",
+         "match": "\\b(let|def|if|else|for|while|return|true|false|nothing|external|mutable|data|set|make|import|this)\\b"
+      },
+      {
+         "match": "\\b([a-z][a-zA-Z0-9_]*)\\b[ ]*(=|:)[ ]*(\\(|\\[)",
+         "name": "function.declaration.tin",
+         "captures": {
+            "1": {
+               "name": "function.tin"
+            },
+            "2": {
+               "name": "operator.tin"
+            },
+            "3": {
+               "name": "operator.tin"
+            }
+         }
+      },
+      {
+         "match": "\\b([a-z][a-zA-Z0-9_]*)\\b(\\(|\\[)",
+         "name": "function.call.tin",
+         "captures": {
+            "1": {
+               "name": "function.tin"
+            },
+            "2": {
+               "name": "operator.tin"
+            }
+         }
+      },
+      {
+         "name": "variable.parameter.tin",
+         "match": "\\b([a-z][a-zA-Z0-9_]*)\\b"
+      },
+      {
+         "name": "type.tin",
+         "match": "\\b([A-Z][a-zA-Z0-9]*)\\b"
+      },
+      {
+         "name": "string.quoted.double.tin",
+         "begin": "\"",
+         "end": "\"",
+         "beginCaptures": {
+            "0": { "name": "punctuation.definition.string.begin.tin" }
+         },
+         "endCaptures": {
+            "0": { "name": "punctuation.definition.string.end.tin" }
+         },
+         "patterns": [
+            {
+               "name": "string.interpolation.tin",
+               "begin": "\\{",
+               "end": "\\}",
+               "beginCaptures": {
+                  "0": {
+                     "name": "punctuation.definition.interpolation.begin.tin"
+                  }
+               },
+               "endCaptures": {
+                  "0": {
+                     "name": "punctuation.definition.interpolation.end.tin"
+                  }
+               },
+               "patterns": [
+                  {
+                     "name": "variable.other.tin",
+                     "match": "[a-zA-Z_][a-zA-Z0-9_]*"
+                  }
+               ]
+            },
+            {
+               "name": "constant.character.escape.tin",
+               "match": "\\\\."
+            },
+            {
+               "name": "string.content.tin",
+               "match": "[^\"{}]+"
+            }
+         ]
+      },
+      {
+         "name": "constant.numeric.tin",
+         "match": "\\b\\d+\\b"
+      },
+      {
+         "name": "operator.tin",
+         "match": "[+\\-*/=<>!&:]+"
+      },
+      {
+         "name": "punctuation.tin",
+         "match": "[{}()\\[\\];,]"
+      }
+   ],
+   "repository": {}
+}

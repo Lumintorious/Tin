@@ -19,7 +19,7 @@ export interface OutputTranslator {
    translate(term: CompilerItem, scope: Scope, options: any): string;
 }
 
-Error.stackTraceLimit = 40;
+Error.stackTraceLimit = 5;
 const isTesting = process.argv.includes("--test");
 const isCompilingToGo = process.argv.includes("--targetLanguage:go");
 const SRC_PATH = path.resolve(process.cwd(), isTesting ? "tests" : "src");
@@ -288,16 +288,12 @@ async function compile(
          fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension),
          translatedString
       );
-      console.log(
-         "Wrote " +
-            fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension)
-      );
 
       console.log("\x1b[32mCompiled " + inputFile + "\x1b[0m");
       // RUNNING
       if (run) {
          console.log(
-            "========================= Output ============================"
+            "\x1b[37m=========================== Output ==============================\x1b[0m"
          );
          OUTPUT_TRANSLATOR.run(
             fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension)
@@ -323,6 +319,8 @@ async function run() {
       isTesting ? "tests" : "src",
       inputFile
    );
+   // console.clear();
+   // exec("cls");
    if (isTesting) {
       const folderPath = path.resolve(process.cwd(), "tests");
       const files = fs.readdirSync(folderPath, {

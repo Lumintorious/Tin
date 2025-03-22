@@ -47,15 +47,24 @@ export class JavascriptTranslator implements OutputTranslator {
    }
 
    run(path: string): void {
-      exec('cd "tin-out"' + " && node " + path, (_, out, err) => {
-         console.log(out);
-         if (err) {
-            console.log(err);
+      exec(
+         'cd "tin-out"' +
+            " && node --no-warnings --loader ../babel-loader.js " +
+            path,
+         (_, out, err) => {
+            console.log(out);
+            if (err) {
+               console.log(err);
+            }
          }
-      });
+      );
    }
 
-   createConstructor(typeDef: TypeDef, scope: Scope): string {
+   createConstructor(
+      typeDef: TypeDef,
+      scope: Scope,
+      isReflectionType = false
+   ): string {
       if (typeDef.fieldDefs.length === 0) {
          return "() => undefined";
       }
@@ -64,7 +73,7 @@ export class JavascriptTranslator implements OutputTranslator {
          "(" +
          typeDef.fieldDefs.map((param, i) => {
             return `_p${i}${
-               param.defaultValue
+               param.defaultValue && !isReflectionType
                   ? " = " + this.translate(param.defaultValue, scope)
                   : ""
             }`;
@@ -89,11 +98,12 @@ export class JavascriptTranslator implements OutputTranslator {
       if (term === undefined || term === null) {
          return "undefined";
       }
-      //www.storia.ro/ro/oferta/direct-dezvoltator-apartamente-cu-3-camere-comision-0-IDD1nu
-      // AppliedKeywords
-      https: if (term instanceof AppliedKeyword) {
+      if (term instanceof AppliedKeyword) {
          if (term.keyword === "external" && term.param instanceof Literal) {
             return "\n" + String(term.param.value) + "\n";
+         }
+         if (term.keyword === "return") {
+            return `throw ${this.translate(term.param, scope)}`;
          }
          return `${term.keyword} (${this.translate(term.param, scope)})`;
 
@@ -101,17 +111,19 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof Block) {
          let last = term.statements.pop();
          const isAssignment = last instanceof Assignment;
-         let result = [
-            ...term.statements.map((st) => this.translate(st, scope)),
-            (!isAssignment &&
+         const shouldReturn =
+            !isAssignment &&
             args &&
             args.returnLast &&
-            !(last instanceof WhileLoop || last instanceof AppliedKeyword)
-               ? "return "
-               : "") + `${this.translate(last, scope)}`,
+            !(last instanceof WhileLoop || last instanceof AppliedKeyword);
+         let result = [
+            ...term.statements.map((st) => this.translate(st, scope)),
+            (shouldReturn ? "throw " : "") +
+               `${this.translate(last, scope)}` +
+               (shouldReturn ? "" : ""),
          ].join(";\n");
 
-         if (args.isTopLevel) {
+         if (args.isTopLevel && this.isStdLib) {
             const requisites = fs.readFileSync("./tin-compiler-ts/stdlib.js");
             result = requisites + ";\n" + result;
          }
@@ -125,13 +137,23 @@ export class JavascriptTranslator implements OutputTranslator {
          // Select
       } else if (term instanceof Select) {
          const operator = term.ammortized ? "?." : ".";
-         if (!term.ownerComponent) {
+         if (!term.ownerComponent && !term.unionOwnerComponents) {
             console.error(term);
-            throw new Error("Attempted select on object without components: ");
+            throw new Error(
+               "Attempted select on object without components. Field = " +
+                  term.field
+            );
          }
-         return `${this.translate(term.owner, scope)}[${
-            term.ownerComponent
-         }._symbol]${operator}${term.field}`;
+         let selectionBase = "";
+         if (term.ownerComponent) {
+            selectionBase = `[${term.ownerComponent}._s]${operator}${term.field}`;
+         } else if (term.unionOwnerComponents) {
+            selectionBase = `._findComponentField([${term.unionOwnerComponents
+               .filter((c) => c)
+               .map((c) => `${c}._s`)
+               .join(",")}], "${term.field}")`;
+         }
+         return `${this.translate(term.owner, scope)}${selectionBase}`;
 
          // Make
       } else if (term instanceof Make) {
@@ -145,13 +167,13 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof SquareTypeToValueLambda) {
          return `function(${term.parameterTypes
             .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
-            .join(", ")}) {\n${this.translate(
+            .join(", ")}) {try{\n${this.translate(
             term.block,
             scope.innerScopeOf(term, true),
             {
                returnLast: true,
             }
-         )}\n}`;
+         )}\n} catch(e) { if(e instanceof Error) {throw e} else {return e} } }`;
 
          // Change
       } else if (term instanceof Change) {
@@ -215,24 +237,44 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // Literal
       } else if (term instanceof Literal) {
+         let rawDisplay = "";
          if (term.type === "String") {
-            return `"${String(term.value).replaceAll(/[\r\n]+/g, "\\n")}"`;
+            rawDisplay = `"${String(term.value).replaceAll(
+               /[\r\n]+/g,
+               "\\n"
+            )}"`;
          } else if (term.type === "Number" || term.type === "Boolean") {
-            return `${term.value}`;
+            rawDisplay = `${term.value}`;
          } else {
-            return "null";
+            rawDisplay = "null";
+         }
+         if (term?.isTypeLevel) {
+            return "_L(" + rawDisplay + ")";
+         } else {
+            return rawDisplay;
          }
 
          // Cast
       } else if (term instanceof Cast) {
-         return `(${this.translate(
+         return `${this.translate(
             term.expression,
             scope
-         )}) /* as ${this.translate(term.type, scope)} */`;
+         )} /* as ${this.translate(term.type, scope)} */`;
 
          // Identifier
       } else if (term instanceof Identifier) {
-         return term.value.replaceAll("@", "$").replaceAll(".", "$");
+         const replacers: { [_: string]: string } = {
+            // Type: "Type$",
+         };
+         let value = term.value.replaceAll("@", "$");
+         if (Object.keys(replacers).includes(value)) {
+            value = replacers[value];
+         }
+         if (term.isTypeIdentifier() && term.isInValueContext) {
+            value = `Type$get(${value})`;
+         }
+
+         return value;
 
          // RoundValueToValueLambda
       } else if (term instanceof RoundValueToValueLambda) {
@@ -240,17 +282,20 @@ export class JavascriptTranslator implements OutputTranslator {
             const params = term.isFirstParamThis()
                ? term.params.slice(1, term.params.length)
                : term.params;
-            return `TIN_LAMBDA("${randomUUID()}", function(${params
+            return `_F(Symbol("lambda"), function(${params
                .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
-               .join(", ")}) {\n${this.translate(
+               .join(", ")}) {try{\n${this.translate(
                term.block,
                scope.innerScopeOf(term, true),
                {
                   returnLast: true,
                }
-            )}\n}, ${this.translateType(term.inferredType, scope)})`;
+            )}\n} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, ${this.translateType(
+               term.inferredType,
+               scope
+            )})`;
          } else {
-            return `TIN_LAMBDA("Lambda", [${term.params
+            return `_F("Lambda", [${term.params
                .map((t) => this.translate(t, scope.innerScopeOf(term, true)))
                .join(", ")}], ${this.translate(
                term.block,
@@ -269,36 +314,41 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // IfStatement
       } else if (term instanceof IfStatement) {
-         let trueBranch = "";
-         if (
-            term.trueBranch instanceof Block &&
-            term.trueBranch.statements.length > 1
-         ) {
-            trueBranch = `((function(){${this.translate(
-               term.trueBranch,
-               scope,
-               {
-                  returnLast: true,
-               }
-            )}}).call(this))`;
-         } else {
-            trueBranch = `(${this.translate(term.trueBranch, scope)})`;
-         }
-         let falseBranch = "";
-         if (
-            term.falseBranch instanceof Block &&
-            term.falseBranch.statements.length > 1
-         ) {
-            falseBranch = `((function(){${this.translate(
-               term.falseBranch,
-               scope,
-               {
-                  returnLast: true,
-               }
-            )}})())`;
-         } else {
-            falseBranch = `(${this.translate(term.falseBranch, scope)})`;
-         }
+         let trueBranch = `(do{${this.translate(term.trueBranch, scope, {
+            returnLast: true,
+         })}})`;
+         let falseBranch = `(do{${this.translate(term.falseBranch, scope, {
+            returnLast: true,
+         })}})`;
+         // if (
+         //    term.trueBranch instanceof Block &&
+         //    term.trueBranch.statements.length > 1
+         // ) {
+         //    trueBranch = `((function(){${this.translate(
+         //       term.trueBranch,
+         //       scope,
+         //       {
+         //          returnLast: !term.trueBranch.skipReturn,
+         //       }
+         //    )}}).call(this))`;
+         // } else {
+         //    trueBranch = `(${this.translate(term.trueBranch, scope)})`;
+         // }
+         // let falseBranch = "";
+         // if (
+         //    term.falseBranch instanceof Block &&
+         //    term.falseBranch.statements.length > 1
+         // ) {
+         //    falseBranch = `((function(){${this.translate(
+         //       term.falseBranch,
+         //       scope,
+         //       {
+         //          returnLast: !term.falseBranch.skipReturn,
+         //       }
+         //    )}})())`;
+         // } else {
+         //    falseBranch = `(${this.translate(term.falseBranch, scope)})`;
+         // }
          return `((${this.translate(
             term.condition,
             scope
@@ -339,7 +389,6 @@ export class JavascriptTranslator implements OutputTranslator {
                params[i] = undefined;
             }
          }
-         // console.log(args);
          const takesVarargs = term.takesVarargs;
          let open = takesVarargs ? "(Array(0)([" : "(";
          const close = takesVarargs ? "]))" : ")";
@@ -348,7 +397,7 @@ export class JavascriptTranslator implements OutputTranslator {
          let callee = term.callee;
          if (term.callee instanceof Select) {
             openWrapper =
-               "((() => { const _owner = " +
+               "((() => { var _owner = " +
                this.translate(term.callee.owner, scope) +
                "; return ";
             closeWrapper = "})())";
@@ -361,6 +410,13 @@ export class JavascriptTranslator implements OutputTranslator {
                ".call(" + this.translate((callee as Select).owner, scope) + ",";
             (callee as Select).ownerComponent = term.callee.ownerComponent;
             (callee as Select).isTypeLevel = term.callee.isTypeLevel;
+         }
+         if (
+            term.isCallingAConstructor &&
+            term.callee instanceof Identifier &&
+            term.callee.isTypeIdentifier()
+         ) {
+            term.callee.isInValueContext = false;
          }
          if (args.thisToPass) {
             open = ".call(" + args.thisToPass + ", ";
@@ -392,14 +448,15 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // TypeDef
       } else if (term instanceof TypeDef) {
-         return `TIN_TYPE(Symbol("${term.name}"), ${this.createConstructor(
+         return `_S(Symbol("${term.name}"), ${this.createConstructor(
             term,
-            scope
-         )}, ${
+            scope,
             this.isStdLib
-               ? "{}"
+         )}, lazy(${
+            this.isStdLib
+               ? "{isReflectionType: true}"
                : this.translateType(term.translatedType, scope)
-         })`;
+         }))`;
 
          // DataDef
       } else if (term instanceof DataDef) {
@@ -446,15 +503,13 @@ export class JavascriptTranslator implements OutputTranslator {
 
    translateType(type: Type | ParamType | undefined, scope: Scope): string {
       if (type instanceof NamedType) {
-         return "() => " + type.name;
+         return "" + type.name;
       } else if (type instanceof StructType) {
-         return this.wrapType(
-            "Struct",
-            `name: "${type.name}",
-					fields: [
+         return `Type('${type.name}', (obj) => Reflect.ownKeys(obj).includes(${
+            type.name
+         }._s))._and(Struct(Array(0)([
 						${type.fields.map((f) => `${this.translateType(f, scope)},`)}
-			]`
-         );
+			])))`;
       } else if (type instanceof ParamType) {
          return `Parameter("${type.name ?? undefined}",
 					${this.translateType(type.type, scope)},
@@ -465,14 +520,11 @@ export class JavascriptTranslator implements OutputTranslator {
                })})
 		`;
       } else if (type instanceof RoundValueToValueLambdaType) {
-         return this.wrapType(
-            "Lambda",
-            `
-				name: ${type.name},
-				parameters: [${type.params.map((f) => `${this.translateType(f, scope)},`)}],
-				returnType: ${this.translateType(type.returnType, scope)}
-			`
-         );
+         return `
+				Type("${type.name}")._and(Lambda(
+				Array(Type)([${type.params.map((f) => `${this.translateType(f, scope)},`)}]),
+				${this.translateType(type.returnType, scope)}))
+			`;
       }
 
       return "{}";
@@ -491,7 +543,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
    translateBinaryExpression(term: BinaryExpression, scope: Scope): string {
       if (term.operator === "=" && term.left instanceof Identifier) {
-         return `const ${term.left.value} ${
+         return `var ${term.left.value} ${
             term.left instanceof Cast
                ? term.left.type
                   ? "/*" + term.left.type + "*/"
@@ -500,26 +552,35 @@ export class JavascriptTranslator implements OutputTranslator {
          } = ${this.translate(term.right, scope)}`;
       }
       if (term.operator === "|") {
-         return this.translate(
-            new RoundApply(new Identifier("_TIN_UNION_OBJECTS"), [
-               ["", term.left],
-               ["", term.right],
-            ]),
-            scope
-         );
+         if (
+            term.isTypeLevel ||
+            (term.left.isTypeLevel && term.right.isTypeLevel)
+         ) {
+            return this.translate(
+               new RoundApply(new Identifier("_U"), [
+                  ["", term.left],
+                  ["", term.right],
+               ]),
+               scope
+            );
+         } else {
+            return `(${this.translate(term.left, scope)} ?? ${this.translate(
+               term.right,
+               scope
+            )})`;
+         }
       }
       if (term.operator === "&") {
+         let reflectMarker = "";
          if (this.isStdLib) {
-            return "{}";
+            reflectMarker = ", true";
          }
          return `(() => { const _left = ${this.translate(
             term.left,
             scope
-         )}; return _TIN_INTERSECT_OBJECTS(_left, ${this.translate(
-            term.right,
-            scope,
-            { thisToPass: "_left" }
-         )});})()`;
+         )}; return _A(_left, ${this.translate(term.right, scope, {
+            thisToPass: "_left",
+         })}${reflectMarker});})()`;
       }
       if (term.operator === "?:") {
          return `${this.translate(term.left, scope)} ?? ${this.translate(

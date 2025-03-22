@@ -28,11 +28,16 @@ import {
    RecursiveResolutionOptions,
 } from "./Scope";
 import { TypeErrorList } from "./TypeChecker";
-import { ParamType, AnyTypeClass, UncheckedType, ThisType } from "./Types";
-import { AstNode, Statement, AppliedKeyword } from "./Parser";
+import {
+   ParamType,
+   AnyTypeClass,
+   UncheckedType,
+   ThisType,
+   NamedType,
+} from "./Types";
+import { AstNode, Statement, AppliedKeyword, TypeCheck } from "./Parser";
 import {
    Type,
-   NamedType,
    LiteralType,
    GenericNamedType,
    VarargsType,
@@ -91,21 +96,12 @@ export class TypeInferencer {
             inferredType = this.inferLiteral(node as Literal, scope);
             break;
          case "Identifier":
-            inferredType = this.inferIdentifier(node as Identifier, scope);
+            inferredType = this.inferIdentifier(
+               node as Identifier,
+               scope,
+               options
+            );
             break;
-         case "Make":
-            const type = scope.resolveNamedType(
-               this.context.translator.translate((node as Make).type, scope)
-            );
-            if (!(type instanceof StructType)) {
-               throw new Error("Was not struct type");
-            }
-            return new RoundValueToValueLambdaType(
-               type.fields.map((f) => {
-                  return new ParamType(f.type, f.name, f.defaultValue);
-               }),
-               type
-            );
          case "Optional":
             inferredType = NamedType.PRIMITIVE_TYPES.Boolean;
             break;
@@ -168,6 +164,7 @@ export class TypeInferencer {
             inferredType = NamedType.PRIMITIVE_TYPES.Boolean;
             break;
          case "Cast":
+            this.infer((node as Cast).expression, scope); // for building purposes
             inferredType = this.context.translator.translate(
                (node as Cast).type,
                scope
@@ -263,12 +260,21 @@ export class TypeInferencer {
    }
 
    inferSquareApply(node: SquareApply, scope: Scope): Type {
-      // const calleeType = this.infer(node.callee, scope);
       let calleeType;
       try {
          calleeType = this.infer(node.callee, scope);
+         const constructor = scope
+            .resolveNamedType(calleeType)
+            .buildConstructor();
+         // console.log(calleeType.toString());
+         // console.log(constructor);
+         // console.log(this.context.translator.translate(node.callee, scope));
+         if (constructor instanceof SquareTypeToValueLambdaType) {
+            calleeType = constructor;
+         }
       } catch (e) {
          calleeType = NamedType.PRIMITIVE_TYPES.Type;
+         throw new Error("Was type");
       }
       // For future, check if calleeType is Type, only then go into Generic[Type] building
       if (
@@ -282,18 +288,27 @@ export class TypeInferencer {
                     this.context.translator.translate(node.callee, scope)
                  );
          if (calleeAsType instanceof SquareTypeToTypeLambdaType) {
-            const actualParams = node.typeArgs.map((t) =>
-               this.context.translator.translate(t, scope)
-            );
-            const expectedParams = calleeAsType.paramTypes;
-            let params: { [_: string]: Type } = {};
-            expectedParams.forEach((p, i) => {
-               if (p.name) {
-                  params[p.name] = actualParams[i];
-               }
-            });
-            return scope.resolveGenericTypes(calleeAsType.returnType, params);
+            const constr = calleeAsType.buildConstructor();
+            if (constr) {
+               return constr;
+            } else {
+               throw new Error("What");
+            }
          }
+         // if (calleeAsType instanceof SquareTypeToTypeLambdaType) {
+         //    const actualParams = node.typeArgs.map((t) =>
+         //       this.context.translator.translate(t, scope)
+         //    );
+         //    const expectedParams = calleeAsType.paramTypes;
+         //    let params: { [_: string]: Type } = {};
+         //    expectedParams.forEach((p, i) => {
+         //       if (p.name) {
+         //          params[p.name] = actualParams[i];
+         //       }
+         //    });
+         //    console.log(calleeAsType.toString());
+         //    return scope.resolveGenericTypes(calleeAsType.returnType, params);
+         // }
       } else if (calleeType instanceof SquareTypeToValueLambdaType) {
          const calledArgs = node.typeArgs.map((t) =>
             this.context.translator.translate(t, scope)
@@ -325,30 +340,25 @@ export class TypeInferencer {
    // = Number
    inferRoundApply(node: RoundApply, scope: Scope): Type {
       let calleeType = scope.resolveNamedType(this.infer(node.callee, scope));
-
-      // if (
-      //    node.callee instanceof Identifier &&
-      //    this.isCapitalized(node.callee.value)
-      // ) {
-      //    const type = scope.resolveNamedType(
-      //       this.context.translator.translate(node.callee, scope)
-      //    );
-      //    if (type instanceof StructType) {
-      //       return type;
-      //    } else if (type instanceof MarkerType) {
-      //       return type;
-      //    } else {
-      //       throw new Error(
-      //          "Cannot call constructor function for non struct-type. Was " +
-      //             type.toString()
-      //       );
-      //    }
-      // } else
+      if (node.callee instanceof Identifier && node.callee.isTypeIdentifier()) {
+         calleeType = scope.lookupType(node.callee.value).typeSymbol;
+      }
+      let constructor = calleeType.buildConstructor();
+      let isStructConstructor = false;
+      if (constructor instanceof RoundValueToValueLambdaType) {
+         calleeType = constructor;
+         isStructConstructor = true;
+         console.log(calleeType.toString());
+         node.isCallingAConstructor = true;
+      }
+      for (const arg of node.args) {
+         this.infer(arg[1], scope);
+      }
       if (calleeType instanceof RoundValueToValueLambdaType) {
          if (calleeType.returnType instanceof ThisType) {
             if (node.callee instanceof Select) {
                return this.infer(node.callee.owner, scope);
-            } else {
+            } else if (!isStructConstructor) {
                this.context.errors.add(
                   "Lambda returning 'this' was not called on an object."
                );
@@ -418,12 +428,8 @@ export class TypeInferencer {
       }
 
       let ownerType: Type;
-      if (node.owner instanceof Identifier && node.owner.isTypeIdentifier()) {
-         node.ownerComponent = "Type";
-         return new NamedType("Type");
-      } else {
-         ownerType = this.infer(node.owner, scope);
-      }
+      ownerType = this.infer(node.owner, scope);
+      // }
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
       }
@@ -439,7 +445,18 @@ export class TypeInferencer {
       if (ownerType instanceof BinaryOpType && ownerType.operator === "&") {
          ownerType = ownerType.simplified();
       }
-      const fields = this.getAllKnownFields(ownerType, scope);
+      let fields: Map<Type, ParamType[]>;
+      try {
+         fields = this.getAllKnownFields(ownerType, scope);
+      } catch (e) {
+         console.log(node.field);
+         throw e;
+      }
+      if (ownerType instanceof BinaryOpType && ownerType.operator === "|") {
+         node.unionOwnerComponents = [...fields.keys()].map(
+            (t) => t.name as string
+         );
+      }
       const found = findField(node.field, fields);
       if (!found) {
          throw new Error(
@@ -491,25 +508,15 @@ export class TypeInferencer {
             this.getAllKnownFields(type.right, scope)
          );
       } else if (type instanceof BinaryOpType && type.operator == "|") {
-         const leftFields = this.getAllKnownFields(type.left, scope);
-         const rightFields = this.getAllKnownFields(type.right, scope);
-         const commonFields = [] as ParamType[];
-         // for (const [type, leftFieldsOfType] of leftFields) {
-         //    for (const leftField of leftFieldsOfType) {
-         //       const rightField = [...rightFields.values()]
-         //          .flat()
-         //          .find((f) => f.name === leftField.name);
-         //       if (rightField === undefined) continue;
-         //       const leftType = scope.resolveNamedType(leftField.typeSymbol);
-         //       const rightType = scope.resolveNamedType(rightField.typeSymbol);
-         //       if (rightType.isAssignableTo(leftType, scope)) {
-         //          commonFields.push(leftField);
-         //       } else if (leftType.isAssignableTo(rightType, scope)) {
-         //          commonFields.push(rightField);
-         //       }
-         //    }
-         // }
-         return new Map();
+         const commonType = this.deduceCommonType(type.left, type.right, scope);
+         if (
+            commonType instanceof BinaryOpType &&
+            commonType.operator === "|"
+         ) {
+            return new Map([]);
+         } else {
+            return this.getAllKnownFields(commonType, scope);
+         }
       } else if (type instanceof OptionalType) {
          return new Map();
          // const originalFields = this.getAllKnownFields(type.type, scope);
@@ -543,60 +550,65 @@ export class TypeInferencer {
       return new Map();
    }
 
-   inferBlock(node: Block, scope: Scope) {
-      // TO DO: change to find returns recursively
-      const inferencer = this;
-      function findReturns(node: Statement, thisScope: Scope, acc: Type[]) {
-         if (node instanceof AppliedKeyword && node.keyword === "return") {
-            acc.push(inferencer.infer(node.param, thisScope));
-         } else if (node instanceof Block) {
-            const innerScope = thisScope.innerScopeOf(node, true);
-            for (let statement of node.statements) {
-               findReturns(statement, innerScope, acc);
-            }
-            if (node.statements.length > 0) {
-               acc.push(
-                  inferencer.infer(
-                     node.statements[node.statements.length - 1],
-                     innerScope
-                  )
-               );
-            }
-         } else if (node instanceof IfStatement) {
-            const ifScope = thisScope.innerScopeOf(node, true);
-            findReturns(
-               node.trueBranch,
-               node.trueBranch instanceof Block
-                  ? ifScope.innerScopeOf(node.trueBranch, true)
+   findReturns(node: Statement, thisScope: Scope, acc: [Term, Type][]) {
+      if (node instanceof AppliedKeyword && node.keyword === "return") {
+         acc.push([node.param, this.infer(node.param, thisScope)]);
+      } else if (node instanceof Block) {
+         const innerScope = thisScope.innerScopeOf(node, true);
+         for (let statement of node.statements) {
+            this.findReturns(statement, innerScope, acc);
+         }
+         if (node.statements.length > 0) {
+            acc.push([
+               node.statements[node.statements.length - 1],
+               this.infer(
+                  node.statements[node.statements.length - 1],
+                  innerScope
+               ),
+            ]);
+         }
+      } else if (node instanceof IfStatement) {
+         const ifScope = thisScope.innerScopeOf(node, true);
+         this.findReturns(
+            node.trueBranch,
+            node.trueBranch instanceof Block
+               ? ifScope.innerScopeOf(node.trueBranch, true)
+               : ifScope,
+            acc
+         );
+         if (node.falseBranch) {
+            this.findReturns(
+               node.falseBranch,
+               node.falseBranch instanceof Block
+                  ? ifScope.innerScopeOf(node.falseBranch, true)
                   : ifScope,
                acc
             );
-            if (node.falseBranch) {
-               findReturns(
-                  node.falseBranch,
-                  node.falseBranch instanceof Block
-                     ? ifScope.innerScopeOf(node.falseBranch, true)
-                     : ifScope,
-                  acc
-               );
-            }
-         } else if (node instanceof WhileLoop && node.eachLoop) {
-            findReturns(node.eachLoop, thisScope.innerScopeOf(node), acc);
-         } else if (node instanceof BinaryExpression) {
-            findReturns(node.left, thisScope, acc);
-            findReturns(node.right, thisScope, acc);
-         } else if (node instanceof UnaryOperator) {
-            findReturns(node.expression, thisScope, acc);
          }
+      } else if (node instanceof WhileLoop && node.eachLoop) {
+         this.findReturns(node.eachLoop, thisScope.innerScopeOf(node), acc);
+      } else if (node instanceof BinaryExpression) {
+         this.findReturns(node.left, thisScope, acc);
+         this.findReturns(node.right, thisScope, acc);
+      } else if (node instanceof UnaryOperator) {
+         this.findReturns(node.expression, thisScope, acc);
       }
+   }
+
+   inferBlock(node: Block, scope: Scope): Type {
+      // TO DO: change to find returns recursively
+      const inferencer = this;
 
       if (node.statements.length === 0) {
          return new Type();
       }
 
       try {
-         const allFoundReturnsInside: Type[] = [];
-         findReturns(node, scope, allFoundReturnsInside);
+         const allFoundReturnsInside: [Term, Type][] = [];
+         this.findReturns(node, scope, allFoundReturnsInside);
+         const allFoundReturnTypesInside = allFoundReturnsInside.map(
+            (r) => r[1]
+         );
          if (allFoundReturnsInside.length === 1) {
             const last = node.statements[node.statements.length - 1];
             if (
@@ -608,13 +620,13 @@ export class TypeInferencer {
             ) {
                return new ThisType();
             }
-            return allFoundReturnsInside[0];
+            return allFoundReturnTypesInside[0];
          }
          let commonType: Type = AnyType;
          for (let i = 0; i < allFoundReturnsInside.length; i++) {
             commonType = this.deduceCommonType(
                commonType,
-               allFoundReturnsInside[i],
+               allFoundReturnTypesInside[i],
                scope
             );
          }
@@ -642,22 +654,31 @@ export class TypeInferencer {
       );
    }
 
-   inferIdentifier(node: Identifier, scope: Scope) {
+   inferIdentifier(
+      node: Identifier,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       try {
          const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
 
          if (!symbol) {
-            if (
-               node.value.charAt(0) === node.value.charAt(0).toUpperCase() &&
-               !node.value.includes("@") &&
-               !node.value.includes(".")
-            ) {
-               return NamedType.PRIMITIVE_TYPES.Type;
-            }
+            // if (
+            //    node.value.charAt(0) === node.value.charAt(0).toUpperCase() &&
+            //    !node.value.includes("@") &&
+            //    !node.value.includes(".")
+            // ) {
+            //    return NamedType.PRIMITIVE_TYPES.Type;
+            // }
             throw new Error(`Undefined identifier: ${node.value}`);
          }
          return symbol.typeSymbol;
       } catch (e) {
+         if (node.isTypeIdentifier()) {
+            const sym = scope.lookupType(node.value);
+            node.isInValueContext = true;
+            return new NamedType("Type");
+         }
          throw new Error(
             `Could not find symbol '${node.value}' - ` +
                scope.toPath() +
@@ -679,6 +700,7 @@ export class TypeInferencer {
       NumberNumberNumber: ["+", "-", "*", "/", "**"],
       NumberNumberBoolean: [">", "<", "<=", ">=", "=="],
       StringAnyString: ["+"],
+      BooleanBooleanBoolean: ["&&", "||"],
    };
 
    inferBinaryExpression(node: BinaryExpression, scope: Scope): Type {
@@ -720,11 +742,24 @@ export class TypeInferencer {
          }
       }
 
+      if (
+         leftType.isAssignableTo(Boolean.typeSymbol, scope) &&
+         rightType.isAssignableTo(Boolean.typeSymbol, scope)
+      ) {
+         const entry = this.DEFINED_OPERATIONS.BooleanBooleanBoolean;
+         if (entry.includes(node.operator)) {
+            return Boolean.typeSymbol;
+         }
+      }
+
       if (node.operator === "&") {
          return new BinaryOpType(leftType, "&", rightType).simplified();
       }
 
       if (node.operator === "|") {
+         if (leftType instanceof OptionalType) {
+            return this.deduceCommonType(leftType.type, rightType, scope);
+         }
          return new BinaryOpType(leftType, "|", rightType);
       }
 
@@ -869,13 +904,21 @@ export class TypeInferencer {
             returnType,
             true
          );
+         lambdaType.name = node.name;
          return lambdaType;
       } else {
-         const returnType = this.infer(node.block, innerScope);
+         let returnType = this.infer(node.block, innerScope);
+         if (returnType instanceof UncheckedType && node.specifiedType) {
+            returnType = this.context.translator.translate(
+               node.specifiedType,
+               innerScope
+            );
+         }
          const lambdaType = new RoundValueToValueLambdaType(
             paramsAsTypes,
             returnType
          );
+         lambdaType.name = node.name;
          return lambdaType;
       }
    }

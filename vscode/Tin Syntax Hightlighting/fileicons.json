@@ -1,0 +1,10 @@
+{
+   "iconDefinitions": {
+      "customIcon": {
+         "iconPath": "./logo.png"
+      }
+   },
+   "fileExtensions": {
+      "tin": "customIcon"
+   }
+}

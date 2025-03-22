@@ -71,7 +71,6 @@ export class Lexer {
          "make",
          "let",
          "return",
-         "type",
          "data",
          "if",
          "else",
@@ -294,19 +293,6 @@ export class Lexer {
             )
          );
       }
-
-      // if (indentLength < previousIndent) {
-      //    const len = this.indentStack.pop();
-      //    console.log(indentLength, len);
-      //    return new Token(
-      //       TokenTag.DEDENT,
-      //       String(len),
-      //       new TokenPos(
-      //          new CodePoint(this.line, 1, this.position),
-      //          new CodePoint(this.line, this.column, this.position)
-      //       )
-      //    );
-      // }
 
       if (indentLength < previousIndent) {
          const tokens = [];

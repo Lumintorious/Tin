@@ -134,6 +134,8 @@ export class NamedType extends Type {
       String: new NamedType("String"),
       Boolean: new NamedType("Boolean"),
       Nothing: new NamedType("Nothing"),
+      Null: new NamedType("Null"),
+      This: new NamedType("This"),
       Any: AnyType,
    };
 
@@ -218,7 +220,18 @@ export class LiteralType extends Type {
       this.type = type;
    }
 
+   isAssignableTo(other: Type, scope: Scope): boolean {
+      if (other instanceof AnyTypeClass) {
+         return true;
+      }
+
+      return super.isAssignableTo(other, scope);
+   }
+
    extends(other: Type, scope: Scope) {
+      if (other instanceof AnyTypeClass) {
+         return true;
+      }
       if (
          other instanceof LiteralType &&
          this.type.extends(other.type, scope) &&
@@ -300,6 +313,9 @@ export class OptionalType extends Type {
    constructor(type: Type) {
       super("OptionalType");
       this.type = type;
+      if (!type) {
+         throw new Error("What?");
+      }
    }
 
    isSame(other: OptionalType, scope: Scope): boolean {
@@ -547,12 +563,15 @@ export class BinaryOpType extends Type {
    }
 
    buildConstructor(): Type | undefined {
-      const allTypes = [...this.getAllIntersectedTypes()];
-      const lastType = allTypes[allTypes.length - 1];
-      lastType.name = this.name;
-      if (this.operator !== "&" || !(lastType instanceof StructType)) {
+      if (this.operator !== "&") {
          return;
       }
+      const allTypes = [...this.getAllIntersectedTypes()];
+      const lastType = allTypes[allTypes.length - 1];
+      if (!(lastType instanceof StructType)) {
+         return;
+      }
+      lastType.name = this.name;
       const constructor = lastType.buildConstructor();
       if (!(constructor instanceof RoundValueToValueLambdaType)) {
          return;
@@ -569,16 +588,19 @@ export class BinaryOpType extends Type {
       return constructor;
    }
 
-   getAllTypesIntersected(types: Type[], index = 0): Type {
+   getAllTypesIntersected(types: Type[]): Type {
+      types = [...types];
       if (types.length === 0) {
          throw new Error("Attempted to unite a list of 0 types.");
       } else if (types.length === 1) {
          return types[0];
       } else {
+         const leftType = types[0];
+         types.shift();
          return new BinaryOpType(
-            types[index],
+            leftType,
             "&",
-            this.getAllTypesIntersected(types, index + 1)
+            this.getAllTypesIntersected(types)
          );
       }
    }
@@ -653,8 +675,8 @@ export class BinaryOpType extends Type {
          );
       } else if (this.operator === "|") {
          return (
-            this.left.isAssignableTo(other, scope) &&
-            this.right.isAssignableTo(other, scope)
+            other.isAssignableTo(this.left, scope) &&
+            other.isAssignableTo(this.right, scope)
          );
       } else {
          return super.isAssignableTo(other, scope);
@@ -681,7 +703,8 @@ export class BinaryOpType extends Type {
          );
       } else if (this.operator === "|") {
          return (
-            this.left.extends(other, scope) || this.right.extends(other, scope)
+            other.isAssignableTo(this.left, scope) &&
+            other.isAssignableTo(this.right, scope)
          );
       }
       return false;
@@ -745,7 +768,6 @@ export class StructType extends Type {
       if (!this.name) {
          return;
       }
-
       return new RoundValueToValueLambdaType(
          this.fields,
          new NamedType(this.name)
@@ -782,7 +804,7 @@ export class StructType extends Type {
       return this.name
          ? "Struct(" + this.name + ")"
          : `StructType(${this.fields.map(
-              (f) => `${f.name}::${f.type.toString()}`
+              (f) => `${f.name}:${f.type.toString()}`
            )})`;
    }
 }

@@ -1,65 +1,76 @@
-IDENTIFIER   | Type         |   1, 1    
-OPERATOR     | =            |   1, 6    
-KEYWORD      | type         |   1, 8    
-OPERATOR     | :            |   1, 12   
 NEWLINE      |              |   2, 1    
-INDENT       | 4            |   2, 1    
-IDENTIFIER   | name         |   2, 2    
-OPERATOR     | :            |   2, 6    
-IDENTIFIER   | String       |   2, 8    
+KEYWORD      | external     |   2, 1    
+STRING       | export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n) => true, (n) => true)));
+ |   2, 10   
 NEWLINE      |              |   4, 1    
-DEDENT       | 4            |   4, 1    
-IDENTIFIER   | RefType      |   4, 1    
-OPERATOR     | =            |   4, 9    
-IDENTIFIER   | Type         |   4, 11   
-OPERATOR     | &            |   4, 16   
-KEYWORD      | type         |   4, 18   
-OPERATOR     | :            |   4, 22   
+IDENTIFIER   | Type         |   4, 1    
+OPERATOR     | =            |   4, 6    
+KEYWORD      | data         |   4, 8    
+OPERATOR     | :            |   4, 12   
 NEWLINE      |              |   5, 1    
 INDENT       | 4            |   5, 1    
-IDENTIFIER   | get          |   5, 2    
-OPERATOR     | :            |   5, 5    
-PARENS       | (            |   5, 7    
-PARENS       | )            |   5, 8    
-OPERATOR     | ->           |   5, 10   
-IDENTIFIER   | Type         |   5, 13   
+IDENTIFIER   | name         |   5, 2    
+OPERATOR     | :            |   5, 6    
+IDENTIFIER   | String       |   5, 8    
+NEWLINE      |              |   6, 1    
+IDENTIFIER   | check        |   6, 2    
+OPERATOR     | =            |   6, 8    
+PARENS       | (            |   6, 10   
+IDENTIFIER   | obj          |   6, 11   
+OPERATOR     | :            |   6, 14   
+IDENTIFIER   | Any          |   6, 16   
+PARENS       | )            |   6, 19   
+OPERATOR     | ->           |   6, 21   
+KEYWORD      | false        |   6, 24   
+OPERATOR     | :            |   6, 29   
+IDENTIFIER   | Boolean      |   6, 31   
 NEWLINE      |              |   7, 1    
-DEDENT       | 4            |   7, 1    
-IDENTIFIER   | Field        |   7, 1    
-OPERATOR     | =            |   7, 7    
-KEYWORD      | type         |   7, 9    
-OPERATOR     | :            |   7, 13   
+IDENTIFIER   | checkIntegrity |   7, 2    
+OPERATOR     | =            |   7, 17   
+PARENS       | (            |   7, 19   
+IDENTIFIER   | obj          |   7, 20   
+OPERATOR     | :            |   7, 23   
+IDENTIFIER   | Any          |   7, 25   
+PARENS       | )            |   7, 28   
+OPERATOR     | ->           |   7, 30   
+KEYWORD      | false        |   7, 33   
+OPERATOR     | :            |   7, 38   
+IDENTIFIER   | Boolean      |   7, 40   
 NEWLINE      |              |   8, 1    
-INDENT       | 4            |   8, 1    
-IDENTIFIER   | name         |   8, 2    
-OPERATOR     | :            |   8, 6    
-IDENTIFIER   | String       |   8, 8    
-NEWLINE      |              |   9, 1    
-IDENTIFIER   | tpe          |   9, 2    
-OPERATOR     | :            |   9, 5    
-IDENTIFIER   | Type         |   9, 7    
+IDENTIFIER   | is           |   8, 2    
+OPERATOR     | =            |   8, 5    
+PARENS       | (            |   8, 7    
+IDENTIFIER   | parent       |   8, 8    
+OPERATOR     | :            |   8, 14   
+IDENTIFIER   | Type         |   8, 16   
+PARENS       | )            |   8, 20   
+OPERATOR     | ->           |   8, 22   
+KEYWORD      | false        |   8, 25   
+OPERATOR     | :            |   8, 30   
+IDENTIFIER   | Boolean      |   8, 32   
 NEWLINE      |              |  10, 1    
-IDENTIFIER   | defaultValue |  10, 2    
+DEDENT       | 4            |  10, 1    
+IDENTIFIER   | Type@of      |  10, 1    
+OPERATOR     | :            |  10, 8    
+PARENS       | (            |  10, 10   
+IDENTIFIER   | obj          |  10, 11   
 OPERATOR     | :            |  10, 14   
-PARENS       | (            |  10, 16   
-PARENS       | (            |  10, 17   
-PARENS       | )            |  10, 18   
-OPERATOR     | ->           |  10, 20   
-IDENTIFIER   | Any          |  10, 23   
-PARENS       | )            |  10, 26   
-OPERATOR     | ?            |  10, 27   
+IDENTIFIER   | Any          |  10, 16   
+PARENS       | )            |  10, 19   
+OPERATOR     | ->           |  10, 21   
+IDENTIFIER   | Type         |  10, 24   
+OPERATOR     | =            |  10, 29   
+KEYWORD      | external     |  10, 31   
 NEWLINE      |              |  12, 1    
-DEDENT       | 4            |  12, 1    
-IDENTIFIER   | Parameter    |  12, 1    
-OPERATOR     | =            |  12, 11   
-KEYWORD      | type         |  12, 13   
-OPERATOR     | :            |  12, 17   
+IDENTIFIER   | Field        |  12, 1    
+OPERATOR     | =            |  12, 7    
+KEYWORD      | data         |  12, 9    
+OPERATOR     | :            |  12, 13   
 NEWLINE      |              |  13, 1    
 INDENT       | 4            |  13, 1    
 IDENTIFIER   | name         |  13, 2    
 OPERATOR     | :            |  13, 6    
 IDENTIFIER   | String       |  13, 8    
-OPERATOR     | ?            |  13, 14   
 NEWLINE      |              |  14, 1    
 IDENTIFIER   | tpe          |  14, 2    
 OPERATOR     | :            |  14, 5    
@@ -76,82 +87,404 @@ PARENS       | )            |  15, 26
 OPERATOR     | ?            |  15, 27   
 NEWLINE      |              |  17, 1    
 DEDENT       | 4            |  17, 1    
-IDENTIFIER   | Struct       |  17, 1    
-OPERATOR     | =            |  17, 8    
-IDENTIFIER   | Type         |  17, 10   
-OPERATOR     | &            |  17, 15   
-KEYWORD      | type         |  17, 17   
-OPERATOR     | :            |  17, 21   
+IDENTIFIER   | Parameter    |  17, 1    
+OPERATOR     | =            |  17, 11   
+KEYWORD      | data         |  17, 13   
+OPERATOR     | :            |  17, 17   
 NEWLINE      |              |  18, 1    
 INDENT       | 4            |  18, 1    
-IDENTIFIER   | fields       |  18, 2    
-OPERATOR     | :            |  18, 8    
-IDENTIFIER   | Array        |  18, 10   
-PARENS       | [            |  18, 15   
-IDENTIFIER   | Field        |  18, 16   
-PARENS       | ]            |  18, 21   
+IDENTIFIER   | name         |  18, 2    
+OPERATOR     | :            |  18, 6    
+IDENTIFIER   | String       |  18, 8    
+OPERATOR     | ?            |  18, 14   
+NEWLINE      |              |  19, 1    
+IDENTIFIER   | tpe          |  19, 2    
+OPERATOR     | :            |  19, 5    
+IDENTIFIER   | Type         |  19, 7    
 NEWLINE      |              |  20, 1    
-DEDENT       | 4            |  20, 1    
-IDENTIFIER   | Lambda       |  20, 1    
-OPERATOR     | =            |  20, 8    
-IDENTIFIER   | Type         |  20, 10   
-OPERATOR     | &            |  20, 15   
-KEYWORD      | type         |  20, 17   
-OPERATOR     | :            |  20, 21   
-NEWLINE      |              |  21, 1    
-INDENT       | 4            |  21, 1    
-IDENTIFIER   | name         |  21, 2    
-OPERATOR     | :            |  21, 6    
-IDENTIFIER   | String       |  21, 8    
-OPERATOR     | ?            |  21, 14   
+IDENTIFIER   | defaultValue |  20, 2    
+OPERATOR     | :            |  20, 14   
+PARENS       | (            |  20, 16   
+PARENS       | (            |  20, 17   
+PARENS       | )            |  20, 18   
+OPERATOR     | ->           |  20, 20   
+IDENTIFIER   | Any          |  20, 23   
+PARENS       | )            |  20, 26   
+OPERATOR     | ?            |  20, 27   
 NEWLINE      |              |  22, 1    
-IDENTIFIER   | params       |  22, 2    
-OPERATOR     | :            |  22, 8    
-IDENTIFIER   | Array        |  22, 10   
-PARENS       | [            |  22, 15   
-IDENTIFIER   | Parameter    |  22, 16   
-PARENS       | ]            |  22, 25   
+DEDENT       | 4            |  22, 1    
+IDENTIFIER   | Intersection |  22, 1    
+OPERATOR     | =            |  22, 14   
+IDENTIFIER   | Type         |  22, 16   
+OPERATOR     | &            |  22, 21   
+KEYWORD      | data         |  22, 23   
+OPERATOR     | :            |  22, 27   
+NEWLINE      |              |  23, 1    
+INDENT       | 4            |  23, 1    
+IDENTIFIER   | left         |  23, 2    
+OPERATOR     | :            |  23, 6    
+IDENTIFIER   | Type         |  23, 8    
 NEWLINE      |              |  24, 1    
-DEDENT       | 4            |  24, 1    
-IDENTIFIER   | s            |  24, 1    
-OPERATOR     | =            |  24, 3    
-IDENTIFIER   | Type         |  24, 5    
-PARENS       | (            |  24, 9    
-STRING       | S            |  24, 10   
-PARENS       | )            |  24, 13   
-OPERATOR     | &            |  24, 15   
-IDENTIFIER   | Struct       |  24, 17   
-PARENS       | (            |  24, 23   
-IDENTIFIER   | Array@of     |  24, 24   
-PARENS       | [            |  24, 32   
-IDENTIFIER   | Field        |  24, 33   
-PARENS       | ]            |  24, 38   
-PARENS       | (            |  24, 39   
-PARENS       | )            |  24, 40   
-PARENS       | )            |  24, 41   
+IDENTIFIER   | right        |  24, 2    
+OPERATOR     | :            |  24, 7    
+IDENTIFIER   | Type         |  24, 9    
 NEWLINE      |              |  26, 1    
-IDENTIFIER   | jsonify      |  26, 1    
-OPERATOR     | :            |  26, 8    
-PARENS       | (            |  26, 10   
-IDENTIFIER   | obj          |  26, 11   
-OPERATOR     | :            |  26, 14   
-IDENTIFIER   | Any          |  26, 16   
-PARENS       | )            |  26, 19   
-OPERATOR     | ->           |  26, 21   
-IDENTIFIER   | String       |  26, 24   
-OPERATOR     | =            |  26, 31   
-KEYWORD      | external     |  26, 33   
+DEDENT       | 4            |  26, 1    
+IDENTIFIER   | Union        |  26, 1    
+OPERATOR     | =            |  26, 7    
+IDENTIFIER   | Type         |  26, 9    
+OPERATOR     | &            |  26, 14   
+KEYWORD      | data         |  26, 16   
+OPERATOR     | :            |  26, 20   
 NEWLINE      |              |  27, 1    
-IDENTIFIER   | dejsonify    |  27, 1    
-OPERATOR     | :            |  27, 10   
-PARENS       | (            |  27, 12   
-IDENTIFIER   | json         |  27, 13   
-OPERATOR     | :            |  27, 17   
-IDENTIFIER   | String       |  27, 19   
-PARENS       | )            |  27, 25   
-OPERATOR     | ->           |  27, 27   
-IDENTIFIER   | Any          |  27, 30   
-OPERATOR     | =            |  27, 34   
-KEYWORD      | external     |  27, 36   
+INDENT       | 4            |  27, 1    
+IDENTIFIER   | left         |  27, 2    
+OPERATOR     | :            |  27, 6    
+IDENTIFIER   | Type         |  27, 8    
 NEWLINE      |              |  28, 1    
+IDENTIFIER   | right        |  28, 2    
+OPERATOR     | :            |  28, 7    
+IDENTIFIER   | Type         |  28, 9    
+NEWLINE      |              |  30, 1    
+DEDENT       | 4            |  30, 1    
+IDENTIFIER   | Struct       |  30, 1    
+OPERATOR     | =            |  30, 8    
+IDENTIFIER   | Type         |  30, 10   
+OPERATOR     | &            |  30, 15   
+KEYWORD      | data         |  30, 17   
+OPERATOR     | :            |  30, 21   
+NEWLINE      |              |  31, 1    
+INDENT       | 4            |  31, 1    
+IDENTIFIER   | fields       |  31, 2    
+OPERATOR     | :            |  31, 8    
+IDENTIFIER   | Array        |  31, 10   
+PARENS       | [            |  31, 15   
+IDENTIFIER   | Field        |  31, 16   
+PARENS       | ]            |  31, 21   
+NEWLINE      |              |  33, 1    
+DEDENT       | 4            |  33, 1    
+IDENTIFIER   | Lambda       |  33, 1    
+OPERATOR     | =            |  33, 8    
+IDENTIFIER   | Type         |  33, 10   
+OPERATOR     | &            |  33, 15   
+KEYWORD      | data         |  33, 17   
+OPERATOR     | :            |  33, 21   
+NEWLINE      |              |  34, 1    
+INDENT       | 4            |  34, 1    
+IDENTIFIER   | params       |  34, 2    
+OPERATOR     | :            |  34, 8    
+IDENTIFIER   | Array        |  34, 10   
+PARENS       | [            |  34, 15   
+IDENTIFIER   | Parameter    |  34, 16   
+PARENS       | ]            |  34, 25   
+NEWLINE      |              |  35, 1    
+IDENTIFIER   | resultType   |  35, 2    
+OPERATOR     | :            |  35, 12   
+IDENTIFIER   | Type         |  35, 14   
+NEWLINE      |              |  37, 1    
+DEDENT       | 4            |  37, 1    
+IDENTIFIER   | RefType      |  37, 1    
+OPERATOR     | =            |  37, 9    
+IDENTIFIER   | Type         |  37, 11   
+OPERATOR     | &            |  37, 16   
+KEYWORD      | data         |  37, 18   
+OPERATOR     | :            |  37, 22   
+NEWLINE      |              |  38, 1    
+INDENT       | 4            |  38, 1    
+IDENTIFIER   | get          |  38, 2    
+OPERATOR     | :            |  38, 5    
+PARENS       | (            |  38, 7    
+PARENS       | )            |  38, 8    
+OPERATOR     | ->           |  38, 10   
+IDENTIFIER   | Type         |  38, 13   
+NEWLINE      |              |  40, 1    
+DEDENT       | 4            |  40, 1    
+KEYWORD      | external     |  40, 1    
+STRING       | export const Null = _S(Symbol("Null"), () => undefined, lazy(Type("Null", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", (n) => typeof n === "number", (n) => typeof n === "number")));
+export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", (n) => typeof n === "string", (n) => typeof n === "string")));
+ |  40, 10   
+NEWLINE      |              |  42, 1    
+IDENTIFIER   | Literal      |  42, 1    
+OPERATOR     | =            |  42, 9    
+IDENTIFIER   | Type         |  42, 11   
+OPERATOR     | &            |  42, 16   
+KEYWORD      | data         |  42, 18   
+OPERATOR     | :            |  42, 22   
+NEWLINE      |              |  43, 1    
+INDENT       | 4            |  43, 1    
+IDENTIFIER   | value        |  43, 2    
+OPERATOR     | :            |  43, 7    
+IDENTIFIER   | String       |  43, 9    
+OPERATOR     | |            |  43, 16   
+IDENTIFIER   | Number       |  43, 18   
+OPERATOR     | |            |  43, 25   
+IDENTIFIER   | Boolean      |  43, 27   
+OPERATOR     | |            |  43, 35   
+IDENTIFIER   | Null         |  43, 37   
+NEWLINE      |              |  44, 1    
+IDENTIFIER   | type         |  44, 2    
+OPERATOR     | :            |  44, 6    
+IDENTIFIER   | Type         |  44, 8    
+NEWLINE      |              |  46, 1    
+DEDENT       | 4            |  46, 1    
+IDENTIFIER   | RefType@create |  46, 1    
+OPERATOR     | =            |  46, 16   
+PARENS       | (            |  46, 18   
+IDENTIFIER   | name         |  46, 19   
+OPERATOR     | :            |  46, 23   
+IDENTIFIER   | String       |  46, 25   
+NEWLINE      | ,            |  46, 1    
+IDENTIFIER   | get          |  46, 33   
+OPERATOR     | :            |  46, 36   
+PARENS       | (            |  46, 38   
+PARENS       | )            |  46, 39   
+OPERATOR     | ->           |  46, 41   
+IDENTIFIER   | Type         |  46, 44   
+PARENS       | )            |  46, 48   
+OPERATOR     | ->           |  46, 50   
+NEWLINE      |              |  47, 1    
+INDENT       | 4            |  47, 1    
+IDENTIFIER   | Type         |  47, 2    
+PARENS       | (            |  47, 6    
+IDENTIFIER   | name         |  47, 7    
+NEWLINE      | ,            |  47, 1    
+IDENTIFIER   | get          |  47, 13   
+PARENS       | (            |  47, 16   
+PARENS       | )            |  47, 17   
+OPERATOR     | .            |  47, 18   
+IDENTIFIER   | check        |  47, 19   
+NEWLINE      | ,            |  47, 1    
+IDENTIFIER   | get          |  47, 26   
+PARENS       | (            |  47, 29   
+PARENS       | )            |  47, 30   
+OPERATOR     | .            |  47, 31   
+IDENTIFIER   | checkIntegrity |  47, 32   
+PARENS       | )            |  47, 46   
+OPERATOR     | &            |  47, 48   
+IDENTIFIER   | RefType      |  47, 50   
+PARENS       | (            |  47, 57   
+IDENTIFIER   | get          |  47, 58   
+PARENS       | )            |  47, 61   
+NEWLINE      |              |  49, 1    
+DEDENT       | 4            |  49, 1    
+IDENTIFIER   | jsonify      |  49, 1    
+OPERATOR     | :            |  49, 8    
+PARENS       | (            |  49, 10   
+IDENTIFIER   | obj          |  49, 11   
+OPERATOR     | :            |  49, 14   
+IDENTIFIER   | Any          |  49, 16   
+PARENS       | )            |  49, 19   
+OPERATOR     | ->           |  49, 21   
+IDENTIFIER   | String       |  49, 24   
+OPERATOR     | =            |  49, 31   
+KEYWORD      | external     |  49, 33   
+NEWLINE      |              |  50, 1    
+IDENTIFIER   | dejsonify    |  50, 1    
+OPERATOR     | :            |  50, 10   
+PARENS       | (            |  50, 12   
+IDENTIFIER   | json         |  50, 13   
+OPERATOR     | :            |  50, 17   
+IDENTIFIER   | String       |  50, 19   
+PARENS       | )            |  50, 25   
+OPERATOR     | ->           |  50, 27   
+IDENTIFIER   | Any          |  50, 30   
+OPERATOR     | =            |  50, 34   
+KEYWORD      | external     |  50, 36   
+NEWLINE      |              |  52, 1    
+IDENTIFIER   | Intersection@of |  52, 1    
+OPERATOR     | =            |  52, 17   
+PARENS       | (            |  52, 19   
+IDENTIFIER   | left         |  52, 20   
+OPERATOR     | :            |  52, 24   
+IDENTIFIER   | Type         |  52, 26   
+NEWLINE      | ,            |  52, 1    
+IDENTIFIER   | right        |  52, 32   
+OPERATOR     | :            |  52, 37   
+IDENTIFIER   | Type         |  52, 39   
+PARENS       | )            |  52, 43   
+OPERATOR     | ->           |  52, 45   
+NEWLINE      |              |  53, 1    
+INDENT       | 4            |  53, 1    
+IDENTIFIER   | check        |  53, 2    
+OPERATOR     | =            |  53, 8    
+PARENS       | (            |  53, 10   
+IDENTIFIER   | obj          |  53, 11   
+OPERATOR     | :            |  53, 14   
+IDENTIFIER   | Any          |  53, 16   
+PARENS       | )            |  53, 19   
+OPERATOR     | ->           |  53, 21   
+NEWLINE      |              |  54, 1    
+INDENT       | 8            |  54, 1    
+IDENTIFIER   | left         |  54, 3    
+OPERATOR     | .            |  54, 7    
+IDENTIFIER   | check        |  54, 8    
+PARENS       | (            |  54, 13   
+IDENTIFIER   | obj          |  54, 14   
+PARENS       | )            |  54, 17   
+OPERATOR     | &&           |  54, 19   
+IDENTIFIER   | right        |  54, 22   
+OPERATOR     | .            |  54, 27   
+IDENTIFIER   | check        |  54, 28   
+PARENS       | (            |  54, 33   
+IDENTIFIER   | obj          |  54, 34   
+PARENS       | )            |  54, 37   
+NEWLINE      |              |  56, 1    
+DEDENT       | 8            |  56, 1    
+IDENTIFIER   | checkIntegrity |  56, 2    
+OPERATOR     | =            |  56, 17   
+PARENS       | (            |  56, 19   
+IDENTIFIER   | obj          |  56, 20   
+OPERATOR     | :            |  56, 23   
+IDENTIFIER   | Any          |  56, 25   
+PARENS       | )            |  56, 28   
+OPERATOR     | ->           |  56, 30   
+NEWLINE      |              |  57, 1    
+INDENT       | 8            |  57, 1    
+IDENTIFIER   | left         |  57, 3    
+OPERATOR     | .            |  57, 7    
+IDENTIFIER   | checkIntegrity |  57, 8    
+PARENS       | (            |  57, 22   
+IDENTIFIER   | obj          |  57, 23   
+PARENS       | )            |  57, 26   
+OPERATOR     | &&           |  57, 28   
+IDENTIFIER   | right        |  57, 31   
+OPERATOR     | .            |  57, 36   
+IDENTIFIER   | checkIntegrity |  57, 37   
+PARENS       | (            |  57, 51   
+IDENTIFIER   | obj          |  57, 52   
+PARENS       | )            |  57, 55   
+NEWLINE      |              |  59, 1    
+DEDENT       | 8            |  59, 1    
+IDENTIFIER   | Type         |  59, 2    
+PARENS       | (            |  59, 6    
+STRING       | Intersection |  59, 7    
+NEWLINE      | ,            |  59, 1    
+IDENTIFIER   | check        |  59, 23   
+NEWLINE      | ,            |  59, 1    
+IDENTIFIER   | checkIntegrity |  59, 30   
+PARENS       | )            |  59, 44   
+OPERATOR     | &            |  59, 46   
+IDENTIFIER   | Intersection |  59, 48   
+PARENS       | (            |  59, 60   
+IDENTIFIER   | left         |  59, 61   
+NEWLINE      | ,            |  59, 1    
+IDENTIFIER   | right        |  59, 67   
+PARENS       | )            |  59, 72   
+NEWLINE      |              |  61, 1    
+DEDENT       | 4            |  61, 1    
+IDENTIFIER   | Digit        |  61, 1    
+OPERATOR     | =            |  61, 7    
+NUMBER       | 0            |  61, 9    
+OPERATOR     | |            |  61, 11   
+NUMBER       | 1            |  61, 13   
+OPERATOR     | |            |  61, 15   
+NUMBER       | 2            |  61, 17   
+OPERATOR     | |            |  61, 19   
+NUMBER       | 3            |  61, 21   
+OPERATOR     | |            |  61, 23   
+NUMBER       | 4            |  61, 25   
+OPERATOR     | |            |  61, 27   
+NUMBER       | 5            |  61, 29   
+OPERATOR     | |            |  61, 31   
+NUMBER       | 6            |  61, 33   
+OPERATOR     | |            |  61, 35   
+NUMBER       | 7            |  61, 37   
+OPERATOR     | |            |  61, 39   
+NUMBER       | 8            |  61, 41   
+OPERATOR     | |            |  61, 43   
+NUMBER       | 9            |  61, 45   
+NEWLINE      |              |  62, 1    
+IDENTIFIER   | One          |  62, 1    
+OPERATOR     | =            |  62, 5    
+NUMBER       | 1            |  62, 7    
+NEWLINE      |              |  64, 1    
+IDENTIFIER   | Union@values |  64, 1    
+OPERATOR     | =            |  64, 14   
+PARENS       | [            |  64, 16   
+IDENTIFIER   | T            |  64, 17   
+PARENS       | ]            |  64, 18   
+OPERATOR     | ->           |  64, 20   
+NEWLINE      |              |  65, 1    
+INDENT       | 4            |  65, 1    
+IDENTIFIER   | go           |  65, 2    
+OPERATOR     | =            |  65, 5    
+PARENS       | (            |  65, 7    
+IDENTIFIER   | type         |  65, 8    
+OPERATOR     | :            |  65, 12   
+IDENTIFIER   | Type         |  65, 14   
+PARENS       | )            |  65, 18   
+OPERATOR     | :            |  65, 19   
+IDENTIFIER   | Array        |  65, 21   
+PARENS       | [            |  65, 26   
+IDENTIFIER   | T            |  65, 27   
+PARENS       | ]            |  65, 28   
+OPERATOR     | ->           |  65, 30   
+NEWLINE      |              |  66, 1    
+INDENT       | 8            |  66, 1    
+KEYWORD      | if           |  66, 3    
+IDENTIFIER   | type         |  66, 6    
+OPERATOR     | ::           |  66, 11   
+IDENTIFIER   | Literal      |  66, 14   
+NEWLINE      | ,            |  66, 1    
+NEWLINE      |              |  67, 1    
+INDENT       | 12           |  67, 1    
+IDENTIFIER   | Array@of     |  67, 4    
+PARENS       | [            |  67, 12   
+IDENTIFIER   | T            |  67, 13   
+PARENS       | ]            |  67, 14   
+PARENS       | (            |  67, 15   
+PARENS       | (            |  67, 16   
+IDENTIFIER   | type         |  67, 17   
+OPERATOR     | .            |  67, 21   
+IDENTIFIER   | value        |  67, 22   
+PARENS       | )            |  67, 27   
+OPERATOR     | :            |  67, 28   
+IDENTIFIER   | T            |  67, 30   
+PARENS       | )            |  67, 31   
+NEWLINE      |              |  68, 1    
+DEDENT       | 12           |  68, 1    
+KEYWORD      | else         |  68, 3    
+KEYWORD      | if           |  68, 8    
+IDENTIFIER   | type         |  68, 11   
+OPERATOR     | ::           |  68, 16   
+IDENTIFIER   | Union        |  68, 19   
+NEWLINE      | ,            |  68, 1    
+NEWLINE      |              |  69, 1    
+INDENT       | 12           |  69, 1    
+IDENTIFIER   | go           |  69, 4    
+PARENS       | (            |  69, 6    
+IDENTIFIER   | type         |  69, 7    
+OPERATOR     | .            |  69, 11   
+IDENTIFIER   | left         |  69, 12   
+PARENS       | )            |  69, 16   
+OPERATOR     | .            |  69, 17   
+IDENTIFIER   | and          |  69, 18   
+PARENS       | (            |  69, 21   
+IDENTIFIER   | go           |  69, 22   
+PARENS       | (            |  69, 24   
+IDENTIFIER   | type         |  69, 25   
+OPERATOR     | .            |  69, 29   
+IDENTIFIER   | right        |  69, 30   
+PARENS       | )            |  69, 35   
+PARENS       | )            |  69, 36   
+NEWLINE      |              |  70, 1    
+DEDENT       | 12           |  70, 1    
+KEYWORD      | else         |  70, 3    
+NEWLINE      |              |  71, 1    
+INDENT       | 12           |  71, 1    
+IDENTIFIER   | Array@of     |  71, 4    
+PARENS       | [            |  71, 12   
+IDENTIFIER   | T            |  71, 13   
+PARENS       | ]            |  71, 14   
+PARENS       | (            |  71, 15   
+PARENS       | )            |  71, 16   
+NEWLINE      |              |  72, 1    
+DEDENT       | 12           |  72, 1    
+DEDENT       | 8            |  72, 1    
+IDENTIFIER   | go           |  72, 2    
+PARENS       | (            |  72, 4    
+IDENTIFIER   | T            |  72, 5    
+PARENS       | )            |  72, 6    
+NEWLINE      |              |  74, 1    
 --undefined--

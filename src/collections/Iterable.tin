@@ -1,13 +1,13 @@
-Iterator = [T] => type:
+Iterator = [T] => data:
 	next: () -> T?
 
-Accessible = [T] => type:
+Accessible = [T] => data:
 	at: (index: Number) -> T
 	length: () -> Number
 
 makeString: (Any) -> String = external
 
-ToString = type:
+ToString = data:
 	toString: (this: Any) -> String
 
 stringOf = (obj: Any) ->
@@ -16,7 +16,7 @@ stringOf = (obj: Any) ->
 	else
 		makeString(obj)
 
-Iterable = [T] => type:
+Iterable = [T] => data:
 	getIterator: () -> Iterator[T]
 
 	forEach = (this: Iterable[T], fn: (T) -> Nothing) ->
@@ -39,4 +39,6 @@ Iterable = [T] => type:
 		this.forEach((t: T) -> if pred(t), set num = num + 1)
 		num
 
+
+print("Loaded")
 	

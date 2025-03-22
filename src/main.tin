@@ -1,16 +1,18 @@
 # import collections/Map
+import collections/List
 
-a = 1
+Animal = data:
+	breed: String
 
-PetOwner = type:
-	cat: Cat
+Furry = data:
+	something: Number
 
-Animal = type:
-	canFly: Boolean
-
-Cat = Animal & type:
+Cat = Animal & Furry & data:
 	name: String
 
-cat = Animal(false) & Cat(name = "Kitten")
+cat = Animal("Something") & Furry(2) & Cat("Mercy")
 
-	
+animal = Animal("Fwoof")
+arr = Array@of(1, 2, 3)
+
+print(arr)

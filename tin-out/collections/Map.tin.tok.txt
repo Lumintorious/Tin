@@ -15,7 +15,7 @@ NEWLINE      | ,            |   5, 1
 IDENTIFIER   | V            |   5, 14   
 PARENS       | ]            |   5, 15   
 OPERATOR     | =>           |   5, 17   
-KEYWORD      | type         |   5, 20   
+KEYWORD      | data         |   5, 20   
 OPERATOR     | :            |   5, 24   
 NEWLINE      |              |   6, 1    
 INDENT       | 4            |   6, 1    
@@ -63,7 +63,7 @@ NEWLINE      | ,            |  10, 1
 IDENTIFIER   | B            |  10, 16   
 PARENS       | ]            |  10, 17   
 OPERATOR     | =>           |  10, 19   
-KEYWORD      | type         |  10, 22   
+KEYWORD      | data         |  10, 22   
 OPERATOR     | :            |  10, 26   
 NEWLINE      |              |  11, 1    
 INDENT       | 4            |  11, 1    
@@ -101,35 +101,6 @@ IDENTIFIER   | V            |  14, 53
 PARENS       | ]            |  14, 54   
 PARENS       | ]            |  14, 55   
 NEWLINE      |              |  16, 1    
-IDENTIFIER   | Map@entry    |  16, 1    
-OPERATOR     | =            |  16, 11   
-PARENS       | [            |  16, 13   
-IDENTIFIER   | A            |  16, 14   
-NEWLINE      | ,            |  16, 1    
-IDENTIFIER   | B            |  16, 17   
-PARENS       | ]            |  16, 18   
-OPERATOR     | ->           |  16, 20   
-PARENS       | (            |  16, 23   
-IDENTIFIER   | key          |  16, 24   
-OPERATOR     | :            |  16, 27   
-IDENTIFIER   | A            |  16, 29   
-NEWLINE      | ,            |  16, 1    
-IDENTIFIER   | value        |  16, 32   
-OPERATOR     | :            |  16, 37   
-IDENTIFIER   | B            |  16, 39   
-PARENS       | )            |  16, 40   
-OPERATOR     | ->           |  16, 42   
-IDENTIFIER   | MapEntry     |  16, 45   
-PARENS       | [            |  16, 53   
-IDENTIFIER   | A            |  16, 54   
-NEWLINE      | ,            |  16, 1    
-IDENTIFIER   | B            |  16, 57   
-PARENS       | ]            |  16, 58   
-PARENS       | (            |  16, 59   
-IDENTIFIER   | key          |  16, 60   
-NEWLINE      | ,            |  16, 1    
-IDENTIFIER   | value        |  16, 65   
-PARENS       | )            |  16, 70   
 NEWLINE      |              |  18, 1    
 IDENTIFIER   | Map@of       |  18, 1    
 OPERATOR     | :            |  18, 7    

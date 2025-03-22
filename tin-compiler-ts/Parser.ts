@@ -8,6 +8,7 @@ export class AstNode {
    readonly tag: string;
    position?: TokenPos;
    isTypeLevel?: boolean;
+   isInValueContext?: boolean;
    id: number = AstNode.currentNumber++;
    constructor(tag: string) {
       this.tag = tag;
@@ -179,9 +180,11 @@ export class SquareTypeToTypeLambda extends Term {
 
 export class Block extends Term {
    statements: Statement[];
-   constructor(statements: (Statement | null)[]) {
+   skipReturn: boolean = false;
+   constructor(statements: (Statement | null)[], skipReturn: boolean = false) {
       super("Block");
       this.statements = statements.filter((s) => s !== null);
+      this.skipReturn = skipReturn;
    }
 }
 
@@ -195,6 +198,7 @@ export class Literal extends Term {
 
    value: String | Number | Boolean;
    type: "String" | "Number" | "Boolean" | "Void" | "Any";
+   isTypeLiteral: boolean = false;
 
    constructor(
       value: String | Number | Boolean,
@@ -216,6 +220,7 @@ export class RoundApply extends Term {
    isFirstParamThis: boolean = false;
    isAnObjectCopy: boolean = false;
    autoFilledSquareParams?: Type[];
+   isCallingAConstructor: boolean = false;
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
@@ -307,6 +312,7 @@ export class Select extends Term {
    owner: Term;
    field: string;
    ownerComponent?: string;
+   unionOwnerComponents?: string[];
    ammortized: boolean = false; // if its x?.blabla
    constructor(owner: Term, field: string, ammortized: boolean = false) {
       super("Select");
@@ -408,11 +414,6 @@ export class Parser {
          }
       }
       const endPos = this.positionNow();
-      // AstNode.toCheckForPosition
-      //    .filter((node) => !node.position)
-      //    .forEach((node) => {
-      //       console.log(node.tag + " MISSING POSITION");
-      //    });
       return new Block(this.body).fromTo(startPos, endPos);
    }
 
@@ -485,7 +486,6 @@ export class Parser {
          this.omit("DEDENT");
          let paramName = "";
          if (this.peek().tag === "IDENTIFIER" && this.peek(1).value === "=") {
-            console.log(this.peek().value);
             paramName = this.consume().value;
             this.consume("OPERATOR", "=");
          }
@@ -814,7 +814,14 @@ export class Parser {
          groupCatch !== undefined
       ) {
          this.omit("NEWLINE");
-         return new Group(groupCatch).fromTo(lambdaStart, this.positionNow());
+         let result: Term = new Group(groupCatch).fromTo(
+            lambdaStart,
+            this.positionNow()
+         );
+         if (specifiedType) {
+            result = new Cast(result, specifiedType);
+         }
+         return result;
       }
       let arrow = this.consume("OPERATOR");
       let body = this.parseExpression(undefined, true);
@@ -1027,15 +1034,15 @@ export class Parser {
          );
       }
 
-      if (token.value === "type") {
+      if (token.value === "data") {
          this.current--;
          return parseNewType(this);
       }
 
-      if (token.value === "data") {
-         this.current--;
-         return parseNewData(this);
-      }
+      // if (token.value === "data") {
+      //    this.current--;
+      //    return parseNewData(this);
+      // }
 
       if (token.value === "(") {
          this.current--;
@@ -1088,7 +1095,6 @@ export class Parser {
          );
       }
       this.current++;
-      // console.log("Consumed " + token.value, "Peek: " + this.peek().value, new Error())
       return token;
    }
 
@@ -1141,9 +1147,9 @@ export class FieldDef extends AstNode {
 
 export function parseNewType(parser: Parser): Term {
    let token: Token = parser.consume("KEYWORD");
-   if (token.value !== "type") {
+   if (token.value !== "data") {
       throw new Error(
-         `Expected 'type', but got '${token.value}' at line ${token.position.start.line}, column ${token.position.start.column}`
+         `Expected 'data', but got '${token.value}' at line ${token.position.start.line}, column ${token.position.start.column}`
       );
    }
    const object = parseObject(parser);
@@ -1188,8 +1194,17 @@ export function parseObject(parser: Parser): DataDef {
          break; // End of type Assignment block
       }
 
+      if (!parser.peek()) {
+         break;
+      }
+
       // if (token.tag === "IDENTIFIER") {
-      const expr = parser.parseExpression();
+      let expr;
+      try {
+         expr = parser.parseExpression();
+      } catch (e) {
+         break;
+      }
       const exprStart = parser.positionNow();
       if (expr instanceof Cast && expr.expression instanceof Identifier) {
          fieldDefs.push(
@@ -1207,7 +1222,9 @@ export function parseObject(parser: Parser): DataDef {
          );
       } else {
          console.log(expr);
-         throw new Error("Malformed syntax at new object");
+         throw new Error(
+            "Malformed syntax at new object" + expr.position?.start.line
+         );
       }
       parser.omit("NEWLINE");
       // } else {
