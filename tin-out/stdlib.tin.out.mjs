@@ -28,10 +28,16 @@ Object.prototype.__is_child = function (obj) {
 	throw new Error("Unhandled")
 }
 
-export function _S(symbol, constructorRaw, descriptor) {
+export function _S(symbol, constructorRaw, descriptor, proto) {
 	descriptor._s = symbol;
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
+		for (let key in result) {
+			if (result[key] === undefined) {
+				delete result[key]
+			}
+		}
+		Object.setPrototypeOf(result, proto)
 		return {
 			_type: descriptor,
 			[symbol]: result
@@ -57,6 +63,9 @@ export function _S(symbol, constructorRaw, descriptor) {
 }
 
 export function Type$of(obj) {
+	if (obj === undefined) {
+		return undefined;
+	}
 	if (typeof obj === "number") {
 		return Number._d;
 	}
@@ -66,7 +75,7 @@ export function Type$of(obj) {
 	if (obj === undefined || obj.null === null) {
 		return Null
 	}
-	let result = obj._type
+	let result = obj._type || obj._d || obj
 	if (result._d) {
 		result = result._d
 	}
@@ -269,7 +278,7 @@ export var Array = (function () {
 			return Array(T)([...args, ...arr[Array._s]._rawArray])
 		},
 		[__tin_varargs_marker]: true
-	}), {})
+	}), {}, {})
 	result._s = arraySymbol()
 	return result;
 })()
@@ -291,12 +300,16 @@ export function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
-export function makeString(obj, sprawl = false) {
+export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
+	function padd(currentIndentChange = 0) {
+		return "".padStart((currentIndent + currentIndentChange * indent), " ".padEnd(indent, " "))
+	}
+
 	if (obj === null) return 'nothing';
 	if (typeof obj === 'undefined') return 'nothing';
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
-	if (typeof obj === 'string') return obj;
+	if (typeof obj === 'string') return indent > 0 ? `"${obj}"` : obj;
 	if (typeof obj === 'symbol') return obj.description;
 
 	if (typeof obj === 'function') {
@@ -304,11 +317,13 @@ export function makeString(obj, sprawl = false) {
 	}
 
 	if (Reflect.ownKeys(obj).includes(Array._s)) {
-		let result = 'Array(';
+		let result = 'Array(' + (indent > 0 ? "\n" : "");
 		for (let i = 0; i < obj[Array._s].length(); i++) {
-			result += makeString(obj[Array._s].at(i)) + (i === obj[Array._s].length() - 1 ? "" : ", ")
+			result += (typeof obj[Array._s].at(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length() - 1 ? "" : ", ") + (indent > 0 ? "\n" : "")
 		}
-		return result + ")"
+
+		currentIndent -= indent;
+		return result + padd() + ")"
 	}
 
 	if (typeof obj === 'object') {
@@ -320,37 +335,43 @@ export function makeString(obj, sprawl = false) {
 			}
 			const component = obj[componentKey]
 			if (!sprawl) {
-				result += componentKey.description + "("
+				result += componentKey.description + "(" + (indent > 0 ? "\n" : "")
+				currentIndent += indent;
 			}
 			for (let key in component) {
-				if (component.hasOwnProperty(key)) {
-					if (key.startsWith("__")) {
-						continue
-					}
-					if (sprawl) {
-						result += componentKey.description + "."
-					}
-					if (!key.startsWith("_") && component[key] != obj) {
-						result += key + "=" + makeString(component[key], sprawl) + ', ';
-					}
+				if (key.startsWith("__")) {
+					continue
+				}
+				if (sprawl) {
+					result += componentKey.description + "."
+				}
+				if (!key.startsWith("_") && component[key] != obj) {
+					result += padd() + key + " = " + makeString(component[key], sprawl, indent, currentIndent + indent) + ', ' + (indent > 0 ? "\n" : "");
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {
 				result = result.slice(0, -2); // Remove trailing comma and space
 			}
+			result += indent > 0 ? padd(-1) : ""
 			result += sprawl ? ", " : ") & "
+			result += indent > 0 ? "\n" : ""
+			currentIndent -= indent;
 		}
 		if (result.length > 1 && ((sprawl && result[result.length - 2] === ",") || (!sprawl && result[result.length - 2] === "&"))) {
 			result = result.slice(0, sprawl ? -2 : -3); // Remove trailing comma and space
 		}
-		return result + (sprawl ? ')' : "");
+		if (result.length > 2 && indent > 0 && result[result.length - 3] === "&") {
+			result = result.slice(0, -4)
+		}
+		result = result + (sprawl ? ')' : "")
+		return result;
 	}
 
 	return ''; // For other types like functions, symbols, etc.
 }
 
 export const print = (arg) => {
-	console.log(makeString(arg))
+	console.log(makeString(arg, false, 2))
 }
 
 export const debug = (...args) => {
@@ -427,40 +448,24 @@ export function lazy(make) {
 export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n) => true, (n) => true)));
 
 ;
-export var Type = _S(Symbol("Type"), (_p0,_p1,_p2,_p3) => ({name: _p0,check: _p1,checkIntegrity: _p2,is: _p3}), lazy({isReflectionType: true}));
+export var Type = _S(Symbol("Type"), (_p0,_p1,_p2,_p3) => ({name: _p0,check: _p1,checkIntegrity: _p2,is: _p3}), lazy({isReflectionType: true}), {});
 ;
-export var Field = _S(Symbol("Field"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}));
-export var Parameter = _S(Symbol("Parameter"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}));
-export var Intersection = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Intersection"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true})), true);})();
-export var Union = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Union"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true})), true);})();
-export var Struct = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Struct"), (_p0) => ({fields: _p0}), lazy({isReflectionType: true})), true);})();
-export var Lambda = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Lambda"), (_p0,_p1) => ({params: _p0,resultType: _p1}), lazy({isReflectionType: true})), true);})();
-export var RefType = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("RefType"), (_p0) => ({get: _p0}), lazy({isReflectionType: true})), true);})();
+export var Field = _S(Symbol("Field"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}), {});
+export var Parameter = _S(Symbol("Parameter"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}), {});
+export var Intersection = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Intersection"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var Union = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Union"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var Struct = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Struct"), (_p0) => ({fields: _p0}), lazy({isReflectionType: true}), {}), true);})();
+export var Lambda = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Lambda"), (_p0,_p1) => ({params: _p0,resultType: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var RefType = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("RefType"), (_p0) => ({get: _p0}), lazy({isReflectionType: true}), {}), true);})();
 
 
 export const Null = _S(Symbol("Null"), () => undefined, lazy(Type("Null", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === undefined, (n) => n === undefined)));
 export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", (n) => typeof n === "number", (n) => typeof n === "number")));
 export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", (n) => typeof n === "string", (n) => typeof n === "string")));
 
 ;
-export var Literal = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Literal"), (_p0,_p1) => ({value: _p0,type: _p1}), lazy({isReflectionType: true})), true);})();
-export var RefType$create/* (name:String, get:() -> Type) -> Type & RefType*/ = _F(Symbol("lambda"), function(name, get) {try{
-throw (() => { const _left = Type(name, get()[Type._s].check, get()[Type._s].checkIntegrity); return _A(_left, RefType.call(_left, get), true);})()
-} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
-				Type("RefType@create")._and(Lambda(
-				Array(Type)([Parameter("name",
-					String,
-					() => { return (undefined)})
-		,,Parameter("get",
-					
-				Type("undefined")._and(Lambda(
-				Array(Type)([]),
-				Type))
-			,
-					() => { return (undefined)})
-		,]),
-				{}))
-			);
+export var Literal = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Literal"), (_p0,_p1) => ({value: _p0,type: _p1}), lazy({isReflectionType: true}), {}), true);})();
 ;
 ;
 export var Intersection$of/* (left:Type, right:Type) -> Type & Intersection*/ = _F(Symbol("lambda"), function(left, right) {try{
@@ -469,7 +474,7 @@ throw ((() => { var _owner = left; return _owner[Type._s].check.call(_owner,obj)
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("check")._and(Lambda(
 				Array(Type)([Parameter("obj",
-					{},
+					Type$of({}),
 					() => { return (undefined)})
 		,]),
 				Boolean))
@@ -479,7 +484,7 @@ throw ((() => { var _owner = left; return _owner[Type._s].checkIntegrity.call(_o
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("checkIntegrity")._and(Lambda(
 				Array(Type)([Parameter("obj",
-					{},
+					Type$of({}),
 					() => { return (undefined)})
 		,]),
 				Boolean))
@@ -488,10 +493,10 @@ throw (() => { const _left = Type("Intersection", check, checkIntegrity); return
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("Intersection@of")._and(Lambda(
 				Array(Type)([Parameter("left",
-					Type,
+					Type$of(Type),
 					() => { return (undefined)})
 		,,Parameter("right",
-					Type,
+					Type$of(Type),
 					() => { return (undefined)})
 		,]),
 				{}))
@@ -504,7 +509,7 @@ throw ((Type$get(Literal).__is_child(type) ) ? (do{throw Array$of.call('Type', T
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("go")._and(Lambda(
 				Array(Type)([Parameter("type",
-					Type,
+					Type$of(Type),
 					() => { return (undefined)})
 		,]),
 				{}))

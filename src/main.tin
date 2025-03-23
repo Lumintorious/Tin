@@ -1,18 +1,22 @@
-# import collections/Map
-import collections/List
+import collections/Iterable
 
-Animal = data:
-	breed: String
+Box = data:
+	get: () -> ~Number
+	setValue: (Number) ~> Void
 
-Furry = data:
-	something: Number
+ImmutableHolder = data:
+	box: ~Box
 
-Cat = Animal & Furry & data:
-	name: String
+makeBox = (n: Number) ->
+	number: ~Number = n
+	
+	get = () ->
+		~number 
 
-cat = Animal("Something") & Furry(2) & Cat("Mercy")
+	setValue = (newValue: Number) ~>
+		set number = newValue
 
-animal = Animal("Fwoof")
-arr = Array@of(1, 2, 3)
+	Box(get, setValue)
 
-print(arr)
+ImmutableHolder(makeBox(2))
+print("Hello")

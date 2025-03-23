@@ -1,335 +1,441 @@
-id: 491
+id: 479
 tag: Block
 skipReturn: false
 statements:
-  - id: 434
+  - id: 403
     tag: Import
-    path: collections/List
+    path: collections/Iterable
     position:
       start:
-        line: 2
+        line: 1
         column: 1
-        absolute: 32
+        absolute: 6
       end:
-        line: 4
+        line: 3
         column: 1
-        absolute: 53
-  - id: 442
+        absolute: 31
+  - id: 423
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 435
+      id: 404
       tag: Identifier
-      value: Animal
+      value: Box
     value:
-      id: 441
+      id: 422
       tag: TypeDef
       fieldDefs:
-        - id: 439
+        - id: 411
           tag: FieldDef
-          name: breed
+          mutable: false
+          name: get
           type:
-            id: 437
-            tag: Identifier
-            value: String
+            id: 409
+            tag: RoundValueToValueLambda
+            pure: true
+            capturesMutableValues: false
+            params:
+            block:
+              id: 408
+              tag: Block
+              skipReturn: false
+              statements:
+                - id: 407
+                  tag: UnaryOperator
+                  operator: ~
+                  expression:
+                    id: 406
+                    tag: Identifier
+                    value: Number
+                  position:
+                    start:
+                      line: 4
+                      column: 13
+                      absolute: 57
+                    end:
+                      line: 5
+                      column: 10
+                      absolute: 74
+            specifiedType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 5
+              column: 2
+              absolute: 74
+            end:
+              line: 5
+              column: 10
+              absolute: 74
+        - id: 420
+          tag: FieldDef
+          mutable: false
+          name: setValue
+          type:
+            id: 418
+            tag: RoundValueToValueLambda
+            pure: false
+            capturesMutableValues: false
+            params:
+              - id: 414
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  id: 413
+                  tag: Identifier
+                  value: Number
+                isDeclaration: false
+                isTypeLevel: true
+                position:
+                  start:
+                    line: 5
+                    column: 13
+                    absolute: 83
+                  end:
+                    line: 5
+                    column: 20
+                    absolute: 84
+            block:
+              id: 417
+              tag: Block
+              skipReturn: false
+              statements:
+                - id: 416
+                  tag: Identifier
+                  value: Void
+                  position:
+                    start:
+                      line: 5
+                      column: 24
+                      absolute: 92
+                    end:
+                      line: 7
+                      column: 1
+                      absolute: 96
+            specifiedType: undefined
           isTypeLevel: true
           position:
             start:
               line: 7
               column: 1
-              absolute: 87
+              absolute: 96
             end:
               line: 7
               column: 1
-              absolute: 87
+              absolute: 96
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
-        line: 4
+        line: 3
         column: 1
-        absolute: 59
+        absolute: 34
       end:
         line: 7
-        column: 6
-        absolute: 92
-  - id: 450
+        column: 16
+        absolute: 111
+  - id: 432
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 443
+      id: 424
       tag: Identifier
-      value: Furry
+      value: ImmutableHolder
     value:
-      id: 449
+      id: 431
       tag: TypeDef
       fieldDefs:
-        - id: 447
+        - id: 429
           tag: FieldDef
-          name: something
+          mutable: false
+          name: box
           type:
-            id: 445
-            tag: Identifier
-            value: Number
+            id: 427
+            tag: UnaryOperator
+            operator: ~
+            expression:
+              id: 426
+              tag: Identifier
+              value: Box
           isTypeLevel: true
           position:
             start:
               line: 10
               column: 1
-              absolute: 124
+              absolute: 135
             end:
               line: 10
               column: 1
-              absolute: 124
+              absolute: 135
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
         line: 7
         column: 1
-        absolute: 92
+        absolute: 111
       end:
         line: 10
-        column: 4
-        absolute: 127
-  - id: 462
+        column: 8
+        absolute: 142
+  - id: 470
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 451
+      id: 433
       tag: Identifier
-      value: Cat
+      value: makeBox
     value:
-      id: 461
-      tag: BinaryExpression
-      left:
-        id: 454
-        tag: BinaryExpression
-        left:
-          id: 452
-          tag: Identifier
-          value: Animal
-        operator: &
-        right:
-          id: 453
-          tag: Identifier
-          value: Furry
-      operator: &
-      right:
-        id: 460
-        tag: TypeDef
-        fieldDefs:
-          - id: 458
-            tag: FieldDef
-            name: name
-            type:
-              id: 456
+      id: 469
+      tag: RoundValueToValueLambda
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 437
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 434
+            tag: Identifier
+            value: n
+          type:
+            id: 435
+            tag: Identifier
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 10
+              column: 12
+              absolute: 147
+            end:
+              line: 10
+              column: 22
+              absolute: 156
+      block:
+        id: 468
+        tag: Block
+        skipReturn: false
+        statements:
+          - id: 444
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 439
               tag: Identifier
-              value: String
-            isTypeLevel: true
+              value: number
+            value:
+              id: 443
+              tag: Identifier
+              value: n
+            type:
+              id: 441
+              tag: UnaryOperator
+              operator: ~
+              expression:
+                id: 440
+                tag: Identifier
+                value: Number
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 11
+                column: 2
+                absolute: 168
+              end:
+                line: 13
+                column: 5
+                absolute: 190
+          - id: 450
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 445
+              tag: Identifier
+              value: get
+            value:
+              id: 449
+              tag: RoundValueToValueLambda
+              pure: true
+              capturesMutableValues: false
+              params:
+              block:
+                id: 448
+                tag: Block
+                skipReturn: false
+                statements:
+                  - id: 447
+                    tag: UnaryOperator
+                    operator: ~
+                    expression:
+                      id: 446
+                      tag: Identifier
+                      value: number
+                    position:
+                      start:
+                        line: 14
+                        column: 3
+                        absolute: 203
+                      end:
+                        line: 16
+                        column: 2
+                        absolute: 215
+              specifiedType: undefined
+            isDeclaration: true
+            isTypeLevel: false
             position:
               start:
                 line: 13
-                column: 1
-                absolute: 171
+                column: 2
+                absolute: 190
               end:
-                line: 13
+                line: 16
+                column: 10
+                absolute: 223
+          - id: 463
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 451
+              tag: Identifier
+              value: setValue
+            value:
+              id: 462
+              tag: RoundValueToValueLambda
+              pure: false
+              capturesMutableValues: false
+              params:
+                - id: 455
+                  tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    id: 452
+                    tag: Identifier
+                    value: newValue
+                  type:
+                    id: 453
+                    tag: Identifier
+                    value: Number
+                  isDeclaration: false
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 16
+                      column: 14
+                      absolute: 235
+                    end:
+                      line: 16
+                      column: 31
+                      absolute: 244
+              block:
+                id: 461
+                tag: Block
+                skipReturn: false
+                statements:
+                  - id: 460
+                    tag: Change
+                    lhs:
+                      id: 457
+                      tag: Identifier
+                      value: number
+                    value:
+                      id: 458
+                      tag: Identifier
+                      value: newValue
+                    position:
+                      start:
+                        line: 17
+                        column: 3
+                        absolute: 254
+                      end:
+                        line: 19
+                        column: 2
+                        absolute: 277
+              specifiedType: undefined
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 16
+                column: 2
+                absolute: 223
+              end:
+                line: 19
+                column: 5
+                absolute: 280
+          - id: 467
+            tag: RoundApply
+            calledInsteadOfSquare: false
+            paramOrder:
+            isFirstParamThis: false
+            isAnObjectCopy: false
+            isCallingAConstructor: false
+            callee:
+              id: 464
+              tag: Identifier
+              value: Box
+            args:
+              0:
+                - 
+                - id: 465
+                  tag: Identifier
+                  value: get
+                  position:
+                    start:
+                      line: 19
+                      column: 6
+                      absolute: 284
+                    end:
+                      line: 19
+                      column: 10
+                      absolute: 285
+              1:
+                - 
+                - id: 466
+                  tag: Identifier
+                  value: setValue
+                  position:
+                    start:
+                      line: 19
+                      column: 11
+                      absolute: 294
+                    end:
+                      line: 19
+                      column: 20
+                      absolute: 295
+            position:
+              start:
+                line: 19
+                column: 2
+                absolute: 280
+              end:
+                line: 21
                 column: 1
-                absolute: 171
+                absolute: 299
+      specifiedType: undefined
     isDeclaration: true
-    isTypeLevel: true
+    isTypeLevel: false
     position:
       start:
         line: 10
         column: 1
-        absolute: 127
+        absolute: 142
       end:
-        line: 13
-        column: 4
-        absolute: 174
+        line: 21
+        column: 16
+        absolute: 314
   - id: 475
-    tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      id: 463
-      tag: Identifier
-      value: cat
-    value:
-      id: 474
-      tag: BinaryExpression
-      left:
-        id: 470
-        tag: BinaryExpression
-        left:
-          id: 466
-          tag: RoundApply
-          calledInsteadOfSquare: false
-          paramOrder:
-          isFirstParamThis: false
-          isAnObjectCopy: false
-          isCallingAConstructor: false
-          callee:
-            id: 464
-            tag: Identifier
-            value: Animal
-          args:
-            - 0: 
-              1:
-                id: 465
-                tag: Literal
-                isTypeLiteral: false
-                type: String
-                value: Something
-        operator: &
-        right:
-          id: 469
-          tag: RoundApply
-          calledInsteadOfSquare: false
-          paramOrder:
-          isFirstParamThis: false
-          isAnObjectCopy: false
-          isCallingAConstructor: false
-          callee:
-            id: 467
-            tag: Identifier
-            value: Furry
-          args:
-            - 0: 
-              1:
-                id: 468
-                tag: Literal
-                isTypeLiteral: false
-                type: Number
-                value: 2
-      operator: &
-      right:
-        id: 473
-        tag: RoundApply
-        calledInsteadOfSquare: false
-        paramOrder:
-        isFirstParamThis: false
-        isAnObjectCopy: false
-        isCallingAConstructor: false
-        callee:
-          id: 471
-          tag: Identifier
-          value: Cat
-        args:
-          - 0: 
-            1:
-              id: 472
-              tag: Literal
-              isTypeLiteral: false
-              type: String
-              value: Mercy
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 13
-        column: 1
-        absolute: 174
-      end:
-        line: 15
-        column: 7
-        absolute: 232
-  - id: 480
-    tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      id: 476
-      tag: Identifier
-      value: animal
-    value:
-      id: 479
-      tag: RoundApply
-      calledInsteadOfSquare: false
-      paramOrder:
-      isFirstParamThis: false
-      isAnObjectCopy: false
-      isCallingAConstructor: false
-      callee:
-        id: 477
-        tag: Identifier
-        value: Animal
-      args:
-        - 0: 
-          1:
-            id: 478
-            tag: Literal
-            isTypeLiteral: false
-            type: String
-            value: Fwoof
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 15
-        column: 1
-        absolute: 232
-      end:
-        line: 16
-        column: 4
-        absolute: 255
-  - id: 487
-    tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      id: 481
-      tag: Identifier
-      value: arr
-    value:
-      id: 486
-      tag: RoundApply
-      calledInsteadOfSquare: false
-      paramOrder:
-      isFirstParamThis: false
-      isAnObjectCopy: false
-      isCallingAConstructor: false
-      callee:
-        id: 482
-        tag: Identifier
-        value: Array@of
-      args:
-        - 0: 
-          1:
-            id: 483
-            tag: Literal
-            isTypeLiteral: false
-            type: Number
-            value: 1
-        - 0: 
-          1:
-            id: 484
-            tag: Literal
-            isTypeLiteral: false
-            type: Number
-            value: 2
-        - 0: 
-          1:
-            id: 485
-            tag: Literal
-            isTypeLiteral: false
-            type: Number
-            value: 3
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 16
-        column: 1
-        absolute: 255
-      end:
-        line: 18
-        column: 6
-        absolute: 284
-  - id: 490
     tag: RoundApply
     calledInsteadOfSquare: false
     paramOrder:
@@ -337,27 +443,89 @@ statements:
     isAnObjectCopy: false
     isCallingAConstructor: false
     callee:
-      id: 488
+      id: 471
+      tag: Identifier
+      value: ImmutableHolder
+    args:
+      0:
+        - 
+        - id: 474
+          tag: RoundApply
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 472
+            tag: Identifier
+            value: makeBox
+          args:
+            0:
+              - 
+              - id: 473
+                tag: Literal
+                isTypeLiteral: false
+                type: Number
+                value: 2
+                position:
+                  start:
+                    line: 21
+                    column: 25
+                    absolute: 324
+                  end:
+                    line: 21
+                    column: 27
+                    absolute: 325
+          position:
+            start:
+              line: 21
+              column: 17
+              absolute: 322
+            end:
+              line: 21
+              column: 28
+              absolute: 326
+    position:
+      start:
+        line: 21
+        column: 1
+        absolute: 314
+      end:
+        line: 22
+        column: 6
+        absolute: 333
+  - id: 478
+    tag: RoundApply
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 476
       tag: Identifier
       value: print
     args:
       0:
         - 
-        - id: 489
-          tag: Identifier
-          value: arr
+        - id: 477
+          tag: Literal
+          isTypeLiteral: false
+          type: String
+          value: Hello
           position:
             start:
-              line: 18
+              line: 22
               column: 7
-              absolute: 288
+              absolute: 341
             end:
-              line: 18
-              column: 11
-              absolute: 289
+              line: 22
+              column: 15
+              absolute: 342
     position:
       start:
-        line: 18
+        line: 22
         column: 1
-        absolute: 284
+        absolute: 333
       end: 0

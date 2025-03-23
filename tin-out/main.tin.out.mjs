@@ -1,28 +1,62 @@
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
 				globalThis[key] = value;
 		  });;
-import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\List.tin.out.mjs";Object.entries(module1).forEach(([key, value]) => {
+import * as module1 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.mjs";Object.entries(module1).forEach(([key, value]) => {
 				globalThis[key] = value;
 		  });;
-export var Animal = _S(Symbol("Animal"), (_p0) => ({breed: _p0}), lazy(Type('Animal', (obj) => Reflect.ownKeys(obj).includes(Animal._s))._and(Struct(Array(0)([
-						Parameter("breed",
-					String,
+export var Box = _S(Symbol("Box"), (_p0,_p1) => ({get: _p0,setValue: _p1}), lazy(Type('Box', (obj) => Reflect.ownKeys(obj).includes(Box._s))._and(Struct(Array(0)([
+						Parameter("get",
+					Type$of(
+				Type("undefined")._and(Lambda(
+				Array(Type)([]),
+				{}))
+			),
 					() => { return (undefined)})
-		,
-			])))));
-export var Furry = _S(Symbol("Furry"), (_p0) => ({something: _p0}), lazy(Type('Furry', (obj) => Reflect.ownKeys(obj).includes(Furry._s))._and(Struct(Array(0)([
-						Parameter("something",
-					Number,
+		,Parameter("setValue",
+					Type$of(
+				Type("undefined")._and(Lambda(
+				Array(Type)([Parameter("undefined",
+					Type$of(Number),
 					() => { return (undefined)})
-		,
-			])))));
-export var Cat = (() => { const _left = (() => { const _left = Type$get(Animal); return _A(_left, Type$get(Furry));})(); return _A(_left, _S(Symbol("Cat"), (_p0) => ({name: _p0}), lazy(Type('Cat', (obj) => Reflect.ownKeys(obj).includes(Cat._s))._and(Struct(Array(0)([
-						Parameter("name",
-					String,
+		,]),
+				Null))
+			),
 					() => { return (undefined)})
-		,
-			]))))));})();
-export var cat/* Animal & Furry & Cat*/ = (() => { const _left = (() => { const _left = Animal("Something"); return _A(_left, Furry.call(_left, 2));})(); return _A(_left, Cat.call(_left, "Mercy"));})();
-export var animal/* Animal*/ = Animal("Fwoof");
-export var arr/* Array[Number]*/ = Array$of(0)(Array(0)([1, 2, 3]));
-print(arr)
+		
+			])))), {});
+export var ImmutableHolder = _S(Symbol("ImmutableHolder"), (_p0) => ({box: _p0}), lazy(Type('ImmutableHolder', (obj) => Reflect.ownKeys(obj).includes(ImmutableHolder._s))._and(Struct(Array(0)([
+						Parameter("box",
+					Type$of({}),
+					() => { return (undefined)})
+		
+			])))), {});
+export var makeBox/* (n:Number) -> Box*/ = _F(Symbol("lambda"), function(n) {try{
+var number/* ~Number*/ = n;
+var get/* () -> ~Number*/ = _F(Symbol("lambda"), function() {try{
+throw number
+} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
+				Type("get")._and(Lambda(
+				Array(Type)([]),
+				{}))
+			);
+var setValue/* (newValue:Number) ~> Any*/ = _F(Symbol("lambda"), function(newValue) {try{
+throw number = newValue
+} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
+				Type("setValue")._and(Lambda(
+				Array(Type)([Parameter("newValue",
+					Type$of(Number),
+					() => { return (undefined)})
+		,]),
+				{}))
+			);
+throw Box(get, setValue)
+} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
+				Type("makeBox")._and(Lambda(
+				Array(Type)([Parameter("n",
+					Type$of(Number),
+					() => { return (undefined)})
+		,]),
+				Box))
+			);
+ImmutableHolder(makeBox(2));
+print("Hello")

@@ -141,7 +141,7 @@ OPERATOR     | :            |  22, 34
 PARENS       | (            |  22, 36   
 IDENTIFIER   | T            |  22, 37   
 PARENS       | )            |  22, 38   
-OPERATOR     | ->           |  22, 40   
+OPERATOR     | ~>           |  22, 40   
 IDENTIFIER   | Nothing      |  22, 43   
 PARENS       | )            |  22, 50   
 OPERATOR     | ->           |  22, 52   
@@ -208,12 +208,18 @@ IDENTIFIER   | right        |  29, 66
 OPERATOR     | :            |  29, 71   
 IDENTIFIER   | String       |  29, 73   
 PARENS       | )            |  29, 79   
-OPERATOR     | ->           |  29, 81   
+OPERATOR     | :            |  29, 80   
+OPERATOR     | ~            |  29, 82   
+IDENTIFIER   | String       |  29, 83   
+OPERATOR     | ->           |  29, 90   
 NEWLINE      |              |  30, 1    
 INDENT       | 8            |  30, 1    
 IDENTIFIER   | string       |  30, 3    
-OPERATOR     | =            |  30, 10   
-STRING       |              |  30, 12   
+OPERATOR     | :            |  30, 9    
+OPERATOR     | ~            |  30, 11   
+IDENTIFIER   | String       |  30, 12   
+OPERATOR     | =            |  30, 19   
+STRING       |              |  30, 21   
 NEWLINE      |              |  31, 1    
 IDENTIFIER   | fn           |  31, 3    
 OPERATOR     | =            |  31, 6    
@@ -222,7 +228,10 @@ IDENTIFIER   | t            |  31, 9
 OPERATOR     | :            |  31, 10   
 IDENTIFIER   | T            |  31, 12   
 PARENS       | )            |  31, 13   
-OPERATOR     | ->           |  31, 15   
+OPERATOR     | :            |  31, 14   
+OPERATOR     | ~            |  31, 16   
+IDENTIFIER   | String       |  31, 17   
+OPERATOR     | ~>           |  31, 24   
 NEWLINE      |              |  32, 1    
 INDENT       | 12           |  32, 1    
 IDENTIFIER   | comma        |  32, 4    
@@ -294,12 +303,18 @@ PARENS       | )            |  37, 38
 OPERATOR     | ->           |  37, 40   
 IDENTIFIER   | Boolean      |  37, 43   
 PARENS       | )            |  37, 50   
-OPERATOR     | ->           |  37, 52   
+OPERATOR     | :            |  37, 51   
+OPERATOR     | ~            |  37, 53   
+IDENTIFIER   | Number       |  37, 54   
+OPERATOR     | ->           |  37, 61   
 NEWLINE      |              |  38, 1    
 INDENT       | 8            |  38, 1    
 IDENTIFIER   | num          |  38, 3    
-OPERATOR     | =            |  38, 7    
-NUMBER       | 0            |  38, 9    
+OPERATOR     | :            |  38, 6    
+OPERATOR     | ~            |  38, 8    
+IDENTIFIER   | Number       |  38, 9    
+OPERATOR     | =            |  38, 16   
+NUMBER       | 0            |  38, 18   
 NEWLINE      |              |  39, 1    
 IDENTIFIER   | this         |  39, 3    
 OPERATOR     | .            |  39, 7    
@@ -310,29 +325,31 @@ IDENTIFIER   | t            |  39, 17
 OPERATOR     | :            |  39, 18   
 IDENTIFIER   | T            |  39, 20   
 PARENS       | )            |  39, 21   
-OPERATOR     | ->           |  39, 23   
-KEYWORD      | if           |  39, 26   
-IDENTIFIER   | pred         |  39, 29   
-PARENS       | (            |  39, 33   
-IDENTIFIER   | t            |  39, 34   
-PARENS       | )            |  39, 35   
+OPERATOR     | :            |  39, 22   
+OPERATOR     | ~            |  39, 24   
+IDENTIFIER   | Any          |  39, 25   
+OPERATOR     | ~>           |  39, 29   
+KEYWORD      | if           |  39, 32   
+IDENTIFIER   | pred         |  39, 35   
+PARENS       | (            |  39, 39   
+IDENTIFIER   | t            |  39, 40   
+PARENS       | )            |  39, 41   
 NEWLINE      | ,            |  39, 1    
-KEYWORD      | set          |  39, 38   
-IDENTIFIER   | num          |  39, 42   
-OPERATOR     | =            |  39, 46   
+KEYWORD      | set          |  39, 44   
 IDENTIFIER   | num          |  39, 48   
-OPERATOR     | +            |  39, 52   
-NUMBER       | 1            |  39, 54   
-PARENS       | )            |  39, 55   
+OPERATOR     | =            |  39, 52   
+IDENTIFIER   | num          |  39, 54   
+OPERATOR     | +            |  39, 58   
+NUMBER       | 1            |  39, 60   
+PARENS       | )            |  39, 61   
 NEWLINE      |              |  40, 1    
 IDENTIFIER   | num          |  40, 3    
 NEWLINE      |              |  43, 1    
 DEDENT       | 8            |  43, 1    
 DEDENT       | 4            |  43, 1    
-IDENTIFIER   | print        |  43, 1    
-PARENS       | (            |  43, 6    
-STRING       | Loaded       |  43, 7    
-PARENS       | )            |  43, 15   
+IDENTIFIER   | ssss         |  43, 1    
+OPERATOR     | =            |  43, 6    
+NUMBER       | 2            |  43, 8    
 NEWLINE      |              |  44, 1    
 INDENT       | 4            |  44, 1    
 --undefined--

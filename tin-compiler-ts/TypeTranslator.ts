@@ -23,7 +23,7 @@ import {
 } from "./Scope";
 import { ParamType, SquareTypeToValueLambdaType, ThisType } from "./Types";
 import { Identifier } from "./Parser";
-import { AnyType } from "./Types";
+import { AnyType, MutableType } from "./Types";
 import {
    Type,
    NamedType,
@@ -98,6 +98,8 @@ export class TypeTranslator {
             }
             if (node.operator === "...") {
                return new VarargsType(this.translate(node.expression, scope));
+            } else if (node.operator === "~") {
+               return new MutableType(this.translate(node.expression, scope));
             } else {
                throw new Error("Unexpected unary operator");
             }
@@ -107,7 +109,6 @@ export class TypeTranslator {
             }
             return node;
          case "RoundValueToValueLambda":
-            // return new RoundValueToValueLambdaType(node.params.map(p => this.translate(p, scope/)))
             if (!(node instanceof RoundValueToValueLambda)) {
                throw new Error("Weird type");
             }
@@ -122,7 +123,9 @@ export class TypeTranslator {
                   )
                ),
                this.translate(node.block.statements[0], innerScope),
-               node.isTypeLambda
+               node.isTypeLambda === true,
+               node.pure,
+               node.capturesMutableValues
             );
             if (
                node.params.length > 0 &&
@@ -134,7 +137,6 @@ export class TypeTranslator {
             }
             return type;
          case "SquareTypeToTypeLambda":
-            // return new RoundValueToValueLambdaType(node.params.map(p => this.translate(p, scope/)))
             if (!(node instanceof SquareTypeToTypeLambda)) {
                throw new Error("Weird type");
             }
@@ -152,7 +154,6 @@ export class TypeTranslator {
                this.translate(node.returnType, innerScope2)
             );
          case "SquareTypeToValueLambda":
-            // return new RoundValueToValueLambdaType(node.params.map(p => this.translate(p, scope/)))
             if (!(node instanceof SquareTypeToValueLambda)) {
                throw new Error("Weird type");
             }
@@ -167,7 +168,8 @@ export class TypeTranslator {
             });
             return new SquareTypeToValueLambdaType(
                genericParametersX,
-               this.translate(node.block, innerScopeX)
+               this.translate(node.block, innerScopeX),
+               node.pure
             );
          case "Block":
             return this.translate((node as Block).statements[0], scope);
@@ -199,7 +201,12 @@ export class TypeTranslator {
                } else {
                   fieldType = new Type();
                }
-               return new ParamType(fieldType, f.name, f.defaultValue);
+               return new ParamType(
+                  fieldType,
+                  f.name,
+                  f.defaultValue,
+                  f.type instanceof MutableType
+               );
             });
             return new StructType(node.name, fieldTypes);
          case "RoundApply":

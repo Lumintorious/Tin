@@ -1,7 +1,7 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
-const applyableKeywords = ["return", "mut", "mutable", "set", "make", "import"];
+const applyableKeywords = ["return", "set", "import", "unsafe"];
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
    static currentNumber = 0;
@@ -13,6 +13,10 @@ export class AstNode {
    constructor(tag: string) {
       this.tag = tag;
       AstNode.toCheckForPosition.push(this);
+   }
+
+   show() {
+      return "Anonymous";
    }
 
    fromTo(start?: TokenPos, end?: TokenPos) {
@@ -136,11 +140,21 @@ export class RoundValueToValueLambda extends Term {
    isTypeLambda?: boolean;
    type?: RoundValueToValueLambdaType;
    name?: string;
-   constructor(params: Term[], block: Block, specifiedType?: Term) {
+   pure: boolean = true;
+   capturesMutableValues: boolean = false;
+   constructor(
+      params: Term[],
+      block: Block,
+      specifiedType?: Term,
+      pure: boolean = true,
+      capturesMutableValues: boolean = false
+   ) {
       super("RoundValueToValueLambda");
       this.params = params;
       this.block = block;
       this.specifiedType = specifiedType;
+      this.pure = pure;
+      this.capturesMutableValues = capturesMutableValues;
    }
 
    isFirstParamThis() {
@@ -153,16 +167,29 @@ export class RoundValueToValueLambda extends Term {
       }
       return false;
    }
+
+   show(): string {
+      return this.name || "Anonymous";
+   }
 }
 
 // [T] -> 1 + 2
 export class SquareTypeToValueLambda extends Term {
    parameterTypes: Term[];
    block: Term;
-   constructor(parameterTypes: Term[], block: Term) {
+   pure: boolean;
+   capturesMutableValues: boolean = false;
+   constructor(
+      parameterTypes: Term[],
+      block: Term,
+      pure: boolean,
+      capturesMutableValues: boolean = false
+   ) {
       super("SquareTypeToValueLambda");
       this.parameterTypes = parameterTypes;
       this.block = block;
+      this.pure = pure;
+      this.capturesMutableValues = capturesMutableValues;
    }
 }
 
@@ -266,6 +293,10 @@ export class Identifier extends Term {
       // this.isType = value.charAt(0) === value.charAt(0).toUpperCase()
    }
 
+   show() {
+      return this.value;
+   }
+
    isTypeIdentifier() {
       const parts = this.value.split("@");
       const lastPart = parts[parts.length - 1];
@@ -319,6 +350,10 @@ export class Select extends Term {
       this.owner = owner;
       this.field = field;
       this.ammortized = ammortized;
+   }
+
+   show() {
+      return this.owner.show() + (this.ammortized ? "?." : ".") + this.field;
    }
 }
 
@@ -506,12 +541,16 @@ export class Parser {
 
       const end = this.consume("PARENS", isSquare ? "]" : ")");
 
-      const result = isSquare
+      let result: Term = isSquare
          ? new SquareApply(
               callee,
               args.map(([name, type]) => type)
            )
          : new RoundApply(callee, args);
+      if (callee instanceof UnaryOperator) {
+         result = new UnaryOperator(callee.operator, result);
+         (result as any).expression.callee = callee.expression;
+      }
 
       return result.fromTo(start.position, end.position); // Return a function application node
    }
@@ -542,6 +581,10 @@ export class Parser {
          this.consume("OPERATOR", "...");
          left = this.parsePrimary();
          left = new UnaryOperator("...", left);
+      } else if (this.peek() && this.peek().value === "~") {
+         this.consume("OPERATOR", "~");
+         left = this.parsePrimary();
+         left = new UnaryOperator("~", left);
       } else {
          left = this.parsePrimary();
       }
@@ -810,6 +853,8 @@ export class Parser {
       if (
          (!this.peek() ||
             (this.peek().value != "->" &&
+               this.peek().value != "~>" &&
+               this.peek().value != "~~>" &&
                (this.peek().value != "=>" || !isSquare))) &&
          groupCatch !== undefined
       ) {
@@ -823,7 +868,16 @@ export class Parser {
          }
          return result;
       }
-      let arrow = this.consume("OPERATOR");
+      let arrow;
+      if (this.peek().value === "->") {
+         arrow = this.consume("OPERATOR", "->");
+      } else if (this.peek().value === "~>") {
+         arrow = this.consume("OPERATOR", "~>");
+      } else if (this.peek().value === "~~>") {
+         arrow = this.consume("OPERATOR", "~~>");
+      } else {
+         arrow = this.consume();
+      }
       let body = this.parseExpression(undefined, true);
       const givesType = body.isTypeLevel || arrow.value === "=>"; // arrow.value === "=>";
       if (!givesType) {
@@ -837,15 +891,19 @@ export class Parser {
             block = new Block([body]).fromTo(lambdaStart, this.positionNow());
          }
          if (isSquare) {
-            return new SquareTypeToValueLambda(parameters, block).fromTo(
-               lambdaStart,
-               this.positionNow()
-            );
+            return new SquareTypeToValueLambda(
+               parameters,
+               block,
+               arrow.value === "->",
+               arrow.value === "~~>"
+            ).fromTo(lambdaStart, this.positionNow());
          } else {
             return new RoundValueToValueLambda(
                parameters,
                block,
-               specifiedType
+               specifiedType,
+               arrow.value === "->",
+               arrow.value === "~~>"
             ).fromTo(lambdaStart, this.positionNow());
          }
       } else {
@@ -869,7 +927,9 @@ export class Parser {
             return new RoundValueToValueLambda(
                parameters,
                block,
-               specifiedType
+               specifiedType,
+               arrow.value === "->",
+               arrow.value === "~~>"
             ).fromTo(lambdaStart, this.positionNow());
             // return new RoundTypeToTypeLambda(parameters, returnType).fromTo(
             //    lambdaStart,
@@ -946,6 +1006,8 @@ export class Parser {
          return new Make(expression);
       } else if (keyword.value === "return") {
          return new AppliedKeyword("return", expression);
+      } else if (keyword.value === "unsafe") {
+         return new AppliedKeyword("unsafe", expression);
       } else if (expression instanceof Assignment && keyword.value === "mut") {
          expression.isMutable = true;
          return expression;
@@ -1136,12 +1198,19 @@ export class FieldDef extends AstNode {
    name: string;
    type?: Term;
    defaultValue?: Term;
-   constructor(name: string, type?: Term, defaultValue?: Term) {
+   mutable: boolean = false;
+   constructor(
+      name: string,
+      type?: Term,
+      defaultValue?: Term,
+      mutable: boolean = false
+   ) {
       super("FieldDef");
       this.name = name;
       this.type = type;
       this.defaultValue = defaultValue;
       this.isTypeLevel = true;
+      this.mutable = mutable;
    }
 }
 
@@ -1198,7 +1267,14 @@ export function parseObject(parser: Parser): DataDef {
          break;
       }
 
-      // if (token.tag === "IDENTIFIER") {
+      let mutable = false;
+      if (
+         parser.peek().tag === "KEYWORD" &&
+         parser.peek().value === "mutable"
+      ) {
+         parser.consume("KEYWORD", "mutable");
+         mutable = true;
+      }
       let expr;
       try {
          expr = parser.parseExpression();
@@ -1208,14 +1284,16 @@ export function parseObject(parser: Parser): DataDef {
       const exprStart = parser.positionNow();
       if (expr instanceof Cast && expr.expression instanceof Identifier) {
          fieldDefs.push(
-            new FieldDef(expr.expression.value, expr.type).fromTo(
-               exprStart,
-               parser.positionNow()
-            )
+            new FieldDef(
+               expr.expression.value,
+               expr.type,
+               undefined,
+               mutable
+            ).fromTo(exprStart, parser.positionNow())
          );
       } else if (expr instanceof Assignment && expr.lhs instanceof Identifier) {
          fieldDefs.push(
-            new FieldDef(expr.lhs.value, expr.type, expr.value).fromTo(
+            new FieldDef(expr.lhs.value, expr.type, expr.value, mutable).fromTo(
                exprStart,
                parser.positionNow()
             )

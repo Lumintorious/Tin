@@ -1,4 +1,4 @@
-id: 400
+id: 369
 tag: Block
 skipReturn: false
 statements:
@@ -36,6 +36,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
       fieldDefs:
         - id: 6
           tag: FieldDef
+          mutable: false
           name: name
           type:
             id: 4
@@ -53,10 +54,13 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 199
         - id: 19
           tag: FieldDef
+          mutable: false
           name: check
           defaultValue:
             id: 17
             tag: RoundValueToValueLambda
+            pure: true
+            capturesMutableValues: false
             params:
               - id: 11
                 tag: Assignment
@@ -120,10 +124,13 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 247
         - id: 32
           tag: FieldDef
+          mutable: false
           name: checkIntegrity
           defaultValue:
             id: 30
             tag: RoundValueToValueLambda
+            pure: true
+            capturesMutableValues: false
             params:
               - id: 24
                 tag: Assignment
@@ -187,10 +194,13 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 283
         - id: 45
           tag: FieldDef
+          mutable: false
           name: is
           defaultValue:
             id: 43
             tag: RoundValueToValueLambda
+            pure: true
+            capturesMutableValues: false
             params:
               - id: 37
                 tag: Assignment
@@ -280,6 +290,8 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
     type:
       id: 57
       tag: RoundValueToValueLambda
+      pure: true
+      capturesMutableValues: false
       params:
         - id: 53
           tag: Assignment
@@ -347,6 +359,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
       fieldDefs:
         - id: 65
           tag: FieldDef
+          mutable: false
           name: name
           type:
             id: 63
@@ -364,6 +377,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 398
         - id: 69
           tag: FieldDef
+          mutable: false
           name: tpe
           type:
             id: 67
@@ -381,6 +395,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 419
         - id: 77
           tag: FieldDef
+          mutable: false
           name: defaultValue
           type:
             id: 75
@@ -392,6 +407,8 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               value:
                 id: 73
                 tag: RoundValueToValueLambda
+                pure: true
+                capturesMutableValues: false
                 params:
                 block:
                   id: 72
@@ -446,6 +463,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
       fieldDefs:
         - id: 86
           tag: FieldDef
+          mutable: false
           name: name
           type:
             id: 84
@@ -467,6 +485,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 476
         - id: 90
           tag: FieldDef
+          mutable: false
           name: tpe
           type:
             id: 88
@@ -484,6 +503,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               absolute: 497
         - id: 98
           tag: FieldDef
+          mutable: false
           name: defaultValue
           type:
             id: 96
@@ -495,6 +515,8 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
               value:
                 id: 94
                 tag: RoundValueToValueLambda
+                pure: true
+                capturesMutableValues: false
                 params:
                 block:
                   id: 93
@@ -557,6 +579,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
         fieldDefs:
           - id: 107
             tag: FieldDef
+            mutable: false
             name: left
             type:
               id: 105
@@ -574,6 +597,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
                 absolute: 563
           - id: 111
             tag: FieldDef
+            mutable: false
             name: right
             type:
               id: 109
@@ -622,6 +646,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
         fieldDefs:
           - id: 121
             tag: FieldDef
+            mutable: false
             name: left
             type:
               id: 119
@@ -639,6 +664,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
                 absolute: 614
           - id: 125
             tag: FieldDef
+            mutable: false
             name: right
             type:
               id: 123
@@ -687,6 +713,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
         fieldDefs:
           - id: 137
             tag: FieldDef
+            mutable: false
             name: fields
             type:
               id: 135
@@ -751,6 +778,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
         fieldDefs:
           - id: 149
             tag: FieldDef
+            mutable: false
             name: params
             type:
               id: 147
@@ -784,6 +812,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
                 absolute: 733
           - id: 153
             tag: FieldDef
+            mutable: false
             name: resultType
             type:
               id: 151
@@ -832,10 +861,13 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
         fieldDefs:
           - id: 165
             tag: FieldDef
+            mutable: false
             name: get
             type:
               id: 163
               tag: RoundValueToValueLambda
+              pure: true
+              capturesMutableValues: false
               params:
               block:
                 id: 162
@@ -886,6 +918,7 @@ export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n)
       type: String
       value: 
 export const Null = _S(Symbol("Null"), () => undefined, lazy(Type("Null", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === undefined, (n) => n === undefined)));
 export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", (n) => typeof n === "number", (n) => typeof n === "number")));
 export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", (n) => typeof n === "string", (n) => typeof n === "string")));
 
@@ -897,7 +930,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
       end:
         line: 42
         column: 8
-        absolute: 1275
+        absolute: 1414
   - id: 191
     tag: Assignment
     isMutable: false
@@ -920,6 +953,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
         fieldDefs:
           - id: 183
             tag: FieldDef
+            mutable: false
             name: value
             type:
               id: 181
@@ -954,13 +988,14 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               start:
                 line: 44
                 column: 2
-                absolute: 1339
+                absolute: 1478
               end:
                 line: 44
                 column: 6
-                absolute: 1339
+                absolute: 1478
           - id: 187
             tag: FieldDef
+            mutable: false
             name: type
             type:
               id: 185
@@ -971,33 +1006,41 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               start:
                 line: 46
                 column: 1
-                absolute: 1349
+                absolute: 1488
               end:
                 line: 46
                 column: 1
-                absolute: 1349
+                absolute: 1488
     isDeclaration: true
     isTypeLevel: true
     position:
       start:
         line: 42
         column: 1
-        absolute: 1275
+        absolute: 1414
       end:
         line: 46
-        column: 15
-        absolute: 1363
-  - id: 222
+        column: 8
+        absolute: 1495
+  - id: 203
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
       id: 192
       tag: Identifier
-      value: RefType@create
+      value: jsonify
     value:
-      id: 221
+      id: 202
+      tag: Literal
+      isTypeLiteral: false
+      type: Any
+      value: 
+    type:
+      id: 200
       tag: RoundValueToValueLambda
+      pure: true
+      capturesMutableValues: false
       params:
         - id: 196
           tag: Assignment
@@ -1006,154 +1049,39 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
           lhs:
             id: 193
             tag: Identifier
-            value: name
+            value: obj
           type:
             id: 194
             tag: Identifier
-            value: String
+            value: Any
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
               line: 46
-              column: 19
-              absolute: 1371
+              column: 11
+              absolute: 1501
             end:
               line: 46
-              column: 32
-              absolute: 1380
-        - id: 203
-          tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            id: 198
-            tag: Identifier
-            value: get
-          type:
-            id: 201
-            tag: RoundValueToValueLambda
-            params:
-            block:
-              id: 200
-              tag: Block
-              skipReturn: false
-              statements:
-                - id: 199
-                  tag: Identifier
-                  value: Type
-                  position:
-                    start:
-                      line: 46
-                      column: 44
-                      absolute: 1396
-                    end:
-                      line: 46
-                      column: 49
-                      absolute: 1397
-            specifiedType: undefined
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 46
-              column: 33
-              absolute: 1384
-            end:
-              line: 46
-              column: 49
-              absolute: 1397
+              column: 20
+              absolute: 1507
       block:
-        id: 220
+        id: 199
         tag: Block
         skipReturn: false
         statements:
-          - id: 219
-            tag: BinaryExpression
-            left:
-              id: 215
-              tag: RoundApply
-              calledInsteadOfSquare: false
-              paramOrder:
-              isFirstParamThis: false
-              isAnObjectCopy: false
-              isCallingAConstructor: false
-              callee:
-                id: 205
-                tag: Identifier
-                value: Type
-              args:
-                - 0: 
-                  1:
-                    id: 206
-                    tag: Identifier
-                    value: name
-                - 0: 
-                  1:
-                    id: 210
-                    tag: Select
-                    ammortized: false
-                    owner:
-                      id: 208
-                      tag: RoundApply
-                      calledInsteadOfSquare: false
-                      paramOrder:
-                      isFirstParamThis: false
-                      isAnObjectCopy: false
-                      isCallingAConstructor: false
-                      callee:
-                        id: 207
-                        tag: Identifier
-                        value: get
-                      args:
-                    field: check
-                - 0: 
-                  1:
-                    id: 214
-                    tag: Select
-                    ammortized: false
-                    owner:
-                      id: 212
-                      tag: RoundApply
-                      calledInsteadOfSquare: false
-                      paramOrder:
-                      isFirstParamThis: false
-                      isAnObjectCopy: false
-                      isCallingAConstructor: false
-                      callee:
-                        id: 211
-                        tag: Identifier
-                        value: get
-                      args:
-                    field: checkIntegrity
-            operator: &
-            right:
-              id: 218
-              tag: RoundApply
-              calledInsteadOfSquare: false
-              paramOrder:
-              isFirstParamThis: false
-              isAnObjectCopy: false
-              isCallingAConstructor: false
-              callee:
-                id: 216
-                tag: Identifier
-                value: RefType
-              args:
-                - 0: 
-                  1:
-                    id: 217
-                    tag: Identifier
-                    value: get
+          - id: 198
+            tag: Identifier
+            value: String
             position:
               start:
-                line: 47
-                column: 2
-                absolute: 1407
+                line: 46
+                column: 24
+                absolute: 1517
               end:
-                line: 49
-                column: 1
-                absolute: 1467
+                line: 46
+                column: 32
+                absolute: 1519
       specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
@@ -1161,236 +1089,284 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
       start:
         line: 46
         column: 1
-        absolute: 1363
+        absolute: 1495
       end:
-        line: 49
-        column: 8
-        absolute: 1474
-  - id: 234
-    tag: Assignment
-    isMutable: false
-    isParameter: false
-    lhs:
-      id: 223
-      tag: Identifier
-      value: jsonify
-    value:
-      id: 233
-      tag: Literal
-      isTypeLiteral: false
-      type: Any
-      value: 
-    type:
-      id: 231
-      tag: RoundValueToValueLambda
-      params:
-        - id: 227
-          tag: Assignment
-          isMutable: false
-          isParameter: true
-          lhs:
-            id: 224
-            tag: Identifier
-            value: obj
-          type:
-            id: 225
-            tag: Identifier
-            value: Any
-          isDeclaration: false
-          isTypeLevel: false
-          position:
-            start:
-              line: 49
-              column: 11
-              absolute: 1480
-            end:
-              line: 49
-              column: 20
-              absolute: 1486
-      block:
-        id: 230
-        tag: Block
-        skipReturn: false
-        statements:
-          - id: 229
-            tag: Identifier
-            value: String
-            position:
-              start:
-                line: 49
-                column: 24
-                absolute: 1496
-              end:
-                line: 49
-                column: 32
-                absolute: 1498
-      specifiedType: undefined
-    isDeclaration: true
-    isTypeLevel: false
-    position:
-      start:
-        line: 49
-        column: 1
-        absolute: 1474
-      end:
-        line: 50
+        line: 47
         column: 10
-        absolute: 1518
-  - id: 246
+        absolute: 1539
+  - id: 215
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 235
+      id: 204
       tag: Identifier
       value: dejsonify
     value:
-      id: 245
+      id: 214
       tag: Literal
       isTypeLiteral: false
       type: Any
       value: 
     type:
-      id: 243
+      id: 212
       tag: RoundValueToValueLambda
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 239
+        - id: 208
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 236
+            id: 205
             tag: Identifier
             value: json
           type:
-            id: 237
+            id: 206
             tag: Identifier
             value: String
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
-              line: 50
+              line: 47
               column: 13
-              absolute: 1525
+              absolute: 1546
             end:
-              line: 50
+              line: 47
               column: 26
-              absolute: 1534
+              absolute: 1555
       block:
-        id: 242
+        id: 211
         tag: Block
         skipReturn: false
         statements:
-          - id: 241
+          - id: 210
             tag: Identifier
             value: Any
             position:
               start:
-                line: 50
+                line: 47
                 column: 30
-                absolute: 1541
+                absolute: 1562
               end:
-                line: 50
+                line: 47
                 column: 35
-                absolute: 1543
+                absolute: 1564
       specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 50
+        line: 47
         column: 1
-        absolute: 1518
+        absolute: 1539
       end:
-        line: 52
+        line: 49
         column: 16
-        absolute: 1571
-  - id: 314
+        absolute: 1592
+  - id: 283
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 247
+      id: 216
       tag: Identifier
       value: Intersection@of
     value:
-      id: 313
+      id: 282
       tag: RoundValueToValueLambda
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 251
+        - id: 220
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 248
+            id: 217
             tag: Identifier
             value: left
           type:
-            id: 249
+            id: 218
             tag: Identifier
             value: Type
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
-              line: 52
+              line: 49
               column: 20
-              absolute: 1579
+              absolute: 1600
             end:
-              line: 52
+              line: 49
               column: 31
-              absolute: 1586
-        - id: 256
+              absolute: 1607
+        - id: 225
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 253
+            id: 222
             tag: Identifier
             value: right
           type:
-            id: 254
+            id: 223
             tag: Identifier
             value: Type
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
-              line: 52
+              line: 49
               column: 32
-              absolute: 1592
+              absolute: 1613
             end:
-              line: 52
+              line: 49
               column: 44
-              absolute: 1599
+              absolute: 1620
       block:
-        id: 312
+        id: 281
         tag: Block
         skipReturn: false
         statements:
-          - id: 279
+          - id: 248
             tag: Assignment
             isMutable: false
             isParameter: false
             lhs:
-              id: 258
+              id: 227
               tag: Identifier
               value: check
             value:
-              id: 278
+              id: 247
               tag: RoundValueToValueLambda
+              pure: true
+              capturesMutableValues: false
               params:
-                - id: 262
+                - id: 231
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 259
+                    id: 228
                     tag: Identifier
                     value: obj
                   type:
-                    id: 260
+                    id: 229
+                    tag: Identifier
+                    value: Any
+                  isDeclaration: false
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 50
+                      column: 11
+                      absolute: 1638
+                    end:
+                      line: 50
+                      column: 20
+                      absolute: 1644
+              block:
+                id: 246
+                tag: Block
+                skipReturn: false
+                statements:
+                  - id: 245
+                    tag: BinaryExpression
+                    left:
+                      id: 238
+                      tag: RoundApply
+                      calledInsteadOfSquare: false
+                      paramOrder:
+                      isFirstParamThis: false
+                      isAnObjectCopy: false
+                      isCallingAConstructor: false
+                      callee:
+                        id: 237
+                        tag: Select
+                        ammortized: false
+                        owner:
+                          id: 233
+                          tag: Identifier
+                          value: left
+                        field: check
+                      args:
+                        - 0: 
+                          1:
+                            id: 235
+                            tag: Identifier
+                            value: obj
+                    operator: &&
+                    right:
+                      id: 244
+                      tag: RoundApply
+                      calledInsteadOfSquare: false
+                      paramOrder:
+                      isFirstParamThis: false
+                      isAnObjectCopy: false
+                      isCallingAConstructor: false
+                      callee:
+                        id: 243
+                        tag: Select
+                        ammortized: false
+                        owner:
+                          id: 239
+                          tag: Identifier
+                          value: right
+                        field: check
+                      args:
+                        - 0: 
+                          1:
+                            id: 241
+                            tag: Identifier
+                            value: obj
+                    position:
+                      start:
+                        line: 51
+                        column: 3
+                        absolute: 1655
+                      end:
+                        line: 53
+                        column: 2
+                        absolute: 1691
+              specifiedType: undefined
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 50
+                column: 2
+                absolute: 1631
+              end:
+                line: 53
+                column: 16
+                absolute: 1705
+          - id: 270
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 249
+              tag: Identifier
+              value: checkIntegrity
+            value:
+              id: 269
+              tag: RoundValueToValueLambda
+              pure: true
+              capturesMutableValues: false
+              params:
+                - id: 253
+                  tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    id: 250
+                    tag: Identifier
+                    value: obj
+                  type:
+                    id: 251
                     tag: Identifier
                     value: Any
                   isDeclaration: false
@@ -1398,21 +1374,21 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                   position:
                     start:
                       line: 53
-                      column: 11
-                      absolute: 1617
+                      column: 20
+                      absolute: 1712
                     end:
                       line: 53
-                      column: 20
-                      absolute: 1623
+                      column: 29
+                      absolute: 1718
               block:
-                id: 277
+                id: 268
                 tag: Block
                 skipReturn: false
                 statements:
-                  - id: 276
+                  - id: 267
                     tag: BinaryExpression
                     left:
-                      id: 269
+                      id: 260
                       tag: RoundApply
                       calledInsteadOfSquare: false
                       paramOrder:
@@ -1420,23 +1396,23 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       isAnObjectCopy: false
                       isCallingAConstructor: false
                       callee:
-                        id: 268
+                        id: 259
                         tag: Select
                         ammortized: false
                         owner:
-                          id: 264
+                          id: 255
                           tag: Identifier
                           value: left
-                        field: check
+                        field: checkIntegrity
                       args:
                         - 0: 
                           1:
-                            id: 266
+                            id: 257
                             tag: Identifier
                             value: obj
                     operator: &&
                     right:
-                      id: 275
+                      id: 266
                       tag: RoundApply
                       calledInsteadOfSquare: false
                       paramOrder:
@@ -1444,29 +1420,29 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       isAnObjectCopy: false
                       isCallingAConstructor: false
                       callee:
-                        id: 274
+                        id: 265
                         tag: Select
                         ammortized: false
                         owner:
-                          id: 270
+                          id: 261
                           tag: Identifier
                           value: right
-                        field: check
+                        field: checkIntegrity
                       args:
                         - 0: 
                           1:
-                            id: 272
+                            id: 263
                             tag: Identifier
                             value: obj
                     position:
                       start:
                         line: 54
                         column: 3
-                        absolute: 1634
+                        absolute: 1729
                       end:
                         line: 56
                         column: 2
-                        absolute: 1670
+                        absolute: 1783
               specifiedType: undefined
             isDeclaration: true
             isTypeLevel: false
@@ -1474,125 +1450,15 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               start:
                 line: 53
                 column: 2
-                absolute: 1610
+                absolute: 1705
               end:
                 line: 56
-                column: 16
-                absolute: 1684
-          - id: 301
-            tag: Assignment
-            isMutable: false
-            isParameter: false
-            lhs:
-              id: 280
-              tag: Identifier
-              value: checkIntegrity
-            value:
-              id: 300
-              tag: RoundValueToValueLambda
-              params:
-                - id: 284
-                  tag: Assignment
-                  isMutable: false
-                  isParameter: true
-                  lhs:
-                    id: 281
-                    tag: Identifier
-                    value: obj
-                  type:
-                    id: 282
-                    tag: Identifier
-                    value: Any
-                  isDeclaration: false
-                  isTypeLevel: false
-                  position:
-                    start:
-                      line: 56
-                      column: 20
-                      absolute: 1691
-                    end:
-                      line: 56
-                      column: 29
-                      absolute: 1697
-              block:
-                id: 299
-                tag: Block
-                skipReturn: false
-                statements:
-                  - id: 298
-                    tag: BinaryExpression
-                    left:
-                      id: 291
-                      tag: RoundApply
-                      calledInsteadOfSquare: false
-                      paramOrder:
-                      isFirstParamThis: false
-                      isAnObjectCopy: false
-                      isCallingAConstructor: false
-                      callee:
-                        id: 290
-                        tag: Select
-                        ammortized: false
-                        owner:
-                          id: 286
-                          tag: Identifier
-                          value: left
-                        field: checkIntegrity
-                      args:
-                        - 0: 
-                          1:
-                            id: 288
-                            tag: Identifier
-                            value: obj
-                    operator: &&
-                    right:
-                      id: 297
-                      tag: RoundApply
-                      calledInsteadOfSquare: false
-                      paramOrder:
-                      isFirstParamThis: false
-                      isAnObjectCopy: false
-                      isCallingAConstructor: false
-                      callee:
-                        id: 296
-                        tag: Select
-                        ammortized: false
-                        owner:
-                          id: 292
-                          tag: Identifier
-                          value: right
-                        field: checkIntegrity
-                      args:
-                        - 0: 
-                          1:
-                            id: 294
-                            tag: Identifier
-                            value: obj
-                    position:
-                      start:
-                        line: 57
-                        column: 3
-                        absolute: 1708
-                      end:
-                        line: 59
-                        column: 2
-                        absolute: 1762
-              specifiedType: undefined
-            isDeclaration: true
-            isTypeLevel: false
-            position:
-              start:
-                line: 56
-                column: 2
-                absolute: 1684
-              end:
-                line: 59
                 column: 6
-                absolute: 1766
-          - id: 311
+                absolute: 1787
+          - id: 280
             tag: BinaryExpression
             left:
-              id: 306
+              id: 275
               tag: RoundApply
               calledInsteadOfSquare: false
               paramOrder:
@@ -1600,30 +1466,30 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               isAnObjectCopy: false
               isCallingAConstructor: false
               callee:
-                id: 302
+                id: 271
                 tag: Identifier
                 value: Type
               args:
                 - 0: 
                   1:
-                    id: 303
+                    id: 272
                     tag: Literal
                     isTypeLiteral: false
                     type: String
                     value: Intersection
                 - 0: 
                   1:
-                    id: 304
+                    id: 273
                     tag: Identifier
                     value: check
                 - 0: 
                   1:
-                    id: 305
+                    id: 274
                     tag: Identifier
                     value: checkIntegrity
             operator: &
             right:
-              id: 310
+              id: 279
               tag: RoundApply
               calledInsteadOfSquare: false
               paramOrder:
@@ -1631,141 +1497,141 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               isAnObjectCopy: false
               isCallingAConstructor: false
               callee:
-                id: 307
+                id: 276
                 tag: Identifier
                 value: Intersection
               args:
                 - 0: 
                   1:
-                    id: 308
+                    id: 277
                     tag: Identifier
                     value: left
                 - 0: 
                   1:
-                    id: 309
+                    id: 278
                     tag: Identifier
                     value: right
             position:
               start:
-                line: 59
+                line: 56
                 column: 2
-                absolute: 1766
+                absolute: 1787
               end:
-                line: 61
+                line: 58
                 column: 1
-                absolute: 1837
+                absolute: 1858
       specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 52
+        line: 49
         column: 1
-        absolute: 1571
+        absolute: 1592
       end:
-        line: 61
+        line: 58
         column: 6
-        absolute: 1842
-  - id: 335
+        absolute: 1863
+  - id: 304
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 315
+      id: 284
       tag: Identifier
       value: Digit
     value:
-      id: 334
+      id: 303
       tag: BinaryExpression
       left:
-        id: 332
+        id: 301
         tag: BinaryExpression
         left:
-          id: 330
+          id: 299
           tag: BinaryExpression
           left:
-            id: 328
+            id: 297
             tag: BinaryExpression
             left:
-              id: 326
+              id: 295
               tag: BinaryExpression
               left:
-                id: 324
+                id: 293
                 tag: BinaryExpression
                 left:
-                  id: 322
+                  id: 291
                   tag: BinaryExpression
                   left:
-                    id: 320
+                    id: 289
                     tag: BinaryExpression
                     left:
-                      id: 318
+                      id: 287
                       tag: BinaryExpression
                       left:
-                        id: 316
+                        id: 285
                         tag: Literal
                         isTypeLiteral: false
                         type: Number
                         value: 0
                       operator: |
                       right:
-                        id: 317
+                        id: 286
                         tag: Literal
                         isTypeLiteral: false
                         type: Number
                         value: 1
                     operator: |
                     right:
-                      id: 319
+                      id: 288
                       tag: Literal
                       isTypeLiteral: false
                       type: Number
                       value: 2
                   operator: |
                   right:
-                    id: 321
+                    id: 290
                     tag: Literal
                     isTypeLiteral: false
                     type: Number
                     value: 3
                 operator: |
                 right:
-                  id: 323
+                  id: 292
                   tag: Literal
                   isTypeLiteral: false
                   type: Number
                   value: 4
               operator: |
               right:
-                id: 325
+                id: 294
                 tag: Literal
                 isTypeLiteral: false
                 type: Number
                 value: 5
             operator: |
             right:
-              id: 327
+              id: 296
               tag: Literal
               isTypeLiteral: false
               type: Number
               value: 6
           operator: |
           right:
-            id: 329
+            id: 298
             tag: Literal
             isTypeLiteral: false
             type: Number
             value: 7
         operator: |
         right:
-          id: 331
+          id: 300
           tag: Literal
           isTypeLiteral: false
           type: Number
           value: 8
       operator: |
       right:
-        id: 333
+        id: 302
         tag: Literal
         isTypeLiteral: false
         type: Number
@@ -1774,23 +1640,23 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
     isTypeLevel: true
     position:
       start:
-        line: 61
+        line: 58
         column: 1
-        absolute: 1842
+        absolute: 1863
       end:
-        line: 62
+        line: 59
         column: 4
-        absolute: 1887
-  - id: 338
+        absolute: 1908
+  - id: 307
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 336
+      id: 305
       tag: Identifier
       value: One
     value:
-      id: 337
+      id: 306
       tag: Literal
       isTypeLiteral: false
       type: Number
@@ -1799,108 +1665,111 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
     isTypeLevel: true
     position:
       start:
-        line: 62
+        line: 59
         column: 1
-        absolute: 1887
+        absolute: 1908
       end:
-        line: 64
+        line: 61
         column: 13
-        absolute: 1907
-  - id: 399
+        absolute: 1928
+  - id: 368
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 339
+      id: 308
       tag: Identifier
       value: Union@values
     value:
-      id: 398
+      id: 367
       tag: SquareTypeToValueLambda
+      capturesMutableValues: false
       parameterTypes:
-        - id: 341
+        - id: 310
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 340
+            id: 309
             tag: Identifier
             value: T
           isDeclaration: false
           isTypeLevel: true
           position:
             start:
-              line: 64
+              line: 61
               column: 17
-              absolute: 1912
+              absolute: 1933
             end:
-              line: 64
+              line: 61
               column: 19
-              absolute: 1913
+              absolute: 1934
       block:
-        id: 397
+        id: 366
         tag: Block
         skipReturn: false
         statements:
-          - id: 393
+          - id: 362
             tag: Assignment
             isMutable: false
             isParameter: false
             lhs:
-              id: 343
+              id: 312
               tag: Identifier
               value: go
             value:
-              id: 392
+              id: 361
               tag: RoundValueToValueLambda
+              pure: true
+              capturesMutableValues: false
               params:
-                - id: 347
+                - id: 316
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 344
+                    id: 313
                     tag: Identifier
                     value: type
                   type:
-                    id: 345
+                    id: 314
                     tag: Identifier
                     value: Type
                   isDeclaration: false
                   isTypeLevel: false
                   position:
                     start:
-                      line: 65
+                      line: 62
                       column: 8
-                      absolute: 1929
+                      absolute: 1950
                     end:
-                      line: 65
+                      line: 62
                       column: 19
-                      absolute: 1936
+                      absolute: 1957
               block:
-                id: 391
+                id: 360
                 tag: Block
                 skipReturn: false
                 statements:
-                  - id: 390
+                  - id: 359
                     tag: IfStatement
                     condition:
-                      id: 354
+                      id: 323
                       tag: TypeCheck
                       term:
-                        id: 352
+                        id: 321
                         tag: Identifier
                         value: type
                       type:
-                        id: 353
+                        id: 322
                         tag: Identifier
                         value: Literal
                     trueBranch:
-                      id: 365
+                      id: 334
                       tag: Block
                       skipReturn: false
                       statements:
-                        - id: 364
+                        - id: 333
                           tag: RoundApply
                           calledInsteadOfSquare: false
                           paramOrder:
@@ -1908,84 +1777,84 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                           isAnObjectCopy: false
                           isCallingAConstructor: false
                           callee:
-                            id: 357
+                            id: 326
                             tag: SquareApply
                             callee:
-                              id: 355
+                              id: 324
                               tag: Identifier
                               value: Array@of
                             typeArgs:
-                              - id: 356
+                              - id: 325
                                 tag: Identifier
                                 value: T
                                 position:
                                   start:
-                                    line: 67
+                                    line: 64
                                     column: 13
-                                    absolute: 1987
+                                    absolute: 2008
                                   end:
-                                    line: 67
+                                    line: 64
                                     column: 15
-                                    absolute: 1988
+                                    absolute: 2009
                           args:
                             0:
                               - 
-                              - id: 363
+                              - id: 332
                                 tag: Cast
                                 expression:
-                                  id: 362
+                                  id: 331
                                   tag: Group
                                   value:
-                                    id: 360
+                                    id: 329
                                     tag: Select
                                     ammortized: false
                                     owner:
-                                      id: 358
+                                      id: 327
                                       tag: Identifier
                                       value: type
                                     field: value
                                 type:
-                                  id: 361
+                                  id: 330
                                   tag: Identifier
                                   value: T
                                 position:
                                   start:
-                                    line: 67
+                                    line: 64
                                     column: 16
-                                    absolute: 1990
+                                    absolute: 2011
                                   end:
-                                    line: 67
+                                    line: 64
                                     column: 32
-                                    absolute: 2005
+                                    absolute: 2026
                           position:
                             start:
-                              line: 67
+                              line: 64
                               column: 4
-                              absolute: 1985
+                              absolute: 2006
                             end:
-                              line: 68
+                              line: 65
                               column: 3
-                              absolute: 2009
+                              absolute: 2030
                     falseBranch:
-                      id: 389
+                      id: 358
                       tag: IfStatement
                       condition:
-                        id: 368
+                        id: 337
                         tag: TypeCheck
                         term:
-                          id: 366
+                          id: 335
                           tag: Identifier
                           value: type
                         type:
-                          id: 367
+                          id: 336
                           tag: Identifier
                           value: Union
                       trueBranch:
-                        id: 383
+                        id: 352
                         tag: Block
                         skipReturn: false
                         statements:
-                          - id: 382
+                          - id: 351
                             tag: RoundApply
                             calledInsteadOfSquare: false
                             paramOrder:
@@ -1993,11 +1862,11 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                             isAnObjectCopy: false
                             isCallingAConstructor: false
                             callee:
-                              id: 381
+                              id: 350
                               tag: Select
                               ammortized: false
                               owner:
-                                id: 373
+                                id: 342
                                 tag: RoundApply
                                 calledInsteadOfSquare: false
                                 paramOrder:
@@ -2005,17 +1874,17 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                 isAnObjectCopy: false
                                 isCallingAConstructor: false
                                 callee:
-                                  id: 369
+                                  id: 338
                                   tag: Identifier
                                   value: go
                                 args:
                                   - 0: 
                                     1:
-                                      id: 372
+                                      id: 341
                                       tag: Select
                                       ammortized: false
                                       owner:
-                                        id: 370
+                                        id: 339
                                         tag: Identifier
                                         value: type
                                       field: left
@@ -2023,7 +1892,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                             args:
                               0:
                                 - 
-                                - id: 379
+                                - id: 348
                                   tag: RoundApply
                                   calledInsteadOfSquare: false
                                   paramOrder:
@@ -2031,53 +1900,53 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                   isAnObjectCopy: false
                                   isCallingAConstructor: false
                                   callee:
-                                    id: 375
+                                    id: 344
                                     tag: Identifier
                                     value: go
                                   args:
                                     0:
                                       - 
-                                      - id: 378
+                                      - id: 347
                                         tag: Select
                                         ammortized: false
                                         owner:
-                                          id: 376
+                                          id: 345
                                           tag: Identifier
                                           value: type
                                         field: right
                                         position:
                                           start:
-                                            line: 69
+                                            line: 66
                                             column: 25
-                                            absolute: 2061
+                                            absolute: 2082
                                           end:
-                                            line: 69
+                                            line: 66
                                             column: 36
-                                            absolute: 2068
+                                            absolute: 2089
                                   position:
                                     start:
-                                      line: 69
+                                      line: 66
                                       column: 22
-                                      absolute: 2056
+                                      absolute: 2077
                                     end:
-                                      line: 69
+                                      line: 66
                                       column: 37
-                                      absolute: 2069
+                                      absolute: 2090
                             position:
                               start:
-                                line: 69
+                                line: 66
                                 column: 4
-                                absolute: 2038
+                                absolute: 2059
                               end:
-                                line: 70
+                                line: 67
                                 column: 3
-                                absolute: 2073
+                                absolute: 2094
                       falseBranch:
-                        id: 388
+                        id: 357
                         tag: Block
                         skipReturn: false
                         statements:
-                          - id: 387
+                          - id: 356
                             tag: RoundApply
                             calledInsteadOfSquare: false
                             paramOrder:
@@ -2085,76 +1954,76 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                             isAnObjectCopy: false
                             isCallingAConstructor: false
                             callee:
-                              id: 386
+                              id: 355
                               tag: SquareApply
                               callee:
-                                id: 384
+                                id: 353
                                 tag: Identifier
                                 value: Array@of
                               typeArgs:
-                                - id: 385
+                                - id: 354
                                   tag: Identifier
                                   value: T
                                   position:
                                     start:
-                                      line: 71
+                                      line: 68
                                       column: 13
-                                      absolute: 2092
+                                      absolute: 2113
                                     end:
-                                      line: 71
+                                      line: 68
                                       column: 15
-                                      absolute: 2093
+                                      absolute: 2114
                             args:
                             position:
                               start:
-                                line: 71
+                                line: 68
                                 column: 4
-                                absolute: 2090
+                                absolute: 2111
                               end:
-                                line: 72
+                                line: 69
                                 column: 2
-                                absolute: 2098
+                                absolute: 2119
                     position:
                       start:
-                        line: 66
+                        line: 63
                         column: 3
-                        absolute: 1955
+                        absolute: 1976
                       end:
-                        line: 72
+                        line: 69
                         column: 2
-                        absolute: 2098
+                        absolute: 2119
               specifiedType:
-                id: 351
+                id: 320
                 tag: SquareApply
                 callee:
-                  id: 349
+                  id: 318
                   tag: Identifier
                   value: Array
                 typeArgs:
-                  - id: 350
+                  - id: 319
                     tag: Identifier
                     value: T
                     position:
                       start:
-                        line: 65
+                        line: 62
                         column: 27
-                        absolute: 1945
+                        absolute: 1966
                       end:
-                        line: 65
+                        line: 62
                         column: 29
-                        absolute: 1946
+                        absolute: 1967
             isDeclaration: true
             isTypeLevel: false
             position:
               start:
-                line: 65
+                line: 62
                 column: 2
-                absolute: 1921
+                absolute: 1942
               end:
-                line: 72
+                line: 69
                 column: 4
-                absolute: 2100
-          - id: 396
+                absolute: 2121
+          - id: 365
             tag: RoundApply
             calledInsteadOfSquare: false
             paramOrder:
@@ -2162,35 +2031,36 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
             isAnObjectCopy: false
             isCallingAConstructor: false
             callee:
-              id: 394
+              id: 363
               tag: Identifier
               value: go
             args:
               0:
                 - 
-                - id: 395
+                - id: 364
                   tag: Identifier
                   value: T
                   position:
                     start:
-                      line: 72
+                      line: 69
                       column: 5
-                      absolute: 2102
+                      absolute: 2123
                     end:
-                      line: 72
+                      line: 69
                       column: 7
-                      absolute: 2103
+                      absolute: 2124
             position:
               start:
-                line: 72
+                line: 69
                 column: 2
-                absolute: 2100
+                absolute: 2121
               end: 0
+      pure: true
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 64
+        line: 61
         column: 1
-        absolute: 1907
+        absolute: 1928
       end: 0

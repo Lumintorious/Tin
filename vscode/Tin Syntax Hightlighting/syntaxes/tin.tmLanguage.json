@@ -7,7 +7,7 @@
       },
       {
          "name": "keyword.control.tin",
-         "match": "\\b(let|def|if|else|for|while|return|true|false|nothing|external|mutable|data|set|make|import|this)\\b"
+         "match": "\\b(if|else|while|return|true|false|nothing|external|data|set|import|this|unsafe)\\b"
       },
       {
          "match": "\\b([a-z][a-zA-Z0-9_]*)\\b[ ]*(=|:)[ ]*(\\(|\\[)",

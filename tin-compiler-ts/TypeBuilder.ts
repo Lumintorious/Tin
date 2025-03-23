@@ -32,8 +32,8 @@ import {
 import { type } from "os";
 import { TypeDef, AppliedKeyword, Literal, Group } from "./Parser";
 import { Symbol } from "./Scope";
-import { NamedType, TypeOfTypes, AnyTypeClass } from "./Types";
-import { SquareTypeToValueLambdaType } from "./Types";
+import { NamedType, TypeOfTypes, AnyTypeClass, UncheckedType } from "./Types";
+import { SquareTypeToValueLambdaType, MutableType } from "./Types";
 import {
    OptionalType,
    GenericNamedType,
@@ -175,6 +175,8 @@ export class TypeBuilder {
          this.build(node.type, scope);
       } else if (node instanceof Group) {
          this.build(node.value, scope);
+      } else if (node instanceof UnaryOperator) {
+         this.build(node.expression, scope);
       } else {
       }
    }
@@ -195,6 +197,19 @@ export class TypeBuilder {
       let calleeType;
       try {
          calleeType = this.context.inferencer.infer(node.callee, scope);
+         if (
+            node.callee instanceof Identifier &&
+            node.callee.isTypeIdentifier()
+         ) {
+            calleeType = scope.lookupType(node.callee.value).typeSymbol;
+         }
+         let constructor = calleeType.buildConstructor();
+         let isStructConstructor = false;
+         if (constructor instanceof RoundValueToValueLambdaType) {
+            calleeType = constructor;
+            isStructConstructor = true;
+            node.isCallingAConstructor = true;
+         }
       } catch (e) {
          if (scope.iteration === "DECLARATION") {
             return;
@@ -517,17 +532,23 @@ export class TypeBuilder {
       scope: Scope,
       options: RecursiveResolutionOptions
    ) {
-      // If it's not a declaration
-      // if (
-      //    this.context.run == 0 &&
-      //    node.lhs instanceof Identifier &&
-      //    scope.hasSymbol(node.lhs.value)
-      // ) {
-      //    node.isDeclaration = false;
-      //    return;
-      // }
-
       const lhs = node.lhs;
+
+      if (lhs instanceof Identifier) {
+         if (
+            scope.hasSymbol(lhs.value) &&
+            !(scope.lookup(lhs.value).typeSymbol instanceof UncheckedType) &&
+            scope.iteration === "DECLARATION"
+         ) {
+            throw new Error("Redeclaration of assignment " + lhs.value);
+         }
+
+         // if (lhs.isTypeIdentifier()) {
+         //    scope.declareType(new Symbol(lhs.value, new UncheckedType()));
+         // } else {
+         // }
+      }
+
       // When lambda like (i) -> i + 1 with i having an expected type
       if (
          lhs instanceof Identifier &&
@@ -553,6 +574,7 @@ export class TypeBuilder {
          }
          return;
       }
+
       this.build(node.value, scope, {
          assignedName:
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
@@ -565,6 +587,7 @@ export class TypeBuilder {
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
       });
+      let isMutable = rhsType instanceof MutableType;
       if (!node.type) {
          if (rhsType instanceof LiteralType) {
             rhsType = rhsType.type;
@@ -578,6 +601,9 @@ export class TypeBuilder {
          let nodeType = scope.resolveNamedType(
             this.context.translator.translate(node.type, scope)
          );
+         if (nodeType instanceof MutableType) {
+            isMutable = true;
+         }
          if (nodeType instanceof AppliedGenericType) {
             scope.resolveAppliedGenericTypes(nodeType);
          }
@@ -654,7 +680,7 @@ export class TypeBuilder {
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
          // if (!scope.hasSymbol(lhs.value)) {
-         scope.declare(symbol.mutable(node.isMutable), true);
+         scope.declare(symbol.mutable(isMutable), true);
          node.symbol = symbol;
          // }
       }

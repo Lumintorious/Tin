@@ -17,6 +17,10 @@ export class Type {
       }
    }
 
+   isMutable(): boolean {
+      return false;
+   }
+
    buildConstructor(): Type | undefined {
       return undefined;
    }
@@ -308,6 +312,43 @@ export class GenericNamedType extends Type {
    }
 }
 
+export class MutableType extends Type {
+   type: Type;
+   constructor(type: Type) {
+      super("MutableType");
+      this.type = type;
+      if (!type) {
+         throw new Error("What?");
+      }
+   }
+
+   isMutable(): boolean {
+      return true;
+   }
+
+   isAssignableTo(other: Type, scope: Scope): boolean {
+      return super.isAssignableTo(other, scope);
+   }
+
+   extends(other: Type, scope: Scope): boolean {
+      return (
+         other instanceof MutableType && this.type.extends(other.type, scope)
+      );
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return (
+         (other instanceof MutableType &&
+            this.type.isExtendedBy(other.type, scope)) ||
+         this.type.isExtendedBy(other, scope)
+      );
+   }
+
+   toString(): string {
+      return "~" + this.type.toString();
+   }
+}
+
 export class OptionalType extends Type {
    type: Type;
    constructor(type: Type) {
@@ -342,10 +383,17 @@ export class ParamType {
    name?: string;
    defaultValue?: Term;
    parentComponent?: Type;
-   constructor(type: Type, name?: string, defaultValue?: Term) {
+   mutable: boolean = false;
+   constructor(
+      type: Type,
+      name?: string,
+      defaultValue?: Term,
+      mutable: boolean = false
+   ) {
       this.type = type;
       this.name = name;
       this.defaultValue = defaultValue;
+      this.mutable = mutable;
    }
 }
 
@@ -355,7 +403,15 @@ export class RoundValueToValueLambdaType extends Type {
    returnType: Type;
    isFirstParamThis: boolean = false;
    isGeneric?: boolean;
-   constructor(params: ParamType[], returnType: Type, isGeneric?: boolean) {
+   pure: boolean;
+   capturesMutableValues: boolean;
+   constructor(
+      params: ParamType[],
+      returnType: Type,
+      isGeneric: boolean,
+      pure: boolean,
+      capturesMutableValues: boolean = false
+   ) {
       super("RoundValueToValueLambdaType");
       for (let param of params) {
          if (!(param instanceof ParamType)) {
@@ -366,6 +422,12 @@ export class RoundValueToValueLambdaType extends Type {
       this.returnType = returnType;
       this.isGeneric = isGeneric;
       this.isForwardReferenceable = true;
+      this.pure = pure;
+      this.capturesMutableValues = capturesMutableValues;
+   }
+
+   isMutable(): boolean {
+      return this.returnType.isMutable();
    }
 
    extends(other: Type, scope: Scope) {
@@ -383,7 +445,12 @@ export class RoundValueToValueLambdaType extends Type {
          other.returnType.name === "Nothing" ||
          this.returnType.isAssignableTo(other.returnType, scope);
 
-      return paramCheck && returnCheck;
+      const purityCheck = other.pure ? this.pure : true;
+      const captureCheck = !other.capturesMutableValues
+         ? !this.capturesMutableValues
+         : true;
+
+      return paramCheck && returnCheck && purityCheck && captureCheck;
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
@@ -399,7 +466,9 @@ export class RoundValueToValueLambdaType extends Type {
          .join(", ");
       return `${this.isGeneric ? "[" : "("}${paramsStr}${
          this.isGeneric ? "]" : ")"
-      } -> ${this.returnType ? this.returnType.toString() : "undefined"}`;
+      } ${this.capturesMutableValues ? "~" : ""}${this.pure ? "->" : "~>"} ${
+         this.returnType ? this.returnType.toString() : "undefined"
+      }`;
    }
 }
 
@@ -425,16 +494,29 @@ export class TypeRoundValueToValueLambda extends Type {
 export class SquareTypeToValueLambdaType extends Type {
    paramTypes: GenericNamedType[];
    returnType: Type;
-   constructor(paramTypes: GenericNamedType[], returnType: Type) {
+   pure: boolean;
+   capturesMutableValues: boolean;
+   constructor(
+      paramTypes: GenericNamedType[],
+      returnType: Type,
+      pure: boolean,
+      capturesMutableValues: boolean = false
+   ) {
       super("SquareTypeToValueLambdaType");
       this.paramTypes = paramTypes;
       this.returnType = returnType;
+      this.pure = pure;
+      this.capturesMutableValues = capturesMutableValues;
+   }
+
+   isMutable(): boolean {
+      return this.capturesMutableValues || this.returnType.isMutable();
    }
 
    toString(): string {
-      return `[${this.paramTypes
-         .map((p) => p.toString())
-         .join(", ")}] -> ${this.returnType.toString()}`;
+      return `[${this.paramTypes.map((p) => p.toString()).join(", ")}] ${
+         this.pure ? "->" : "~>"
+      } ${this.returnType.toString()}`;
    }
 }
 
@@ -455,8 +537,11 @@ export class SquareTypeToTypeLambdaType extends Type {
          this.paramTypes,
          new RoundValueToValueLambdaType(
             this.returnType.fields,
-            new AppliedGenericType(new NamedType(this.name), this.paramTypes)
-         )
+            new AppliedGenericType(new NamedType(this.name), this.paramTypes),
+            false,
+            true
+         ),
+         true
       );
    }
 
@@ -764,13 +849,34 @@ export class StructType extends Type {
       this.name = name;
    }
 
+   getMutableFields() {
+      const values = this.fields.filter((f) => f.type.isMutable());
+      const lambdas = this.fields.filter(
+         (f) =>
+            (f.type instanceof RoundValueToValueLambdaType &&
+               !(f.type.returnType instanceof MutableType) &&
+               f.type.isMutable()) ||
+            (f.type instanceof SquareTypeToValueLambdaType &&
+               !(f.type.returnType instanceof MutableType) &&
+               f.type.isMutable())
+      );
+      return [...values, ...lambdas];
+   }
+
+   isMutable(): boolean {
+      console.log(this.name + " - " + (this.getMutableFields().length > 0));
+      return this.getMutableFields().length > 0;
+   }
+
    buildConstructor(): Type | undefined {
       if (!this.name) {
          return;
       }
       return new RoundValueToValueLambdaType(
          this.fields,
-         new NamedType(this.name)
+         new NamedType(this.name),
+         false,
+         true
       );
    }
 

@@ -7,6 +7,10 @@ export class CodePoint {
       this.column = column;
       this.absolute = absolute;
    }
+
+   toString() {
+      return `${this.line}:${this.column}`;
+   }
 }
 
 export enum TokenTag {
@@ -28,6 +32,10 @@ export class TokenPos {
    constructor(start: CodePoint, end: CodePoint) {
       this.start = start;
       this.end = end;
+   }
+
+   toString() {
+      return `TokenPos(${this.start} -> ${this.end})`;
    }
 }
 
@@ -67,21 +75,16 @@ export class Lexer {
       this.line = 1;
       this.column = 1;
       this.keywords = [
-         "def",
-         "make",
-         "let",
          "return",
          "data",
          "if",
          "else",
          "while",
-         "do",
-         "for",
          "true",
          "false",
          "void",
          "set",
-         "mut",
+         "unsafe",
          "external",
          "import",
       ];
@@ -92,6 +95,7 @@ export class Lexer {
          "?:",
          "?.",
          "->",
+         "~>",
          "=>",
          "&&",
          "::",
@@ -102,6 +106,7 @@ export class Lexer {
          "<=",
          "**",
          "=",
+         "~",
          "+",
          "*",
          "/",

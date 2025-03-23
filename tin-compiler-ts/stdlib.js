@@ -28,10 +28,16 @@ Object.prototype.__is_child = function (obj) {
 	throw new Error("Unhandled")
 }
 
-export function _S(symbol, constructorRaw, descriptor) {
+export function _S(symbol, constructorRaw, descriptor, proto) {
 	descriptor._s = symbol;
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
+		for (let key in result) {
+			if (result[key] === undefined) {
+				delete result[key]
+			}
+		}
+		Object.setPrototypeOf(result, proto)
 		return {
 			_type: descriptor,
 			[symbol]: result
@@ -57,6 +63,9 @@ export function _S(symbol, constructorRaw, descriptor) {
 }
 
 export function Type$of(obj) {
+	if (obj === undefined) {
+		return undefined;
+	}
 	if (typeof obj === "number") {
 		return Number._d;
 	}
@@ -66,7 +75,7 @@ export function Type$of(obj) {
 	if (obj === undefined || obj.null === null) {
 		return Null
 	}
-	let result = obj._type
+	let result = obj._type || obj._d || obj
 	if (result._d) {
 		result = result._d
 	}
@@ -269,7 +278,7 @@ export var Array = (function () {
 			return Array(T)([...args, ...arr[Array._s]._rawArray])
 		},
 		[__tin_varargs_marker]: true
-	}), {})
+	}), {}, {})
 	result._s = arraySymbol()
 	return result;
 })()
@@ -291,12 +300,16 @@ export function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
-export function makeString(obj, sprawl = false) {
+export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
+	function padd(currentIndentChange = 0) {
+		return "".padStart((currentIndent + currentIndentChange * indent), " ".padEnd(indent, " "))
+	}
+
 	if (obj === null) return 'nothing';
 	if (typeof obj === 'undefined') return 'nothing';
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
-	if (typeof obj === 'string') return obj;
+	if (typeof obj === 'string') return indent > 0 ? `"${obj}"` : obj;
 	if (typeof obj === 'symbol') return obj.description;
 
 	if (typeof obj === 'function') {
@@ -304,11 +317,13 @@ export function makeString(obj, sprawl = false) {
 	}
 
 	if (Reflect.ownKeys(obj).includes(Array._s)) {
-		let result = 'Array(';
+		let result = 'Array(' + (indent > 0 ? "\n" : "");
 		for (let i = 0; i < obj[Array._s].length(); i++) {
-			result += makeString(obj[Array._s].at(i)) + (i === obj[Array._s].length() - 1 ? "" : ", ")
+			result += (typeof obj[Array._s].at(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length() - 1 ? "" : ", ") + (indent > 0 ? "\n" : "")
 		}
-		return result + ")"
+
+		currentIndent -= indent;
+		return result + padd() + ")"
 	}
 
 	if (typeof obj === 'object') {
@@ -320,37 +335,43 @@ export function makeString(obj, sprawl = false) {
 			}
 			const component = obj[componentKey]
 			if (!sprawl) {
-				result += componentKey.description + "("
+				result += componentKey.description + "(" + (indent > 0 ? "\n" : "")
+				currentIndent += indent;
 			}
 			for (let key in component) {
-				if (component.hasOwnProperty(key)) {
-					if (key.startsWith("__")) {
-						continue
-					}
-					if (sprawl) {
-						result += componentKey.description + "."
-					}
-					if (!key.startsWith("_") && component[key] != obj) {
-						result += key + "=" + makeString(component[key], sprawl) + ', ';
-					}
+				if (key.startsWith("__")) {
+					continue
+				}
+				if (sprawl) {
+					result += componentKey.description + "."
+				}
+				if (!key.startsWith("_") && component[key] != obj) {
+					result += padd() + key + " = " + makeString(component[key], sprawl, indent, currentIndent + indent) + ', ' + (indent > 0 ? "\n" : "");
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {
 				result = result.slice(0, -2); // Remove trailing comma and space
 			}
+			result += indent > 0 ? padd(-1) : ""
 			result += sprawl ? ", " : ") & "
+			result += indent > 0 ? "\n" : ""
+			currentIndent -= indent;
 		}
 		if (result.length > 1 && ((sprawl && result[result.length - 2] === ",") || (!sprawl && result[result.length - 2] === "&"))) {
 			result = result.slice(0, sprawl ? -2 : -3); // Remove trailing comma and space
 		}
-		return result + (sprawl ? ')' : "");
+		if (result.length > 2 && indent > 0 && result[result.length - 3] === "&") {
+			result = result.slice(0, -4)
+		}
+		result = result + (sprawl ? ')' : "")
+		return result;
 	}
 
 	return ''; // For other types like functions, symbols, etc.
 }
 
 export const print = (arg) => {
-	console.log(makeString(arg))
+	console.log(makeString(arg, false, 2))
 }
 
 export const debug = (...args) => {

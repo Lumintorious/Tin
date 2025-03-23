@@ -1,10 +1,7 @@
 import { Lexer, Token } from "./Lexer";
 import { Block, Parser, Import, AstNode } from "./Parser";
 import fs from "node:fs";
-import { escape } from "node:querystring";
 import { JavascriptTranslator } from "./JavascriptTranslator";
-import { TypeChecker } from "./TypeChecker";
-import { exec } from "node:child_process";
 import files from "node:fs/promises";
 import path from "node:path";
 import { Scope, TypePhaseContext } from "./Scope";
@@ -13,13 +10,16 @@ import { GoTranslator } from "./GoTranslator";
 
 export type CompilerItem = AstNode | Type | ParamType | undefined;
 
+const SETTINGS = JSON.parse(fs.readFileSync("./tin.settings.json", "utf-8"));
+console.log(SETTINGS);
+
 export interface OutputTranslator {
    extension: string;
    run(path: string): void;
    translate(term: CompilerItem, scope: Scope, options: any): string;
 }
 
-Error.stackTraceLimit = 5;
+Error.stackTraceLimit = 15;
 const isTesting = process.argv.includes("--test");
 const isCompilingToGo = process.argv.includes("--targetLanguage:go");
 const SRC_PATH = path.resolve(process.cwd(), isTesting ? "tests" : "src");
@@ -263,6 +263,10 @@ async function compile(
          scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
       );
       const context = new TypePhaseContext(inputFile, ast, scopes);
+      const uncheckedSymbols = context.fileScope.checkNoUncheckedTypesLeft();
+      for (const uncheckedSymbol of uncheckedSymbols) {
+         console.error(uncheckedSymbol[1].name + " @ " + uncheckedSymbol[0]);
+      }
       context.checker.typeCheck(ast, context.fileScope);
       const errors = context.errors.getErrors();
       if (errors) {

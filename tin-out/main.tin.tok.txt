@@ -1,84 +1,105 @@
-NEWLINE      |              |   2, 1    
-KEYWORD      | import       |   2, 1    
-IDENTIFIER   | collections  |   2, 8    
-OPERATOR     | /            |   2, 19   
-IDENTIFIER   | List         |   2, 20   
+KEYWORD      | import       |   1, 1    
+IDENTIFIER   | collections  |   1, 8    
+OPERATOR     | /            |   1, 19   
+IDENTIFIER   | Iterable     |   1, 20   
+NEWLINE      |              |   3, 1    
+IDENTIFIER   | Box          |   3, 1    
+OPERATOR     | =            |   3, 5    
+KEYWORD      | data         |   3, 7    
+OPERATOR     | :            |   3, 11   
 NEWLINE      |              |   4, 1    
-IDENTIFIER   | Animal       |   4, 1    
-OPERATOR     | =            |   4, 8    
-KEYWORD      | data         |   4, 10   
-OPERATOR     | :            |   4, 14   
+INDENT       | 4            |   4, 1    
+IDENTIFIER   | get          |   4, 2    
+OPERATOR     | :            |   4, 5    
+PARENS       | (            |   4, 7    
+PARENS       | )            |   4, 8    
+OPERATOR     | ->           |   4, 10   
+OPERATOR     | ~            |   4, 13   
+IDENTIFIER   | Number       |   4, 14   
 NEWLINE      |              |   5, 1    
-INDENT       | 4            |   5, 1    
-IDENTIFIER   | breed        |   5, 2    
-OPERATOR     | :            |   5, 7    
-IDENTIFIER   | String       |   5, 9    
+IDENTIFIER   | setValue     |   5, 2    
+OPERATOR     | :            |   5, 10   
+PARENS       | (            |   5, 12   
+IDENTIFIER   | Number       |   5, 13   
+PARENS       | )            |   5, 19   
+OPERATOR     | ~>           |   5, 21   
+IDENTIFIER   | Void         |   5, 24   
 NEWLINE      |              |   7, 1    
 DEDENT       | 4            |   7, 1    
-IDENTIFIER   | Furry        |   7, 1    
-OPERATOR     | =            |   7, 7    
-KEYWORD      | data         |   7, 9    
-OPERATOR     | :            |   7, 13   
+IDENTIFIER   | ImmutableHolder |   7, 1    
+OPERATOR     | =            |   7, 17   
+KEYWORD      | data         |   7, 19   
+OPERATOR     | :            |   7, 23   
 NEWLINE      |              |   8, 1    
 INDENT       | 4            |   8, 1    
-IDENTIFIER   | something    |   8, 2    
-OPERATOR     | :            |   8, 11   
-IDENTIFIER   | Number       |   8, 13   
+IDENTIFIER   | box          |   8, 2    
+OPERATOR     | :            |   8, 5    
+OPERATOR     | ~            |   8, 7    
+IDENTIFIER   | Box          |   8, 8    
 NEWLINE      |              |  10, 1    
 DEDENT       | 4            |  10, 1    
-IDENTIFIER   | Cat          |  10, 1    
-OPERATOR     | =            |  10, 5    
-IDENTIFIER   | Animal       |  10, 7    
-OPERATOR     | &            |  10, 14   
-IDENTIFIER   | Furry        |  10, 16   
-OPERATOR     | &            |  10, 22   
-KEYWORD      | data         |  10, 24   
-OPERATOR     | :            |  10, 28   
+IDENTIFIER   | makeBox      |  10, 1    
+OPERATOR     | =            |  10, 9    
+PARENS       | (            |  10, 11   
+IDENTIFIER   | n            |  10, 12   
+OPERATOR     | :            |  10, 13   
+IDENTIFIER   | Number       |  10, 15   
+PARENS       | )            |  10, 21   
+OPERATOR     | ->           |  10, 23   
 NEWLINE      |              |  11, 1    
 INDENT       | 4            |  11, 1    
-IDENTIFIER   | name         |  11, 2    
-OPERATOR     | :            |  11, 6    
-IDENTIFIER   | String       |  11, 8    
+IDENTIFIER   | number       |  11, 2    
+OPERATOR     | :            |  11, 8    
+OPERATOR     | ~            |  11, 10   
+IDENTIFIER   | Number       |  11, 11   
+OPERATOR     | =            |  11, 18   
+IDENTIFIER   | n            |  11, 20   
 NEWLINE      |              |  13, 1    
-DEDENT       | 4            |  13, 1    
-IDENTIFIER   | cat          |  13, 1    
-OPERATOR     | =            |  13, 5    
-IDENTIFIER   | Animal       |  13, 7    
-PARENS       | (            |  13, 13   
-STRING       | Something    |  13, 14   
-PARENS       | )            |  13, 25   
-OPERATOR     | &            |  13, 27   
-IDENTIFIER   | Furry        |  13, 29   
-PARENS       | (            |  13, 34   
-NUMBER       | 2            |  13, 35   
-PARENS       | )            |  13, 36   
-OPERATOR     | &            |  13, 38   
-IDENTIFIER   | Cat          |  13, 40   
-PARENS       | (            |  13, 43   
-STRING       | Mercy        |  13, 44   
-PARENS       | )            |  13, 51   
-NEWLINE      |              |  15, 1    
-IDENTIFIER   | animal       |  15, 1    
-OPERATOR     | =            |  15, 8    
-IDENTIFIER   | Animal       |  15, 10   
-PARENS       | (            |  15, 16   
-STRING       | Fwoof        |  15, 17   
-PARENS       | )            |  15, 24   
+IDENTIFIER   | get          |  13, 2    
+OPERATOR     | =            |  13, 6    
+PARENS       | (            |  13, 8    
+PARENS       | )            |  13, 9    
+OPERATOR     | ->           |  13, 11   
+NEWLINE      |              |  14, 1    
+INDENT       | 8            |  14, 1    
+OPERATOR     | ~            |  14, 3    
+IDENTIFIER   | number       |  14, 4    
 NEWLINE      |              |  16, 1    
-IDENTIFIER   | arr          |  16, 1    
-OPERATOR     | =            |  16, 5    
-IDENTIFIER   | Array@of     |  16, 7    
-PARENS       | (            |  16, 15   
-NUMBER       | 1            |  16, 16   
-NEWLINE      | ,            |  16, 1    
-NUMBER       | 2            |  16, 19   
-NEWLINE      | ,            |  16, 1    
-NUMBER       | 3            |  16, 22   
-PARENS       | )            |  16, 23   
-NEWLINE      |              |  18, 1    
-IDENTIFIER   | print        |  18, 1    
-PARENS       | (            |  18, 6    
-IDENTIFIER   | arr          |  18, 7    
-PARENS       | )            |  18, 10   
+DEDENT       | 8            |  16, 1    
+IDENTIFIER   | setValue     |  16, 2    
+OPERATOR     | =            |  16, 11   
+PARENS       | (            |  16, 13   
+IDENTIFIER   | newValue     |  16, 14   
+OPERATOR     | :            |  16, 22   
+IDENTIFIER   | Number       |  16, 24   
+PARENS       | )            |  16, 30   
+OPERATOR     | ~>           |  16, 32   
+NEWLINE      |              |  17, 1    
+INDENT       | 8            |  17, 1    
+KEYWORD      | set          |  17, 3    
+IDENTIFIER   | number       |  17, 7    
+OPERATOR     | =            |  17, 14   
+IDENTIFIER   | newValue     |  17, 16   
 NEWLINE      |              |  19, 1    
+DEDENT       | 8            |  19, 1    
+IDENTIFIER   | Box          |  19, 2    
+PARENS       | (            |  19, 5    
+IDENTIFIER   | get          |  19, 6    
+NEWLINE      | ,            |  19, 1    
+IDENTIFIER   | setValue     |  19, 11   
+PARENS       | )            |  19, 19   
+NEWLINE      |              |  21, 1    
+DEDENT       | 4            |  21, 1    
+IDENTIFIER   | ImmutableHolder |  21, 1    
+PARENS       | (            |  21, 16   
+IDENTIFIER   | makeBox      |  21, 17   
+PARENS       | (            |  21, 24   
+NUMBER       | 2            |  21, 25   
+PARENS       | )            |  21, 26   
+PARENS       | )            |  21, 27   
+NEWLINE      |              |  22, 1    
+IDENTIFIER   | print        |  22, 1    
+PARENS       | (            |  22, 6    
+STRING       | Hello        |  22, 7    
+PARENS       | )            |  22, 14   
 --undefined--

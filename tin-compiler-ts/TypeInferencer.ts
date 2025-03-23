@@ -1,57 +1,51 @@
 import {
-   Identifier,
-   Literal,
+   AppliedKeyword,
    Assignment,
-   UnaryOperator,
-   RoundValueToValueLambda,
-   SquareTypeToTypeLambda,
-   SquareApply,
-   TypeDef,
-   RoundApply,
    BinaryExpression,
-   Optional,
-   Group,
    Block,
    Cast,
    DataDef,
+   Group,
+   Identifier,
    IfStatement,
-   Make,
+   Literal,
+   RoundApply,
+   RoundValueToValueLambda,
    Select,
+   SquareApply,
+   SquareTypeToTypeLambda,
    SquareTypeToValueLambda,
+   Statement,
    Term,
+   TypeDef,
+   UnaryOperator,
    WhileLoop,
 } from "./Parser";
 import {
-   Symbol,
-   Scope,
-   TypePhaseContext,
    RecursiveResolutionOptions,
+   Scope,
+   Symbol,
+   TypePhaseContext,
 } from "./Scope";
-import { TypeErrorList } from "./TypeChecker";
 import {
-   ParamType,
+   AnyType,
    AnyTypeClass,
-   UncheckedType,
-   ThisType,
-   NamedType,
-} from "./Types";
-import { AstNode, Statement, AppliedKeyword, TypeCheck } from "./Parser";
-import {
-   Type,
-   LiteralType,
+   AppliedGenericType,
+   BinaryOpType,
    GenericNamedType,
-   VarargsType,
+   LiteralType,
+   MutableType,
+   NamedType,
+   OptionalType,
+   ParamType,
    RoundValueToValueLambdaType,
    SquareTypeToTypeLambdaType,
-   AppliedGenericType,
-   MarkerType,
-   StructType,
-   BinaryOpType,
-   OptionalType,
-   AnyType,
    SquareTypeToValueLambdaType,
+   StructType,
+   ThisType,
+   Type,
    TypeOfTypes,
-   TypeRoundValueToValueLambda,
+   UncheckedType,
 } from "./Types";
 
 export class TypeInferencer {
@@ -183,6 +177,11 @@ export class TypeInferencer {
                scope
             ) as any;
             break;
+         case "UnaryOperator":
+            inferredType = new MutableType(
+               this.infer((node as UnaryOperator).expression, scope)
+            );
+            break;
          default:
             throw new Error(
                "Could not infer '" + node.tag + "' - " + node.position
@@ -255,7 +254,8 @@ export class TypeInferencer {
                );
             }
          }),
-         this.infer(node.block, innerScope)
+         this.infer(node.block, innerScope),
+         node.pure
       );
    }
 
@@ -266,9 +266,6 @@ export class TypeInferencer {
          const constructor = scope
             .resolveNamedType(calleeType)
             .buildConstructor();
-         // console.log(calleeType.toString());
-         // console.log(constructor);
-         // console.log(this.context.translator.translate(node.callee, scope));
          if (constructor instanceof SquareTypeToValueLambdaType) {
             calleeType = constructor;
          }
@@ -295,20 +292,6 @@ export class TypeInferencer {
                throw new Error("What");
             }
          }
-         // if (calleeAsType instanceof SquareTypeToTypeLambdaType) {
-         //    const actualParams = node.typeArgs.map((t) =>
-         //       this.context.translator.translate(t, scope)
-         //    );
-         //    const expectedParams = calleeAsType.paramTypes;
-         //    let params: { [_: string]: Type } = {};
-         //    expectedParams.forEach((p, i) => {
-         //       if (p.name) {
-         //          params[p.name] = actualParams[i];
-         //       }
-         //    });
-         //    console.log(calleeAsType.toString());
-         //    return scope.resolveGenericTypes(calleeAsType.returnType, params);
-         // }
       } else if (calleeType instanceof SquareTypeToValueLambdaType) {
          const calledArgs = node.typeArgs.map((t) =>
             this.context.translator.translate(t, scope)
@@ -348,7 +331,6 @@ export class TypeInferencer {
       if (constructor instanceof RoundValueToValueLambdaType) {
          calleeType = constructor;
          isStructConstructor = true;
-         console.log(calleeType.toString());
          node.isCallingAConstructor = true;
       }
       for (const arg of node.args) {
@@ -475,6 +457,36 @@ export class TypeInferencer {
          result = new OptionalType(result);
       }
       return result;
+   }
+
+   findField(type: Type, field: string, scope: Scope): ParamType | undefined {
+      function findField(
+         fieldName: string,
+         fields: Map<Type, ParamType[]>
+      ): [Type, ParamType] | undefined {
+         let firstFind: [Type, ParamType] | undefined;
+         for (const [type, symbols] of fields) {
+            for (const symbol of symbols) {
+               if (symbol.name === fieldName) {
+                  if (firstFind) {
+                     if (type.toString() !== firstFind[0].toString()) {
+                        throw new Error(
+                           "Attempted to access field " +
+                              fieldName +
+                              ", but type has multiple fields of that name. Try casting the object first. Clash at " +
+                              type.toString() +
+                              " and " +
+                              firstFind[0].toString()
+                        );
+                     }
+                  }
+                  firstFind = [type, symbol];
+               }
+            }
+         }
+         return firstFind;
+      }
+      return findField(field, this.getAllKnownFields(type, scope))?.[1];
    }
 
    getAllKnownFields(type: Type, scope: Scope): Map<Type, ParamType[]> {
@@ -671,6 +683,9 @@ export class TypeInferencer {
             //    return NamedType.PRIMITIVE_TYPES.Type;
             // }
             throw new Error(`Undefined identifier: ${node.value}`);
+         }
+         if (symbol.typeSymbol instanceof MutableType) {
+            return symbol.typeSymbol.type;
          }
          return symbol.typeSymbol;
       } catch (e) {
@@ -902,13 +917,15 @@ export class TypeInferencer {
          const lambdaType = new RoundValueToValueLambdaType(
             paramsAsTypes,
             returnType,
-            true
+            true,
+            node.pure,
+            node.capturesMutableValues
          );
          lambdaType.name = node.name;
          return lambdaType;
       } else {
          let returnType = this.infer(node.block, innerScope);
-         if (returnType instanceof UncheckedType && node.specifiedType) {
+         if (node.specifiedType) {
             returnType = this.context.translator.translate(
                node.specifiedType,
                innerScope
@@ -916,7 +933,10 @@ export class TypeInferencer {
          }
          const lambdaType = new RoundValueToValueLambdaType(
             paramsAsTypes,
-            returnType
+            returnType,
+            false,
+            node.pure,
+            node.capturesMutableValues
          );
          lambdaType.name = node.name;
          return lambdaType;

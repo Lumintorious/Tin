@@ -1,5 +1,13 @@
 import { TokenPos } from "./Lexer";
-import { SquareTypeToValueLambda, SquareApply, WhileLoop } from "./Parser";
+import {
+   SquareTypeToValueLambda,
+   SquareApply,
+   WhileLoop,
+   Statement,
+   AppliedKeyword,
+   UnaryOperator,
+   Cast,
+} from "./Parser";
 import {
    SquareTypeToTypeLambda,
    Change,
@@ -16,7 +24,7 @@ import {
 import { Scope, TypePhaseContext } from "./Scope";
 import { RoundValueToValueLambda, TypeDef } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
-import { UncheckedType } from "./Types";
+import { UncheckedType, MutableType } from "./Types";
 import {
    AppliedGenericType,
    BinaryOpType,
@@ -97,21 +105,42 @@ export class TypeChecker {
       this.typeCheck(node.value, scope);
       const leftType = this.context.inferencer.infer(node.lhs, scope);
       const rightType = this.context.inferencer.infer(node.value, scope);
-      // if (node.lhs instanceof Identifier) {
-      //    let symbol = scope.lookup(node.lhs.value);
-      //    if (symbol.shadowing) {
-      //       symbol = symbol.shadowing;
-      //       scope.remove(symbol.name);
-      //    }
-      //    if (!symbol.isMutable) {
-      //       this.context.errors.add(
-      //          `Setting of mutable ${node.lhs.value}`,
-      //          rightType,
-      //          rightType,
-      //          node.position
-      //       );
-      //    }
-      // }
+      if (node.lhs instanceof Identifier) {
+         let symbol = scope.lookup(node.lhs.value);
+         if (symbol.shadowing) {
+            symbol = symbol.shadowing;
+            scope.remove(symbol.name);
+         }
+         if (!symbol.isMutable) {
+            this.context.errors.add(
+               `Setting an immutable value '${node.lhs.value}'`,
+               undefined,
+               undefined,
+               node.position,
+               `Either declare '${
+                  node.lhs.value
+               }' as a variable type '~${symbol.typeSymbol.toString()}', or don't mutate it here.`
+            );
+         }
+      } else if (node.lhs instanceof Select) {
+         let ownerType = scope.resolveNamedType(
+            this.context.inferencer.infer(node.lhs.owner, scope)
+         ) as StructType;
+         let fieldType = ownerType.fields.find(
+            (f) => f.name === (node.lhs as Select).field
+         );
+         if (!fieldType?.mutable) {
+            this.context.errors.add(
+               `Setting an immutable field '${node.lhs.show()}'`,
+               undefined,
+               undefined,
+               node.position,
+               `Either declare '${
+                  fieldType?.name
+               }' as a variable type '~${fieldType?.toString()}', or don't mutate it here.`
+            );
+         }
+      }
       if (!rightType.isAssignableTo(leftType, scope)) {
          if (node.lhs instanceof Identifier) {
             const symbol = scope.lookup(node.lhs.value);
@@ -185,13 +214,15 @@ export class TypeChecker {
       } else if (node instanceof TypeDef) {
          const innerScope = scope.innerScopeOf(node);
          node.fieldDefs.forEach((fd) => {
+            let finalType;
             if (fd.defaultValue) {
                this.typeCheck(fd.defaultValue, innerScope);
+               const inferredType = this.context.inferencer.infer(
+                  fd.defaultValue,
+                  innerScope
+               );
+               finalType = inferredType;
                if (fd.type) {
-                  const inferredType = this.context.inferencer.infer(
-                     fd.defaultValue,
-                     innerScope
-                  );
                   const expectedType = this.context.translator.translate(
                      fd.type,
                      innerScope
@@ -204,6 +235,62 @@ export class TypeChecker {
                         fd.position
                      );
                   }
+                  const commonType = this.context.inferencer.deduceCommonType(
+                     expectedType,
+                     inferredType,
+                     scope
+                  );
+                  finalType = commonType;
+               }
+            }
+            if (!finalType && fd.type) {
+               finalType = this.context.translator.translate(
+                  fd.type,
+                  innerScope
+               );
+            }
+            if (finalType) {
+               finalType = scope.resolveNamedType(finalType);
+            }
+            if (!fd.mutable && finalType instanceof StructType) {
+               const mutableSubFields = finalType.getMutableFields();
+               if (mutableSubFields.length > 0) {
+                  this.context.errors.add(
+                     `Immutable field '${fd.name}' of '${
+                        node.name
+                     }' cannot hold a mutable value. Mutable fields = [${mutableSubFields
+                        .map((f) => f.name)
+                        .join(", ")}]`,
+                     undefined,
+                     finalType,
+                     fd.position,
+                     "Acknowledge the mutability by specifying the field's type as '~" +
+                        finalType.toString() +
+                        "'"
+                  );
+               }
+            }
+            if (
+               finalType instanceof RoundValueToValueLambdaType &&
+               scope.resolveFully(finalType.returnType) instanceof StructType
+            ) {
+               const mutableSubFields = (
+                  scope.resolveFully(finalType.returnType) as StructType
+               ).getMutableFields();
+               if (mutableSubFields.length > 0) {
+                  this.context.errors.add(
+                     `Lambda field '${fd.name}' of '${
+                        node.name
+                     }' with invariable return type cannot hold a variable value. Mutable fields = [${mutableSubFields
+                        .map((f) => f.name)
+                        .join(", ")}]`,
+                     undefined,
+                     finalType,
+                     fd.position,
+                     "Acknowledge the mutability by specifying the return type as '~" +
+                        finalType.toString() +
+                        "'"
+                  );
                }
             }
          });
@@ -237,16 +324,18 @@ export class TypeChecker {
                explicitType,
                returnType,
                node.position,
+               undefined,
                new Error()
             );
          }
       }
       if (returnType instanceof UncheckedType) {
          this.context.errors.add(
-            `Return type of recursive lambda was not explicitly specified`,
+            `Could not infer return type of recursive lambda ${node.show()}`,
             undefined,
             returnType,
             node.position,
+            "Specify the return type explicitly '(...): <Type> -> ...'",
             new Error()
          );
       }
@@ -276,6 +365,59 @@ export class TypeChecker {
          this.checkLambdaParamsValidity(type.params, scope);
       }
       this.typeCheck(node.block, innerScope);
+
+      if (node.pure) {
+         let effects = [
+            ...this.findEffects(node.block, false, innerScope),
+            ...node.params.flatMap((p) =>
+               this.findEffects(p, false, scope.innerScopeOf(node))
+            ),
+         ];
+         for (const [error, term] of effects) {
+            this.context.errors.add(
+               error + " in a pure lambda body",
+               undefined,
+               undefined,
+               term.position,
+               `Either declare ${node.show} as an effectful lambda '(...) ~> ...', or remove the effect.`
+            );
+         }
+      }
+
+      if (
+         type instanceof RoundValueToValueLambdaType &&
+         !(type.returnType instanceof MutableType)
+      ) {
+         let effects = [
+            ...this.findEffects(node.block, true, innerScope),
+            ...node.params.flatMap((p) =>
+               this.findEffects(p, true, scope.innerScopeOf(node))
+            ),
+         ];
+         for (const [error, term] of effects) {
+            this.context.errors.add(
+               error +
+                  " in lambda '" +
+                  node.show() +
+                  "' that supposedly returns an invariable value.",
+               undefined,
+               undefined,
+               term.position,
+               "You must mark the return type of the lambda with ~<Type>, or not use a variable value"
+            );
+         }
+         const returnType = scope.resolveNamedType(type.returnType);
+         // if (returnType.isMutable()) {
+         //    this.context.errors.add(
+         //       "Return type of lambda '" +
+         //          node.show() +
+         //          "' is a mutable type, yet the lambda's signature doesn't reflect that",
+         //       undefined,
+         //       undefined,
+         //       node.block.position
+         //    );
+         // }
+      }
    }
 
    checkLambdaParamsValidity(params: ParamType[], scope: Scope) {
@@ -359,22 +501,18 @@ export class TypeChecker {
       this.typeCheck(apply.callee, scope);
       let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
       let mappings: { [_: string]: Type } = {};
-      // if (
-      //    typeSymbol instanceof SquareTypeToValueLambdaType &&
-      //    typeSymbol.returnType instanceof RoundValueToValueLambdaType
-      // ) {
-      //    for (let i = 0; i < typeSymbol.paramTypes.length; i++) {
-      //       if (apply.autoFilledSquareParams) {
-      //          mappings[typeSymbol.paramTypes[i].name] =
-      //             apply.autoFilledSquareParams[i];
-      //       }
-      //    }
-      //    typeSymbol = scope.resolveGenericTypes(
-      //       typeSymbol.returnType,
-      //       mappings
-      //    );
-      // }
-
+      if (
+         apply.callee instanceof Identifier &&
+         apply.callee.isTypeIdentifier()
+      ) {
+         typeSymbol = scope.lookupType(apply.callee.value).typeSymbol;
+      }
+      let constructor = typeSymbol.buildConstructor();
+      let isStructConstructor = false;
+      if (constructor instanceof RoundValueToValueLambdaType) {
+         typeSymbol = constructor;
+         isStructConstructor = true;
+      }
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
          const hasThis = params.length > 0 && params[0].name === "this";
@@ -422,6 +560,7 @@ export class TypeChecker {
                         expectedType,
                         gottenType,
                         apply.position,
+                        undefined,
                         new Error()
                      );
                   }
@@ -445,11 +584,146 @@ export class TypeChecker {
                typeExpectedInPlace: calleeType,
                firstPartOfIntersection: options.firstPartOfIntersection,
             },
-            options?.firstPartOfIntersection !== undefined &&
-               apply.callee instanceof Identifier
+            (options?.firstPartOfIntersection?.isAssignableTo(
+               typeSymbol.returnType,
+               scope
+            ) &&
+               apply.callee instanceof Identifier) ||
+               false
          );
          apply.paramOrder = paramOrder;
       }
+   }
+
+   findEffects(
+      node: Statement,
+      onlyCaptures: boolean,
+      scope: Scope
+   ): [string, Term][] {
+      if (node instanceof AppliedKeyword && node.keyword !== "unsafe") {
+         return this.findEffects(node.param, onlyCaptures, scope);
+      } else if (node instanceof Block) {
+         return node.statements.flatMap((statement) =>
+            this.findEffects(statement, onlyCaptures, scope.innerScopeOf(node))
+         );
+      } else if (node instanceof IfStatement) {
+         const ifScope = scope.innerScopeOf(node);
+         return [
+            ...this.findEffects(node.condition, onlyCaptures, ifScope),
+            ...this.findEffects(
+               node.trueBranch,
+               onlyCaptures,
+               ifScope.innerScopeOf(node.trueBranch)
+            ),
+            ...(node.falseBranch
+               ? this.findEffects(
+                    node.falseBranch,
+                    onlyCaptures,
+                    ifScope instanceof Block
+                       ? ifScope.innerScopeOf(node.falseBranch)
+                       : ifScope
+                 )
+               : []),
+         ];
+      } else if (node instanceof WhileLoop && node.eachLoop) {
+         const ifScope = scope.innerScopeOf(node);
+         return [
+            ...this.findEffects(node.condition, onlyCaptures, ifScope),
+            ...this.findEffects(node.action, onlyCaptures, ifScope),
+         ];
+      } else if (node instanceof BinaryExpression) {
+         return [
+            ...this.findEffects(node.left, onlyCaptures, scope),
+            ...this.findEffects(node.right, onlyCaptures, scope),
+         ];
+      } else if (node instanceof UnaryOperator) {
+         return [...this.findEffects(node.expression, onlyCaptures, scope)];
+      } else if (node instanceof Assignment) {
+         return [
+            ...(node.isDeclaration
+               ? []
+               : this.findEffects(node.lhs, onlyCaptures, scope)),
+            ...(node.value
+               ? this.findEffects(node.value, onlyCaptures, scope)
+               : []),
+         ];
+      } else if (node instanceof Change) {
+         const result = [...this.findEffects(node.value, onlyCaptures, scope)];
+         if (!onlyCaptures) {
+            result.push(["Setting variable '" + node.lhs.show() + "'", node]);
+         }
+         return result;
+      } else if (node instanceof Select) {
+         const result = [...this.findEffects(node.owner, onlyCaptures, scope)];
+         const field = this.context.inferencer.findField(
+            this.context.inferencer.infer(node.owner, scope),
+            node.field,
+            scope
+         );
+         if (field && field.mutable) {
+            result.push([
+               "Using outside mutable value '" + node.show() + "'",
+               node,
+            ]);
+         }
+         return result;
+      } else if (node instanceof Cast) {
+         return [...this.findEffects(node.expression, onlyCaptures, scope)];
+      } else if (node instanceof RoundApply) {
+         const type = this.context.inferencer.infer(node.callee, scope);
+         if (!onlyCaptures) {
+            const results = node.args.flatMap((arg) =>
+               this.findEffects(arg[1], onlyCaptures, scope)
+            );
+            if (type instanceof RoundValueToValueLambdaType && !type.pure) {
+               results.push([
+                  "Calling lambda '" + node.callee.show() + "'",
+                  node,
+               ]);
+            }
+            if (type instanceof SquareTypeToValueLambdaType && !type.pure) {
+               results.push([
+                  "Calling square lambda '" + node.callee.show() + "'",
+                  node,
+               ]);
+            }
+
+            return results;
+         } else {
+            const results = node.args.flatMap((arg) =>
+               this.findEffects(arg[1], onlyCaptures, scope)
+            );
+            if (
+               type instanceof RoundValueToValueLambdaType &&
+               type.returnType instanceof MutableType
+            ) {
+               results.push([
+                  "Calling lambda '" + node.callee.show() + "'",
+                  node,
+               ]);
+            }
+            if (
+               type instanceof SquareTypeToValueLambdaType &&
+               type.returnType instanceof MutableType
+            ) {
+               results.push([
+                  "Calling square lambda '" + node.callee.show() + "'",
+                  node,
+               ]);
+            }
+
+            return results;
+         }
+      } else if (node instanceof Identifier) {
+         const symbol = scope.lookup(node.value);
+         if (symbol.isMutable && onlyCaptures) {
+            return [["Variable value '" + node.value + "' present", node]];
+         } else {
+            [];
+         }
+      }
+
+      return [];
    }
 
    typeCheckLambdaCall(
@@ -534,7 +808,8 @@ export class TypeChecker {
                this.context.errors.add(
                   `Call target ('this') of lambda ${term.callee.field}`,
                   expectedThisType,
-                  calleeType
+                  calleeType,
+                  term.position
                );
             }
          }
@@ -571,7 +846,13 @@ export class TypeChecker {
             : expectedParams[i + hasThisParamIncrement];
          if (!expectedParam) {
             this.context.errors.add(
-               "Applying too many parameters to lambda " + termName
+               "Applying too many parameters to lambda " + termName,
+               undefined,
+               undefined,
+               term.position,
+               `Expected ${expectedParams.length} params, got ${
+                  i + hasThisParamIncrement
+               }.`
             );
             return [];
          }
@@ -629,11 +910,7 @@ export class TypeChecker {
 
       if (unfulfilledExpectedParams.length > 0 && !areAllOptional) {
          this.context.errors.add(
-            `Lambda ${termName} didn't have all of its non-optional parameters fulfilled, ${
-               unfulfilledExpectedParams.length
-            } params unfulfilled ${unfulfilledExpectedParams[0].type} ${
-               "" + applyArgs.length + expectedParams.length
-            }`,
+            `Lambda ${termName} didn't have all of its non-optional parameters fulfilled, ${unfulfilledExpectedParams.length} params unfulfilled`,
             undefined,
             undefined,
             term.position
@@ -646,10 +923,11 @@ export class TypeChecker {
 
 export class TypeErrorList {
    errors: {
-      hint: string;
+      message: string;
       expectedType?: Type;
       insertedType?: Type;
       position?: TokenPos;
+      hint?: string;
       errorForStack?: Error;
    }[];
    context: TypePhaseContext;
@@ -659,28 +937,33 @@ export class TypeErrorList {
    }
 
    add(
-      hint: string,
+      message: string,
       expectedType?: Type,
       insertedType?: Type,
       position?: TokenPos,
+      hint?: string,
       errorForStack?: Error
    ) {
       for (let error of this.errors) {
          if (
+            error.message === message &&
             error.hint === hint &&
             (expectedType === undefined ||
                expectedType.toString() === error.expectedType?.toString()) &&
             (insertedType === undefined ||
-               insertedType.toString() === error.insertedType?.toString())
+               insertedType.toString() === error.insertedType?.toString()) &&
+            (position === undefined ||
+               position.start.toString() === error.position?.start.toString())
          ) {
             return;
          }
       }
       this.errors.push({
-         hint,
+         message,
          expectedType,
          insertedType,
          position,
+         hint,
          errorForStack,
       });
    }
@@ -692,13 +975,15 @@ export class TypeErrorList {
             this.errors
                .map(
                   (e) =>
-                     `- ${e.hint} @ ${this.context.fileName}:${
+                     `- ${e.message} @ ${this.context.fileName}:${
                         e.position?.start.line
                      }:${e.position?.start.column}${
                         e.expectedType
                            ? `\n  > Expected '${e.expectedType?.toString()}'`
                            : ""
-                     }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}`
+                     }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}${
+                        e.hint ? `\n > ${e.hint}` : ""
+                     }`
                )
                .join("\n");
          return message;

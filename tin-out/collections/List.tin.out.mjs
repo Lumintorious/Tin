@@ -12,7 +12,7 @@ export var ListHead = /* [] */(T) => _S(Symbol("ListHead"), (_p0,_p1) => ({value
 					{},
 					() => { return (undefined)})
 		,
-			])))));
+			])))), {});
 export var List = /* [] */(T) => ((() => { const _left = (() => { const _left = (() => { const _left = ListHead.call('Type', T); return _A(_left, Iterable.call('Type', T));})(); return _A(_left, Accessible.call('Type', T));})(); return _A(_left, ToString);})());
 export var List$iterator/* [T] -> (list:ListHead[T]?) -> Iterator[T]*/ = function(T) {try{
 throw _F(Symbol("lambda"), function(list) {try{

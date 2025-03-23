@@ -19,26 +19,26 @@ stringOf = (obj: Any) ->
 Iterable = [T] => data:
 	getIterator: () -> Iterator[T]
 
-	forEach = (this: Iterable[T], fn: (T) -> Nothing) ->
+	forEach = (this: Iterable[T], fn: (T) ~> Nothing) ->
 		iterator = this.getIterator()
 		current = iterator.next()
 		while current != nothing,
 			fn(current)
 			set current = iterator.next()
 
-	mkString = (this: Iterable[T], separator: String, left: String, right: String) ->
-		string = ""
-		fn = (t: T) ->
+	mkString = (this: Iterable[T], separator: String, left: String, right: String): ~String ->
+		string: ~String = ""
+		fn = (t: T): ~String ~>
 			comma = if string == "", "" else separator
 			set string = "{string}{comma}{t}"
 		this.forEach(fn)
 		"{left}{string}{right}"
 
-	count = (this: Iterable[T], pred: (T) -> Boolean) ->
-		num = 0
-		this.forEach((t: T) -> if pred(t), set num = num + 1)
+	count = (this: Iterable[T], pred: (T) -> Boolean): ~Number ->
+		num: ~Number = 0
+		this.forEach((t: T): ~Any ~> if pred(t), set num = num + 1)
 		num
 
 
-print("Loaded")
+ssss = 2
 	

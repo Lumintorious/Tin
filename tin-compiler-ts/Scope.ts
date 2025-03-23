@@ -1,24 +1,25 @@
 import { TokenPos } from "./Lexer";
 import {
-   Term,
-   AstNode,
    Assignment,
+   AstNode,
+   Block,
    Identifier,
    RoundValueToValueLambda,
-   Block,
+   Term,
 } from "./Parser";
-import { getConstructorName, TypeErrorList, TypeChecker } from "./TypeChecker";
-import { TypeInferencer } from "./TypeInferencer";
 import { TypeBuilder } from "./TypeBuilder";
+import { TypeChecker, TypeErrorList } from "./TypeChecker";
+import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
-import { ParamType, AnyType } from "./Types";
 import {
+   AnyType,
    AppliedGenericType,
    BinaryOpType,
    GenericNamedType,
-   MarkerType,
+   MutableType,
    NamedType,
    OptionalType,
+   ParamType,
    RoundValueToValueLambdaType,
    SquareTypeToTypeLambdaType,
    SquareTypeToValueLambdaType,
@@ -96,6 +97,22 @@ export class Scope {
       }
    }
 
+   checkNoUncheckedTypesLeft() {
+      let uncheckedSymbols: [string, Symbol][] = [];
+      for (const symbol of this.symbols.values()) {
+         if (symbol.typeSymbol instanceof UncheckedType) {
+            uncheckedSymbols.push([this.toPath(), symbol]);
+         }
+      }
+      for (const child of this.childrenByAst.values()) {
+         uncheckedSymbols = [
+            ...uncheckedSymbols,
+            ...child.checkNoUncheckedTypesLeft(),
+         ];
+      }
+      return uncheckedSymbols;
+   }
+
    absorbAllFrom(scope: Scope) {
       scope.symbols.forEach((v, k) => this.symbols.set(k, v));
       scope.typeSymbols.forEach((v, k) => this.typeSymbols.set(k, v));
@@ -167,7 +184,7 @@ export class Scope {
    declare(symbol: Symbol, redeclare: boolean = false) {
       const name = symbol.name;
       console.log(
-         `# \x1b[36m${name.padStart(
+         `# \x1b[36m${((symbol.isMutable ? "mutable " : "") + name).padStart(
             10,
             " "
          )}\x1b[37m: \x1b[33m${symbol.typeSymbol
@@ -219,7 +236,11 @@ export class Scope {
       typeSymbol.name = name;
       if (this.typeSymbols.has(name)) {
          const existingSymbol = this.typeSymbols.get(name);
-         if (existingSymbol && existingSymbol.iteration == this.iteration) {
+         if (
+            existingSymbol &&
+            existingSymbol.iteration == this.iteration &&
+            !(existingSymbol.typeSymbol instanceof UncheckedType)
+         ) {
             throw new Error(`Symbol ${name} is already declared.`);
          } else {
             symbol.iteration = this.iteration;
@@ -339,6 +360,9 @@ export class Scope {
          return type;
       }
       const typeCallee = this.resolveNamedType(type.callee);
+      if (typeCallee instanceof UncheckedType) {
+         return new UncheckedType();
+      }
       if (!(typeCallee instanceof SquareTypeToTypeLambdaType)) {
          throw new Error(
             "Attempted to apply generic parameters to non type lambda. Was " +
@@ -416,8 +440,12 @@ export class Scope {
             );
             const result = new RoundValueToValueLambdaType(
                resolvedParams,
-               returnType
+               returnType,
+               lambdaType.isGeneric === true,
+               lambdaType.pure
             );
+            result.isFirstParamThis = lambdaType.isFirstParamThis;
+            result.isForwardReferenceable = lambdaType.isForwardReferenceable;
             return result;
          case "StructType":
             if (!(type instanceof StructType)) {
@@ -453,6 +481,10 @@ export class Scope {
             return type;
          case "This":
             return type;
+         case "MutableType":
+            return new MutableType(
+               this.resolveGenericTypes((type as MutableType).type)
+            );
          default:
             throw new Error(
                "Can't handle type " +
@@ -484,6 +516,10 @@ export type RecursiveResolutionOptions = {
    isTypeLevel?: boolean;
 };
 
+export class CompilerFlags {
+   checkImpurity = false;
+}
+
 export class TypePhaseContext {
    fileName: string;
    languageScope: Scope;
@@ -493,6 +529,7 @@ export class TypePhaseContext {
    translator: TypeTranslator;
    checker: TypeChecker;
    errors: TypeErrorList;
+   flags: CompilerFlags;
    run: number;
    constructor(
       fileName: string,
@@ -507,6 +544,7 @@ export class TypePhaseContext {
       this.translator = new TypeTranslator(this);
       this.checker = new TypeChecker(this);
       this.errors = new TypeErrorList(this);
+      this.flags = new CompilerFlags();
       this.run = 0;
       existingFileScopes.forEach((s) => {
          this.fileScope.absorbAllFrom(s);
@@ -522,7 +560,9 @@ export class TypePhaseContext {
             "print",
             new RoundValueToValueLambdaType(
                [new ParamType(NamedType.PRIMITIVE_TYPES.Any)],
-               NamedType.PRIMITIVE_TYPES.Nothing
+               NamedType.PRIMITIVE_TYPES.Nothing,
+               false,
+               false
             ),
             new RoundValueToValueLambda([], new Block([]))
          )
@@ -532,7 +572,9 @@ export class TypePhaseContext {
             "debug",
             new RoundValueToValueLambdaType(
                [new ParamType(NamedType.PRIMITIVE_TYPES.Any)],
-               NamedType.PRIMITIVE_TYPES.Nothing
+               NamedType.PRIMITIVE_TYPES.Nothing,
+               false,
+               false
             ),
             new RoundValueToValueLambda([], new Block([]))
          )
@@ -543,14 +585,18 @@ export class TypePhaseContext {
          new ParamType(
             new RoundValueToValueLambdaType(
                [],
-               this.languageScope.lookupType("Number").typeSymbol
+               this.languageScope.lookupType("Number").typeSymbol,
+               false,
+               true
             ),
             "length"
          ),
          new ParamType(
             new RoundValueToValueLambdaType(
                [new ParamType(new NamedType("Number"))],
-               new GenericNamedType("T")
+               new GenericNamedType("T"),
+               false,
+               true
             ),
             "at"
          ),
@@ -565,7 +611,9 @@ export class TypePhaseContext {
                ],
                new AppliedGenericType(new NamedType("Array"), [
                   new GenericNamedType("T"),
-               ])
+               ]),
+               false,
+               true
             ),
             "and"
          ),
@@ -593,24 +641,13 @@ export class TypePhaseContext {
                   new AppliedGenericType(new NamedType("Array"), [
                      new GenericNamedType("T"),
                   ]),
+                  true,
                   true
-               )
+               ),
+               true
             )
          ),
          true
-      );
-      this.languageScope.declare(
-         new Symbol(
-            "copy",
-            new SquareTypeToValueLambdaType(
-               [new GenericNamedType("T")],
-               new RoundValueToValueLambdaType(
-                  [new ParamType(new NamedType("T"))],
-                  new NamedType("T"),
-                  true
-               )
-            )
-         )
       );
       this.languageScope.declare(
          new Symbol(

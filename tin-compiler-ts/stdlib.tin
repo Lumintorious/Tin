@@ -41,6 +41,7 @@ RefType = Type & data:
 
 external "
 export const Null = _S(Symbol(\"Null\"), () => undefined, lazy(Type(\"Null\", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\"Nothing\", (n) => n === undefined, (n) => n === undefined)));
 export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", (n) => typeof n === \"number\", (n) => typeof n === \"number\")));
 export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", (n) => typeof n === \"string\", (n) => typeof n === \"string\")));
 "
@@ -48,9 +49,6 @@ export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"Strin
 Literal = Type & data:
 	value: String | Number | Boolean | Null
 	type: Type
-
-RefType@create = (name: String, get: () -> Type) ->
-	Type(name, get().check, get().checkIntegrity) & RefType(get)
 
 jsonify: (obj: Any) -> String = external
 dejsonify: (json: String) -> Any = external

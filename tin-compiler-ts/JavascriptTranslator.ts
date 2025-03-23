@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import { randomUUID } from "crypto";
 import {
    Block,
    AstNode,
@@ -27,7 +26,7 @@ import {
    Optional,
 } from "./Parser";
 import { getConstructorName } from "./TypeChecker";
-import { Make, Identifier, TypeCheck, Import } from "./Parser";
+import { Make, Identifier, TypeCheck, Import, UnaryOperator } from "./Parser";
 import { Scope } from "./Scope";
 import {
    Type,
@@ -35,6 +34,7 @@ import {
    StructType,
    ParamType,
    RoundValueToValueLambdaType,
+   SquareTypeToValueLambdaType,
 } from "./Types";
 import { OutputTranslator } from "./compiler";
 import { exec } from "node:child_process";
@@ -60,8 +60,44 @@ export class JavascriptTranslator implements OutputTranslator {
       );
    }
 
+   createPrototype(
+      typeDef: TypeDef,
+      type: StructType,
+      scope: Scope,
+      isReflectiveType: boolean
+   ): string {
+      const L = "{";
+      const R = "}";
+      let result = "";
+      if (isReflectiveType) {
+         return "{}";
+      }
+      let i = 0;
+      for (const field of typeDef.fieldDefs) {
+         const fieldType = type.fields[i];
+         const isPrimitive =
+            fieldType instanceof NamedType && fieldType.isPrimitive();
+         const isLambda =
+            fieldType instanceof RoundValueToValueLambdaType ||
+            fieldType instanceof SquareTypeToValueLambdaType;
+         if (field.defaultValue && (isPrimitive || isLambda)) {
+            result += `${field.name}: ${this.translate(
+               field.defaultValue,
+               scope
+            )},`;
+         }
+         i++;
+      }
+      if (result.endsWith(",")) {
+         result = result.substring(0, result.length - 1);
+      }
+
+      return L + result + R;
+   }
+
    createConstructor(
       typeDef: TypeDef,
+      type: StructType,
       scope: Scope,
       isReflectionType = false
    ): string {
@@ -72,8 +108,17 @@ export class JavascriptTranslator implements OutputTranslator {
       const parameters =
          "(" +
          typeDef.fieldDefs.map((param, i) => {
+            const fieldType = type.fields[i];
+            const isPrimitive =
+               fieldType instanceof NamedType && fieldType.isPrimitive();
+            const isLambda =
+               fieldType instanceof RoundValueToValueLambdaType ||
+               fieldType instanceof SquareTypeToValueLambdaType;
             return `_p${i}${
-               param.defaultValue && !isReflectionType
+               param.defaultValue &&
+               !isReflectionType &&
+               !isPrimitive &&
+               !isLambda
                   ? " = " + this.translate(param.defaultValue, scope)
                   : ""
             }`;
@@ -225,7 +270,10 @@ export class JavascriptTranslator implements OutputTranslator {
          ) {
             const surrogateFunc = new SquareTypeToValueLambda(
                term.value.parameterTypes,
-               new Block([new SquareApply(term.lhs, term.value.parameterTypes)])
+               new Block([
+                  new SquareApply(term.lhs, term.value.parameterTypes),
+               ]),
+               true
             );
             declareConstructor = "";
             // `; var ${constructorName} = ${this.translate(
@@ -450,13 +498,19 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof TypeDef) {
          return `_S(Symbol("${term.name}"), ${this.createConstructor(
             term,
+            term.translatedType as StructType,
             scope,
             this.isStdLib
          )}, lazy(${
             this.isStdLib
                ? "{isReflectionType: true}"
                : this.translateType(term.translatedType, scope)
-         }))`;
+         }), ${this.createPrototype(
+            term,
+            term.translatedType as StructType,
+            scope,
+            this.isStdLib
+         )})`;
 
          // DataDef
       } else if (term instanceof DataDef) {
@@ -496,6 +550,12 @@ export class JavascriptTranslator implements OutputTranslator {
 				globalThis[key] = value;
 		  });`;
          // Undefined
+      } else if (term instanceof UnaryOperator) {
+         if (term.operator === "~") {
+            return this.translate(term.expression, scope);
+         } else {
+            return "(? " + term.tag + " ?)";
+         }
       } else {
          return "(? " + term.tag + " ?)";
       }
@@ -508,11 +568,11 @@ export class JavascriptTranslator implements OutputTranslator {
          return `Type('${type.name}', (obj) => Reflect.ownKeys(obj).includes(${
             type.name
          }._s))._and(Struct(Array(0)([
-						${type.fields.map((f) => `${this.translateType(f, scope)},`)}
+						${type.fields.map((f) => `${this.translateType(f, scope)}`)}
 			])))`;
       } else if (type instanceof ParamType) {
          return `Parameter("${type.name ?? undefined}",
-					${this.translateType(type.type, scope)},
+					Type$of(${this.translateType(type.type, scope)}),
 					() => { return (${
                   type.defaultValue
                      ? this.translate(type.defaultValue, scope)
