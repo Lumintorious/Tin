@@ -167,8 +167,8 @@ const debug = (...args) => {
 	console.log(...args)
 }
 
-// COMPILED TIN
-;
+	// COMPILED TIN
+	;
 export let v/* Number*/ = 1;
 export let vv/* Number*/ = 1.1;
 export let s/* String*/ = "string, can be spliced like " + v + "";
@@ -183,27 +183,27 @@ export let number/* Number*/ = 1;
 export let string/* String*/ = "str";
 export let boolean/* Boolean*/ = false;
 export let empty/* Nothing*/ = nothing;
-export let any/* Any*/ = "str";
+export let any/* Anything*/ = "str";
 export let maybeFull/* Number?*/ = 10;
 export let maybeEmpty/* Number?*/ = nothing;
-export let f/* (n:Number) -> Number*/ = function(n) {
-return n + 1
+export let f/* (n:Number) -> Number*/ = function (n) {
+	return n + 1
 };
-export let ff/* (n:Number) -> Number*/ = function(n) {
-return n + 2
+export let ff/* (n:Number) -> Number*/ = function (n) {
+	return n + 2
 };
 print("Hello World");
 export let F = TIN_LAMBDA_TYPE("Lambda", [Number], Number);
 export let FNamed = TIN_LAMBDA_TYPE("Lambda", [first, second], Number);
 f(24);
-((v > 0) ? (print("Works")) : (print("Doesn't work"))) ;
-export let ifelse/* Number*/ = ((v > 0) ? (1) : (2)) ;
+((v > 0) ? (print("Works")) : (print("Doesn't work")));
+export let ifelse/* Number*/ = ((v > 0) ? (1) : (2));
 export let i/* Number*/ = 0;
 while (i < 3) {
- print(i) 
+	print(i)
 };
-export let Cat = TIN_TYPE("Cat", "8b293e5c-5707-473f-917b-f86706c9a114", (_p0,_p1 = 1) => ({name: _p0,age: _p1}), {}); Cat._typeId = "Cat";;
-export let Mech = TIN_TYPE("Mech", "af08de4b-c330-47d5-ab3c-74e1e18d8ccf", (_p0,_p1) => ({name: _p0,version: _p1}), {}); Mech._typeId = "Mech";;
+export let Cat = TIN_TYPE("Cat", "8b293e5c-5707-473f-917b-f86706c9a114", (_p0, _p1 = 1) => ({ name: _p0, age: _p1 }), {}); Cat._typeId = "Cat";;
+export let Mech = TIN_TYPE("Mech", "af08de4b-c330-47d5-ab3c-74e1e18d8ccf", (_p0, _p1) => ({ name: _p0, version: _p1 }), {}); Mech._typeId = "Mech";;
 export let test/* Number*/ = 0;
 export let kitty/* Cat*/ = Cat("Kitty", 1);
 export let mech/* Mech*/ = Mech("Iodized Steel", 3);
@@ -215,15 +215,15 @@ export let mechaCat/* Cat & Mech*/ = _TIN_INTERSECT_OBJECTS(Cat("MechaCat", 10),
 mechaCat.Mech.version;
 (mechaCat) /* as Cat */.Cat.name == "MechaCat";
 (mechaCat) /* as Mech */.Mech.name == "OxidizedCopper";
-export let any/* Any*/ = kitty;
-((Cat.__is_child(any) ) ? (print(any.Cat.name)) : (null)) ;
+export let any/* Anything*/ = kitty;
+((Cat.__is_child(any)) ? (print(any.Cat.name)) : (null));
 export let maybeCat/* Cat?*/ = kitty;
-((maybeCat != nothing) ? (print(maybeCat.Cat.age)) : (null)) ;
+((maybeCat != nothing) ? (print(maybeCat.Cat.age)) : (null));
 export let arr/* Array[Number]*/ = Array$of(0)(Array(0)([1, 2, 3, 4]));
-((() => { const _owner = arr; return _owner.Array.at.call(_owner,0)})());
-((() => { const _owner = arr; return _owner.Array.length.call(_owner,)})());
-export let varargs/* (n:Array[Number]) -> Number*/ = function(n) {
-return ((() => { const _owner = n; return _owner.Array.at.call(_owner,0)})())
+((() => { const _owner = arr; return _owner.Array.at.call(_owner, 0) })());
+((() => { const _owner = arr; return _owner.Array.length.call(_owner,) })());
+export let varargs/* (n:Array[Number]) -> Number*/ = function (n) {
+	return ((() => { const _owner = n; return _owner.Array.at.call(_owner, 0) })())
 };
 varargs(Array(0)([1, 2, 3]));
 varargs(Array$of(0)(Array(0)([1, 2])))

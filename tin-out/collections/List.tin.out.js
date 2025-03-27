@@ -166,74 +166,76 @@ const debug = (...args) => {
 	console.log(...args)
 }
 
-// COMPILED TIN
-;
-import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js";Object.entries(module0).forEach(([key, value]) => {
-			globalThis[key] = value;
-	  });;
-export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "e871a80a-ff08-44b6-8b58-6192ce17d606", (_p0,_p1) => ({value: _p0,rest: _p1}), {}); ListHead._typeId = "ListHead";;
+	// COMPILED TIN
+	;
+import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\collections\\Iterable.tin.out.js"; Object.entries(module0).forEach(([key, value]) => {
+	globalThis[key] = value;
+});;
+export var ListHead = /* [] */(T) => TIN_TYPE("ListHead", "e871a80a-ff08-44b6-8b58-6192ce17d606", (_p0, _p1) => ({ value: _p0, rest: _p1 }), {}); ListHead._typeId = "ListHead";;
 export var List = /* [] */(T) => (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(ListHead.call('Type', T), Iterable.call('Type', T)), Accessible.call('Type', T)), ToString));
-export var List$iterator/* [T] => (list:ListHead[T]?) -> Iterator[T]*/ = function(T) {
-return function(list) {
-var currentList/* ListHead[T]?*/ = list;
-var nextF/* () -> T?*/ = function() {
-return ((currentList != nothing) ? ((function(){var result/* T*/ = currentList.ListHead.value;
-currentList = currentList.ListHead.rest;
-return result}).call(this)) : (nothing)) 
+export var List$iterator/* [T] => (list:ListHead[T]?) -> Iterator[T]*/ = function (T) {
+	return function (list) {
+		var currentList/* ListHead[T]?*/ = list;
+		var nextF/* () -> T?*/ = function () {
+			return ((currentList != nothing) ? ((function () {
+				var result/* T*/ = currentList.ListHead.value;
+				currentList = currentList.ListHead.rest;
+				return result
+			}).call(this)) : (nothing))
+		};
+		return Iterator.call('Type', T)(nextF)
+	}
 };
-return Iterator.call('Type', T)(nextF)
-}
+export var List$accessible/* [T] => (list:ListHead[T]) -> Accessible[T]*/ = function (T) {
+	return function (list) {
+		var length/* () -> Number*/ = function () {
+			var num/* Number*/ = 0;
+			var l/* ListHead[T]*/ = list;
+			while (l != nothing) {
+				num = num + 1
+			};
+			return num
+		};
+		var at/* (index:Number) -> T*/ = function (index) {
+			var currentIndex/* Number*/ = 0;
+			var l/* ListHead[T]*/ = list;
+			while (currentIndex < index) {
+				((l != nothing) ? (l = l.ListHead.rest) : (null));
+				currentIndex = currentIndex + 1
+			};
+			return l.ListHead.value
+		};
+		return (Accessible.call('Type', T)(at, length))
+	}
 };
-export var List$accessible/* [T] => (list:ListHead[T]) -> Accessible[T]*/ = function(T) {
-return function(list) {
-var length/* () -> Number*/ = function() {
-var num/* Number*/ = 0;
-var l/* ListHead[T]*/ = list;
-while (l != nothing) {
- num = num + 1 
+export var List$of/* [T] => (arr:Array[T]) -> ListHead[T]? & Iterable[T] & Accessible[T] & Struct(ToString)*/ = function (T) {
+	return function (arr) {
+		var i/* Number*/ = arr.Array.length();
+		var list/* ListHead[T]?*/ = (nothing) /* as ListHead.call('Type', T) */;
+		while (i > 0) {
+			i = i - 1;
+			list = ListHead.call('Type', T)(arr.Array.at(i), list)
+		};
+		var iterable/* Iterable[T]*/ = Iterable.call('Type', T)(function () {
+			return List$iterator.call('Type', T)(list)
+		});
+		var toStr/* (this:Anything) -> String*/ = function () {
+			return iterable.Iterable.mkString.call(iterable, ",", "List(", ")")
+		};
+		return (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(list, iterable), List$accessible.call('Type', T)(list)), ToString(toStr)))
+	}
 };
-return num
-};
-var at/* (index:Number) -> T*/ = function(index) {
-var currentIndex/* Number*/ = 0;
-var l/* ListHead[T]*/ = list;
-while (currentIndex < index) {
- ((l != nothing) ? (l = l.ListHead.rest) : (null)) ;
-currentIndex = currentIndex + 1 
-};
-return l.ListHead.value
-};
-return (Accessible.call('Type', T)(at, length))
-}
-};
-export var List$of/* [T] => (arr:Array[T]) -> ListHead[T]? & Iterable[T] & Accessible[T] & Struct(ToString)*/ = function(T) {
-return function(arr) {
-var i/* Number*/ = arr.Array.length();
-var list/* ListHead[T]?*/ = (nothing) /* as ListHead.call('Type', T) */;
-while (i > 0) {
- i = i - 1;
-list = ListHead.call('Type', T)(arr.Array.at(i), list) 
-};
-var iterable/* Iterable[T]*/ = Iterable.call('Type', T)(function() {
-return List$iterator.call('Type', T)(list)
-});
-var toStr/* (this:Any) -> String*/ = function() {
-return iterable.Iterable.mkString.call(iterable,",", "List(", ")")
-};
-return (_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(_TIN_INTERSECT_OBJECTS(list, iterable), List$accessible.call('Type', T)(list)), ToString(toStr)))
-}
-};
-export var List$fromIterator/* [T] => (getIterator:() -> Iterator[T]) -> ListHead[T]? & Iterable[T]*/ = function(T) {
-return function(getIterator) {
-var list/* ListHead[T]?*/ = nothing;
-var iterator/* Iterator[T]*/ = getIterator();
-var current/* T?*/ = iterator.Iterator.next();
-while (current != nothing) {
- list = ListHead.call('Type', T)(current, list);
-current = iterator.Iterator.next() 
-};
-return (_TIN_INTERSECT_OBJECTS(list, Iterable.call('Type', T)(function() {
-return List$iterator.call('Type', T)(list)
-})))
-}
+export var List$fromIterator/* [T] => (getIterator:() -> Iterator[T]) -> ListHead[T]? & Iterable[T]*/ = function (T) {
+	return function (getIterator) {
+		var list/* ListHead[T]?*/ = nothing;
+		var iterator/* Iterator[T]*/ = getIterator();
+		var current/* T?*/ = iterator.Iterator.next();
+		while (current != nothing) {
+			list = ListHead.call('Type', T)(current, list);
+			current = iterator.Iterator.next()
+		};
+		return (_TIN_INTERSECT_OBJECTS(list, Iterable.call('Type', T)(function () {
+			return List$iterator.call('Type', T)(list)
+		})))
+	}
 }

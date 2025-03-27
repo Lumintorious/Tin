@@ -62,6 +62,11 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 	return constructor;
 }
 
+export function _Q(symbol, func, descriptor) {
+	func._s = symbol;
+	return func
+}
+
 export function Type$of(obj) {
 	if (obj === undefined) {
 		return undefined;
@@ -73,7 +78,7 @@ export function Type$of(obj) {
 		return String._d;
 	}
 	if (obj === undefined || obj.null === null) {
-		return Null
+		return Nothing
 	}
 	let result = obj._type || obj._d || obj
 	if (result._d) {
@@ -102,7 +107,7 @@ export function Union$getValuesRaw(objType) {
 	} else if (objType[Literal._s]) {
 		return Array(objType)([objType[Literal._s].value])
 	} else {
-		return Array(Null)([])
+		return Array(Nothing)([])
 	}
 }
 
@@ -239,7 +244,7 @@ export function _L(value) {
 	function check(obj) {
 		return obj === value;
 	}
-	let broaderType = Null;
+	let broaderType = Nothing;
 	if (typeof value === "number") {
 		broaderType = Number;
 	} else if (typeof value === "strin") {
@@ -283,6 +288,8 @@ export var Array = (function () {
 	return result;
 })()
 
+export const _v = (v) => { _: v }
+
 export const Array$of = (t) => (args) => args
 Array._typeId = "Array"
 
@@ -292,6 +299,18 @@ export const copy = (T) => (obj) => {
 		newObj[key] = { ...obj[key] }
 	}
 	return newObj;
+}
+
+export const _makeClojure = (clojure, obj) => {
+	if (typeof obj !== "object") {
+		return obj;
+	}
+	if (obj._) {
+		obj._._clojure = clojure;
+	} else {
+		obj._clojure = clojure;
+	}
+	return obj;
 }
 
 export function getRandomInt(min, max) {
@@ -307,6 +326,9 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 	if (obj === null) return 'nothing';
 	if (typeof obj === 'undefined') return 'nothing';
+	if (obj._) {
+		obj = obj._
+	}
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return indent > 0 ? `"${obj}"` : obj;

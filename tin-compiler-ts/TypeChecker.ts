@@ -126,10 +126,12 @@ export class TypeChecker {
          let ownerType = scope.resolveNamedType(
             this.context.inferencer.infer(node.lhs.owner, scope)
          ) as StructType;
-         let fieldType = ownerType.fields.find(
-            (f) => f.name === (node.lhs as Select).field
+         let fieldType = this.context.inferencer.findField(
+            ownerType,
+            node.lhs.field,
+            scope
          );
-         if (!fieldType?.mutable) {
+         if (!fieldType?.mutable && !(fieldType?.type instanceof MutableType)) {
             this.context.errors.add(
                `Setting an immutable field '${node.lhs.show()}'`,
                undefined,
@@ -176,9 +178,7 @@ export class TypeChecker {
    ) {
       if (node instanceof Block) {
          const innerScope = scope.innerScopeOf(node);
-         node.statements.forEach((c) =>
-            this.typeCheck.bind(this)(c, innerScope)
-         );
+         node.statements.forEach((c) => this.typeCheck(c, innerScope));
       } else if (node instanceof Assignment && node.value) {
          const options: RecursiveResolutionOptions = {};
          if (node.lhs instanceof Identifier) {
@@ -208,8 +208,8 @@ export class TypeChecker {
       } else if (node instanceof WhileLoop) {
          const innerScope = scope.innerScopeOf(node);
          this.typeCheck(node.condition, innerScope);
-         if (node.eachLoop) {
-            this.typeCheck(node.eachLoop, innerScope);
+         if (node.action) {
+            this.typeCheck(node.action, innerScope);
          }
       } else if (node instanceof TypeDef) {
          const innerScope = scope.innerScopeOf(node);
@@ -256,17 +256,17 @@ export class TypeChecker {
                const mutableSubFields = finalType.getMutableFields();
                if (mutableSubFields.length > 0) {
                   this.context.errors.add(
-                     `Immutable field '${fd.name}' of '${
+                     `Invariable field '${fd.name}' of '${
                         node.name
-                     }' cannot hold a mutable value. Mutable fields = [${mutableSubFields
-                        .map((f) => f.name)
-                        .join(", ")}]`,
+                     }' cannot hold a variable value '${finalType.toString()}' with variable fields ${mutableSubFields
+                        .map((f) => "'" + f.name + "'")
+                        .join(", ")}`,
                      undefined,
                      finalType,
                      fd.position,
-                     "Acknowledge the mutability by specifying the field's type as '~" +
+                     "Either declare the variability by specifying the field's type as '~" +
                         finalType.toString() +
-                        "'"
+                        "' or don't use a variable type in this field"
                   );
                }
             }
@@ -287,9 +287,9 @@ export class TypeChecker {
                      undefined,
                      finalType,
                      fd.position,
-                     "Acknowledge the mutability by specifying the return type as '~" +
-                        finalType.toString() +
-                        "'"
+                     "Either declare the variability by specifying the return type as '~" +
+                        finalType.returnType.toString() +
+                        "' or don't use a lambda returning a variable value in this field"
                   );
                }
             }
@@ -356,11 +356,12 @@ export class TypeChecker {
                node.position?.start.line
          );
       }
-      let type = this.context.inferencer.inferRoundValueToValueLambda(
-         node,
-         scope,
-         { typeExpectedInPlace: lambdaType }
-      );
+      let type = lambdaType;
+      // this.context.inferencer.inferRoundValueToValueLambda(
+      //    node,
+      //    scope,
+      //    { typeExpectedInPlace: lambdaType }
+      // );
       if (type instanceof RoundValueToValueLambdaType) {
          this.checkLambdaParamsValidity(type.params, scope);
       }
@@ -379,14 +380,15 @@ export class TypeChecker {
                undefined,
                undefined,
                term.position,
-               `Either declare ${node.show} as an effectful lambda '(...) ~> ...', or remove the effect.`
+               `Either declare ${node.show()} as an effectful lambda '(...) ~> ...', or remove the effect.`
             );
          }
       }
 
       if (
          type instanceof RoundValueToValueLambdaType &&
-         !(type.returnType instanceof MutableType)
+         !(type.returnType instanceof MutableType) &&
+         !(type.returnType.name === "Nothing")
       ) {
          let effects = [
             ...this.findEffects(node.block, true, innerScope),
@@ -600,7 +602,7 @@ export class TypeChecker {
       onlyCaptures: boolean,
       scope: Scope
    ): [string, Term][] {
-      if (node instanceof AppliedKeyword && node.keyword !== "unsafe") {
+      if (node instanceof AppliedKeyword && node.keyword !== "unchecked") {
          return this.findEffects(node.param, onlyCaptures, scope);
       } else if (node instanceof Block) {
          return node.statements.flatMap((statement) =>
@@ -625,7 +627,7 @@ export class TypeChecker {
                  )
                : []),
          ];
-      } else if (node instanceof WhileLoop && node.eachLoop) {
+      } else if (node instanceof WhileLoop) {
          const ifScope = scope.innerScopeOf(node);
          return [
             ...this.findEffects(node.condition, onlyCaptures, ifScope),
@@ -804,14 +806,14 @@ export class TypeChecker {
                term.callee.owner,
                scope
             );
-            if (!calleeType.isAssignableTo(expectedThisType, scope)) {
-               this.context.errors.add(
-                  `Call target ('this') of lambda ${term.callee.field}`,
-                  expectedThisType,
-                  calleeType,
-                  term.position
-               );
-            }
+            // if (!calleeType.isAssignableTo(expectedThisType, scope)) {
+            //    this.context.errors.add(
+            //       `Call target ('this') of lambda ${term.callee.field}`,
+            //       expectedThisType,
+            //       calleeType,
+            //       term.position
+            //    );
+            // }
          }
          term.isFirstParamThis = true;
       }
@@ -982,7 +984,7 @@ export class TypeErrorList {
                            ? `\n  > Expected '${e.expectedType?.toString()}'`
                            : ""
                      }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}${
-                        e.hint ? `\n > ${e.hint}` : ""
+                        e.hint ? `\n  > ${e.hint}` : ""
                      }`
                )
                .join("\n");

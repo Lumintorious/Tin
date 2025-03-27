@@ -1,7 +1,7 @@
 import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
 				globalThis[key] = value;
 		  });;
-export var Iterator = /* [] */(T) => _S(Symbol("Iterator"), (_p0) => ({next: _p0}), lazy(Type('Iterator', (obj) => Reflect.ownKeys(obj).includes(Iterator._s))._and(Struct(Array(0)([
+export var Iterator = /* [] */(function(){ const _sym = Symbol("undefined"); return _Q(_sym, (T) => _S(typeof _sym !== "undefined" ? _sym : Symbol("Iterator"), (_p0) => ({next: _p0}), lazy(Type('Iterator', (obj) => Reflect.ownKeys(obj).includes(Iterator._s))._and(Struct(Array(0)([
 						Parameter("next",
 					Type$of(
 				Type("undefined")._and(Lambda(
@@ -10,8 +10,8 @@ export var Iterator = /* [] */(T) => _S(Symbol("Iterator"), (_p0) => ({next: _p0
 			),
 					() => { return (undefined)})
 		
-			])))), {});
-export var Accessible = /* [] */(T) => _S(Symbol("Accessible"), (_p0,_p1) => ({at: _p0,length: _p1}), lazy(Type('Accessible', (obj) => Reflect.ownKeys(obj).includes(Accessible._s))._and(Struct(Array(0)([
+			])))), {})); })();
+export var Accessible = /* [] */(function(){ const _sym = Symbol("undefined"); return _Q(_sym, (T) => _S(typeof _sym !== "undefined" ? _sym : Symbol("Accessible"), (_p0,_p1) => ({at: _p0,length: _p1}), lazy(Type('Accessible', (obj) => Reflect.ownKeys(obj).includes(Accessible._s))._and(Struct(Array(0)([
 						Parameter("at",
 					Type$of(
 				Type("undefined")._and(Lambda(
@@ -30,9 +30,9 @@ export var Accessible = /* [] */(T) => _S(Symbol("Accessible"), (_p0,_p1) => ({a
 			),
 					() => { return (undefined)})
 		
-			])))), {});
+			])))), {})); })();
 ;
-export var ToString = _S(Symbol("ToString"), (_p0) => ({toString: _p0}), lazy(Type('ToString', (obj) => Reflect.ownKeys(obj).includes(ToString._s))._and(Struct(Array(0)([
+export var ToString = _S(typeof _sym !== "undefined" ? _sym : Symbol("ToString"), (_p0) => ({toString: _p0}), lazy(Type('ToString', (obj) => Reflect.ownKeys(obj).includes(ToString._s))._and(Struct(Array(0)([
 						Parameter("toString",
 					Type$of(
 				Type("undefined")._and(Lambda(
@@ -45,8 +45,8 @@ export var ToString = _S(Symbol("ToString"), (_p0) => ({toString: _p0}), lazy(Ty
 					() => { return (undefined)})
 		
 			])))), {});
-export var stringOf/* (obj:Any) -> String*/ = _F(Symbol("lambda"), function(obj) {try{
-throw ((Type$get(ToString).__is_child(obj) ) ? (do{throw ((() => { var _owner = obj; return _owner[ToString._s].toString.call(_owner,)})())}) : (do{throw makeString(obj)})) 
+export var stringOf/* (obj:Anything) -> String*/ = _F(Symbol("lambda"), function(obj) {try{
+throw ((Type$get(ToString).__is_child(obj) ) ? (function(){throw ((() => { var _owner = obj; return _owner[ToString._s].toString.call(_owner,)})())})() : (function(){throw makeString(obj)})()) 
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("stringOf")._and(Lambda(
 				Array(Type)([Parameter("obj",
@@ -55,13 +55,10 @@ throw ((Type$get(ToString).__is_child(obj) ) ? (do{throw ((() => { var _owner = 
 		,]),
 				String))
 			);
-export var Iterable = /* [] */(T) => _S(Symbol("Iterable"), (_p0,_p1 = _F(Symbol("lambda"), function(fn) {try{
+export var Iterable = /* [] */(function(){ const _sym = Symbol("undefined"); return _Q(_sym, (T) => _S(typeof _sym !== "undefined" ? _sym : Symbol("Iterable"), (_p0,_p1 = _F(Symbol("lambda"), function(fn) {try{
 var iterator/* Iterator[T]*/ = ((() => { var _owner = this; return _owner[Iterable._s].getIterator.call(_owner,)})());
-var current/* T?*/ = ((() => { var _owner = iterator; return _owner[Iterator._s].next.call(_owner,)})());
-while (current != nothing) {
- fn(current);
-current = ((() => { var _owner = iterator; return _owner[Iterator._s].next.call(_owner,)})()) 
-}
+var current/* var (T)?*/ = ((() => { var _owner = iterator; return _owner[Iterator._s].next.call(_owner,)})());
+throw ((current != nothing) ? (function(){throw current = nothing})() : (function(){null})()) 
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("undefined")._and(Lambda(
 				Array(Type)([Parameter("this",
@@ -78,11 +75,11 @@ current = ((() => { var _owner = iterator; return _owner[Iterator._s].next.call(
 			),
 					() => { return (undefined)})
 		,]),
-				Nothing))
+				{}))
 			),_p2 = _F(Symbol("lambda"), function(separator, left, right) {try{
-var string/* ~String*/ = "";
-var fn/* (t:T) ~> ~String*/ = _F(Symbol("lambda"), function(t) {try{
-var comma/* String*/ = ((string == "") ? (do{""}) : (do{separator})) ;
+var string/* var String*/ = "";
+var fn/* (t:T) ~> var String*/ = _F(Symbol("lambda"), function(t) {try{
+var comma/* String*/ = ((string == "") ? (function(){""})() : (function(){separator})()) ;
 throw string = "" + string + "" + comma + "" + t + ""
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("fn")._and(Lambda(
@@ -111,12 +108,12 @@ throw "" + left + "" + string + "" + right + ""
 		,]),
 				{}))
 			),_p3 = _F(Symbol("lambda"), function(pred) {try{
-var num/* ~Number*/ = 0;
+var num/* var Number*/ = 0;
 ((() => { var _owner = this; return _owner[Iterable._s].forEach.call(_owner,_F(Symbol("lambda"), function(t) {try{
-throw ((pred(t)) ? (do{num = num + 1}) : (do{null})) 
+throw ((pred(t)) ? (function(){num = num + 1})() : (function(){null})()) 
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("undefined")._and(Lambda(
-				Array(Type)([Parameter("undefined",
+				Array(Type)([Parameter("t",
 					Type$of(T),
 					() => { return (undefined)})
 		,]),
@@ -165,11 +162,11 @@ throw num
 			),
 					() => { return (undefined)})
 		,]),
-				Nothing))
+				{}))
 			),
 					() => { return (_F(Symbol("lambda"), function(fn) {try{
 var iterator/* Iterator[T]*/ = ((() => { var _owner = this; return _owner[Iterable._s].getIterator.call(_owner,)})());
-var current/* T?*/ = ((() => { var _owner = iterator; return _owner[Iterator._s].next.call(_owner,)})())
+var current/* var (T)?*/ = ((() => { var _owner = iterator; return _owner[Iterator._s].next.call(_owner,)})())
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("undefined")._and(Lambda(
 				Array(Type)([Parameter("this",
@@ -186,7 +183,7 @@ var current/* T?*/ = ((() => { var _owner = iterator; return _owner[Iterator._s]
 			),
 					() => { return (undefined)})
 		,]),
-				Nothing))
+				{}))
 			))})
 		,Parameter("mkString",
 					Type$of(
@@ -207,9 +204,9 @@ var current/* T?*/ = ((() => { var _owner = iterator; return _owner[Iterator._s]
 				{}))
 			),
 					() => { return (_F(Symbol("lambda"), function(separator, left, right) {try{
-var string/* ~String*/ = "";
-var fn/* (t:T) ~> ~String*/ = _F(Symbol("lambda"), function(t) {try{
-var comma/* String*/ = ((string == "") ? (do{""}) : (do{separator})) 
+var string/* var String*/ = "";
+var fn/* (t:T) ~> var String*/ = _F(Symbol("lambda"), function(t) {try{
+var comma/* String*/ = ((string == "") ? (function(){""})() : (function(){separator})()) 
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("fn")._and(Lambda(
 				Array(Type)([Parameter("t",
@@ -256,12 +253,12 @@ throw ((() => { var _owner = this; return _owner[Iterable._s].forEach.call(_owne
 				{}))
 			),
 					() => { return (_F(Symbol("lambda"), function(pred) {try{
-var num/* ~Number*/ = 0;
+var num/* var Number*/ = 0;
 throw ((() => { var _owner = this; return _owner[Iterable._s].forEach.call(_owner,_F(Symbol("lambda"), function(t) {try{
 throw undefined
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("undefined")._and(Lambda(
-				Array(Type)([Parameter("undefined",
+				Array(Type)([Parameter("t",
 					Type$of(T),
 					() => { return (undefined)})
 		,]),
@@ -286,5 +283,5 @@ throw undefined
 				{}))
 			))})
 		
-			])))), {});
+			])))), {})); })();
 export var ssss/* Number*/ = 2

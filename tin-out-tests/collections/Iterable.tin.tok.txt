@@ -48,7 +48,7 @@ DEDENT       | 4            |   8, 1
 IDENTIFIER   | makeString   |   8, 1    
 OPERATOR     | :            |   8, 11   
 PARENS       | (            |   8, 13   
-IDENTIFIER   | Any          |   8, 14   
+IDENTIFIER   | Anything          |   8, 14   
 PARENS       | )            |   8, 17   
 OPERATOR     | ->           |   8, 19   
 IDENTIFIER   | String       |   8, 22   
@@ -66,7 +66,7 @@ OPERATOR     | :            |  11, 10
 PARENS       | (            |  11, 12   
 IDENTIFIER   | this         |  11, 13   
 OPERATOR     | :            |  11, 17   
-IDENTIFIER   | Any          |  11, 19   
+IDENTIFIER   | Anything          |  11, 19   
 PARENS       | )            |  11, 22   
 OPERATOR     | ->           |  11, 24   
 IDENTIFIER   | String       |  11, 27   
@@ -77,7 +77,7 @@ OPERATOR     | =            |  13, 10
 PARENS       | (            |  13, 12   
 IDENTIFIER   | obj          |  13, 13   
 OPERATOR     | :            |  13, 16   
-IDENTIFIER   | Any          |  13, 18   
+IDENTIFIER   | Anything          |  13, 18   
 PARENS       | )            |  13, 21   
 OPERATOR     | ->           |  13, 23   
 NEWLINE      |              |  14, 1    

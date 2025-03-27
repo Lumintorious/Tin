@@ -88,7 +88,7 @@ export class UncheckedType extends Type {
 
 export class AnyTypeClass extends Type {
    constructor() {
-      super("Any");
+      super("Anything");
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
@@ -105,7 +105,7 @@ export class AnyTypeClass extends Type {
    }
 
    toString() {
-      return "Any";
+      return "Anything";
    }
 }
 
@@ -138,9 +138,9 @@ export class NamedType extends Type {
       String: new NamedType("String"),
       Boolean: new NamedType("Boolean"),
       Nothing: new NamedType("Nothing"),
-      Null: new NamedType("Null"),
+      Never: new NamedType("Never"),
       This: new NamedType("This"),
-      Any: AnyType,
+      Anything: AnyType,
    };
 
    name: string;
@@ -178,7 +178,6 @@ export class NamedType extends Type {
          return false;
       }
       realType.typeSymbol.name = this.name;
-
       return realType.typeSymbol.isAssignableTo(other, scope);
    }
 
@@ -188,9 +187,20 @@ export class NamedType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope) {
+      let realType: Type | undefined;
+      if (this.isPrimitive()) {
+         realType = undefined;
+      } else {
+         try {
+            realType = scope.lookup(this.name).typeSymbol;
+         } catch (e) {
+            // Nothing
+         }
+      }
       return (
          (other instanceof NamedType && this.name === other.name) ||
-         (other.name !== undefined && other.name === this.name)
+         (other.name !== undefined && other.name === this.name) ||
+         (realType ? realType.isExtendedBy(other, scope) : false)
       );
    }
 
@@ -327,12 +337,17 @@ export class MutableType extends Type {
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
-      return super.isAssignableTo(other, scope);
+      return (
+         super.isAssignableTo(other, scope) ||
+         this.type.isAssignableTo(other, scope)
+      );
    }
 
    extends(other: Type, scope: Scope): boolean {
       return (
-         other instanceof MutableType && this.type.extends(other.type, scope)
+         (other instanceof MutableType &&
+            this.type.extends(other.type, scope)) ||
+         this.type.extends(other, scope)
       );
    }
 
@@ -345,7 +360,7 @@ export class MutableType extends Type {
    }
 
    toString(): string {
-      return "~" + this.type.toString();
+      return "var " + this.type.toString();
    }
 }
 
@@ -374,7 +389,7 @@ export class OptionalType extends Type {
    }
 
    toString() {
-      return this.type.toString() + "?";
+      return "(" + this.type.toString() + ")?";
    }
 }
 
@@ -881,7 +896,7 @@ export class StructType extends Type {
    }
 
    extends(other: Type, scope: Scope) {
-      if (other.name === "Any") return true;
+      if (other.name === "Anything") return true;
       if (!(other instanceof StructType)) return false;
 
       // Check if every field in this type exists in the other and is assignable
@@ -908,7 +923,7 @@ export class StructType extends Type {
 
    toString() {
       return this.name
-         ? "Struct(" + this.name + ")"
+         ? this.name
          : `StructType(${this.fields.map(
               (f) => `${f.name}:${f.type.toString()}`
            )})`;

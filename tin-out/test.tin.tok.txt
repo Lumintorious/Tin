@@ -48,7 +48,7 @@ OPERATOR     | :            |  10, 10
 PARENS       | (            |  10, 12   
 IDENTIFIER   | this         |  10, 13   
 OPERATOR     | :            |  10, 17   
-IDENTIFIER   | Any          |  10, 19   
+IDENTIFIER   | Anything          |  10, 19   
 PARENS       | )            |  10, 22   
 OPERATOR     | ->           |  10, 24   
 IDENTIFIER   | String       |  10, 27   
@@ -61,7 +61,7 @@ PARENS       | (            |  12, 13
 PARENS       | (            |  12, 14   
 IDENTIFIER   | this         |  12, 15   
 OPERATOR     | :            |  12, 19   
-IDENTIFIER   | Any          |  12, 21   
+IDENTIFIER   | Anything          |  12, 21   
 PARENS       | )            |  12, 24   
 OPERATOR     | ->           |  12, 26   
 STRING       | Sup          |  12, 29   

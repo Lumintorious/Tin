@@ -1,22 +1,17 @@
-import collections/Iterable
+# import collections/List
 
-Box = data:
-	get: () -> ~Number
-	setValue: (Number) ~> Void
+Shape = data:
+	area: () -> var Number
 
-ImmutableHolder = data:
-	box: ~Box
+Rectangle = data:
+	side: var Number
 
-makeBox = (n: Number) ->
-	number: ~Number = n
-	
-	get = () ->
-		~number 
+Rectangle@make = (sideIn: Number): var Rectangle & Shape ~>
+	side = var sideIn
+	rect = Rectangle(side)
+	rect & Shape(() -> side ** 2) 
 
-	setValue = (newValue: Number) ~>
-		set number = newValue
+copy: [T] -> (t: T) -> T = external
 
-	Box(get, setValue)
-
-ImmutableHolder(makeBox(2))
-print("Hello")
+rect = Rectangle@make(12)
+debug(rect)

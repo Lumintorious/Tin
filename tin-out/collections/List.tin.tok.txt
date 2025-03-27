@@ -72,19 +72,24 @@ NEWLINE      |              |  10, 1
 INDENT       | 4            |  10, 1    
 IDENTIFIER   | currentList  |  10, 2    
 OPERATOR     | :            |  10, 13   
-IDENTIFIER   | ListHead     |  10, 15   
-PARENS       | [            |  10, 23   
-IDENTIFIER   | T            |  10, 24   
-PARENS       | ]            |  10, 25   
-OPERATOR     | ?            |  10, 26   
-OPERATOR     | ~=           |  10, 28   
-IDENTIFIER   | list         |  10, 31   
+IDENTIFIER   | var          |  10, 15   
+IDENTIFIER   | ListHead     |  10, 19   
+PARENS       | [            |  10, 27   
+IDENTIFIER   | T            |  10, 28   
+PARENS       | ]            |  10, 29   
+OPERATOR     | ?            |  10, 30   
+OPERATOR     | =            |  10, 32   
+IDENTIFIER   | list         |  10, 34   
 NEWLINE      |              |  11, 1    
 IDENTIFIER   | nextF        |  11, 2    
 OPERATOR     | =            |  11, 8    
 PARENS       | (            |  11, 10   
 PARENS       | )            |  11, 11   
-OPERATOR     | ->           |  11, 13   
+OPERATOR     | :            |  11, 12   
+IDENTIFIER   | var          |  11, 14   
+IDENTIFIER   | T            |  11, 18   
+OPERATOR     | ?            |  11, 19   
+OPERATOR     | ~>           |  11, 21   
 NEWLINE      |              |  12, 1    
 INDENT       | 8            |  12, 1    
 KEYWORD      | if           |  12, 3    
@@ -140,19 +145,31 @@ PARENS       | [            |  21, 41
 IDENTIFIER   | T            |  21, 42   
 PARENS       | ]            |  21, 43   
 PARENS       | )            |  21, 44   
-OPERATOR     | ->           |  21, 46   
+OPERATOR     | :            |  21, 45   
+IDENTIFIER   | var          |  21, 47   
+IDENTIFIER   | Accessible   |  21, 51   
+PARENS       | [            |  21, 61   
+IDENTIFIER   | T            |  21, 62   
+PARENS       | ]            |  21, 63   
+OPERATOR     | ->           |  21, 65   
 NEWLINE      |              |  22, 1    
 INDENT       | 4            |  22, 1    
 IDENTIFIER   | length       |  22, 2    
 OPERATOR     | =            |  22, 9    
 PARENS       | (            |  22, 11   
 PARENS       | )            |  22, 12   
-OPERATOR     | ->           |  22, 14   
+OPERATOR     | :            |  22, 13   
+IDENTIFIER   | var          |  22, 15   
+IDENTIFIER   | Number       |  22, 19   
+OPERATOR     | ~>           |  22, 26   
 NEWLINE      |              |  23, 1    
 INDENT       | 8            |  23, 1    
 IDENTIFIER   | num          |  23, 3    
-OPERATOR     | =            |  23, 7    
-NUMBER       | 0            |  23, 9    
+OPERATOR     | :            |  23, 6    
+IDENTIFIER   | var          |  23, 8    
+IDENTIFIER   | Number       |  23, 12   
+OPERATOR     | =            |  23, 19   
+NUMBER       | 0            |  23, 21   
 NEWLINE      |              |  24, 1    
 IDENTIFIER   | l            |  24, 3    
 OPERATOR     | =            |  24, 5    
@@ -183,16 +200,28 @@ IDENTIFIER   | index        |  29, 8
 OPERATOR     | :            |  29, 13   
 IDENTIFIER   | Number       |  29, 15   
 PARENS       | )            |  29, 21   
-OPERATOR     | ->           |  29, 23   
+OPERATOR     | :            |  29, 22   
+IDENTIFIER   | var          |  29, 24   
+IDENTIFIER   | T            |  29, 28   
+OPERATOR     | ~>           |  29, 31   
 NEWLINE      |              |  30, 1    
 INDENT       | 8            |  30, 1    
 IDENTIFIER   | currentIndex |  30, 3    
-OPERATOR     | =            |  30, 16   
-NUMBER       | 0            |  30, 18   
+OPERATOR     | :            |  30, 15   
+IDENTIFIER   | var          |  30, 17   
+IDENTIFIER   | Number       |  30, 21   
+OPERATOR     | =            |  30, 28   
+NUMBER       | 0            |  30, 30   
 NEWLINE      |              |  31, 1    
 IDENTIFIER   | l            |  31, 3    
-OPERATOR     | =            |  31, 5    
-IDENTIFIER   | list         |  31, 7    
+OPERATOR     | :            |  31, 4    
+IDENTIFIER   | var          |  31, 6    
+IDENTIFIER   | ListHead     |  31, 10   
+PARENS       | [            |  31, 18   
+IDENTIFIER   | T            |  31, 19   
+PARENS       | ]            |  31, 20   
+OPERATOR     | =            |  31, 22   
+IDENTIFIER   | list         |  31, 24   
 NEWLINE      |              |  32, 1    
 KEYWORD      | while        |  32, 3    
 IDENTIFIER   | currentIndex |  32, 9    
@@ -255,16 +284,25 @@ PARENS       | [            |  40, 29
 IDENTIFIER   | T            |  40, 30   
 PARENS       | ]            |  40, 31   
 PARENS       | )            |  40, 32   
-OPERATOR     | ->           |  40, 34   
+OPERATOR     | :            |  40, 33   
+IDENTIFIER   | var          |  40, 35   
+IDENTIFIER   | List         |  40, 39   
+PARENS       | [            |  40, 43   
+IDENTIFIER   | T            |  40, 44   
+PARENS       | ]            |  40, 45   
+OPERATOR     | ~>           |  40, 47   
 NEWLINE      |              |  41, 1    
 INDENT       | 4            |  41, 1    
 IDENTIFIER   | i            |  41, 2    
-OPERATOR     | =            |  41, 4    
-IDENTIFIER   | arr          |  41, 6    
-OPERATOR     | .            |  41, 9    
-IDENTIFIER   | length       |  41, 10   
-PARENS       | (            |  41, 16   
-PARENS       | )            |  41, 17   
+OPERATOR     | :            |  41, 3    
+IDENTIFIER   | var          |  41, 5    
+IDENTIFIER   | Number       |  41, 9    
+OPERATOR     | =            |  41, 16   
+IDENTIFIER   | arr          |  41, 18   
+OPERATOR     | .            |  41, 21   
+IDENTIFIER   | length       |  41, 22   
+PARENS       | (            |  41, 28   
+PARENS       | )            |  41, 29   
 NEWLINE      |              |  42, 1    
 IDENTIFIER   | list         |  42, 2    
 OPERATOR     | =            |  42, 7    
@@ -339,19 +377,19 @@ OPERATOR     | =            |  50, 8
 PARENS       | (            |  50, 10   
 IDENTIFIER   | this         |  50, 11   
 OPERATOR     | :            |  50, 15   
-IDENTIFIER   | Any          |  50, 17   
-PARENS       | )            |  50, 20   
-OPERATOR     | ->           |  50, 22   
-IDENTIFIER   | iterable     |  50, 25   
-OPERATOR     | .            |  50, 33   
-IDENTIFIER   | mkString     |  50, 34   
-PARENS       | (            |  50, 42   
-STRING       | ,            |  50, 43   
+IDENTIFIER   | Anything     |  50, 17   
+PARENS       | )            |  50, 25   
+OPERATOR     | ~>           |  50, 27   
+IDENTIFIER   | iterable     |  50, 30   
+OPERATOR     | .            |  50, 38   
+IDENTIFIER   | mkString     |  50, 39   
+PARENS       | (            |  50, 47   
+STRING       | ,            |  50, 48   
 NEWLINE      | ,            |  50, 1    
-STRING       | List(        |  50, 48   
+STRING       | List(        |  50, 53   
 NEWLINE      | ,            |  50, 1    
-STRING       | )            |  50, 57   
-PARENS       | )            |  50, 60   
+STRING       | )            |  50, 62   
+PARENS       | )            |  50, 65   
 NEWLINE      |              |  52, 1    
 KEYWORD      | return       |  52, 2    
 IDENTIFIER   | list         |  52, 9    
@@ -371,99 +409,106 @@ PARENS       | (            |  52, 62
 IDENTIFIER   | toStr        |  52, 63   
 PARENS       | )            |  52, 68   
 NEWLINE      |              |  54, 1    
-DEDENT       | 4            |  54, 1    
-IDENTIFIER   | List@fromIterator |  54, 1    
-OPERATOR     | =            |  54, 19   
-PARENS       | [            |  54, 21   
-IDENTIFIER   | T            |  54, 22   
-PARENS       | ]            |  54, 23   
-OPERATOR     | ->           |  54, 25   
-PARENS       | (            |  54, 28   
-IDENTIFIER   | getIterator  |  54, 29   
-OPERATOR     | :            |  54, 40   
-PARENS       | (            |  54, 42   
-PARENS       | )            |  54, 43   
-OPERATOR     | =>           |  54, 45   
-IDENTIFIER   | Iterator     |  54, 48   
-PARENS       | [            |  54, 56   
-IDENTIFIER   | T            |  54, 57   
-PARENS       | ]            |  54, 58   
-PARENS       | )            |  54, 59   
-OPERATOR     | ->           |  54, 61   
 NEWLINE      |              |  55, 1    
-INDENT       | 4            |  55, 1    
-IDENTIFIER   | list         |  55, 2    
-OPERATOR     | :            |  55, 6    
-IDENTIFIER   | ListHead     |  55, 8    
-PARENS       | [            |  55, 16   
-IDENTIFIER   | T            |  55, 17   
-PARENS       | ]            |  55, 18   
-OPERATOR     | ?            |  55, 19   
-OPERATOR     | =            |  55, 21   
-IDENTIFIER   | nothing      |  55, 23   
 NEWLINE      |              |  56, 1    
-IDENTIFIER   | iterator     |  56, 2    
-OPERATOR     | =            |  56, 11   
-IDENTIFIER   | getIterator  |  56, 13   
-PARENS       | (            |  56, 24   
-PARENS       | )            |  56, 25   
 NEWLINE      |              |  57, 1    
-IDENTIFIER   | current      |  57, 2    
-OPERATOR     | =            |  57, 10   
-IDENTIFIER   | iterator     |  57, 12   
-OPERATOR     | .            |  57, 20   
-IDENTIFIER   | next         |  57, 21   
-PARENS       | (            |  57, 25   
-PARENS       | )            |  57, 26   
 NEWLINE      |              |  59, 1    
-KEYWORD      | while        |  59, 2    
-IDENTIFIER   | current      |  59, 8    
-OPERATOR     | !=           |  59, 16   
-IDENTIFIER   | nothing      |  59, 19   
-NEWLINE      | ,            |  59, 1    
 NEWLINE      |              |  60, 1    
-INDENT       | 8            |  60, 1    
-KEYWORD      | set          |  60, 3    
-IDENTIFIER   | list         |  60, 7    
-OPERATOR     | =            |  60, 12   
-IDENTIFIER   | ListHead     |  60, 14   
-PARENS       | [            |  60, 22   
-IDENTIFIER   | T            |  60, 23   
-PARENS       | ]            |  60, 24   
-PARENS       | (            |  60, 25   
-IDENTIFIER   | current      |  60, 26   
-NEWLINE      | ,            |  60, 1    
-IDENTIFIER   | list         |  60, 35   
-PARENS       | )            |  60, 39   
 NEWLINE      |              |  61, 1    
-KEYWORD      | set          |  61, 3    
-IDENTIFIER   | current      |  61, 7    
-OPERATOR     | =            |  61, 15   
-IDENTIFIER   | iterator     |  61, 17   
-OPERATOR     | .            |  61, 25   
-IDENTIFIER   | next         |  61, 26   
-PARENS       | (            |  61, 30   
-PARENS       | )            |  61, 31   
 NEWLINE      |              |  63, 1    
-DEDENT       | 8            |  63, 1    
-KEYWORD      | return       |  63, 2    
-IDENTIFIER   | list         |  63, 9    
-OPERATOR     | &            |  63, 14   
-IDENTIFIER   | Iterable     |  63, 16   
-PARENS       | [            |  63, 24   
-IDENTIFIER   | T            |  63, 25   
-PARENS       | ]            |  63, 26   
-PARENS       | (            |  63, 27   
-PARENS       | (            |  63, 28   
-PARENS       | )            |  63, 29   
-OPERATOR     | ->           |  63, 31   
-IDENTIFIER   | List@iterator |  63, 34   
-PARENS       | [            |  63, 47   
-IDENTIFIER   | T            |  63, 48   
-PARENS       | ]            |  63, 49   
-PARENS       | (            |  63, 50   
-IDENTIFIER   | list         |  63, 51   
-PARENS       | )            |  63, 55   
-PARENS       | )            |  63, 56   
-NEWLINE      |              |  64, 1    
+NEWLINE      |              |  65, 1    
+DEDENT       | 4            |  65, 1    
+IDENTIFIER   | List@range   |  65, 1    
+OPERATOR     | =            |  65, 12   
+PARENS       | (            |  65, 14   
+IDENTIFIER   | start        |  65, 15   
+OPERATOR     | :            |  65, 20   
+IDENTIFIER   | Number       |  65, 22   
+NEWLINE      | ,            |  65, 1    
+IDENTIFIER   | end          |  65, 30   
+OPERATOR     | :            |  65, 33   
+IDENTIFIER   | Number       |  65, 35   
+PARENS       | )            |  65, 41   
+OPERATOR     | ->           |  65, 43   
+NEWLINE      |              |  66, 1    
+INDENT       | 4            |  66, 1    
+IDENTIFIER   | list         |  66, 2    
+OPERATOR     | :            |  66, 6    
+IDENTIFIER   | var          |  66, 8    
+IDENTIFIER   | ListHead     |  66, 12   
+PARENS       | [            |  66, 20   
+IDENTIFIER   | Number       |  66, 21   
+PARENS       | ]            |  66, 27   
+OPERATOR     | ?            |  66, 28   
+OPERATOR     | =            |  66, 30   
+IDENTIFIER   | nothing      |  66, 32   
+NEWLINE      |              |  67, 1    
+IDENTIFIER   | st           |  67, 2    
+OPERATOR     | :            |  67, 4    
+IDENTIFIER   | var          |  67, 6    
+IDENTIFIER   | Number       |  67, 10   
+OPERATOR     | =            |  67, 17   
+IDENTIFIER   | start        |  67, 19   
+NEWLINE      |              |  68, 1    
+IDENTIFIER   | en           |  68, 2    
+OPERATOR     | =            |  68, 5    
+IDENTIFIER   | end          |  68, 7    
+NEWLINE      |              |  70, 1    
+KEYWORD      | unchecked    |  70, 2    
+KEYWORD      | while        |  70, 12   
+IDENTIFIER   | st           |  70, 18   
+OPERATOR     | <            |  70, 21   
+IDENTIFIER   | en           |  70, 23   
+NEWLINE      | ,            |  70, 1    
+NEWLINE      |              |  71, 1    
+INDENT       | 8            |  71, 1    
+KEYWORD      | set          |  71, 3    
+IDENTIFIER   | list         |  71, 7    
+OPERATOR     | =            |  71, 12   
+IDENTIFIER   | ListHead     |  71, 14   
+PARENS       | [            |  71, 22   
+IDENTIFIER   | Number       |  71, 23   
+PARENS       | ]            |  71, 29   
+PARENS       | (            |  71, 30   
+IDENTIFIER   | st           |  71, 31   
+NEWLINE      | ,            |  71, 1    
+IDENTIFIER   | list         |  71, 35   
+PARENS       | )            |  71, 39   
+NEWLINE      |              |  72, 1    
+KEYWORD      | set          |  72, 3    
+IDENTIFIER   | st           |  72, 7    
+OPERATOR     | =            |  72, 10   
+IDENTIFIER   | st           |  72, 12   
+OPERATOR     | +            |  72, 15   
+NUMBER       | 1            |  72, 17   
+NEWLINE      |              |  74, 1    
+DEDENT       | 8            |  74, 1    
+KEYWORD      | return       |  74, 2    
+IDENTIFIER   | var          |  74, 9    
+PARENS       | (            |  74, 13   
+IDENTIFIER   | list         |  74, 14   
+OPERATOR     | &            |  74, 19   
+IDENTIFIER   | Iterable     |  74, 21   
+PARENS       | [            |  74, 29   
+IDENTIFIER   | Number       |  74, 30   
+PARENS       | ]            |  74, 36   
+PARENS       | (            |  74, 37   
+PARENS       | (            |  74, 38   
+PARENS       | )            |  74, 39   
+OPERATOR     | ->           |  74, 41   
+IDENTIFIER   | List@iterator |  74, 44   
+PARENS       | [            |  74, 57   
+IDENTIFIER   | Number       |  74, 58   
+PARENS       | ]            |  74, 64   
+PARENS       | (            |  74, 65   
+IDENTIFIER   | list         |  74, 66   
+PARENS       | )            |  74, 70   
+PARENS       | )            |  74, 71   
+PARENS       | )            |  74, 72   
+NEWLINE      |              |  76, 1    
+DEDENT       | 4            |  76, 1    
+IDENTIFIER   | li           |  76, 1    
+OPERATOR     | =            |  76, 4    
+NUMBER       | 0            |  76, 6    
+NEWLINE      |              |  77, 1    
 --undefined--

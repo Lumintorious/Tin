@@ -1,6 +1,6 @@
 NEWLINE      |              |   2, 1    
 KEYWORD      | external     |   2, 1    
-STRING       | export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n) => true, (n) => true)));
+STRING       | export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type("Anything", (n) => true, (n) => true)));
  |   2, 10   
 NEWLINE      |              |   4, 1    
 IDENTIFIER   | Type         |   4, 1    
@@ -18,24 +18,24 @@ OPERATOR     | =            |   6, 8
 PARENS       | (            |   6, 10   
 IDENTIFIER   | obj          |   6, 11   
 OPERATOR     | :            |   6, 14   
-IDENTIFIER   | Any          |   6, 16   
-PARENS       | )            |   6, 19   
-OPERATOR     | ->           |   6, 21   
-KEYWORD      | false        |   6, 24   
-OPERATOR     | :            |   6, 29   
-IDENTIFIER   | Boolean      |   6, 31   
+IDENTIFIER   | Anything     |   6, 16   
+PARENS       | )            |   6, 24   
+OPERATOR     | ->           |   6, 26   
+KEYWORD      | false        |   6, 29   
+OPERATOR     | :            |   6, 34   
+IDENTIFIER   | Boolean      |   6, 36   
 NEWLINE      |              |   7, 1    
 IDENTIFIER   | checkIntegrity |   7, 2    
 OPERATOR     | =            |   7, 17   
 PARENS       | (            |   7, 19   
 IDENTIFIER   | obj          |   7, 20   
 OPERATOR     | :            |   7, 23   
-IDENTIFIER   | Any          |   7, 25   
-PARENS       | )            |   7, 28   
-OPERATOR     | ->           |   7, 30   
-KEYWORD      | false        |   7, 33   
-OPERATOR     | :            |   7, 38   
-IDENTIFIER   | Boolean      |   7, 40   
+IDENTIFIER   | Anything     |   7, 25   
+PARENS       | )            |   7, 33   
+OPERATOR     | ->           |   7, 35   
+KEYWORD      | false        |   7, 38   
+OPERATOR     | :            |   7, 43   
+IDENTIFIER   | Boolean      |   7, 45   
 NEWLINE      |              |   8, 1    
 IDENTIFIER   | is           |   8, 2    
 OPERATOR     | =            |   8, 5    
@@ -55,12 +55,12 @@ OPERATOR     | :            |  10, 8
 PARENS       | (            |  10, 10   
 IDENTIFIER   | obj          |  10, 11   
 OPERATOR     | :            |  10, 14   
-IDENTIFIER   | Any          |  10, 16   
-PARENS       | )            |  10, 19   
-OPERATOR     | ->           |  10, 21   
-IDENTIFIER   | Type         |  10, 24   
-OPERATOR     | =            |  10, 29   
-KEYWORD      | external     |  10, 31   
+IDENTIFIER   | Anything     |  10, 16   
+PARENS       | )            |  10, 24   
+OPERATOR     | ->           |  10, 26   
+IDENTIFIER   | Type         |  10, 29   
+OPERATOR     | =            |  10, 34   
+KEYWORD      | external     |  10, 36   
 NEWLINE      |              |  12, 1    
 IDENTIFIER   | Field        |  12, 1    
 OPERATOR     | =            |  12, 7    
@@ -82,9 +82,9 @@ PARENS       | (            |  15, 16
 PARENS       | (            |  15, 17   
 PARENS       | )            |  15, 18   
 OPERATOR     | ->           |  15, 20   
-IDENTIFIER   | Any          |  15, 23   
-PARENS       | )            |  15, 26   
-OPERATOR     | ?            |  15, 27   
+IDENTIFIER   | Anything     |  15, 23   
+PARENS       | )            |  15, 31   
+OPERATOR     | ?            |  15, 32   
 NEWLINE      |              |  17, 1    
 DEDENT       | 4            |  17, 1    
 IDENTIFIER   | Parameter    |  17, 1    
@@ -108,9 +108,9 @@ PARENS       | (            |  20, 16
 PARENS       | (            |  20, 17   
 PARENS       | )            |  20, 18   
 OPERATOR     | ->           |  20, 20   
-IDENTIFIER   | Any          |  20, 23   
-PARENS       | )            |  20, 26   
-OPERATOR     | ?            |  20, 27   
+IDENTIFIER   | Anything     |  20, 23   
+PARENS       | )            |  20, 31   
+OPERATOR     | ?            |  20, 32   
 NEWLINE      |              |  22, 1    
 DEDENT       | 4            |  22, 1    
 IDENTIFIER   | Intersection |  22, 1    
@@ -200,8 +200,8 @@ IDENTIFIER   | Type         |  38, 13
 NEWLINE      |              |  40, 1    
 DEDENT       | 4            |  40, 1    
 KEYWORD      | external     |  40, 1    
-STRING       | export const Null = _S(Symbol("Null"), () => undefined, lazy(Type("Null", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
-export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === undefined, (n) => n === undefined)));
+STRING       | export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Never = _S(Symbol("Never"), () => undefined, lazy(Type("Never", (n) => n === undefined, (n) => n === undefined)));
 export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", (n) => typeof n === "number", (n) => typeof n === "number")));
 export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", (n) => typeof n === "string", (n) => typeof n === "string")));
  |  40, 10   
@@ -222,7 +222,7 @@ IDENTIFIER   | Number       |  43, 18
 OPERATOR     | |            |  43, 25   
 IDENTIFIER   | Boolean      |  43, 27   
 OPERATOR     | |            |  43, 35   
-IDENTIFIER   | Null         |  43, 37   
+IDENTIFIER   | Nothing      |  43, 37   
 NEWLINE      |              |  44, 1    
 IDENTIFIER   | type         |  44, 2    
 OPERATOR     | :            |  44, 6    
@@ -234,12 +234,12 @@ OPERATOR     | :            |  46, 8
 PARENS       | (            |  46, 10   
 IDENTIFIER   | obj          |  46, 11   
 OPERATOR     | :            |  46, 14   
-IDENTIFIER   | Any          |  46, 16   
-PARENS       | )            |  46, 19   
-OPERATOR     | ->           |  46, 21   
-IDENTIFIER   | String       |  46, 24   
-OPERATOR     | =            |  46, 31   
-KEYWORD      | external     |  46, 33   
+IDENTIFIER   | Anything     |  46, 16   
+PARENS       | )            |  46, 24   
+OPERATOR     | ->           |  46, 26   
+IDENTIFIER   | String       |  46, 29   
+OPERATOR     | =            |  46, 36   
+KEYWORD      | external     |  46, 38   
 NEWLINE      |              |  47, 1    
 IDENTIFIER   | dejsonify    |  47, 1    
 OPERATOR     | :            |  47, 10   
@@ -249,9 +249,9 @@ OPERATOR     | :            |  47, 17
 IDENTIFIER   | String       |  47, 19   
 PARENS       | )            |  47, 25   
 OPERATOR     | ->           |  47, 27   
-IDENTIFIER   | Any          |  47, 30   
-OPERATOR     | =            |  47, 34   
-KEYWORD      | external     |  47, 36   
+IDENTIFIER   | Anything     |  47, 30   
+OPERATOR     | =            |  47, 39   
+KEYWORD      | external     |  47, 41   
 NEWLINE      |              |  49, 1    
 IDENTIFIER   | Intersection@of |  49, 1    
 OPERATOR     | =            |  49, 17   
@@ -272,9 +272,9 @@ OPERATOR     | =            |  50, 8
 PARENS       | (            |  50, 10   
 IDENTIFIER   | obj          |  50, 11   
 OPERATOR     | :            |  50, 14   
-IDENTIFIER   | Any          |  50, 16   
-PARENS       | )            |  50, 19   
-OPERATOR     | ->           |  50, 21   
+IDENTIFIER   | Anything     |  50, 16   
+PARENS       | )            |  50, 24   
+OPERATOR     | ->           |  50, 26   
 NEWLINE      |              |  51, 1    
 INDENT       | 8            |  51, 1    
 IDENTIFIER   | left         |  51, 3    
@@ -297,9 +297,9 @@ OPERATOR     | =            |  53, 17
 PARENS       | (            |  53, 19   
 IDENTIFIER   | obj          |  53, 20   
 OPERATOR     | :            |  53, 23   
-IDENTIFIER   | Any          |  53, 25   
-PARENS       | )            |  53, 28   
-OPERATOR     | ->           |  53, 30   
+IDENTIFIER   | Anything     |  53, 25   
+PARENS       | )            |  53, 33   
+OPERATOR     | ->           |  53, 35   
 NEWLINE      |              |  54, 1    
 INDENT       | 8            |  54, 1    
 IDENTIFIER   | left         |  54, 3    

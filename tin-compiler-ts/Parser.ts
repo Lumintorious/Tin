@@ -1,7 +1,7 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
-const applyableKeywords = ["return", "set", "import", "unsafe"];
+const applyableKeywords = ["return", "set", "import", "unchecked"];
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
    static currentNumber = 0;
@@ -80,6 +80,9 @@ export class Assignment extends AstNode {
 export class Term extends Statement {
    inferredType?: Type;
    translatedType?: Type;
+   varTypeInInvarPlace?: boolean = false;
+   invarTypeInVarPlace?: boolean = false;
+   clojure?: Symbol[];
    constructor(tag: string) {
       super(tag);
    }
@@ -197,6 +200,7 @@ export class SquareTypeToValueLambda extends Term {
 export class SquareTypeToTypeLambda extends Term {
    parameterTypes: Term[];
    returnType: Term;
+   name?: string;
    constructor(parameterTypes: Term[], returnType: Term) {
       super("SquareTypeToTypeLambda");
       this.parameterTypes = parameterTypes;
@@ -221,15 +225,15 @@ export class Literal extends Term {
    static NUMBER = "Number";
    static BOOLEAN = "Boolean";
    static VOID = "Boolean";
-   static ANY = "Any";
+   static ANY = "Anything";
 
    value: String | Number | Boolean;
-   type: "String" | "Number" | "Boolean" | "Void" | "Any";
+   type: "String" | "Number" | "Boolean" | "Void" | "Anything";
    isTypeLiteral: boolean = false;
 
    constructor(
       value: String | Number | Boolean,
-      type: "String" | "Number" | "Boolean" | "Void" | "Any"
+      type: "String" | "Number" | "Boolean" | "Void" | "Anything"
    ) {
       super("Literal"); // tag of the AST node
       this.type = type;
@@ -258,6 +262,7 @@ export class RoundApply extends Term {
 export class SquareApply extends Term {
    callee: Term;
    typeArgs: Term[];
+   isCallingAConstructor: boolean = false;
    constructor(callee: Term, typeArgs: Term[]) {
       super("SquareApply");
       this.callee = callee;
@@ -566,14 +571,20 @@ export class Parser {
       const result = this.parseExpressionRaw(
          precedence,
          stopAtEquals,
-         stopAtDot
+         stopAtDot,
+         stopAtArrow
       );
       const endPos = this.positionNow();
       return result.fromTo(startPos, endPos);
    }
 
    // parseExpression > parsePrimary
-   parseExpressionRaw(precedence = 0, stopAtEquals = false, stopAtDot = false) {
+   parseExpressionRaw(
+      precedence = 0,
+      stopAtEquals = false,
+      stopAtDot = false,
+      stopAtArrow = false
+   ) {
       const startPos = this.peek().position;
       let left: Term; // Parse the left-hand side (like a literal or identifier)
 
@@ -581,10 +592,10 @@ export class Parser {
          this.consume("OPERATOR", "...");
          left = this.parsePrimary();
          left = new UnaryOperator("...", left);
-      } else if (this.peek() && this.peek().value === "~") {
-         this.consume("OPERATOR", "~");
-         left = this.parsePrimary();
-         left = new UnaryOperator("~", left);
+      } else if (this.peek() && this.peek().value === "var") {
+         this.consume("OPERATOR", "var");
+         left = this.parseExpression(precedence, true, false, true);
+         left = new UnaryOperator("var", left);
       } else {
          left = this.parsePrimary();
       }
@@ -618,6 +629,8 @@ export class Parser {
          (!stopAtEquals || !this.is("=")) &&
          (!stopAtEquals || !this.is("~=")) &&
          (!stopAtDot || !this.is(".")) &&
+         (!stopAtArrow || !this.is("->")) &&
+         (!stopAtArrow || !this.is("~>")) &&
          this.peek()
          // this.peek().tag === "NEWLINE" ||
          // !this.peek(1) ||
@@ -649,11 +662,20 @@ export class Parser {
          this.consume("OPERATOR");
 
          if (operator === "?") {
-            left = new Optional(left);
-            break;
-         }
-         if (operator === "??") {
-            left = new Optional(left, true);
+            const optional = new Optional(left);
+            // (~X)?
+            if (optional.expression instanceof UnaryOperator) {
+               const unary = new UnaryOperator(
+                  optional.expression.operator,
+                  optional.expression.expression
+               );
+               // ~(X)
+               unary.expression = new Optional(unary.expression);
+               // optional.expression = optional.expression.expression;
+               left = unary;
+            } else {
+               left = optional;
+            }
             break;
          }
 
@@ -695,8 +717,16 @@ export class Parser {
                );
             break;
          }
-
-         if (operator === "." && right instanceof Identifier) {
+         if (
+            operator === "." &&
+            left instanceof UnaryOperator &&
+            right instanceof Identifier
+         ) {
+            left = new UnaryOperator(
+               left.operator,
+               new Select(left.expression, right.value)
+            );
+         } else if (operator === "." && right instanceof Identifier) {
             left = new Select(left, right.value).fromTo(
                whileLoopStart,
                this.positionNow()
@@ -762,10 +792,17 @@ export class Parser {
 
       if (this.peek() && this.peek().value === "?") {
          this.consume("OPERATOR");
-         left = new Optional(left);
-      } else if (this.peek() && this.peek().value === "??") {
-         this.consume("OPERATOR");
-         left = new Optional(left, true);
+         const optional = new Optional(left);
+         if (optional.expression instanceof UnaryOperator) {
+            const unary = new UnaryOperator(
+               optional.expression.operator,
+               optional.expression.expression
+            );
+            unary.expression = new Optional(unary.expression);
+            left = unary;
+         } else {
+            left = optional;
+         }
       }
 
       return left.fromTo(whileLoopStart, this.positionNow());
@@ -1006,8 +1043,8 @@ export class Parser {
          return new Make(expression);
       } else if (keyword.value === "return") {
          return new AppliedKeyword("return", expression);
-      } else if (keyword.value === "unsafe") {
-         return new AppliedKeyword("unsafe", expression);
+      } else if (keyword.value === "unchecked") {
+         return new AppliedKeyword("unchecked", expression);
       } else if (expression instanceof Assignment && keyword.value === "mut") {
          expression.isMutable = true;
          return expression;
@@ -1054,7 +1091,21 @@ export class Parser {
 
    parsePrimary(): Term {
       const startPos = this.positionNow();
-      const result = this.parsePrimaryRaw();
+      let result = this.parsePrimaryRaw();
+      if (this.peek() && this.peek().value === "?") {
+         this.consume("OPERATOR");
+         const optional = new Optional(result);
+         if (optional.expression instanceof UnaryOperator) {
+            const unary = new UnaryOperator(
+               optional.expression.operator,
+               optional.expression.expression
+            );
+            unary.expression = new Optional(unary.expression);
+            result = unary;
+         } else {
+            result = optional;
+         }
+      }
       const endPos = this.positionNow();
       return result.fromTo(startPos, endPos);
    }
@@ -1080,7 +1131,7 @@ export class Parser {
                new Literal(this.consume().value, "String")
             );
          } else {
-            return new Literal("", "Any");
+            return new Literal("", "Anything");
          }
       }
       if (token.value === "true" || token.value === "false") {
@@ -1276,12 +1327,12 @@ export function parseObject(parser: Parser): DataDef {
          mutable = true;
       }
       let expr;
+      const exprStart = parser.positionNow();
       try {
          expr = parser.parseExpression();
       } catch (e) {
          break;
       }
-      const exprStart = parser.positionNow();
       if (expr instanceof Cast && expr.expression instanceof Identifier) {
          fieldDefs.push(
             new FieldDef(

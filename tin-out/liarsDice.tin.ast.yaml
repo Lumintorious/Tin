@@ -24,7 +24,7 @@ statements:
     value:
       id: 47
       tag: Literal
-      type: Any
+      type: Anything
       value: 
     type:
       id: 45

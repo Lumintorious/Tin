@@ -167,43 +167,43 @@ const debug = (...args) => {
 	console.log(...args)
 }
 
-// COMPILED TIN
+	// COMPILED TIN
+	;
+export let Iterator = /* [] */(T) => TIN_TYPE("Iterator", "0050bbca-a4dc-44b0-90c3-f4ace7a3c60e", (_p0) => ({ next: _p0 }), {}); Iterator._typeId = "Iterator";;
+export let Accessible = /* [] */(T) => TIN_TYPE("Accessible", "1121addb-99d4-4ace-acb3-a3a719a0036f", (_p0, _p1) => ({ at: _p0, length: _p1 }), {}); Accessible._typeId = "Accessible";;
 ;
-export let Iterator = /* [] */(T) => TIN_TYPE("Iterator", "0050bbca-a4dc-44b0-90c3-f4ace7a3c60e", (_p0) => ({next: _p0}), {}); Iterator._typeId = "Iterator";;
-export let Accessible = /* [] */(T) => TIN_TYPE("Accessible", "1121addb-99d4-4ace-acb3-a3a719a0036f", (_p0,_p1) => ({at: _p0,length: _p1}), {}); Accessible._typeId = "Accessible";;
-;
-export let ToString = TIN_TYPE("ToString", "6ef3ac5e-a476-4d6b-8eb3-99fa1ab8b9f8", (_p0) => ({toString: _p0}), {}); ToString._typeId = "ToString";;
-export let stringOf/* (obj:Any) -> String*/ = function(obj) {
-return ((ToString.__is_child(obj) ) ? (((() => { const _owner = obj; return _owner.ToString.toString.call(_owner,)})())) : (makeString(obj))) 
+export let ToString = TIN_TYPE("ToString", "6ef3ac5e-a476-4d6b-8eb3-99fa1ab8b9f8", (_p0) => ({ toString: _p0 }), {}); ToString._typeId = "ToString";;
+export let stringOf/* (obj:Anything) -> String*/ = function (obj) {
+	return ((ToString.__is_child(obj)) ? (((() => { const _owner = obj; return _owner.ToString.toString.call(_owner,) })())) : (makeString(obj)))
 };
-export let Iterable = /* [] */(T) => TIN_TYPE("Iterable", "da45405b-d17c-40d7-a92e-77c44074129d", (_p0,_p1,_p2,_p3) => ({forEach: _p0,mkString: _p1,count: _p2,getIterator: _p3}), {}); Iterable._typeId = "Iterable";;
-export let makeIterable/* [T] -> (getIterator:() -> Iterator[T]) -> Iterable[T]*/ = function(T) {
-return function(getIterator) {
-let forEach/* (fn:(T) -> Nothing) -> Nothing*/ = function(fn) {
-let iterator/* Iterator[T]*/ = getIterator();
-let current/* T?*/ = ((() => { const _owner = iterator; return _owner.Iterator.next.call(_owner,)})());
-while (current != nothing) {
- fn(current);
-let current/* T?*/ = ((() => { const _owner = iterator; return _owner.Iterator.next.call(_owner,)})()) 
-}
-};
-let mkString/* (separator:String, left:String, right:String) -> String*/ = function(separator = ", ", left = "", right = "") {
-let string/* String*/ = "";
-let fn/* (t:T) -> Any*/ = function(t) {
-let comma/* String*/ = ((string == "") ? ("") : (separator)) ;
-return string = "" + string + "" + comma + "" + t + ""
-};
-forEach(fn);
-return "" + left + "" + string + "" + right + ""
-};
-let count/* (pred:(T) -> Boolean) -> Number*/ = function(pred) {
-let num/* Number*/ = 0;
-let fn/* (t:T) -> Any?*/ = function(t) {
-return ((pred(t)) ? (num = num + 1) : (null)) 
-};
-forEach(fn);
-return num
-};
-return Iterable.call('Type', T)(forEach, mkString, count, getIterator)
-}
+export let Iterable = /* [] */(T) => TIN_TYPE("Iterable", "da45405b-d17c-40d7-a92e-77c44074129d", (_p0, _p1, _p2, _p3) => ({ forEach: _p0, mkString: _p1, count: _p2, getIterator: _p3 }), {}); Iterable._typeId = "Iterable";;
+export let makeIterable/* [T] -> (getIterator:() -> Iterator[T]) -> Iterable[T]*/ = function (T) {
+	return function (getIterator) {
+		let forEach/* (fn:(T) -> Nothing) -> Nothing*/ = function (fn) {
+			let iterator/* Iterator[T]*/ = getIterator();
+			let current/* T?*/ = ((() => { const _owner = iterator; return _owner.Iterator.next.call(_owner,) })());
+			while (current != nothing) {
+				fn(current);
+				let current/* T?*/ = ((() => { const _owner = iterator; return _owner.Iterator.next.call(_owner,) })())
+			}
+		};
+		let mkString/* (separator:String, left:String, right:String) -> String*/ = function (separator = ", ", left = "", right = "") {
+			let string/* String*/ = "";
+			let fn/* (t:T) -> Anything*/ = function (t) {
+				let comma/* String*/ = ((string == "") ? ("") : (separator));
+				return string = "" + string + "" + comma + "" + t + ""
+			};
+			forEach(fn);
+			return "" + left + "" + string + "" + right + ""
+		};
+		let count/* (pred:(T) -> Boolean) -> Number*/ = function (pred) {
+			let num/* Number*/ = 0;
+			let fn/* (t:T) -> Anything?*/ = function (t) {
+				return ((pred(t)) ? (num = num + 1) : (null))
+			};
+			forEach(fn);
+			return num
+		};
+		return Iterable.call('Type', T)(forEach, mkString, count, getIterator)
+	}
 }

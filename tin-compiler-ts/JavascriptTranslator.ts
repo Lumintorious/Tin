@@ -35,6 +35,7 @@ import {
    ParamType,
    RoundValueToValueLambdaType,
    SquareTypeToValueLambdaType,
+   MutableType,
 } from "./Types";
 import { OutputTranslator } from "./compiler";
 import { exec } from "node:child_process";
@@ -140,10 +141,33 @@ export class JavascriptTranslator implements OutputTranslator {
       scope: Scope,
       args: any = {}
    ): string {
+      let result = this.translateRaw(term, scope, args);
+      if (term instanceof Term && term.varTypeInInvarPlace) {
+         result += "._";
+      }
+      if (term instanceof Term && term.invarTypeInVarPlace) {
+         result = `{_:${result}}`;
+      }
+      if (term instanceof Term && term.clojure) {
+         result = `_makeClojure({${term.clojure
+            .map((s) => s.name)
+            .join(",")}}, ${result})`;
+      }
+      return result;
+   }
+
+   translateRaw(
+      term: AstNode | Type | undefined,
+      scope: Scope,
+      args: any = {}
+   ): string {
       if (term === undefined || term === null) {
          return "undefined";
       }
       if (term instanceof AppliedKeyword) {
+         if (term.keyword === "unchecked") {
+            return this.translate(term.param, scope);
+         }
          if (term.keyword === "external" && term.param instanceof Literal) {
             return "\n" + String(term.param.value) + "\n";
          }
@@ -218,21 +242,24 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch(e) { if(e instanceof Error) {throw e} else {return e} } }`;
+         )}\n} catch(e) { if(e instanceof Error) {throw e} else { return e} } }`;
 
          // Change
       } else if (term instanceof Change) {
-         return `${this.translate(term.lhs, scope)} = ${this.translate(
+         const termValueType = term.value.inferredType;
+         const ifTermValueMutable =
+            termValueType instanceof MutableType ? "._" : "";
+         return `${this.translate(term.lhs, scope)}._ = ${this.translate(
             term.value,
             scope
-         )}`;
+         )}${ifTermValueMutable}`;
 
          // Assignment
       } else if (term instanceof Assignment) {
          if (
             term.value instanceof Literal &&
             term.value.value === "" &&
-            term.value.type === "Any"
+            term.value.type === "Anything"
          ) {
             return "";
          }
@@ -241,8 +268,16 @@ export class JavascriptTranslator implements OutputTranslator {
          const doExport = scopeDots < 2 && term.isDeclaration ? "export " : "";
          keyword = doExport + keyword;
          const lhs = this.translate(term.lhs, scope);
+         const isMutable = term.type?.translatedType instanceof MutableType;
+         function mutableWrapper(str: string) {
+            if (isMutable) {
+               return `{_:${str}}`;
+            } else {
+               return str;
+            }
+         }
          const value = term.value
-            ? " = " + this.translate(term.value, scope)
+            ? " = " + mutableWrapper(this.translate(term.value, scope))
             : "";
          let type = "";
          if (!term.isTypeLevel) {
@@ -353,21 +388,37 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
-         return `/* [] */(${term.parameterTypes
+         return `/* [] */(function(){ const _sym = Symbol("${
+            term.name
+         }"); return _Q(_sym, (${term.parameterTypes
             .map((t) => this.translate(t, scope.innerScopeOf(term, true)))
             .join(", ")}) => ${this.translate(
             term.returnType,
             scope.innerScopeOf(term, true)
-         )}`;
+         )}); })()`;
 
          // IfStatement
       } else if (term instanceof IfStatement) {
-         let trueBranch = `(do{${this.translate(term.trueBranch, scope, {
-            returnLast: true,
-         })}})`;
-         let falseBranch = `(do{${this.translate(term.falseBranch, scope, {
-            returnLast: true,
-         })}})`;
+         const isTrueBranchIf =
+            term.trueBranch instanceof IfStatement ||
+            (term.trueBranch instanceof Block &&
+               term.trueBranch.statements[0] instanceof IfStatement);
+         let trueBranch = `(function(){${this.translate(
+            term.trueBranch,
+            scope,
+            {
+               returnLast: !isTrueBranchIf,
+            }
+         )}})()`;
+         const isFalseBranchIf =
+            term.falseBranch instanceof IfStatement ||
+            (term.falseBranch instanceof Block &&
+               term.falseBranch.statements[0] instanceof IfStatement);
+         let falseBranch = `(function(){${
+            isFalseBranchIf ? "return " : ""
+         }${this.translate(term.falseBranch, scope, {
+            returnLast: !isFalseBranchIf,
+         })}})()`;
          // if (
          //    term.trueBranch instanceof Block &&
          //    term.trueBranch.statements.length > 1
@@ -473,7 +524,7 @@ export class JavascriptTranslator implements OutputTranslator {
             openWrapper +
             this.translate(callee, scope) +
             (term.calledInsteadOfSquare || term.autoFilledSquareParams
-               ? "(0)"
+               ? ""
                : "") +
             open +
             params
@@ -496,7 +547,9 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // TypeDef
       } else if (term instanceof TypeDef) {
-         return `_S(Symbol("${term.name}"), ${this.createConstructor(
+         return `_S(typeof _sym !== "undefined" ? _sym : Symbol("${
+            term.name
+         }"), ${this.createConstructor(
             term,
             term.translatedType as StructType,
             scope,
@@ -551,10 +604,15 @@ export class JavascriptTranslator implements OutputTranslator {
 		  });`;
          // Undefined
       } else if (term instanceof UnaryOperator) {
-         if (term.operator === "~") {
-            return this.translate(term.expression, scope);
+         if (term.operator === "var") {
+            const v = term.varTypeInInvarPlace;
+            return (
+               (!v ? "{_:" : "") +
+               this.translate(term.expression, scope) +
+               (!v ? "}" : "")
+            );
          } else {
-            return "(? " + term.tag + " ?)";
+            return "(? " + term.tag + " " + term.operator + " ?)";
          }
       } else {
          return "(? " + term.tag + " ?)";

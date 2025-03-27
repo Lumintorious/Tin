@@ -1,16 +1,16 @@
 Iterator = [T] => data:
-	next: () -> T?
+	next: () ~> T?
 
 Accessible = [T] => data:
 	at: (index: Number) -> T
 	length: () -> Number
 
-makeString: (Any) -> String = external
+makeString: (Anything) -> String = external
 
 ToString = data:
-	toString: (this: Any) -> String
+	toString: (this: Anything) -> String
 
-stringOf = (obj: Any) ->
+stringOf = (obj: Anything) ->
 	if obj :: ToString,
 		obj.toString()
 	else
@@ -19,24 +19,26 @@ stringOf = (obj: Any) ->
 Iterable = [T] => data:
 	getIterator: () -> Iterator[T]
 
-	forEach = (this: Iterable[T], fn: (T) ~> Nothing) ->
+	forEach = (this: Iterable[T], fn: (T) ~> Nothing): var Anything ~>
 		iterator = this.getIterator()
-		current = iterator.next()
-		while current != nothing,
-			fn(current)
-			set current = iterator.next()
+		current: var T? = iterator.next()
+		if current != nothing,
+			set current = nothing
+		# while current != nothing,
+		# 	fn(current)
+		# 	set current = iterator.next()
 
-	mkString = (this: Iterable[T], separator: String, left: String, right: String): ~String ->
-		string: ~String = ""
-		fn = (t: T): ~String ~>
+	mkString = (this: Iterable[T], separator: String, left: String, right: String): var String ~>
+		string: var String = ""
+		fn = (t: T): var String ~>
 			comma = if string == "", "" else separator
 			set string = "{string}{comma}{t}"
 		this.forEach(fn)
 		"{left}{string}{right}"
 
-	count = (this: Iterable[T], pred: (T) -> Boolean): ~Number ->
-		num: ~Number = 0
-		this.forEach((t: T): ~Any ~> if pred(t), set num = num + 1)
+	count = (this: Iterable[T], pred: (T) -> Boolean): var Number ~>
+		num: var Number = 0
+		this.forEach((t: T): var Anything ~> if pred(t), set num = num + 1)
 		num
 
 

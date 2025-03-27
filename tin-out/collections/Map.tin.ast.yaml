@@ -540,7 +540,7 @@ statements:
       id: 597
       tag: Literal
       isTypeLiteral: false
-      type: Any
+      type: Anything
       value: 
     type:
       id: 595

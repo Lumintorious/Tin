@@ -68,7 +68,7 @@ export class Symbol {
       this.typeSymbol = template.typeSymbol;
       this.ast = template.ast;
       this.iteration = template.iteration;
-      this.shadowing = template.shadowing;
+      // this.shadowing = this.shadowing || template.shadowing;
       this.position = template.position;
       this.index = template.index;
    }
@@ -184,7 +184,7 @@ export class Scope {
    declare(symbol: Symbol, redeclare: boolean = false) {
       const name = symbol.name;
       console.log(
-         `# \x1b[36m${((symbol.isMutable ? "mutable " : "") + name).padStart(
+         `# \x1b[36m${name.padStart(
             10,
             " "
          )}\x1b[37m: \x1b[33m${symbol.typeSymbol
@@ -475,7 +475,7 @@ export class Scope {
                bType.operator,
                this.resolveGenericTypes(bType.right, parameters)
             );
-         case "Any":
+         case "Anything":
             return AnyType;
          case "Unchecked":
             return type;
@@ -512,6 +512,7 @@ export class Scope {
 export type RecursiveResolutionOptions = {
    firstPartOfIntersection?: Type;
    typeExpectedInPlace?: Type;
+   typeExpectedAsOwner?: Type;
    assignedName?: string;
    isTypeLevel?: boolean;
 };
@@ -559,7 +560,7 @@ export class TypePhaseContext {
          new Symbol(
             "print",
             new RoundValueToValueLambdaType(
-               [new ParamType(NamedType.PRIMITIVE_TYPES.Any)],
+               [new ParamType(NamedType.PRIMITIVE_TYPES.Anything)],
                NamedType.PRIMITIVE_TYPES.Nothing,
                false,
                false
@@ -571,7 +572,7 @@ export class TypePhaseContext {
          new Symbol(
             "debug",
             new RoundValueToValueLambdaType(
-               [new ParamType(NamedType.PRIMITIVE_TYPES.Any)],
+               [new ParamType(NamedType.PRIMITIVE_TYPES.Anything)],
                NamedType.PRIMITIVE_TYPES.Nothing,
                false,
                false

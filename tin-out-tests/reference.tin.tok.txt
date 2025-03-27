@@ -80,7 +80,7 @@ IDENTIFIER   | nothing      |  22, 18
 NEWLINE      |              |  23, 1    
 IDENTIFIER   | any          |  23, 1    
 OPERATOR     | :            |  23, 4    
-IDENTIFIER   | Any          |  23, 6    
+IDENTIFIER   | Anything          |  23, 6    
 OPERATOR     | =            |  23, 10   
 STRING       | str          |  23, 12   
 NEWLINE      |              |  25, 1    
@@ -339,7 +339,7 @@ NEWLINE      |              |  91, 1
 NEWLINE      |              |  92, 1    
 IDENTIFIER   | any          |  92, 1    
 OPERATOR     | :            |  92, 4    
-IDENTIFIER   | Any          |  92, 6    
+IDENTIFIER   | Anything          |  92, 6    
 OPERATOR     | =            |  92, 10   
 IDENTIFIER   | kitty        |  92, 12   
 NEWLINE      |              |  93, 1    

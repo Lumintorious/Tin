@@ -55,7 +55,7 @@ class UncheckedType extends Type {
 exports.UncheckedType = UncheckedType;
 class AnyTypeClass extends Type {
 	constructor() {
-		super("Any");
+		super("Anything");
 	}
 	isAssignableTo(other, scope) {
 		return true;
@@ -68,7 +68,7 @@ class AnyTypeClass extends Type {
 		return true;
 	}
 	toString() {
-		return "Any";
+		return "Anything";
 	}
 }
 exports.AnyTypeClass = AnyTypeClass;
@@ -133,7 +133,7 @@ NamedType.PRIMITIVE_TYPES = {
 	Boolean: new NamedType("Boolean"),
 	Nothing: new NamedType("Nothing"),
 	Type: new NamedType("Type"),
-	Any: AnyType,
+	Anything: AnyType,
 };
 class ModuleType extends Type {
 	constructor(scope) {
@@ -1158,7 +1158,7 @@ class TypeChecker {
 	}
 	inferLiteral(node, scope) {
 		// Handle different literal types (assuming 'Number' is one type)
-		if (node.type === "Any" && node.value === "") {
+		if (node.type === "Anything" && node.value === "") {
 			return AnyType;
 		}
 		return new LiteralType(String(node.value), scope.lookupType(node.type));
@@ -1621,8 +1621,8 @@ class TypeChecker {
 		for (const t in NamedType.PRIMITIVE_TYPES) {
 			languageScope.typeSymbols.set(t, NamedType.PRIMITIVE_TYPES[t]);
 		}
-		languageScope.declare("print", new Symbol("print", new RoundValueToValueLambdaType([NamedType.PRIMITIVE_TYPES.Any], NamedType.PRIMITIVE_TYPES.Nothing), new Parser_3.RoundValueToValueLambda([], new Parser_3.Block([]))));
-		languageScope.declare("debug", new Symbol("debug", new RoundValueToValueLambdaType([NamedType.PRIMITIVE_TYPES.Any], NamedType.PRIMITIVE_TYPES.Nothing), new Parser_3.RoundValueToValueLambda([], new Parser_3.Block([]))));
+		languageScope.declare("print", new Symbol("print", new RoundValueToValueLambdaType([NamedType.PRIMITIVE_TYPES.Anything], NamedType.PRIMITIVE_TYPES.Nothing), new Parser_3.RoundValueToValueLambda([], new Parser_3.Block([]))));
+		languageScope.declare("debug", new Symbol("debug", new RoundValueToValueLambdaType([NamedType.PRIMITIVE_TYPES.Anything], NamedType.PRIMITIVE_TYPES.Nothing), new Parser_3.RoundValueToValueLambda([], new Parser_3.Block([]))));
 		const innerArrayScope = new Scope("inner-array", languageScope);
 		innerArrayScope.declareType("T", new GenericNamedType("T"));
 		const arrayStruct = new StructType([

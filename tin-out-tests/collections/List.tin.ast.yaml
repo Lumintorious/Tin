@@ -1498,7 +1498,7 @@ statements:
                         type:
                           id: 1065
                           tag: Identifier
-                          value: Any
+                          value: Anything
                         isDeclaration: false
                         isTypeLevel: false
                         position:

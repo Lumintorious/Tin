@@ -46,7 +46,7 @@ List@of = [T] -> (arr: Array[T]) ->
 		list = ListHead[T](arr.at(i), list)
 
 	iterable = makeIterable[T](() -> List@iterator[T](list))
-	toStr = (this: Any) -> iterable.mkString(",", "List(", ")")
+	toStr = (this: Anything) -> iterable.mkString(",", "List(", ")")
 		
 	return list & iterable & List@accessible[T](list) & ToString(toStr)
 

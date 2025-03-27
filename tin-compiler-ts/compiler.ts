@@ -11,7 +11,7 @@ import { GoTranslator } from "./GoTranslator";
 export type CompilerItem = AstNode | Type | ParamType | undefined;
 
 const SETTINGS = JSON.parse(fs.readFileSync("./tin.settings.json", "utf-8"));
-console.log(SETTINGS);
+// console.log(SETTINGS);
 
 export interface OutputTranslator {
    extension: string;

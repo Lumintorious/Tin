@@ -5,12 +5,12 @@ Accessible = [T] => type:
 	at: (index: Number) -> T
 	length: () -> Number
 
-makeString: (Any) -> String = external
+makeString: (Anything) -> String = external
 
 ToString = type:
-	toString: (this: Any) -> String
+	toString: (this: Anything) -> String
 
-stringOf = (obj: Any) ->
+stringOf = (obj: Anything) ->
 	if obj :: ToString,
 		obj.toString()
 	else

@@ -84,12 +84,13 @@ export class Lexer {
          "false",
          "void",
          "set",
-         "unsafe",
+         "unchecked",
          "external",
          "import",
       ];
       this.operators = [
          "...",
+         "var",
          "```",
          "??",
          "?:",
@@ -478,7 +479,12 @@ export class Lexer {
       let startColumn = this.column;
       const isCapitalized = this.peek().toUpperCase() === this.peek();
 
-      while (this.peek() !== undefined && /[a-zA-Z@]/.test(this.peek())) {
+      if (this.peek() !== undefined && /[a-zA-Z]/.test(this.peek())) {
+         this.position++;
+         this.column++;
+      }
+
+      while (this.peek() !== undefined && /[a-zA-Z0-9@]/.test(this.peek())) {
          this.position++;
          this.column++;
       }

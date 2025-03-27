@@ -333,7 +333,7 @@ OPERATOR     | =            |  49, 8
 PARENS       | (            |  49, 10   
 IDENTIFIER   | this         |  49, 11   
 OPERATOR     | :            |  49, 15   
-IDENTIFIER   | Any          |  49, 17   
+IDENTIFIER   | Anything          |  49, 17   
 PARENS       | )            |  49, 20   
 OPERATOR     | ->           |  49, 22   
 IDENTIFIER   | iterable     |  49, 25   

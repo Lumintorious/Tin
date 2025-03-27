@@ -62,6 +62,11 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 	return constructor;
 }
 
+export function _Q(symbol, func, descriptor) {
+	func._s = symbol;
+	return func
+}
+
 export function Type$of(obj) {
 	if (obj === undefined) {
 		return undefined;
@@ -73,7 +78,7 @@ export function Type$of(obj) {
 		return String._d;
 	}
 	if (obj === undefined || obj.null === null) {
-		return Null
+		return Nothing
 	}
 	let result = obj._type || obj._d || obj
 	if (result._d) {
@@ -102,7 +107,7 @@ export function Union$getValuesRaw(objType) {
 	} else if (objType[Literal._s]) {
 		return Array(objType)([objType[Literal._s].value])
 	} else {
-		return Array(Null)([])
+		return Array(Nothing)([])
 	}
 }
 
@@ -239,7 +244,7 @@ export function _L(value) {
 	function check(obj) {
 		return obj === value;
 	}
-	let broaderType = Null;
+	let broaderType = Nothing;
 	if (typeof value === "number") {
 		broaderType = Number;
 	} else if (typeof value === "strin") {
@@ -283,6 +288,8 @@ export var Array = (function () {
 	return result;
 })()
 
+export const _v = (v) => { _: v }
+
 export const Array$of = (t) => (args) => args
 Array._typeId = "Array"
 
@@ -292,6 +299,18 @@ export const copy = (T) => (obj) => {
 		newObj[key] = { ...obj[key] }
 	}
 	return newObj;
+}
+
+export const _makeClojure = (clojure, obj) => {
+	if (typeof obj !== "object") {
+		return obj;
+	}
+	if (obj._) {
+		obj._._clojure = clojure;
+	} else {
+		obj._clojure = clojure;
+	}
+	return obj;
 }
 
 export function getRandomInt(min, max) {
@@ -307,6 +326,9 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 	if (obj === null) return 'nothing';
 	if (typeof obj === 'undefined') return 'nothing';
+	if (obj._) {
+		obj = obj._
+	}
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
 	if (typeof obj === 'number') return obj.toString();
 	if (typeof obj === 'string') return indent > 0 ? `"${obj}"` : obj;
@@ -445,32 +467,32 @@ export function lazy(make) {
 ;
 
 
-export const Any = _S(Symbol("Any"), () => undefined, lazy(() => Type("Any", (n) => true, (n) => true)));
+export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type("Anything", (n) => true, (n) => true)));
 
 ;
-export var Type = _S(Symbol("Type"), (_p0,_p1,_p2,_p3) => ({name: _p0,check: _p1,checkIntegrity: _p2,is: _p3}), lazy({isReflectionType: true}), {});
+export var Type = _S(typeof _sym !== "undefined" ? _sym : Symbol("Type"), (_p0,_p1,_p2,_p3) => ({name: _p0,check: _p1,checkIntegrity: _p2,is: _p3}), lazy({isReflectionType: true}), {});
 ;
-export var Field = _S(Symbol("Field"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}), {});
-export var Parameter = _S(Symbol("Parameter"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}), {});
-export var Intersection = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Intersection"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true}), {}), true);})();
-export var Union = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Union"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true}), {}), true);})();
-export var Struct = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Struct"), (_p0) => ({fields: _p0}), lazy({isReflectionType: true}), {}), true);})();
-export var Lambda = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Lambda"), (_p0,_p1) => ({params: _p0,resultType: _p1}), lazy({isReflectionType: true}), {}), true);})();
-export var RefType = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("RefType"), (_p0) => ({get: _p0}), lazy({isReflectionType: true}), {}), true);})();
+export var Field = _S(typeof _sym !== "undefined" ? _sym : Symbol("Field"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}), {});
+export var Parameter = _S(typeof _sym !== "undefined" ? _sym : Symbol("Parameter"), (_p0,_p1,_p2) => ({name: _p0,tpe: _p1,defaultValue: _p2}), lazy({isReflectionType: true}), {});
+export var Intersection = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("Intersection"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var Union = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("Union"), (_p0,_p1) => ({left: _p0,right: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var Struct = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("Struct"), (_p0) => ({fields: _p0}), lazy({isReflectionType: true}), {}), true);})();
+export var Lambda = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("Lambda"), (_p0,_p1) => ({params: _p0,resultType: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var RefType = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("RefType"), (_p0) => ({get: _p0}), lazy({isReflectionType: true}), {}), true);})();
 
 
-export const Null = _S(Symbol("Null"), () => undefined, lazy(Type("Null", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
-export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === undefined, (n) => n === undefined)));
+export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Never = _S(Symbol("Never"), () => undefined, lazy(Type("Never", (n) => n === undefined, (n) => n === undefined)));
 export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", (n) => typeof n === "number", (n) => typeof n === "number")));
 export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", (n) => typeof n === "string", (n) => typeof n === "string")));
 
 ;
-export var Literal = (() => { const _left = Type$get(Type); return _A(_left, _S(Symbol("Literal"), (_p0,_p1) => ({value: _p0,type: _p1}), lazy({isReflectionType: true}), {}), true);})();
+export var Literal = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("Literal"), (_p0,_p1) => ({value: _p0,type: _p1}), lazy({isReflectionType: true}), {}), true);})();
 ;
 ;
 export var Intersection$of/* (left:Type, right:Type) -> Type & Intersection*/ = _F(Symbol("lambda"), function(left, right) {try{
-var check/* (obj:Any) -> Boolean*/ = _F(Symbol("lambda"), function(obj) {try{
-throw ((() => { var _owner = left; return _owner[Type._s].check.call(_owner,obj)})()) && ((() => { var _owner = right; return _owner[Type._s].check.call(_owner,obj)})())
+var check/* (obj:Anything) -> Boolean*/ = _F(Symbol("lambda"), function(obj) {try{
+throw _makeClojure({left,obj,right,obj}, ((() => { var _owner = left; return _owner[Type._s].check.call(_owner,obj)})()) && ((() => { var _owner = right; return _owner[Type._s].check.call(_owner,obj)})()))
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("check")._and(Lambda(
 				Array(Type)([Parameter("obj",
@@ -479,8 +501,8 @@ throw ((() => { var _owner = left; return _owner[Type._s].check.call(_owner,obj)
 		,]),
 				Boolean))
 			);
-var checkIntegrity/* (obj:Any) -> Boolean*/ = _F(Symbol("lambda"), function(obj) {try{
-throw ((() => { var _owner = left; return _owner[Type._s].checkIntegrity.call(_owner,obj)})()) && ((() => { var _owner = right; return _owner[Type._s].checkIntegrity.call(_owner,obj)})())
+var checkIntegrity/* (obj:Anything) -> Boolean*/ = _F(Symbol("lambda"), function(obj) {try{
+throw _makeClojure({left,obj,right,obj}, ((() => { var _owner = left; return _owner[Type._s].checkIntegrity.call(_owner,obj)})()) && ((() => { var _owner = right; return _owner[Type._s].checkIntegrity.call(_owner,obj)})()))
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("checkIntegrity")._and(Lambda(
 				Array(Type)([Parameter("obj",
@@ -489,7 +511,7 @@ throw ((() => { var _owner = left; return _owner[Type._s].checkIntegrity.call(_o
 		,]),
 				Boolean))
 			);
-throw (() => { const _left = Type("Intersection", check, checkIntegrity); return _A(_left, Intersection.call(_left, left, right), true);})()
+throw _makeClojure({check,checkIntegrity,left,right}, (() => { const _left = Type("Intersection", check, checkIntegrity); return _A(_left, Intersection.call(_left, left, right), true);})())
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("Intersection@of")._and(Lambda(
 				Array(Type)([Parameter("left",
@@ -505,7 +527,7 @@ export var Digit = _U(_U(_U(_U(_U(_U(_U(_U(_U(_L(0), _L(1)), _L(2)), _L(3)), _L(
 export var One = _L(1);
 export var Union$values/* [T] -> Array[T]*/ = function(T) {try{
 var go/* (type:Type) -> Array[T]*/ = _F(Symbol("lambda"), function(type) {try{
-throw ((Type$get(Literal).__is_child(type) ) ? (do{throw Array$of.call('Type', T)(Array(0)([(type[Literal._s].value) /* as Type$get(T) */]))}) : (do{((Type$get(Union).__is_child(type) ) ? (do{throw ((() => { var _owner = go(type[Union._s].left); return _owner[Array._s].and.call(_owner,go(type[Union._s].right))})())}) : (do{throw Array$of.call('Type', T)(Array(0)([]))})) })) 
+throw ((Type$get(Literal).__is_child(type) ) ? (function(){throw Array$of.call('Type', T)(Array(0)([(type[Literal._s].value) /* as Type$get(T) */]))})() : (function(){return ((Type$get(Union).__is_child(type) ) ? (function(){throw _makeClojure({go,type,go,type}, ((() => { var _owner = go(type[Union._s].left); return _owner[Array._s].and.call(_owner,go(type[Union._s].right))})()))})() : (function(){throw Array$of.call('Type', T)(Array(0)([]))})()) })()) 
 } catch (e) { if (e instanceof Error) { throw e } else { return e } }}, 
 				Type("go")._and(Lambda(
 				Array(Type)([Parameter("type",
@@ -514,5 +536,5 @@ throw ((Type$get(Literal).__is_child(type) ) ? (do{throw Array$of.call('Type', T
 		,]),
 				{}))
 			);
-throw go(Type$get(T))
-} catch(e) { if(e instanceof Error) {throw e} else {return e} } }
+throw _makeClojure({go}, go(Type$get(T)))
+} catch(e) { if(e instanceof Error) {throw e} else { return e} } }

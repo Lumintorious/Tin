@@ -61,7 +61,7 @@ export class TypeTranslator {
             if ((node as Identifier).value === "This") {
                return new ThisType();
             }
-            if ((node as Identifier).value === "Any") {
+            if ((node as Identifier).value === "Anything") {
                return AnyType;
             }
             return new NamedType((node as Identifier).value);
@@ -98,7 +98,7 @@ export class TypeTranslator {
             }
             if (node.operator === "...") {
                return new VarargsType(this.translate(node.expression, scope));
-            } else if (node.operator === "~") {
+            } else if (node.operator === "var") {
                return new MutableType(this.translate(node.expression, scope));
             } else {
                throw new Error("Unexpected unary operator");
@@ -285,6 +285,7 @@ export class TypeTranslator {
                   explicitType,
                   inferredType,
                   node.position,
+                  undefined,
                   new Error()
                );
             }

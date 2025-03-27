@@ -131,7 +131,7 @@ export class TypeInferencer {
             inferredType = new TypeOfTypes();
             break;
          case "Block":
-            inferredType = this.inferBlock(node as Block, scope);
+            inferredType = this.inferBlock(node as Block, scope, options);
             break;
          case "RoundApply":
             inferredType = this.inferRoundApply(node as RoundApply, scope);
@@ -262,7 +262,10 @@ export class TypeInferencer {
    inferSquareApply(node: SquareApply, scope: Scope): Type {
       let calleeType;
       try {
-         calleeType = this.infer(node.callee, scope);
+         calleeType =
+            node.callee instanceof Identifier && node.callee.isTypeIdentifier()
+               ? this.context.translator.translate(node.callee, scope)
+               : this.infer(node.callee, scope);
          const constructor = scope
             .resolveNamedType(calleeType)
             .buildConstructor();
@@ -271,7 +274,8 @@ export class TypeInferencer {
          }
       } catch (e) {
          calleeType = NamedType.PRIMITIVE_TYPES.Type;
-         throw new Error("Was type");
+         // (e as any).message = "Was Type";
+         throw e;
       }
       // For future, check if calleeType is Type, only then go into Generic[Type] building
       if (
@@ -551,6 +555,8 @@ export class TypeInferencer {
          return new Map([]);
       } else if (type instanceof AnyTypeClass) {
          return new Map([]);
+      } else if (type instanceof MutableType) {
+         return this.getAllKnownFields(type.type, scope);
       } else {
          throw new Error(
             "Could not deduce fields of type " +
@@ -597,8 +603,8 @@ export class TypeInferencer {
                acc
             );
          }
-      } else if (node instanceof WhileLoop && node.eachLoop) {
-         this.findReturns(node.eachLoop, thisScope.innerScopeOf(node), acc);
+      } else if (node instanceof WhileLoop) {
+         this.findReturns(node.action, thisScope.innerScopeOf(node), acc);
       } else if (node instanceof BinaryExpression) {
          this.findReturns(node.left, thisScope, acc);
          this.findReturns(node.right, thisScope, acc);
@@ -607,7 +613,11 @@ export class TypeInferencer {
       }
    }
 
-   inferBlock(node: Block, scope: Scope): Type {
+   inferBlock(
+      node: Block,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ): Type {
       // TO DO: change to find returns recursively
       const inferencer = this;
 
@@ -621,6 +631,13 @@ export class TypeInferencer {
          const allFoundReturnTypesInside = allFoundReturnsInside.map(
             (r) => r[1]
          );
+         for (const [term, type] of allFoundReturnsInside) {
+            this.context.builder.buildVarTransformations(
+               term,
+               options.typeExpectedInPlace,
+               type
+            );
+         }
          if (allFoundReturnsInside.length === 1) {
             const last = node.statements[node.statements.length - 1];
             if (
@@ -635,14 +652,15 @@ export class TypeInferencer {
             return allFoundReturnTypesInside[0];
          }
          let commonType: Type = AnyType;
-         for (let i = 0; i < allFoundReturnsInside.length; i++) {
+         let i = 0;
+         for (; i < allFoundReturnsInside.length; i++) {
             commonType = this.deduceCommonType(
                commonType,
                allFoundReturnTypesInside[i],
                scope
             );
          }
-         return commonType;
+         return i === 0 ? NamedType.PRIMITIVE_TYPES.Nothing : commonType;
       } catch (e) {
          if (scope.iteration === "DECLARATION") {
             return new UncheckedType();
@@ -654,7 +672,7 @@ export class TypeInferencer {
 
    inferLiteral(node: Literal, scope: Scope) {
       // Handle different literal types (assuming 'Number' is one type)
-      if (node.type === "Any" && node.value === "") {
+      if (node.type === "Anything" && node.value === "") {
          return AnyType;
       }
       if (node.type === "Void") {
@@ -684,9 +702,9 @@ export class TypeInferencer {
             // }
             throw new Error(`Undefined identifier: ${node.value}`);
          }
-         if (symbol.typeSymbol instanceof MutableType) {
-            return symbol.typeSymbol.type;
-         }
+         // if (symbol.typeSymbol instanceof MutableType) {
+         //    return symbol.typeSymbol.type;
+         // }
          return symbol.typeSymbol;
       } catch (e) {
          if (node.isTypeIdentifier()) {
@@ -924,12 +942,19 @@ export class TypeInferencer {
          lambdaType.name = node.name;
          return lambdaType;
       } else {
-         let returnType = this.infer(node.block, innerScope);
+         let specifiedType: Type | undefined;
          if (node.specifiedType) {
-            returnType = this.context.translator.translate(
+            specifiedType = this.context.translator.translate(
                node.specifiedType,
                innerScope
             );
+         }
+         let returnType = this.infer(node.block, innerScope, {
+            typeExpectedInPlace: specifiedType,
+         });
+
+         if (specifiedType) {
+            returnType = specifiedType;
          }
          const lambdaType = new RoundValueToValueLambdaType(
             paramsAsTypes,
@@ -939,6 +964,31 @@ export class TypeInferencer {
             node.capturesMutableValues
          );
          lambdaType.name = node.name;
+         if (
+            scope.iteration === "RESOLUTION" &&
+            !(lambdaType instanceof MutableType)
+         ) {
+            let effects = [
+               ...this.context.checker.findEffects(
+                  node.block,
+                  true,
+                  innerScope
+               ),
+               ...node.params.flatMap((p) =>
+                  this.context.checker.findEffects(p, true, innerScope)
+               ),
+            ];
+            if (effects.length > 0) {
+               // lambdaType.capturesMutableValues = true;
+               lambdaType.returnType = new MutableType(lambdaType.returnType);
+               if (node.block instanceof Block) {
+                  this.inferBlock(node.block, innerScope, {
+                     typeExpectedInPlace: lambdaType.returnType,
+                  });
+               }
+            }
+         }
+
          return lambdaType;
       }
    }

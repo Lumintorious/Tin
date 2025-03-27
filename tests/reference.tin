@@ -20,7 +20,7 @@ number: Number = 1
 string: String = "str"
 boolean: Boolean = false
 empty: Nothing = nothing # keyword
-any: Any = "str"
+any: Anything = "str"
 
 # Optional
 maybeFull: Number? = 10
@@ -89,7 +89,7 @@ mechaCat:Cat.name == "MechaCat"
 mechaCat:Mech.name == "OxidizedCopper"
 
 # Type Checks
-any: Any = kitty
+any: Anything = kitty
 if any :: Cat,
 	print(any.name) # any is 'Cat' in this scope
 
