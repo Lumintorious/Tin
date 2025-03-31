@@ -1,0 +1,2533 @@
+id: 1544
+tag: Block
+varTypeInInvarPlace: false
+invarTypeInVarPlace: false
+skipReturn: false
+statements:
+  - id: 1176
+    tag: AppliedKeyword
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    keyword: external
+    param:
+      id: 1175
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: 
+export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type("Anything", (n) => true, (n) => true)));
+
+    position:
+      start:
+        line: 2
+        column: 1
+        absolute: 43
+      end:
+        line: 4
+        column: 5
+        absolute: 182
+  - id: 1223
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1177
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Type
+    value:
+      id: 1222
+      tag: TypeDef
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      fieldDefs:
+        - id: 1181
+          tag: FieldDef
+          mutable: false
+          name: name
+          type:
+            id: 1179
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 5
+              column: 2
+              absolute: 197
+            end:
+              line: 6
+              column: 7
+              absolute: 214
+        - id: 1194
+          tag: FieldDef
+          mutable: false
+          name: check
+          defaultValue:
+            id: 1192
+            tag: RoundValueToValueLambda
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            pure: true
+            capturesMutableValues: false
+            params:
+              - id: 1186
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  id: 1183
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: obj
+                type:
+                  id: 1184
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Anything
+                isDeclaration: false
+                isTypeLevel: false
+                position:
+                  start:
+                    line: 6
+                    column: 11
+                    absolute: 221
+                  end:
+                    line: 6
+                    column: 25
+                    absolute: 232
+            block:
+              id: 1191
+              tag: Block
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              skipReturn: false
+              statements:
+                - id: 1190
+                  tag: Cast
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  expression:
+                    id: 1188
+                    tag: Literal
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    isTypeLiteral: false
+                    type: Boolean
+                    value: false
+                  type:
+                    id: 1189
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Boolean
+                  position:
+                    start:
+                      line: 6
+                      column: 29
+                      absolute: 241
+                    end:
+                      line: 7
+                      column: 16
+                      absolute: 267
+            specifiedType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 6
+              column: 2
+              absolute: 214
+            end:
+              line: 7
+              column: 16
+              absolute: 267
+        - id: 1207
+          tag: FieldDef
+          mutable: false
+          name: checkIntegrity
+          defaultValue:
+            id: 1205
+            tag: RoundValueToValueLambda
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            pure: true
+            capturesMutableValues: false
+            params:
+              - id: 1199
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  id: 1196
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: obj
+                type:
+                  id: 1197
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Anything
+                isDeclaration: false
+                isTypeLevel: false
+                position:
+                  start:
+                    line: 7
+                    column: 20
+                    absolute: 274
+                  end:
+                    line: 7
+                    column: 34
+                    absolute: 285
+            block:
+              id: 1204
+              tag: Block
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              skipReturn: false
+              statements:
+                - id: 1203
+                  tag: Cast
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  expression:
+                    id: 1201
+                    tag: Literal
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    isTypeLiteral: false
+                    type: Boolean
+                    value: false
+                  type:
+                    id: 1202
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Boolean
+                  position:
+                    start:
+                      line: 7
+                      column: 38
+                      absolute: 294
+                    end:
+                      line: 8
+                      column: 4
+                      absolute: 308
+            specifiedType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 7
+              column: 2
+              absolute: 267
+            end:
+              line: 8
+              column: 4
+              absolute: 308
+        - id: 1220
+          tag: FieldDef
+          mutable: false
+          name: is
+          defaultValue:
+            id: 1218
+            tag: RoundValueToValueLambda
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            pure: true
+            capturesMutableValues: false
+            params:
+              - id: 1212
+                tag: Assignment
+                isMutable: false
+                isParameter: true
+                lhs:
+                  id: 1209
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: parent
+                type:
+                  id: 1210
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Type
+                isDeclaration: false
+                isTypeLevel: false
+                position:
+                  start:
+                    line: 8
+                    column: 8
+                    absolute: 318
+                  end:
+                    line: 8
+                    column: 21
+                    absolute: 325
+            block:
+              id: 1217
+              tag: Block
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              skipReturn: false
+              statements:
+                - id: 1216
+                  tag: Cast
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  expression:
+                    id: 1214
+                    tag: Literal
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    isTypeLiteral: false
+                    type: Boolean
+                    value: false
+                  type:
+                    id: 1215
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Boolean
+                  position:
+                    start:
+                      line: 8
+                      column: 25
+                      absolute: 334
+                    end:
+                      line: 10
+                      column: 1
+                      absolute: 347
+            specifiedType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 8
+              column: 2
+              absolute: 308
+            end:
+              line: 10
+              column: 1
+              absolute: 347
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 4
+        column: 1
+        absolute: 182
+      end:
+        line: 10
+        column: 8
+        absolute: 354
+  - id: 1235
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1224
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Type@of
+    value:
+      id: 1234
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Anything
+      value: 
+    type:
+      id: 1232
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 1228
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 1225
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: obj
+          type:
+            id: 1226
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Anything
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 10
+              column: 11
+              absolute: 360
+            end:
+              line: 10
+              column: 25
+              absolute: 371
+      block:
+        id: 1231
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 1230
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+            position:
+              start:
+                line: 10
+                column: 29
+                absolute: 379
+              end:
+                line: 10
+                column: 35
+                absolute: 381
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 10
+        column: 1
+        absolute: 354
+      end:
+        line: 12
+        column: 6
+        absolute: 399
+  - id: 1255
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1236
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Field
+    value:
+      id: 1254
+      tag: TypeDef
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      fieldDefs:
+        - id: 1240
+          tag: FieldDef
+          mutable: false
+          name: name
+          type:
+            id: 1238
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 13
+              column: 2
+              absolute: 414
+            end:
+              line: 14
+              column: 5
+              absolute: 428
+        - id: 1244
+          tag: FieldDef
+          mutable: false
+          name: tpe
+          type:
+            id: 1242
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+          isTypeLevel: true
+          position:
+            start:
+              line: 14
+              column: 2
+              absolute: 428
+            end:
+              line: 15
+              column: 14
+              absolute: 449
+        - id: 1252
+          tag: FieldDef
+          mutable: false
+          name: defaultValue
+          type:
+            id: 1250
+            tag: Optional
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            doubleQuestionMark: false
+            expression:
+              id: 1249
+              tag: Group
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value:
+                id: 1248
+                tag: RoundValueToValueLambda
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                pure: true
+                capturesMutableValues: false
+                params:
+                block:
+                  id: 1247
+                  tag: Block
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  skipReturn: false
+                  statements:
+                    - id: 1246
+                      tag: Identifier
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      value: Anything
+                      position:
+                        start:
+                          line: 15
+                          column: 23
+                          absolute: 466
+                        end:
+                          line: 15
+                          column: 32
+                          absolute: 467
+                specifiedType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 15
+              column: 2
+              absolute: 449
+            end:
+              line: 17
+              column: 1
+              absolute: 472
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 12
+        column: 1
+        absolute: 399
+      end:
+        line: 17
+        column: 10
+        absolute: 481
+  - id: 1276
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1256
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Parameter
+    value:
+      id: 1275
+      tag: TypeDef
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      fieldDefs:
+        - id: 1261
+          tag: FieldDef
+          mutable: false
+          name: name
+          type:
+            id: 1259
+            tag: Optional
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            doubleQuestionMark: false
+            expression:
+              id: 1258
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 18
+              column: 2
+              absolute: 496
+            end:
+              line: 19
+              column: 5
+              absolute: 511
+        - id: 1265
+          tag: FieldDef
+          mutable: false
+          name: tpe
+          type:
+            id: 1263
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+          isTypeLevel: true
+          position:
+            start:
+              line: 19
+              column: 2
+              absolute: 511
+            end:
+              line: 20
+              column: 14
+              absolute: 532
+        - id: 1273
+          tag: FieldDef
+          mutable: false
+          name: defaultValue
+          type:
+            id: 1271
+            tag: Optional
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            doubleQuestionMark: false
+            expression:
+              id: 1270
+              tag: Group
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value:
+                id: 1269
+                tag: RoundValueToValueLambda
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                pure: true
+                capturesMutableValues: false
+                params:
+                block:
+                  id: 1268
+                  tag: Block
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  skipReturn: false
+                  statements:
+                    - id: 1267
+                      tag: Identifier
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      value: Anything
+                      position:
+                        start:
+                          line: 20
+                          column: 23
+                          absolute: 549
+                        end:
+                          line: 20
+                          column: 32
+                          absolute: 550
+                specifiedType: undefined
+          isTypeLevel: true
+          position:
+            start:
+              line: 20
+              column: 2
+              absolute: 532
+            end:
+              line: 22
+              column: 1
+              absolute: 555
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 17
+        column: 1
+        absolute: 481
+      end:
+        line: 22
+        column: 13
+        absolute: 567
+  - id: 1290
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1277
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Intersection
+    value:
+      id: 1289
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1278
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Type
+      operator: &
+      right:
+        id: 1288
+        tag: TypeDef
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        fieldDefs:
+          - id: 1282
+            tag: FieldDef
+            mutable: false
+            name: left
+            type:
+              id: 1280
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Type
+            isTypeLevel: true
+            position:
+              start:
+                line: 23
+                column: 2
+                absolute: 589
+              end:
+                line: 24
+                column: 7
+                absolute: 603
+          - id: 1286
+            tag: FieldDef
+            mutable: false
+            name: right
+            type:
+              id: 1284
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Type
+            isTypeLevel: true
+            position:
+              start:
+                line: 24
+                column: 2
+                absolute: 603
+              end:
+                line: 26
+                column: 1
+                absolute: 613
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 22
+        column: 1
+        absolute: 567
+      end:
+        line: 26
+        column: 6
+        absolute: 618
+  - id: 1304
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1291
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Union
+    value:
+      id: 1303
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1292
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Type
+      operator: &
+      right:
+        id: 1302
+        tag: TypeDef
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        fieldDefs:
+          - id: 1296
+            tag: FieldDef
+            mutable: false
+            name: left
+            type:
+              id: 1294
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Type
+            isTypeLevel: true
+            position:
+              start:
+                line: 27
+                column: 2
+                absolute: 640
+              end:
+                line: 28
+                column: 7
+                absolute: 654
+          - id: 1300
+            tag: FieldDef
+            mutable: false
+            name: right
+            type:
+              id: 1298
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Type
+            isTypeLevel: true
+            position:
+              start:
+                line: 28
+                column: 2
+                absolute: 654
+              end:
+                line: 30
+                column: 1
+                absolute: 664
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 26
+        column: 1
+        absolute: 618
+      end:
+        line: 30
+        column: 7
+        absolute: 670
+  - id: 1316
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1305
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Struct
+    value:
+      id: 1315
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1306
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Type
+      operator: &
+      right:
+        id: 1314
+        tag: TypeDef
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        fieldDefs:
+          - id: 1312
+            tag: FieldDef
+            mutable: false
+            name: fields
+            type:
+              id: 1310
+              tag: SquareApply
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isCallingAConstructor: false
+              callee:
+                id: 1308
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: Array
+              typeArgs:
+                - id: 1309
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Field
+                  position:
+                    start:
+                      line: 31
+                      column: 16
+                      absolute: 707
+                    end:
+                      line: 31
+                      column: 22
+                      absolute: 708
+            isTypeLevel: true
+            position:
+              start:
+                line: 31
+                column: 2
+                absolute: 694
+              end:
+                line: 33
+                column: 1
+                absolute: 712
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 30
+        column: 1
+        absolute: 670
+      end:
+        line: 33
+        column: 7
+        absolute: 718
+  - id: 1332
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1317
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Lambda
+    value:
+      id: 1331
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1318
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Type
+      operator: &
+      right:
+        id: 1330
+        tag: TypeDef
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        fieldDefs:
+          - id: 1324
+            tag: FieldDef
+            mutable: false
+            name: params
+            type:
+              id: 1322
+              tag: SquareApply
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isCallingAConstructor: false
+              callee:
+                id: 1320
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: Array
+              typeArgs:
+                - id: 1321
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Parameter
+                  position:
+                    start:
+                      line: 34
+                      column: 16
+                      absolute: 759
+                    end:
+                      line: 34
+                      column: 26
+                      absolute: 760
+            isTypeLevel: true
+            position:
+              start:
+                line: 34
+                column: 2
+                absolute: 742
+              end:
+                line: 35
+                column: 12
+                absolute: 773
+          - id: 1328
+            tag: FieldDef
+            mutable: false
+            name: resultType
+            type:
+              id: 1326
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Type
+            isTypeLevel: true
+            position:
+              start:
+                line: 35
+                column: 2
+                absolute: 773
+              end:
+                line: 37
+                column: 1
+                absolute: 783
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 33
+        column: 1
+        absolute: 718
+      end:
+        line: 37
+        column: 8
+        absolute: 790
+  - id: 1344
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1333
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: RefType
+    value:
+      id: 1343
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1334
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Type
+      operator: &
+      right:
+        id: 1342
+        tag: TypeDef
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        fieldDefs:
+          - id: 1340
+            tag: FieldDef
+            mutable: false
+            name: get
+            type:
+              id: 1338
+              tag: RoundValueToValueLambda
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              pure: true
+              capturesMutableValues: false
+              params:
+              block:
+                id: 1337
+                tag: Block
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                skipReturn: false
+                statements:
+                  - id: 1336
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Type
+                    position:
+                      start:
+                        line: 38
+                        column: 13
+                        absolute: 823
+                      end:
+                        line: 40
+                        column: 1
+                        absolute: 827
+              specifiedType: undefined
+            isTypeLevel: true
+            position:
+              start:
+                line: 38
+                column: 2
+                absolute: 811
+              end:
+                line: 40
+                column: 1
+                absolute: 827
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 37
+        column: 1
+        absolute: 790
+      end:
+        line: 40
+        column: 9
+        absolute: 835
+  - id: 1346
+    tag: AppliedKeyword
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    keyword: external
+    param:
+      id: 1345
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: 
+export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
+export const Never = _S(Symbol("Never"), () => undefined, lazy(Type("Never", (n) => n === undefined, (n) => n === undefined)));
+export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", (n) => typeof n === "number", (n) => typeof n === "number")));
+export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", (n) => typeof n === "string", (n) => typeof n === "string")));
+
+    position:
+      start:
+        line: 40
+        column: 1
+        absolute: 835
+      end:
+        line: 42
+        column: 8
+        absolute: 1457
+  - id: 1366
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1347
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Literal
+    value:
+      id: 1365
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1348
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Type
+      operator: &
+      right:
+        id: 1364
+        tag: TypeDef
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        fieldDefs:
+          - id: 1358
+            tag: FieldDef
+            mutable: false
+            name: value
+            type:
+              id: 1356
+              tag: BinaryExpression
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              left:
+                id: 1354
+                tag: BinaryExpression
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                left:
+                  id: 1352
+                  tag: BinaryExpression
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  left:
+                    id: 1350
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: String
+                  operator: |
+                  right:
+                    id: 1351
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Number
+                operator: |
+                right:
+                  id: 1353
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Boolean
+              operator: |
+              right:
+                id: 1355
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: Nothing
+            isTypeLevel: true
+            position:
+              start:
+                line: 43
+                column: 2
+                absolute: 1480
+              end:
+                line: 44
+                column: 6
+                absolute: 1524
+          - id: 1362
+            tag: FieldDef
+            mutable: false
+            name: type
+            type:
+              id: 1360
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Type
+            isTypeLevel: true
+            position:
+              start:
+                line: 44
+                column: 2
+                absolute: 1524
+              end:
+                line: 46
+                column: 1
+                absolute: 1534
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 42
+        column: 1
+        absolute: 1457
+      end:
+        line: 46
+        column: 8
+        absolute: 1541
+  - id: 1378
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1367
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: jsonify
+    value:
+      id: 1377
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Anything
+      value: 
+    type:
+      id: 1375
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 1371
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 1368
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: obj
+          type:
+            id: 1369
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Anything
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 46
+              column: 11
+              absolute: 1547
+            end:
+              line: 46
+              column: 25
+              absolute: 1558
+      block:
+        id: 1374
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 1373
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: String
+            position:
+              start:
+                line: 46
+                column: 29
+                absolute: 1568
+              end:
+                line: 46
+                column: 37
+                absolute: 1570
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 46
+        column: 1
+        absolute: 1541
+      end:
+        line: 47
+        column: 10
+        absolute: 1590
+  - id: 1390
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1379
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: dejsonify
+    value:
+      id: 1389
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Anything
+      value: 
+    type:
+      id: 1387
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 1383
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 1380
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: json
+          type:
+            id: 1381
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: String
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 47
+              column: 13
+              absolute: 1597
+            end:
+              line: 47
+              column: 26
+              absolute: 1606
+      block:
+        id: 1386
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 1385
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Anything
+            position:
+              start:
+                line: 47
+                column: 30
+                absolute: 1618
+              end:
+                line: 47
+                column: 40
+                absolute: 1620
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 47
+        column: 1
+        absolute: 1590
+      end:
+        line: 49
+        column: 16
+        absolute: 1648
+  - id: 1458
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1391
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Intersection@of
+    value:
+      id: 1457
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 1395
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 1392
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: left
+          type:
+            id: 1393
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 49
+              column: 20
+              absolute: 1656
+            end:
+              line: 49
+              column: 31
+              absolute: 1663
+        - id: 1400
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 1397
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: right
+          type:
+            id: 1398
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 49
+              column: 32
+              absolute: 1669
+            end:
+              line: 49
+              column: 44
+              absolute: 1676
+      block:
+        id: 1456
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 1423
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 1402
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: check
+            value:
+              id: 1422
+              tag: RoundValueToValueLambda
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              pure: true
+              capturesMutableValues: false
+              params:
+                - id: 1406
+                  tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    id: 1403
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: obj
+                  type:
+                    id: 1404
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Anything
+                  isDeclaration: false
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 50
+                      column: 11
+                      absolute: 1694
+                    end:
+                      line: 50
+                      column: 25
+                      absolute: 1705
+              block:
+                id: 1421
+                tag: Block
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                skipReturn: false
+                statements:
+                  - id: 1420
+                    tag: BinaryExpression
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    left:
+                      id: 1413
+                      tag: RoundApply
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      calledInsteadOfSquare: false
+                      paramOrder:
+                      isFirstParamThis: false
+                      isAnObjectCopy: false
+                      isCallingAConstructor: false
+                      callee:
+                        id: 1412
+                        tag: Select
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        ammortized: false
+                        owner:
+                          id: 1408
+                          tag: Identifier
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          value: left
+                        field: check
+                      args:
+                        - 0: 
+                          1:
+                            id: 1410
+                            tag: Identifier
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            value: obj
+                    operator: &&
+                    right:
+                      id: 1419
+                      tag: RoundApply
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      calledInsteadOfSquare: false
+                      paramOrder:
+                      isFirstParamThis: false
+                      isAnObjectCopy: false
+                      isCallingAConstructor: false
+                      callee:
+                        id: 1418
+                        tag: Select
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        ammortized: false
+                        owner:
+                          id: 1414
+                          tag: Identifier
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          value: right
+                        field: check
+                      args:
+                        - 0: 
+                          1:
+                            id: 1416
+                            tag: Identifier
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            value: obj
+                    position:
+                      start:
+                        line: 51
+                        column: 3
+                        absolute: 1716
+                      end:
+                        line: 53
+                        column: 2
+                        absolute: 1752
+              specifiedType: undefined
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 50
+                column: 2
+                absolute: 1687
+              end:
+                line: 53
+                column: 16
+                absolute: 1766
+          - id: 1445
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 1424
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: checkIntegrity
+            value:
+              id: 1444
+              tag: RoundValueToValueLambda
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              pure: true
+              capturesMutableValues: false
+              params:
+                - id: 1428
+                  tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    id: 1425
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: obj
+                  type:
+                    id: 1426
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Anything
+                  isDeclaration: false
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 53
+                      column: 20
+                      absolute: 1773
+                    end:
+                      line: 53
+                      column: 34
+                      absolute: 1784
+              block:
+                id: 1443
+                tag: Block
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                skipReturn: false
+                statements:
+                  - id: 1442
+                    tag: BinaryExpression
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    left:
+                      id: 1435
+                      tag: RoundApply
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      calledInsteadOfSquare: false
+                      paramOrder:
+                      isFirstParamThis: false
+                      isAnObjectCopy: false
+                      isCallingAConstructor: false
+                      callee:
+                        id: 1434
+                        tag: Select
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        ammortized: false
+                        owner:
+                          id: 1430
+                          tag: Identifier
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          value: left
+                        field: checkIntegrity
+                      args:
+                        - 0: 
+                          1:
+                            id: 1432
+                            tag: Identifier
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            value: obj
+                    operator: &&
+                    right:
+                      id: 1441
+                      tag: RoundApply
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      calledInsteadOfSquare: false
+                      paramOrder:
+                      isFirstParamThis: false
+                      isAnObjectCopy: false
+                      isCallingAConstructor: false
+                      callee:
+                        id: 1440
+                        tag: Select
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        ammortized: false
+                        owner:
+                          id: 1436
+                          tag: Identifier
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          value: right
+                        field: checkIntegrity
+                      args:
+                        - 0: 
+                          1:
+                            id: 1438
+                            tag: Identifier
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            value: obj
+                    position:
+                      start:
+                        line: 54
+                        column: 3
+                        absolute: 1795
+                      end:
+                        line: 56
+                        column: 2
+                        absolute: 1849
+              specifiedType: undefined
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 53
+                column: 2
+                absolute: 1766
+              end:
+                line: 56
+                column: 6
+                absolute: 1853
+          - id: 1455
+            tag: BinaryExpression
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            left:
+              id: 1450
+              tag: RoundApply
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              calledInsteadOfSquare: false
+              paramOrder:
+              isFirstParamThis: false
+              isAnObjectCopy: false
+              isCallingAConstructor: false
+              callee:
+                id: 1446
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: Type
+              args:
+                - 0: 
+                  1:
+                    id: 1447
+                    tag: Literal
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    isTypeLiteral: false
+                    type: String
+                    value: Intersection
+                - 0: 
+                  1:
+                    id: 1448
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: check
+                - 0: 
+                  1:
+                    id: 1449
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: checkIntegrity
+            operator: &
+            right:
+              id: 1454
+              tag: RoundApply
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              calledInsteadOfSquare: false
+              paramOrder:
+              isFirstParamThis: false
+              isAnObjectCopy: false
+              isCallingAConstructor: false
+              callee:
+                id: 1451
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: Intersection
+              args:
+                - 0: 
+                  1:
+                    id: 1452
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: left
+                - 0: 
+                  1:
+                    id: 1453
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: right
+            position:
+              start:
+                line: 56
+                column: 2
+                absolute: 1853
+              end:
+                line: 58
+                column: 1
+                absolute: 1924
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 49
+        column: 1
+        absolute: 1648
+      end:
+        line: 58
+        column: 6
+        absolute: 1929
+  - id: 1479
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1459
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Digit
+    value:
+      id: 1478
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 1476
+        tag: BinaryExpression
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        left:
+          id: 1474
+          tag: BinaryExpression
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          left:
+            id: 1472
+            tag: BinaryExpression
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            left:
+              id: 1470
+              tag: BinaryExpression
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              left:
+                id: 1468
+                tag: BinaryExpression
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                left:
+                  id: 1466
+                  tag: BinaryExpression
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  left:
+                    id: 1464
+                    tag: BinaryExpression
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    left:
+                      id: 1462
+                      tag: BinaryExpression
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      left:
+                        id: 1460
+                        tag: Literal
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        isTypeLiteral: false
+                        type: Number
+                        value: 0
+                      operator: |
+                      right:
+                        id: 1461
+                        tag: Literal
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        isTypeLiteral: false
+                        type: Number
+                        value: 1
+                    operator: |
+                    right:
+                      id: 1463
+                      tag: Literal
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      isTypeLiteral: false
+                      type: Number
+                      value: 2
+                  operator: |
+                  right:
+                    id: 1465
+                    tag: Literal
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    isTypeLiteral: false
+                    type: Number
+                    value: 3
+                operator: |
+                right:
+                  id: 1467
+                  tag: Literal
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  isTypeLiteral: false
+                  type: Number
+                  value: 4
+              operator: |
+              right:
+                id: 1469
+                tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
+                type: Number
+                value: 5
+            operator: |
+            right:
+              id: 1471
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: Number
+              value: 6
+          operator: |
+          right:
+            id: 1473
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 7
+        operator: |
+        right:
+          id: 1475
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 8
+      operator: |
+      right:
+        id: 1477
+        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
+        type: Number
+        value: 9
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 58
+        column: 1
+        absolute: 1929
+      end:
+        line: 59
+        column: 4
+        absolute: 1974
+  - id: 1482
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1480
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: One
+    value:
+      id: 1481
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 1
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 59
+        column: 1
+        absolute: 1974
+      end:
+        line: 61
+        column: 13
+        absolute: 1994
+  - id: 1543
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 1483
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Union@values
+    value:
+      id: 1542
+      tag: SquareTypeToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      capturesMutableValues: false
+      parameterTypes:
+        - id: 1485
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 1484
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: T
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 61
+              column: 17
+              absolute: 1999
+            end:
+              line: 61
+              column: 19
+              absolute: 2000
+      block:
+        id: 1541
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 1537
+            tag: Assignment
+            isMutable: false
+            isParameter: false
+            lhs:
+              id: 1487
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: go
+            value:
+              id: 1536
+              tag: RoundValueToValueLambda
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              pure: true
+              capturesMutableValues: false
+              params:
+                - id: 1491
+                  tag: Assignment
+                  isMutable: false
+                  isParameter: true
+                  lhs:
+                    id: 1488
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: type
+                  type:
+                    id: 1489
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: Type
+                  isDeclaration: false
+                  isTypeLevel: false
+                  position:
+                    start:
+                      line: 62
+                      column: 8
+                      absolute: 2016
+                    end:
+                      line: 62
+                      column: 19
+                      absolute: 2023
+              block:
+                id: 1535
+                tag: Block
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                skipReturn: false
+                statements:
+                  - id: 1534
+                    tag: IfStatement
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    condition:
+                      id: 1498
+                      tag: TypeCheck
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      term:
+                        id: 1496
+                        tag: Identifier
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        value: type
+                      type:
+                        id: 1497
+                        tag: Identifier
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        value: Literal
+                    trueBranch:
+                      id: 1509
+                      tag: Block
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      skipReturn: false
+                      statements:
+                        - id: 1508
+                          tag: RoundApply
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          calledInsteadOfSquare: false
+                          paramOrder:
+                          isFirstParamThis: false
+                          isAnObjectCopy: false
+                          isCallingAConstructor: false
+                          callee:
+                            id: 1501
+                            tag: SquareApply
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            isCallingAConstructor: false
+                            callee:
+                              id: 1499
+                              tag: Identifier
+                              varTypeInInvarPlace: false
+                              invarTypeInVarPlace: false
+                              value: Array@of
+                            typeArgs:
+                              - id: 1500
+                                tag: Identifier
+                                varTypeInInvarPlace: false
+                                invarTypeInVarPlace: false
+                                value: T
+                                position:
+                                  start:
+                                    line: 64
+                                    column: 13
+                                    absolute: 2074
+                                  end:
+                                    line: 64
+                                    column: 15
+                                    absolute: 2075
+                          args:
+                            0:
+                              - 
+                              - id: 1507
+                                tag: Cast
+                                varTypeInInvarPlace: false
+                                invarTypeInVarPlace: false
+                                expression:
+                                  id: 1506
+                                  tag: Group
+                                  varTypeInInvarPlace: false
+                                  invarTypeInVarPlace: false
+                                  value:
+                                    id: 1504
+                                    tag: Select
+                                    varTypeInInvarPlace: false
+                                    invarTypeInVarPlace: false
+                                    ammortized: false
+                                    owner:
+                                      id: 1502
+                                      tag: Identifier
+                                      varTypeInInvarPlace: false
+                                      invarTypeInVarPlace: false
+                                      value: type
+                                    field: value
+                                type:
+                                  id: 1505
+                                  tag: Identifier
+                                  varTypeInInvarPlace: false
+                                  invarTypeInVarPlace: false
+                                  value: T
+                                position:
+                                  start:
+                                    line: 64
+                                    column: 16
+                                    absolute: 2077
+                                  end:
+                                    line: 64
+                                    column: 32
+                                    absolute: 2092
+                          position:
+                            start:
+                              line: 64
+                              column: 4
+                              absolute: 2072
+                            end:
+                              line: 65
+                              column: 3
+                              absolute: 2096
+                    falseBranch:
+                      id: 1533
+                      tag: IfStatement
+                      varTypeInInvarPlace: false
+                      invarTypeInVarPlace: false
+                      condition:
+                        id: 1512
+                        tag: TypeCheck
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        term:
+                          id: 1510
+                          tag: Identifier
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          value: type
+                        type:
+                          id: 1511
+                          tag: Identifier
+                          varTypeInInvarPlace: false
+                          invarTypeInVarPlace: false
+                          value: Union
+                      trueBranch:
+                        id: 1527
+                        tag: Block
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        skipReturn: false
+                        statements:
+                          - id: 1526
+                            tag: RoundApply
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            calledInsteadOfSquare: false
+                            paramOrder:
+                            isFirstParamThis: false
+                            isAnObjectCopy: false
+                            isCallingAConstructor: false
+                            callee:
+                              id: 1525
+                              tag: Select
+                              varTypeInInvarPlace: false
+                              invarTypeInVarPlace: false
+                              ammortized: false
+                              owner:
+                                id: 1517
+                                tag: RoundApply
+                                varTypeInInvarPlace: false
+                                invarTypeInVarPlace: false
+                                calledInsteadOfSquare: false
+                                paramOrder:
+                                isFirstParamThis: false
+                                isAnObjectCopy: false
+                                isCallingAConstructor: false
+                                callee:
+                                  id: 1513
+                                  tag: Identifier
+                                  varTypeInInvarPlace: false
+                                  invarTypeInVarPlace: false
+                                  value: go
+                                args:
+                                  - 0: 
+                                    1:
+                                      id: 1516
+                                      tag: Select
+                                      varTypeInInvarPlace: false
+                                      invarTypeInVarPlace: false
+                                      ammortized: false
+                                      owner:
+                                        id: 1514
+                                        tag: Identifier
+                                        varTypeInInvarPlace: false
+                                        invarTypeInVarPlace: false
+                                        value: type
+                                      field: left
+                              field: and
+                            args:
+                              0:
+                                - 
+                                - id: 1523
+                                  tag: RoundApply
+                                  varTypeInInvarPlace: false
+                                  invarTypeInVarPlace: false
+                                  calledInsteadOfSquare: false
+                                  paramOrder:
+                                  isFirstParamThis: false
+                                  isAnObjectCopy: false
+                                  isCallingAConstructor: false
+                                  callee:
+                                    id: 1519
+                                    tag: Identifier
+                                    varTypeInInvarPlace: false
+                                    invarTypeInVarPlace: false
+                                    value: go
+                                  args:
+                                    0:
+                                      - 
+                                      - id: 1522
+                                        tag: Select
+                                        varTypeInInvarPlace: false
+                                        invarTypeInVarPlace: false
+                                        ammortized: false
+                                        owner:
+                                          id: 1520
+                                          tag: Identifier
+                                          varTypeInInvarPlace: false
+                                          invarTypeInVarPlace: false
+                                          value: type
+                                        field: right
+                                        position:
+                                          start:
+                                            line: 66
+                                            column: 25
+                                            absolute: 2148
+                                          end:
+                                            line: 66
+                                            column: 36
+                                            absolute: 2155
+                                  position:
+                                    start:
+                                      line: 66
+                                      column: 22
+                                      absolute: 2143
+                                    end:
+                                      line: 66
+                                      column: 37
+                                      absolute: 2156
+                            position:
+                              start:
+                                line: 66
+                                column: 4
+                                absolute: 2125
+                              end:
+                                line: 67
+                                column: 3
+                                absolute: 2160
+                      falseBranch:
+                        id: 1532
+                        tag: Block
+                        varTypeInInvarPlace: false
+                        invarTypeInVarPlace: false
+                        skipReturn: false
+                        statements:
+                          - id: 1531
+                            tag: RoundApply
+                            varTypeInInvarPlace: false
+                            invarTypeInVarPlace: false
+                            calledInsteadOfSquare: false
+                            paramOrder:
+                            isFirstParamThis: false
+                            isAnObjectCopy: false
+                            isCallingAConstructor: false
+                            callee:
+                              id: 1530
+                              tag: SquareApply
+                              varTypeInInvarPlace: false
+                              invarTypeInVarPlace: false
+                              isCallingAConstructor: false
+                              callee:
+                                id: 1528
+                                tag: Identifier
+                                varTypeInInvarPlace: false
+                                invarTypeInVarPlace: false
+                                value: Array@of
+                              typeArgs:
+                                - id: 1529
+                                  tag: Identifier
+                                  varTypeInInvarPlace: false
+                                  invarTypeInVarPlace: false
+                                  value: T
+                                  position:
+                                    start:
+                                      line: 68
+                                      column: 13
+                                      absolute: 2179
+                                    end:
+                                      line: 68
+                                      column: 15
+                                      absolute: 2180
+                            args:
+                            position:
+                              start:
+                                line: 68
+                                column: 4
+                                absolute: 2177
+                              end:
+                                line: 69
+                                column: 2
+                                absolute: 2185
+                    position:
+                      start:
+                        line: 63
+                        column: 3
+                        absolute: 2042
+                      end:
+                        line: 69
+                        column: 2
+                        absolute: 2185
+              specifiedType:
+                id: 1495
+                tag: SquareApply
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isCallingAConstructor: false
+                callee:
+                  id: 1493
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: Array
+                typeArgs:
+                  - id: 1494
+                    tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
+                    value: T
+                    position:
+                      start:
+                        line: 62
+                        column: 27
+                        absolute: 2032
+                      end:
+                        line: 62
+                        column: 29
+                        absolute: 2033
+            isDeclaration: true
+            isTypeLevel: false
+            position:
+              start:
+                line: 62
+                column: 2
+                absolute: 2008
+              end:
+                line: 69
+                column: 4
+                absolute: 2187
+          - id: 1540
+            tag: RoundApply
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            calledInsteadOfSquare: false
+            paramOrder:
+            isFirstParamThis: false
+            isAnObjectCopy: false
+            isCallingAConstructor: false
+            callee:
+              id: 1538
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: go
+            args:
+              0:
+                - 
+                - id: 1539
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: T
+                  position:
+                    start:
+                      line: 69
+                      column: 5
+                      absolute: 2189
+                    end:
+                      line: 69
+                      column: 7
+                      absolute: 2190
+            position:
+              start:
+                line: 69
+                column: 2
+                absolute: 2187
+              end: 0
+      pure: true
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 61
+        column: 1
+        absolute: 1994
+      end: 0

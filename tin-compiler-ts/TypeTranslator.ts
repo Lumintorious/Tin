@@ -21,7 +21,12 @@ import {
    Symbol,
    RecursiveResolutionOptions,
 } from "./Scope";
-import { ParamType, SquareTypeToValueLambdaType, ThisType } from "./Types";
+import {
+   ParamType,
+   SquareTypeToValueLambdaType,
+   ThisType,
+   RefinedType,
+} from "./Types";
 import { Identifier } from "./Parser";
 import { AnyType, MutableType } from "./Types";
 import {
@@ -235,6 +240,8 @@ export class TypeTranslator {
             if (node instanceof Group) {
                return this.translate(node.value, scope);
             }
+         case "RefinedDef":
+            return new RefinedType();
          default:
             throw new Error("Could not translate " + node.tag);
       }

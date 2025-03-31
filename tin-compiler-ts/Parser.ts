@@ -82,6 +82,7 @@ export class Term extends Statement {
    translatedType?: Type;
    varTypeInInvarPlace?: boolean = false;
    invarTypeInVarPlace?: boolean = false;
+   capturedName?: string;
    clojure?: Symbol[];
    constructor(tag: string) {
       super(tag);
@@ -252,6 +253,7 @@ export class RoundApply extends Term {
    isAnObjectCopy: boolean = false;
    autoFilledSquareParams?: Type[];
    isCallingAConstructor: boolean = false;
+   bakedInThis?: Term;
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
@@ -292,6 +294,7 @@ export class UnaryOperator extends Term {
 // Named values. Assigned beforehand in Assignment
 export class Identifier extends Term {
    value: string;
+   isFromSelfClojure?: boolean;
    constructor(value: string) {
       super("Identifier"); // tag of the AST node
       this.value = value; // Value of the literal (number, string, etc.)
@@ -426,6 +429,7 @@ const PRECEDENCE: { [_: string]: number } = {
    "&&": 6, // Logical AND
    "||": 5, // Logical OR
    "&": 4,
+   copy: 4,
    "|": 3,
    // (right-associative)
    "!=": 0, // Inequality
@@ -1152,6 +1156,17 @@ export class Parser {
          return parseNewType(this);
       }
 
+      if (token.value === "refined") {
+         const parsedChecker = this.parseRoundValueToValueLambda(
+            this.peek().value === "["
+         );
+         if (parsedChecker instanceof RoundValueToValueLambda) {
+            return new RefinedDef(parsedChecker);
+         } else {
+            throw new Error("Was not round lambda");
+         }
+      }
+
       // if (token.value === "data") {
       //    this.current--;
       //    return parseNewData(this);
@@ -1233,6 +1248,14 @@ export class TypeDef extends Term {
       super("TypeDef");
       this.fieldDefs = fieldDefs;
       this.isTypeLevel = true;
+   }
+}
+
+export class RefinedDef extends Term {
+   lambda: RoundValueToValueLambda;
+   constructor(lambda: RoundValueToValueLambda) {
+      super("RefinedDef");
+      this.lambda = lambda;
    }
 }
 

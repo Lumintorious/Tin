@@ -182,6 +182,9 @@ export class TypeInferencer {
                this.infer((node as UnaryOperator).expression, scope)
             );
             break;
+         case "RefinedDef":
+            inferredType = new TypeOfTypes();
+            break;
          default:
             throw new Error(
                "Could not infer '" + node.tag + "' - " + node.position
@@ -326,7 +329,39 @@ export class TypeInferencer {
    // func(12, "Something")
    // = Number
    inferRoundApply(node: RoundApply, scope: Scope): Type {
-      let calleeType = scope.resolveNamedType(this.infer(node.callee, scope));
+      let calleeType;
+
+      // Handle extension method search
+      if (node.callee instanceof Select) {
+         try {
+            const symbol = scope.lookup(node.callee.field);
+            const selectOwnerType = this.infer(node.callee.owner, scope);
+            if (
+               symbol.typeSymbol instanceof RoundValueToValueLambdaType &&
+               symbol.typeSymbol.params[0]?.name === "this" &&
+               selectOwnerType.isAssignableTo(
+                  symbol.typeSymbol.params[0].type,
+                  scope
+               )
+            ) {
+               // obj.field(p1, p2)
+               // field(obj, p1, p2)
+               const owner = node.callee.owner;
+               node.callee = new Identifier(symbol.name);
+               node.bakedInThis = owner;
+               this.context.builder.build(node.callee, scope);
+               this.context.builder.build(node, scope);
+               console.log(node);
+            }
+         } catch (e) {
+            //
+         }
+      }
+
+      if (!calleeType) {
+         calleeType = scope.resolveNamedType(this.infer(node.callee, scope));
+      }
+
       if (node.callee instanceof Identifier && node.callee.isTypeIdentifier()) {
          calleeType = scope.lookupType(node.callee.value).typeSymbol;
       }
@@ -356,6 +391,7 @@ export class TypeInferencer {
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
       ) {
+         this.context.builder.buildSquareArgsInRoundApply(node, scope);
          const squareArgs = node.autoFilledSquareParams;
 
          const calledArgs = squareArgs;
@@ -610,6 +646,8 @@ export class TypeInferencer {
          this.findReturns(node.right, thisScope, acc);
       } else if (node instanceof UnaryOperator) {
          this.findReturns(node.expression, thisScope, acc);
+      } else if (node instanceof Select) {
+         this.findReturns(node.owner, thisScope, acc);
       }
    }
 
@@ -632,11 +670,13 @@ export class TypeInferencer {
             (r) => r[1]
          );
          for (const [term, type] of allFoundReturnsInside) {
-            this.context.builder.buildVarTransformations(
-               term,
-               options.typeExpectedInPlace,
-               type
-            );
+            if (options.typeExpectedInPlace) {
+               this.context.builder.buildVarTransformations(
+                  term,
+                  options.typeExpectedInPlace,
+                  type
+               );
+            }
          }
          if (allFoundReturnsInside.length === 1) {
             const last = node.statements[node.statements.length - 1];
@@ -737,17 +777,35 @@ export class TypeInferencer {
    };
 
    inferBinaryExpression(node: BinaryExpression, scope: Scope): Type {
-      const leftType = this.infer(node.left, scope);
-      const rightType = this.infer(node.right, scope);
-      // Here, you would define the logic to determine the resulting type based on the operator
-      // For example, if the operator is '+', you might expect both operands to be of type 'Int'
+      let leftType = this.infer(node.left, scope);
+      let rightType = this.infer(node.right, scope);
+      let hasVar = false;
+
+      if (leftType instanceof MutableType) {
+         leftType = leftType.type;
+         // hasVar = true;
+      }
+
+      if (rightType instanceof MutableType) {
+         rightType = rightType.type;
+         // hasVar = true;
+      }
+
+      function make(type: Type) {
+         if (hasVar) {
+            return new MutableType(type);
+         } else {
+            return type;
+         }
+      }
+
       const Number = scope.lookupType("Number");
       const String = scope.lookupType("String");
       const Boolean = scope.lookupType("Boolean");
       if (leftType.isAssignableTo(String.typeSymbol, scope)) {
          const entry = this.DEFINED_OPERATIONS.StringAnyString;
          if (entry.includes(node.operator)) {
-            return String.typeSymbol;
+            return make(String.typeSymbol);
          }
       }
       if (node.operator === "?:") {
@@ -762,7 +820,7 @@ export class TypeInferencer {
       ) {
          const entry = this.DEFINED_OPERATIONS.NumberNumberNumber;
          if (entry.includes(node.operator)) {
-            return Number.typeSymbol;
+            return make(Number.typeSymbol);
          }
       }
       if (
@@ -771,7 +829,7 @@ export class TypeInferencer {
       ) {
          const entry = this.DEFINED_OPERATIONS.NumberNumberBoolean;
          if (entry.includes(node.operator)) {
-            return Boolean.typeSymbol;
+            return make(Boolean.typeSymbol);
          }
       }
 
@@ -781,7 +839,7 @@ export class TypeInferencer {
       ) {
          const entry = this.DEFINED_OPERATIONS.BooleanBooleanBoolean;
          if (entry.includes(node.operator)) {
-            return Boolean.typeSymbol;
+            return make(Boolean.typeSymbol);
          }
       }
 
@@ -796,8 +854,18 @@ export class TypeInferencer {
          return new BinaryOpType(leftType, "|", rightType);
       }
 
+      if (node.operator === "copy") {
+         return leftType;
+      }
+
       // Return a BinaryOpType if types are not directly inferrable
-      return new BinaryOpType(leftType, node.operator, rightType);
+      this.context.errors.add(
+         "Operation " + node.operator + " not supported.",
+         undefined,
+         undefined,
+         node.position
+      );
+      return make(new BinaryOpType(leftType, node.operator, rightType));
    }
 
    // inferRoundTypeToTypeLambda(node: RoundTypeToTypeLambda, scope: Scope) {

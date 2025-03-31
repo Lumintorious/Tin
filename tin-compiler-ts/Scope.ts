@@ -288,8 +288,13 @@ export class Scope {
       );
    }
 
-   hasSymbol(name: string): boolean {
-      return this.symbols.has(name) || (this.parent?.hasSymbol(name) ?? false);
+   hasSymbol(name: string, stopAtScope?: Scope): boolean {
+      return (
+         this.symbols.has(name) ||
+         (this.parent?.id === stopAtScope?.id
+            ? false
+            : this.parent?.hasSymbol(name, stopAtScope) ?? false)
+      );
    }
 
    hasTypeSymbol(name: string): boolean {
@@ -515,6 +520,7 @@ export type RecursiveResolutionOptions = {
    typeExpectedAsOwner?: Type;
    assignedName?: string;
    isTypeLevel?: boolean;
+   isWithinCopyStructure?: boolean;
 };
 
 export class CompilerFlags {

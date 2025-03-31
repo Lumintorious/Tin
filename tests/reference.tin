@@ -8,7 +8,7 @@ same = 1, line = 2
 String@anything = "Works"
 
 # Mutation
-m = 1
+m = var 1
 set m = 1 # 'm = 1' won't work
 
 # Operations
@@ -20,7 +20,7 @@ number: Number = 1
 string: String = "str"
 boolean: Boolean = false
 empty: Nothing = nothing # keyword
-any: Anything = "str"
+anyStr: Anything = "str"
 
 # Optional
 maybeFull: Number? = 10
@@ -55,11 +55,11 @@ while i < 3,
 	print(i)
 
 # Data
-Cat = type:
+Cat = data:
 	name: String
 	age: Number = 1
 
-Mech = type:
+Mech = data:
 	name: String
 	version: Number
 

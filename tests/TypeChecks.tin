@@ -1,4 +1,4 @@
-Tp = type:
+Tp = data:
 	value: String
 
 a = 1

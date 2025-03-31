@@ -7,6 +7,7 @@ import {
    AppliedKeyword,
    UnaryOperator,
    Cast,
+   Group,
 } from "./Parser";
 import {
    SquareTypeToTypeLambda,
@@ -295,13 +296,19 @@ export class TypeChecker {
             }
          });
       } else if (node instanceof BinaryExpression) {
-         this.typeCheck(node.left, scope);
+         this.typeCheck(node.left, scope, {
+            isWithinCopyStructure: options.isWithinCopyStructure,
+         });
          const leftType = this.context.inferencer.infer(node.left, scope);
          this.typeCheck(node.right, scope, {
             firstPartOfIntersection: leftType,
+            isWithinCopyStructure:
+               options.isWithinCopyStructure || node.operator === "copy",
          });
       } else if (node instanceof Select) {
          this.typeCheck(node.owner, scope);
+      } else if (node instanceof UnaryOperator) {
+         this.typeCheck(node.expression, scope);
       }
    }
 
@@ -586,12 +593,9 @@ export class TypeChecker {
                typeExpectedInPlace: calleeType,
                firstPartOfIntersection: options.firstPartOfIntersection,
             },
-            (options?.firstPartOfIntersection?.isAssignableTo(
-               typeSymbol.returnType,
-               scope
-            ) &&
-               apply.callee instanceof Identifier) ||
-               false
+            options?.isWithinCopyStructure === true &&
+               apply.callee instanceof Identifier &&
+               apply.callee.isTypeIdentifier()
          );
          apply.paramOrder = paramOrder;
       }
@@ -662,7 +666,11 @@ export class TypeChecker {
             node.field,
             scope
          );
-         if (field && field.mutable) {
+         if (
+            onlyCaptures &&
+            field &&
+            (field.mutable || field.type instanceof MutableType)
+         ) {
             result.push([
                "Using outside mutable value '" + node.show() + "'",
                node,
@@ -721,8 +729,10 @@ export class TypeChecker {
          if (symbol.isMutable && onlyCaptures) {
             return [["Variable value '" + node.value + "' present", node]];
          } else {
-            [];
+            return [];
          }
+      } else if (node instanceof Group) {
+         return this.findEffects(node.value, onlyCaptures, scope);
       }
 
       return [];
@@ -748,16 +758,18 @@ export class TypeChecker {
       if (thisParam && !(term.callee instanceof Select)) {
          checkedThis = true;
          if (!options.firstPartOfIntersection) {
-            this.context.errors.add(
-               "Previous part of intersection (&), parameter 'this' of '" +
-                  (term.callee instanceof Identifier
-                     ? term.callee.value
-                     : "Anonymous function") +
-                  "'",
-               thisParam.type,
-               undefined,
-               term.position
-            );
+            if (!term.bakedInThis) {
+               this.context.errors.add(
+                  "Previous part of intersection (&), parameter 'this' of '" +
+                     (term.callee instanceof Identifier
+                        ? term.callee.value
+                        : "Anonymous function") +
+                     "'",
+                  thisParam.type,
+                  undefined,
+                  term.position
+               );
+            }
          } else {
             if (
                !options.firstPartOfIntersection.isAssignableTo(

@@ -1,2118 +1,2698 @@
-id: 329
+id: 330
 tag: Block
+varTypeInInvarPlace: false
+invarTypeInVarPlace: false
+skipReturn: false
 statements:
-   - id: 2
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 0
-        tag: Identifier
-        value: v
-     value:
-        id: 1
-        tag: Literal
-        type: Number
-        value: 1
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 2
-           column: 1
-           absolute: 17
-        end:
-           line: 3
-           column: 1
-           absolute: 23
-   - id: 7
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 3
-        tag: Identifier
-        value: vv
-     value:
-        id: 6
-        tag: Literal
-        type: Number
-        value: 1.1
-     type:
-        id: 4
-        tag: Identifier
-        value: Number
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 3
-           column: 1
-           absolute: 25
-        end:
-           line: 4
-           column: 1
-           absolute: 41
-   - id: 14
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 8
-        tag: Identifier
-        value: s
-     value:
-        id: 13
+  - id: 2
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 0
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: v
+    value:
+      id: 1
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 1
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 2
+        column: 1
+        absolute: 17
+      end:
+        line: 3
+        column: 3
+        absolute: 25
+  - id: 7
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 3
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: vv
+    value:
+      id: 6
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 1.1
+    type:
+      id: 4
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Number
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 3
+        column: 1
+        absolute: 25
+      end:
+        line: 4
+        column: 2
+        absolute: 42
+  - id: 14
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 8
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: s
+    value:
+      id: 13
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 11
         tag: BinaryExpression
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
         left:
-           id: 11
-           tag: BinaryExpression
-           left:
-              id: 9
-              tag: Literal
-              type: String
-              value: string, can be spliced like
-           operator: +
-           right:
-              id: 10
-              tag: Identifier
-              value: v
+          id: 9
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: String
+          value: string, can be spliced like 
         operator: +
         right:
-           id: 12
-           tag: Literal
-           type: String
-           value:
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 4
-           column: 1
-           absolute: 42
-        end:
-           line: 5
-           column: 1
-           absolute: 80
-   - id: 17
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 15
-        tag: Identifier
-        value: same
-     value:
-        id: 16
+          id: 10
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: v
+      operator: +
+      right:
+        id: 12
         tag: Literal
-        type: Number
-        value: 1
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 5
-           column: 1
-           absolute: 84
-        end:
-           line: 5
-           column: 10
-           absolute: 89
-   - id: 20
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 18
-        tag: Identifier
-        value: line
-     value:
-        id: 19
-        tag: Literal
-        type: Number
-        value: 2
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 5
-           column: 11
-           absolute: 94
-        end:
-           line: 7
-           column: 1
-           absolute: 102
-   - id: 23
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 21
-        tag: Identifier
-        value: String@anything
-     value:
-        id: 22
-        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
         type: String
-        value: Works
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 8
-           column: 1
-           absolute: 159
-        end:
-           line: 10
-           column: 1
-           absolute: 173
-   - id: 26
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 24
-        tag: Identifier
-        value: m
-     value:
+        value: 
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 4
+        column: 1
+        absolute: 42
+      end:
+        line: 5
+        column: 5
+        absolute: 84
+  - id: 17
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 15
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: same
+    value:
+      id: 16
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 1
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 5
+        column: 1
+        absolute: 84
+      end:
+        line: 5
+        column: 10
+        absolute: 89
+  - id: 20
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 18
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: line
+    value:
+      id: 19
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 2
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 5
+        column: 11
+        absolute: 94
+      end:
+        line: 8
+        column: 16
+        absolute: 159
+  - id: 23
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 21
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: String@anything
+    value:
+      id: 22
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: Works
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 8
+        column: 1
+        absolute: 159
+      end:
+        line: 11
+        column: 2
+        absolute: 186
+  - id: 27
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 24
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: m
+    value:
+      id: 26
+      tag: UnaryOperator
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      operator: var
+      expression:
         id: 25
         tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
         type: Number
         value: 1
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 11
-           column: 1
-           absolute: 186
-        end:
-           line: 12
-           column: 1
-           absolute: 192
-   - id: 30
-     tag: Change
-     lhs:
-        id: 27
-        tag: Identifier
-        value: m
-     value:
-        id: 28
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 11
+        column: 1
+        absolute: 186
+      end:
+        line: 12
+        column: 4
+        absolute: 199
+  - id: 31
+    tag: Change
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    lhs:
+      id: 28
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: m
+    value:
+      id: 29
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 1
+    position:
+      start:
+        line: 12
+        column: 1
+        absolute: 199
+      end:
+        line: 15
+        column: 2
+        absolute: 245
+  - id: 36
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 32
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: x
+    value:
+      id: 35
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 33
         tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
         type: Number
         value: 1
-     position:
-        start:
-           line: 12
-           column: 1
-           absolute: 195
-        end:
-           line: 14
-           column: 1
-           absolute: 226
-   - id: 35
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 31
-        tag: Identifier
-        value: x
-     value:
+      operator: +
+      right:
         id: 34
-        tag: BinaryExpression
-        left:
-           id: 32
-           tag: Literal
-           type: Number
-           value: 1
-        operator: +
-        right:
-           id: 33
-           tag: Literal
-           type: Number
-           value: 2
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 15
-           column: 1
-           absolute: 241
-        end:
-           line: 16
-           column: 1
-           absolute: 251
-   - id: 40
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 36
-        tag: Identifier
-        value: y
-     value:
+        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
+        type: Number
+        value: 2
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 15
+        column: 1
+        absolute: 245
+      end:
+        line: 16
+        column: 2
+        absolute: 256
+  - id: 41
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 37
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: y
+    value:
+      id: 40
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 38
+        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
+        type: Number
+        value: 12
+      operator: /
+      right:
         id: 39
-        tag: BinaryExpression
-        left:
-           id: 37
-           tag: Literal
-           type: Number
-           value: 12
-        operator: /
-        right:
-           id: 38
-           tag: Literal
-           type: Number
-           value: 3
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 16
-           column: 1
-           absolute: 252
-        end:
-           line: 18
-           column: 1
-           absolute: 265
-   - id: 45
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 41
-        tag: Identifier
-        value: number
-     value:
-        id: 44
         tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
         type: Number
-        value: 1
-     type:
-        id: 42
-        tag: Identifier
-        value: Number
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 19
-           column: 1
-           absolute: 285
-        end:
-           line: 20
-           column: 1
-           absolute: 299
-   - id: 50
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 46
-        tag: Identifier
-        value: string
-     value:
-        id: 49
-        tag: Literal
-        type: String
-        value: str
-     type:
-        id: 47
-        tag: Identifier
-        value: String
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 20
-           column: 1
-           absolute: 305
-        end:
-           line: 21
-           column: 1
-           absolute: 323
-   - id: 55
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 51
-        tag: Identifier
-        value: boolean
-     value:
-        id: 54
-        tag: Literal
-        type: Boolean
-        value: false
-     type:
-        id: 52
-        tag: Identifier
-        value: Boolean
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 21
-           column: 1
-           absolute: 330
-        end:
-           line: 22
-           column: 1
-           absolute: 349
-   - id: 60
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 56
-        tag: Identifier
-        value: empty
-     value:
-        id: 59
-        tag: Identifier
-        value: nothing
-     type:
-        id: 57
-        tag: Identifier
-        value: Nothing
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 22
-           column: 1
-           absolute: 354
-        end:
-           line: 23
-           column: 1
-           absolute: 385
-   - id: 65
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 61
-        tag: Identifier
-        value: any
-     value:
-        id: 64
-        tag: Literal
-        type: String
-        value: str
-     type:
-        id: 62
-        tag: Identifier
-        value: Anything
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 23
-           column: 1
-           absolute: 388
-        end:
-           line: 25
-           column: 1
-           absolute: 405
-   - id: 71
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 66
-        tag: Identifier
-        value: maybeFull
-     value:
-        id: 70
-        tag: Literal
-        type: Number
-        value: 10
-     type:
+        value: 3
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 16
+        column: 1
+        absolute: 256
+      end:
+        line: 19
+        column: 7
+        absolute: 289
+  - id: 46
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 42
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: number
+    value:
+      id: 45
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 1
+    type:
+      id: 43
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Number
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 19
+        column: 1
+        absolute: 289
+      end:
+        line: 20
+        column: 7
+        absolute: 309
+  - id: 51
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 47
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: string
+    value:
+      id: 50
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: str
+    type:
+      id: 48
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: String
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 20
+        column: 1
+        absolute: 309
+      end:
+        line: 21
+        column: 8
+        absolute: 334
+  - id: 56
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 52
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: boolean
+    value:
+      id: 55
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Boolean
+      value: false
+    type:
+      id: 53
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Boolean
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 21
+        column: 1
+        absolute: 334
+      end:
+        line: 22
+        column: 6
+        absolute: 358
+  - id: 61
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 57
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: empty
+    value:
+      id: 60
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: nothing
+    type:
+      id: 58
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Nothing
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 22
+        column: 1
+        absolute: 358
+      end:
+        line: 23
+        column: 7
+        absolute: 395
+  - id: 66
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 62
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: anyStr
+    value:
+      id: 65
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: str
+    type:
+      id: 63
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Anything
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 23
+        column: 1
+        absolute: 395
+      end:
+        line: 26
+        column: 10
+        absolute: 438
+  - id: 72
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 67
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: maybeFull
+    value:
+      id: 71
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 10
+    type:
+      id: 69
+      tag: Optional
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      doubleQuestionMark: false
+      expression:
         id: 68
-        tag: Optional
-        doubleQuestionMark: false
-        expression:
-           id: 67
-           tag: Identifier
-           value: Number
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 26
-           column: 1
-           absolute: 426
-        end:
-           line: 27
-           column: 1
-           absolute: 442
-   - id: 77
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 72
         tag: Identifier
-        value: maybeEmpty
-     value:
-        id: 76
-        tag: Identifier
-        value: nothing
-     type:
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Number
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 26
+        column: 1
+        absolute: 438
+      end:
+        line: 27
+        column: 11
+        absolute: 464
+  - id: 78
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 73
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: maybeEmpty
+    value:
+      id: 77
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: nothing
+    type:
+      id: 75
+      tag: Optional
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      doubleQuestionMark: false
+      expression:
         id: 74
-        tag: Optional
-        doubleQuestionMark: false
-        expression:
-           id: 73
-           tag: Identifier
-           value: Number
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 27
-           column: 1
-           absolute: 452
-        end:
-           line: 29
-           column: 1
-           absolute: 475
-   - id: 89
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 78
         tag: Identifier
-        value: f
-     value:
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Number
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 27
+        column: 1
+        absolute: 464
+      end:
+        line: 30
+        column: 2
+        absolute: 499
+  - id: 90
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 79
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: f
+    value:
+      id: 89
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 83
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 80
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: n
+          type:
+            id: 81
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 30
+              column: 6
+              absolute: 504
+            end:
+              line: 30
+              column: 16
+              absolute: 513
+      block:
         id: 88
-        tag: RoundValueToValueLambda
-        params:
-           - id: 82
-             tag: Assignment
-             isMutable: false
-             isParameter: true
-             lhs:
-                id: 79
-                tag: Identifier
-                value: n
-             type:
-                id: 80
-                tag: Identifier
-                value: Number
-             isDeclaration: false
-             isTypeLevel: false
-             position:
-                start:
-                   line: 30
-                   column: 6
-                   absolute: 492
-                end:
-                   line: 30
-                   column: 16
-                   absolute: 501
-        block:
-           id: 87
-           tag: Block
-           statements:
-              - id: 86
-                tag: BinaryExpression
-                left:
-                   id: 84
-                   tag: Identifier
-                   value: n
-                operator: +
-                right:
-                   id: 85
-                   tag: Literal
-                   type: Number
-                   value: 1
-                position:
-                   start:
-                      line: 30
-                      column: 20
-                      absolute: 506
-                   end:
-                      line: 31
-                      column: 1
-                      absolute: 512
-        explicitType: undefined
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 30
-           column: 1
-           absolute: 487
-        end:
-           line: 31
-           column: 1
-           absolute: 512
-   - id: 101
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 90
-        tag: Identifier
-        value: ff
-     value:
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 87
+            tag: BinaryExpression
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            left:
+              id: 85
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: n
+            operator: +
+            right:
+              id: 86
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: Number
+              value: 1
+            position:
+              start:
+                line: 30
+                column: 20
+                absolute: 518
+              end:
+                line: 31
+                column: 3
+                absolute: 526
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 30
+        column: 1
+        absolute: 499
+      end:
+        line: 31
+        column: 3
+        absolute: 526
+  - id: 102
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 91
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: ff
+    value:
+      id: 101
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 95
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 92
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: n
+          type:
+            id: 93
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 31
+              column: 7
+              absolute: 531
+            end:
+              line: 31
+              column: 17
+              absolute: 540
+      block:
         id: 100
-        tag: RoundValueToValueLambda
-        params:
-           - id: 94
-             tag: Assignment
-             isMutable: false
-             isParameter: true
-             lhs:
-                id: 91
-                tag: Identifier
-                value: n
-             type:
-                id: 92
-                tag: Identifier
-                value: Number
-             isDeclaration: false
-             isTypeLevel: false
-             position:
-                start:
-                   line: 31
-                   column: 7
-                   absolute: 519
-                end:
-                   line: 31
-                   column: 17
-                   absolute: 528
-        block:
-           id: 99
-           tag: Block
-           statements:
-              - id: 98
-                tag: BinaryExpression
-                left:
-                   id: 96
-                   tag: Identifier
-                   value: n
-                operator: +
-                right:
-                   id: 97
-                   tag: Literal
-                   type: Number
-                   value: 2
-                position:
-                   start:
-                      line: 32
-                      column: 2
-                      absolute: 535
-                   end:
-                      line: 34
-                      column: 1
-                      absolute: 543
-        explicitType: undefined
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 31
-           column: 1
-           absolute: 514
-        end:
-           line: 35
-           column: 6
-           absolute: 564
-   - id: 104
-     tag: RoundApply
-     calledInsteadOfSquare: false
-     paramOrder:
-     isFirstParamThis: false
-     isAnObjectCopy: false
-     callee:
-        id: 102
-        tag: Identifier
-        value: print
-     args:
-        0:
-           -
-           - id: 103
-             tag: Literal
-             type: String
-             value: Hello World
-             position:
-                start:
-                   line: 35
-                   column: 7
-                   absolute: 578
-                end:
-                   line: 35
-                   column: 21
-                   absolute: 579
-     position:
-        start:
-           line: 35
-           column: 1
-           absolute: 564
-        end:
-           line: 37
-           column: 1
-           absolute: 583
-   - id: 112
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 105
-        tag: Identifier
-        value: F
-     value:
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 99
+            tag: BinaryExpression
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            left:
+              id: 97
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: n
+            operator: +
+            right:
+              id: 98
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: Number
+              value: 2
+            position:
+              start:
+                line: 32
+                column: 2
+                absolute: 547
+              end:
+                line: 35
+                column: 1
+                absolute: 571
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 31
+        column: 1
+        absolute: 526
+      end:
+        line: 35
+        column: 6
+        absolute: 576
+  - id: 105
+    tag: RoundApply
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 103
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: print
+    args:
+      0:
+        - 
+        - id: 104
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: String
+          value: Hello World
+          position:
+            start:
+              line: 35
+              column: 7
+              absolute: 590
+            end:
+              line: 35
+              column: 21
+              absolute: 591
+    position:
+      start:
+        line: 35
+        column: 1
+        absolute: 576
+      end:
+        line: 38
+        column: 2
+        absolute: 612
+  - id: 113
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 106
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: F
+    value:
+      id: 112
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 108
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 107
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          isDeclaration: false
+          isTypeLevel: true
+          position:
+            start:
+              line: 38
+              column: 6
+              absolute: 622
+            end:
+              line: 38
+              column: 13
+              absolute: 623
+      block:
         id: 111
-        tag: RoundValueToValueLambda
-        params:
-           - id: 107
-             tag: Assignment
-             isMutable: false
-             isParameter: true
-             lhs:
-                id: 106
-                tag: Identifier
-                value: Number
-             isDeclaration: false
-             isTypeLevel: true
-             position:
-                start:
-                   line: 38
-                   column: 6
-                   absolute: 610
-                end:
-                   line: 38
-                   column: 13
-                   absolute: 611
-        block:
-           id: 110
-           tag: Block
-           statements:
-              - id: 109
-                tag: Identifier
-                value: Number
-                position:
-                   start:
-                      line: 38
-                      column: 17
-                      absolute: 621
-                   end:
-                      line: 39
-                      column: 1
-                      absolute: 623
-        explicitType: undefined
-     isDeclaration: true
-     isTypeLevel: true
-     position:
-        start:
-           line: 38
-           column: 1
-           absolute: 600
-        end:
-           line: 39
-           column: 1
-           absolute: 623
-   - id: 127
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 113
-        tag: Identifier
-        value: FNamed
-     value:
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 110
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+            position:
+              start:
+                line: 38
+                column: 17
+                absolute: 633
+              end:
+                line: 39
+                column: 7
+                absolute: 641
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 38
+        column: 1
+        absolute: 612
+      end:
+        line: 39
+        column: 7
+        absolute: 641
+  - id: 128
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 114
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: FNamed
+    value:
+      id: 127
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 118
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 115
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: first
+          type:
+            id: 116
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 39
+              column: 11
+              absolute: 650
+            end:
+              line: 39
+              column: 25
+              absolute: 659
+        - id: 123
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 120
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: second
+          type:
+            id: 121
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 39
+              column: 26
+              absolute: 666
+            end:
+              line: 39
+              column: 41
+              absolute: 675
+      block:
         id: 126
-        tag: RoundValueToValueLambda
-        params:
-           - id: 117
-             tag: Assignment
-             isMutable: false
-             isParameter: true
-             lhs:
-                id: 114
-                tag: Identifier
-                value: first
-             type:
-                id: 115
-                tag: Identifier
-                value: Number
-             isDeclaration: false
-             isTypeLevel: false
-             position:
-                start:
-                   line: 39
-                   column: 11
-                   absolute: 638
-                end:
-                   line: 39
-                   column: 25
-                   absolute: 647
-           - id: 122
-             tag: Assignment
-             isMutable: false
-             isParameter: true
-             lhs:
-                id: 119
-                tag: Identifier
-                value: second
-             type:
-                id: 120
-                tag: Identifier
-                value: Number
-             isDeclaration: false
-             isTypeLevel: false
-             position:
-                start:
-                   line: 39
-                   column: 26
-                   absolute: 654
-                end:
-                   line: 39
-                   column: 41
-                   absolute: 663
-        block:
-           id: 125
-           tag: Block
-           statements:
-              - id: 124
-                tag: Identifier
-                value: Number
-                position:
-                   start:
-                      line: 39
-                      column: 45
-                      absolute: 673
-                   end:
-                      line: 41
-                      column: 1
-                      absolute: 677
-        explicitType: undefined
-     isDeclaration: true
-     isTypeLevel: true
-     position:
-        start:
-           line: 39
-           column: 1
-           absolute: 629
-        end:
-           line: 41
-           column: 1
-           absolute: 677
-   - id: 130
-     tag: RoundApply
-     calledInsteadOfSquare: false
-     paramOrder:
-     isFirstParamThis: false
-     isAnObjectCopy: false
-     callee:
-        id: 128
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 125
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+            position:
+              start:
+                line: 39
+                column: 45
+                absolute: 685
+              end:
+                line: 42
+                column: 2
+                absolute: 712
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 39
+        column: 1
+        absolute: 641
+      end:
+        line: 42
+        column: 2
+        absolute: 712
+  - id: 131
+    tag: RoundApply
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 129
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: f
+    args:
+      0:
+        - n
+        - id: 130
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 24
+          position:
+            start:
+              line: 42
+              column: 7
+              absolute: 719
+            end:
+              line: 42
+              column: 10
+              absolute: 720
+    position:
+      start:
+        line: 42
+        column: 1
+        absolute: 712
+      end:
+        line: 45
+        column: 3
+        absolute: 732
+  - id: 143
+    tag: IfStatement
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    condition:
+      id: 134
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 132
         tag: Identifier
-        value: f
-     args:
-        0:
-           - n
-           - id: 129
-             tag: Literal
-             type: Number
-             value: 24
-             position:
-                start:
-                   line: 42
-                   column: 7
-                   absolute: 707
-                end:
-                   line: 42
-                   column: 10
-                   absolute: 708
-     position:
-        start:
-           line: 42
-           column: 1
-           absolute: 700
-        end:
-           line: 44
-           column: 1
-           absolute: 712
-   - id: 142
-     tag: IfStatement
-     condition:
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: v
+      operator: >
+      right:
         id: 133
+        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
+        type: Number
+        value: 0
+    trueBranch:
+      id: 138
+      tag: Block
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      skipReturn: false
+      statements:
+        - id: 137
+          tag: RoundApply
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 135
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: print
+          args:
+            0:
+              - 
+              - id: 136
+                tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
+                type: String
+                value: Works
+                position:
+                  start:
+                    line: 46
+                    column: 8
+                    absolute: 755
+                  end:
+                    line: 46
+                    column: 16
+                    absolute: 756
+          position:
+            start:
+              line: 46
+              column: 2
+              absolute: 747
+            end:
+              line: 47
+              column: 1
+              absolute: 758
+    falseBranch:
+      id: 142
+      tag: Block
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      skipReturn: false
+      statements:
+        - id: 141
+          tag: RoundApply
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 139
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: print
+          args:
+            0:
+              - 
+              - id: 140
+                tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
+                type: String
+                value: Doesn't work
+                position:
+                  start:
+                    line: 48
+                    column: 8
+                    absolute: 785
+                  end:
+                    line: 48
+                    column: 23
+                    absolute: 786
+          position:
+            start:
+              line: 48
+              column: 2
+              absolute: 770
+            end:
+              line: 50
+              column: 1
+              absolute: 790
+    position:
+      start:
+        line: 45
+        column: 1
+        absolute: 732
+      end:
+        line: 50
+        column: 7
+        absolute: 796
+  - id: 153
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 144
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: ifelse
+    value:
+      id: 152
+      tag: IfStatement
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      condition:
+        id: 149
         tag: BinaryExpression
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
         left:
-           id: 131
-           tag: Identifier
-           value: v
+          id: 147
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: v
         operator: >
         right:
-           id: 132
-           tag: Literal
-           type: Number
-           value: 0
-     trueBranch:
-        id: 137
-        tag: Block
-        statements:
-           - id: 136
-             tag: RoundApply
-             calledInsteadOfSquare: false
-             paramOrder:
-             isFirstParamThis: false
-             isAnObjectCopy: false
-             callee:
-                id: 134
-                tag: Identifier
-                value: print
-             args:
-                0:
-                   -
-                   - id: 135
-                     tag: Literal
-                     type: String
-                     value: Works
-                     position:
-                        start:
-                           line: 46
-                           column: 8
-                           absolute: 743
-                        end:
-                           line: 46
-                           column: 16
-                           absolute: 744
-             position:
-                start:
-                   line: 46
-                   column: 2
-                   absolute: 735
-                end:
-                   line: 47
-                   column: 1
-                   absolute: 746
-     falseBranch:
-        id: 141
-        tag: Block
-        statements:
-           - id: 140
-             tag: RoundApply
-             calledInsteadOfSquare: false
-             paramOrder:
-             isFirstParamThis: false
-             isAnObjectCopy: false
-             callee:
-                id: 138
-                tag: Identifier
-                value: print
-             args:
-                0:
-                   -
-                   - id: 139
-                     tag: Literal
-                     type: String
-                     value: Doesn't work
-                     position:
-                        start:
-                           line: 48
-                           column: 8
-                           absolute: 773
-                        end:
-                           line: 48
-                           column: 23
-                           absolute: 774
-             position:
-                start:
-                   line: 48
-                   column: 2
-                   absolute: 758
-                end:
-                   line: 50
-                   column: 1
-                   absolute: 778
-     position:
-        start:
-           line: 45
-           column: 1
-           absolute: 720
-        end:
-           line: 50
-           column: 7
-           absolute: 784
-   - id: 152
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 143
-        tag: Identifier
-        value: ifelse
-     value:
+          id: 148
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 0
+      trueBranch:
+        id: 150
+        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
+        type: Number
+        value: 1
+      falseBranch:
         id: 151
-        tag: IfStatement
-        condition:
-           id: 148
-           tag: BinaryExpression
-           left:
-              id: 146
-              tag: Identifier
-              value: v
-           operator: >
-           right:
-              id: 147
-              tag: Literal
-              type: Number
-              value: 0
-        trueBranch:
-           id: 149
-           tag: Literal
-           type: Number
-           value: 1
-        falseBranch:
-           id: 150
-           tag: Literal
-           type: Number
-           value: 2
-     type:
-        id: 144
+        tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
+        type: Number
+        value: 2
+    type:
+      id: 145
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Number
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 50
+        column: 1
+        absolute: 796
+      end:
+        line: 53
+        column: 2
+        absolute: 864
+  - id: 156
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 154
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: i
+    value:
+      id: 155
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 0
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 53
+        column: 1
+        absolute: 864
+      end:
+        line: 54
+        column: 6
+        absolute: 875
+  - id: 164
+    tag: WhileLoop
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    condition:
+      id: 159
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 157
         tag: Identifier
-        value: Number
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 50
-           column: 1
-           absolute: 784
-        end:
-           line: 52
-           column: 1
-           absolute: 842
-   - id: 155
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 153
-        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
         value: i
-     value:
-        id: 154
-        tag: Literal
-        type: Number
-        value: 0
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 53
-           column: 1
-           absolute: 852
-        end:
-           line: 54
-           column: 1
-           absolute: 858
-   - id: 163
-     tag: WhileLoop
-     condition:
+      operator: <
+      right:
         id: 158
-        tag: BinaryExpression
-        left:
-           id: 156
-           tag: Identifier
-           value: i
-        operator: <
-        right:
-           id: 157
-           tag: Literal
-           type: Number
-           value: 3
-     action:
-        id: 162
-        tag: Block
-        statements:
-           - id: 161
-             tag: RoundApply
-             calledInsteadOfSquare: false
-             paramOrder:
-             isFirstParamThis: false
-             isAnObjectCopy: false
-             callee:
-                id: 159
-                tag: Identifier
-                value: print
-             args:
-                0:
-                   -
-                   - id: 160
-                     tag: Identifier
-                     value: i
-                     position:
-                        start:
-                           line: 55
-                           column: 8
-                           absolute: 880
-                        end:
-                           line: 55
-                           column: 10
-                           absolute: 881
-             position:
-                start:
-                   line: 55
-                   column: 2
-                   absolute: 878
-                end:
-                   line: 57
-                   column: 1
-                   absolute: 885
-     position:
-        start:
-           line: 54
-           column: 1
-           absolute: 863
-        end:
-           line: 58
-           column: 4
-           absolute: 896
-   - id: 177
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 164
-        tag: Identifier
-        value: Cat
-     value:
-        id: 176
-        tag: TypeDef
-        fieldDefs:
-           - id: 168
-             tag: FieldDef
-             name: name
-             type:
-                id: 166
-                tag: Identifier
-                value: String
-             isTypeLevel: true
-             position:
-                start:
-                   line: 60
-                   column: 1
-                   absolute: 921
-                end:
-                   line: 60
-                   column: 1
-                   absolute: 921
-           - id: 174
-             tag: FieldDef
-             name: age
-             type:
-                id: 170
-                tag: Identifier
-                value: Number
-             defaultValue:
-                id: 172
-                tag: Literal
-                type: Number
-                value: 1
-             isTypeLevel: true
-             position:
-                start:
-                   line: 62
-                   column: 1
-                   absolute: 941
-                end:
-                   line: 62
-                   column: 1
-                   absolute: 941
-     isDeclaration: true
-     isTypeLevel: true
-     position:
-        start:
-           line: 58
-           column: 1
-           absolute: 896
-        end:
-           line: 62
-           column: 5
-           absolute: 945
-   - id: 189
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 178
-        tag: Identifier
-        value: Mech
-     value:
-        id: 188
-        tag: TypeDef
-        fieldDefs:
-           - id: 182
-             tag: FieldDef
-             name: name
-             type:
-                id: 180
-                tag: Identifier
-                value: String
-             isTypeLevel: true
-             position:
-                start:
-                   line: 64
-                   column: 1
-                   absolute: 970
-                end:
-                   line: 64
-                   column: 1
-                   absolute: 970
-           - id: 186
-             tag: FieldDef
-             name: version
-             type:
-                id: 184
-                tag: Identifier
-                value: Number
-             isTypeLevel: true
-             position:
-                start:
-                   line: 66
-                   column: 1
-                   absolute: 990
-                end:
-                   line: 66
-                   column: 1
-                   absolute: 990
-     isDeclaration: true
-     isTypeLevel: true
-     position:
-        start:
-           line: 62
-           column: 1
-           absolute: 945
-        end:
-           line: 66
-           column: 5
-           absolute: 994
-   - id: 192
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 190
-        tag: Identifier
-        value: test
-     value:
-        id: 191
         tag: Literal
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        isTypeLiteral: false
         type: Number
-        value: 0
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 66
-           column: 1
-           absolute: 994
-        end:
-           line: 68
-           column: 1
-           absolute: 1023
-   - id: 198
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 193
+        value: 3
+    action:
+      id: 163
+      tag: Block
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      skipReturn: false
+      statements:
+        - id: 162
+          tag: RoundApply
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 160
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: print
+          args:
+            0:
+              - 
+              - id: 161
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: i
+                position:
+                  start:
+                    line: 55
+                    column: 8
+                    absolute: 892
+                  end:
+                    line: 55
+                    column: 10
+                    absolute: 893
+          position:
+            start:
+              line: 55
+              column: 2
+              absolute: 890
+            end:
+              line: 58
+              column: 1
+              absolute: 905
+    position:
+      start:
+        line: 54
+        column: 1
+        absolute: 875
+      end:
+        line: 58
+        column: 4
+        absolute: 908
+  - id: 178
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 165
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Cat
+    value:
+      id: 177
+      tag: TypeDef
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      fieldDefs:
+        - id: 169
+          tag: FieldDef
+          mutable: false
+          name: name
+          type:
+            id: 167
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 59
+              column: 2
+              absolute: 923
+            end:
+              line: 60
+              column: 5
+              absolute: 937
+        - id: 175
+          tag: FieldDef
+          mutable: false
+          name: age
+          type:
+            id: 171
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          defaultValue:
+            id: 173
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 1
+          isTypeLevel: true
+          position:
+            start:
+              line: 60
+              column: 2
+              absolute: 937
+            end:
+              line: 62
+              column: 1
+              absolute: 953
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 58
+        column: 1
+        absolute: 908
+      end:
+        line: 62
+        column: 5
+        absolute: 957
+  - id: 190
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 179
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Mech
+    value:
+      id: 189
+      tag: TypeDef
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      fieldDefs:
+        - id: 183
+          tag: FieldDef
+          mutable: false
+          name: name
+          type:
+            id: 181
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: String
+          isTypeLevel: true
+          position:
+            start:
+              line: 63
+              column: 2
+              absolute: 972
+            end:
+              line: 64
+              column: 9
+              absolute: 990
+        - id: 187
+          tag: FieldDef
+          mutable: false
+          name: version
+          type:
+            id: 185
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Number
+          isTypeLevel: true
+          position:
+            start:
+              line: 64
+              column: 2
+              absolute: 990
+            end:
+              line: 66
+              column: 1
+              absolute: 1002
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 62
+        column: 1
+        absolute: 957
+      end:
+        line: 66
+        column: 5
+        absolute: 1006
+  - id: 193
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 191
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: test
+    value:
+      id: 192
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Number
+      value: 0
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 66
+        column: 1
+        absolute: 1006
+      end:
+        line: 69
+        column: 6
+        absolute: 1056
+  - id: 199
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 194
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: kitty
+    value:
+      id: 198
+      tag: RoundApply
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      isAnObjectCopy: false
+      isCallingAConstructor: false
+      callee:
+        id: 195
         tag: Identifier
-        value: kitty
-     value:
-        id: 197
-        tag: RoundApply
-        calledInsteadOfSquare: false
-        paramOrder:
-        isFirstParamThis: false
-        isAnObjectCopy: false
-        callee:
-           id: 194
-           tag: Identifier
-           value: Cat
-        args:
-           - 0:
-             1:
-                id: 195
-                tag: Literal
-                type: String
-                value: Kitty
-           - 0:
-             1:
-                id: 196
-                tag: Literal
-                type: Number
-                value: 1
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 69
-           column: 1
-           absolute: 1044
-        end:
-           line: 70
-           column: 1
-           absolute: 1064
-   - id: 204
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 199
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Cat
+      args:
+        - 0: 
+          1:
+            id: 196
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: String
+            value: Kitty
+        - 0: 
+          1:
+            id: 197
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 1
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 69
+        column: 1
+        absolute: 1056
+      end:
+        line: 70
+        column: 5
+        absolute: 1080
+  - id: 205
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 200
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: mech
+    value:
+      id: 204
+      tag: RoundApply
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      isAnObjectCopy: false
+      isCallingAConstructor: false
+      callee:
+        id: 201
         tag: Identifier
-        value: mech
-     value:
-        id: 203
-        tag: RoundApply
-        calledInsteadOfSquare: false
-        paramOrder:
-        isFirstParamThis: false
-        isAnObjectCopy: false
-        callee:
-           id: 200
-           tag: Identifier
-           value: Mech
-        args:
-           - 0:
-             1:
-                id: 201
-                tag: Literal
-                type: String
-                value: Iodized Steel
-           - 0:
-             1:
-                id: 202
-                tag: Literal
-                type: Number
-                value: 3
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 70
-           column: 1
-           absolute: 1068
-        end:
-           line: 72
-           column: 1
-           absolute: 1101
-   - id: 207
-     tag: Select
-     ammortized: false
-     owner:
-        id: 205
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Mech
+      args:
+        - 0: 
+          1:
+            id: 202
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: String
+            value: Iodized Steel
+        - 0: 
+          1:
+            id: 203
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 3
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 70
+        column: 1
+        absolute: 1080
+      end:
+        line: 73
+        column: 6
+        absolute: 1128
+  - id: 208
+    tag: Select
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    ammortized: false
+    owner:
+      id: 206
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: kitty
+    field: name
+    position:
+      start:
+        line: 73
+        column: 1
+        absolute: 1128
+      end:
+        line: 74
+        column: 5
+        absolute: 1139
+  - id: 211
+    tag: Select
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    ammortized: false
+    owner:
+      id: 209
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: mech
+    field: version
+    position:
+      start:
+        line: 74
+        column: 1
+        absolute: 1139
+      end:
+        line: 77
+        column: 9
+        absolute: 1177
+  - id: 216
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 212
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: MechaCat
+    value:
+      id: 215
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 213
         tag: Identifier
-        value: kitty
-     field: name
-     position:
-        start:
-           line: 73
-           column: 1
-           absolute: 1116
-        end:
-           line: 74
-           column: 1
-           absolute: 1123
-   - id: 210
-     tag: Select
-     ammortized: false
-     owner:
-        id: 208
-        tag: Identifier
-        value: mech
-     field: version
-     position:
-        start:
-           line: 74
-           column: 1
-           absolute: 1127
-        end:
-           line: 76
-           column: 1
-           absolute: 1139
-   - id: 215
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 211
-        tag: Identifier
-        value: MechaCat
-     value:
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Mech
+      operator: &
+      right:
         id: 214
-        tag: BinaryExpression
-        left:
-           id: 212
-           tag: Identifier
-           value: Mech
-        operator: &
-        right:
-           id: 213
-           tag: Identifier
-           value: Cat
-     isDeclaration: true
-     isTypeLevel: true
-     position:
-        start:
-           line: 77
-           column: 1
-           absolute: 1165
-        end:
-           line: 78
-           column: 1
-           absolute: 1180
-   - id: 220
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 216
         tag: Identifier
-        value: MechOrCat
-     value:
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Cat
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 77
+        column: 1
+        absolute: 1177
+      end:
+        line: 78
+        column: 10
+        absolute: 1201
+  - id: 221
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 217
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: MechOrCat
+    value:
+      id: 220
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 218
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Mech
+      operator: |
+      right:
         id: 219
-        tag: BinaryExpression
-        left:
-           id: 217
-           tag: Identifier
-           value: Mech
-        operator: |
-        right:
-           id: 218
-           tag: Identifier
-           value: Cat
-     isDeclaration: true
-     isTypeLevel: true
-     position:
-        start:
-           line: 78
-           column: 1
-           absolute: 1189
-        end:
-           line: 80
-           column: 1
-           absolute: 1206
-   - id: 231
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 221
         tag: Identifier
-        value: mechaCat
-     value:
-        id: 230
-        tag: BinaryExpression
-        left:
-           id: 225
-           tag: RoundApply
-           calledInsteadOfSquare: false
-           paramOrder:
-           isFirstParamThis: false
-           isAnObjectCopy: false
-           callee:
-              id: 222
-              tag: Identifier
-              value: Cat
-           args:
-              - 0:
-                1:
-                   id: 223
-                   tag: Literal
-                   type: String
-                   value: MechaCat
-              - 0:
-                1:
-                   id: 224
-                   tag: Literal
-                   type: Number
-                   value: 10
-        operator: &
-        right:
-           id: 229
-           tag: RoundApply
-           calledInsteadOfSquare: false
-           paramOrder:
-           isFirstParamThis: false
-           isAnObjectCopy: false
-           callee:
-              id: 226
-              tag: Identifier
-              value: Mech
-           args:
-              - 0:
-                1:
-                   id: 227
-                   tag: Literal
-                   type: String
-                   value: Oxidized Copper
-              - 0:
-                1:
-                   id: 228
-                   tag: Literal
-                   type: Number
-                   value: 1.4
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 81
-           column: 1
-           absolute: 1235
-        end:
-           line: 83
-           column: 1
-           absolute: 1292
-   - id: 234
-     tag: Select
-     ammortized: false
-     owner:
-        id: 232
-        tag: Identifier
-        value: mechaCat
-     field: version
-     position:
-        start:
-           line: 84
-           column: 1
-           absolute: 1333
-        end:
-           line: 85
-           column: 1
-           absolute: 1362
-   - id: 241
-     tag: BinaryExpression
-     left:
-        id: 239
-        tag: Select
-        ammortized: false
-        owner:
-           id: 237
-           tag: Cast
-           expression:
-              id: 235
-              tag: Identifier
-              value: mechaCat
-           type:
-              id: 236
-              tag: Identifier
-              value: Cat
-        field: name
-     operator: ==
-     right:
-        id: 240
-        tag: Literal
-        type: String
-        value: MechaCat
-     position:
-        start:
-           line: 88
-           column: 1
-           absolute: 1477
-        end:
-           line: 89
-           column: 1
-           absolute: 1502
-   - id: 248
-     tag: BinaryExpression
-     left:
-        id: 246
-        tag: Select
-        ammortized: false
-        owner:
-           id: 244
-           tag: Cast
-           expression:
-              id: 242
-              tag: Identifier
-              value: mechaCat
-           type:
-              id: 243
-              tag: Identifier
-              value: Mech
-        field: name
-     operator: ==
-     right:
-        id: 247
-        tag: Literal
-        type: String
-        value: OxidizedCopper
-     position:
-        start:
-           line: 89
-           column: 1
-           absolute: 1510
-        end:
-           line: 91
-           column: 1
-           absolute: 1544
-   - id: 253
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 249
-        tag: Identifier
-        value: any
-     value:
-        id: 252
-        tag: Identifier
-        value: kitty
-     type:
-        id: 250
-        tag: Identifier
-        value: Anything
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 92
-           column: 1
-           absolute: 1562
-        end:
-           line: 93
-           column: 1
-           absolute: 1577
-   - id: 264
-     tag: IfStatement
-     condition:
-        id: 256
-        tag: TypeCheck
-        term:
-           id: 254
-           tag: Identifier
-           value: any
-        type:
-           id: 255
-           tag: Identifier
-           value: Cat
-     trueBranch:
-        id: 262
-        tag: Block
-        statements:
-           - id: 261
-             tag: RoundApply
-             calledInsteadOfSquare: false
-             paramOrder:
-             isFirstParamThis: false
-             isAnObjectCopy: false
-             callee:
-                id: 257
-                tag: Identifier
-                value: print
-             args:
-                0:
-                   -
-                   - id: 260
-                     tag: Select
-                     ammortized: false
-                     owner:
-                        id: 258
-                        tag: Identifier
-                        value: any
-                     field: name
-                     position:
-                        start:
-                           line: 94
-                           column: 8
-                           absolute: 1603
-                        end:
-                           line: 94
-                           column: 17
-                           absolute: 1609
-             position:
-                start:
-                   line: 94
-                   column: 2
-                   absolute: 1599
-                end:
-                   line: 96
-                   column: 1
-                   absolute: 1642
-     falseBranch:
-        id: 263
-        tag: Literal
-        type: Void
-        value: null
-     position:
-        start:
-           line: 93
-           column: 1
-           absolute: 1579
-        end:
-           line: 97
-           column: 9
-           absolute: 1668
-   - id: 270
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 265
-        tag: Identifier
-        value: maybeCat
-     value:
-        id: 269
-        tag: Identifier
-        value: kitty
-     type:
-        id: 267
-        tag: Optional
-        doubleQuestionMark: false
-        expression:
-           id: 266
-           tag: Identifier
-           value: Cat
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 97
-           column: 1
-           absolute: 1668
-        end:
-           line: 98
-           column: 1
-           absolute: 1684
-   - id: 281
-     tag: IfStatement
-     condition:
-        id: 273
-        tag: BinaryExpression
-        left:
-           id: 271
-           tag: Identifier
-           value: maybeCat
-        operator: !=
-        right:
-           id: 272
-           tag: Identifier
-           value: nothing
-     trueBranch:
-        id: 279
-        tag: Block
-        statements:
-           - id: 278
-             tag: RoundApply
-             calledInsteadOfSquare: false
-             paramOrder:
-             isFirstParamThis: false
-             isAnObjectCopy: false
-             callee:
-                id: 274
-                tag: Identifier
-                value: print
-             args:
-                0:
-                   -
-                   - id: 277
-                     tag: Select
-                     ammortized: false
-                     owner:
-                        id: 275
-                        tag: Identifier
-                        value: maybeCat
-                     field: age
-                     position:
-                        start:
-                           line: 99
-                           column: 8
-                           absolute: 1724
-                        end:
-                           line: 99
-                           column: 21
-                           absolute: 1729
-             position:
-                start:
-                   line: 99
-                   column: 2
-                   absolute: 1715
-                end:
-                   line: 101
-                   column: 1
-                   absolute: 1766
-     falseBranch:
-        id: 280
-        tag: Literal
-        type: Void
-        value: null
-     position:
-        start:
-           line: 98
-           column: 1
-           absolute: 1686
-        end:
-           line: 102
-           column: 4
-           absolute: 1779
-   - id: 289
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 282
-        tag: Identifier
-        value: arr
-     value:
-        id: 288
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Cat
+    isDeclaration: true
+    isTypeLevel: true
+    position:
+      start:
+        line: 78
+        column: 1
+        absolute: 1201
+      end:
+        line: 81
+        column: 9
+        absolute: 1247
+  - id: 232
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 222
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: mechaCat
+    value:
+      id: 231
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 226
         tag: RoundApply
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
         calledInsteadOfSquare: false
         paramOrder:
         isFirstParamThis: false
         isAnObjectCopy: false
+        isCallingAConstructor: false
         callee:
-           id: 283
-           tag: Identifier
-           value: Array@of
+          id: 223
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: Cat
         args:
-           - 0:
-             1:
-                id: 284
+          - 0: 
+            1:
+              id: 224
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: String
+              value: MechaCat
+          - 0: 
+            1:
+              id: 225
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: Number
+              value: 10
+      operator: &
+      right:
+        id: 230
+        tag: RoundApply
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        calledInsteadOfSquare: false
+        paramOrder:
+        isFirstParamThis: false
+        isAnObjectCopy: false
+        isCallingAConstructor: false
+        callee:
+          id: 227
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: Mech
+        args:
+          - 0: 
+            1:
+              id: 228
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: String
+              value: Oxidized Copper
+          - 0: 
+            1:
+              id: 229
+              tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
+              type: Number
+              value: 1.4
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 81
+        column: 1
+        absolute: 1247
+      end:
+        line: 84
+        column: 9
+        absolute: 1345
+  - id: 235
+    tag: Select
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    ammortized: false
+    owner:
+      id: 233
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: mechaCat
+    field: version
+    position:
+      start:
+        line: 84
+        column: 1
+        absolute: 1345
+      end:
+        line: 88
+        column: 9
+        absolute: 1489
+  - id: 242
+    tag: BinaryExpression
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    left:
+      id: 240
+      tag: Select
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      ammortized: false
+      owner:
+        id: 238
+        tag: Cast
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        expression:
+          id: 236
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: mechaCat
+        type:
+          id: 237
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: Cat
+      field: name
+    operator: ==
+    right:
+      id: 241
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: MechaCat
+    position:
+      start:
+        line: 88
+        column: 1
+        absolute: 1489
+      end:
+        line: 89
+        column: 9
+        absolute: 1522
+  - id: 249
+    tag: BinaryExpression
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    left:
+      id: 247
+      tag: Select
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      ammortized: false
+      owner:
+        id: 245
+        tag: Cast
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        expression:
+          id: 243
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: mechaCat
+        type:
+          id: 244
+          tag: Identifier
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          value: Mech
+      field: name
+    operator: ==
+    right:
+      id: 248
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: String
+      value: OxidizedCopper
+    position:
+      start:
+        line: 89
+        column: 1
+        absolute: 1522
+      end:
+        line: 92
+        column: 4
+        absolute: 1574
+  - id: 254
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 250
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: any
+    value:
+      id: 253
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: kitty
+    type:
+      id: 251
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Anything
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 92
+        column: 1
+        absolute: 1574
+      end:
+        line: 93
+        column: 3
+        absolute: 1596
+  - id: 265
+    tag: IfStatement
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    condition:
+      id: 257
+      tag: TypeCheck
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      term:
+        id: 255
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: any
+      type:
+        id: 256
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Cat
+    trueBranch:
+      id: 263
+      tag: Block
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      skipReturn: false
+      statements:
+        - id: 262
+          tag: RoundApply
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 258
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: print
+          args:
+            0:
+              - 
+              - id: 261
+                tag: Select
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                ammortized: false
+                owner:
+                  id: 259
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: any
+                field: name
+                position:
+                  start:
+                    line: 94
+                    column: 8
+                    absolute: 1620
+                  end:
+                    line: 94
+                    column: 17
+                    absolute: 1626
+          position:
+            start:
+              line: 94
+              column: 2
+              absolute: 1616
+            end:
+              line: 97
+              column: 1
+              absolute: 1677
+    falseBranch:
+      id: 264
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Void
+      value: null
+    position:
+      start:
+        line: 93
+        column: 1
+        absolute: 1596
+      end:
+        line: 97
+        column: 9
+        absolute: 1685
+  - id: 271
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 266
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: maybeCat
+    value:
+      id: 270
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: kitty
+    type:
+      id: 268
+      tag: Optional
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      doubleQuestionMark: false
+      expression:
+        id: 267
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Cat
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 97
+        column: 1
+        absolute: 1685
+      end:
+        line: 98
+        column: 3
+        absolute: 1703
+  - id: 282
+    tag: IfStatement
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    condition:
+      id: 274
+      tag: BinaryExpression
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      left:
+        id: 272
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: maybeCat
+      operator: !=
+      right:
+        id: 273
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: nothing
+    trueBranch:
+      id: 280
+      tag: Block
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      skipReturn: false
+      statements:
+        - id: 279
+          tag: RoundApply
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 275
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: print
+          args:
+            0:
+              - 
+              - id: 278
+                tag: Select
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                ammortized: false
+                owner:
+                  id: 276
+                  tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  value: maybeCat
+                field: age
+                position:
+                  start:
+                    line: 99
+                    column: 8
+                    absolute: 1741
+                  end:
+                    line: 99
+                    column: 21
+                    absolute: 1746
+          position:
+            start:
+              line: 99
+              column: 2
+              absolute: 1732
+            end:
+              line: 102
+              column: 1
+              absolute: 1793
+    falseBranch:
+      id: 281
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Void
+      value: null
+    position:
+      start:
+        line: 98
+        column: 1
+        absolute: 1703
+      end:
+        line: 102
+        column: 4
+        absolute: 1796
+  - id: 290
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 283
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: arr
+    value:
+      id: 289
+      tag: RoundApply
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      calledInsteadOfSquare: false
+      paramOrder:
+      isFirstParamThis: false
+      isAnObjectCopy: false
+      isCallingAConstructor: false
+      callee:
+        id: 284
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: Array@of
+      args:
+        - 0: 
+          1:
+            id: 285
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 1
+        - 0: 
+          1:
+            id: 286
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 2
+        - 0: 
+          1:
+            id: 287
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 3
+        - 0: 
+          1:
+            id: 288
+            tag: Literal
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isTypeLiteral: false
+            type: Number
+            value: 4
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 102
+        column: 1
+        absolute: 1796
+      end:
+        line: 103
+        column: 4
+        absolute: 1824
+  - id: 296
+    tag: RoundApply
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 295
+      tag: Select
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      ammortized: false
+      owner:
+        id: 291
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: arr
+      field: at
+    args:
+      0:
+        - 
+        - id: 293
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 0
+          position:
+            start:
+              line: 103
+              column: 8
+              absolute: 1829
+            end:
+              line: 103
+              column: 10
+              absolute: 1830
+    position:
+      start:
+        line: 103
+        column: 1
+        absolute: 1824
+      end:
+        line: 104
+        column: 4
+        absolute: 1835
+  - id: 301
+    tag: RoundApply
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 300
+      tag: Select
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      ammortized: false
+      owner:
+        id: 297
+        tag: Identifier
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        value: arr
+      field: length
+    args:
+    position:
+      start:
+        line: 104
+        column: 1
+        absolute: 1835
+      end:
+        line: 107
+        column: 8
+        absolute: 1866
+  - id: 318
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 302
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: varargs
+    value:
+      id: 317
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 308
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 303
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: n
+          type:
+            id: 306
+            tag: SquareApply
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            isCallingAConstructor: false
+            callee:
+              id: 304
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: Array
+            typeArgs:
+              - id: 305
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: Number
+                position:
+                  start:
+                    line: 107
+                    column: 21
+                    absolute: 1885
+                  end:
+                    line: 107
+                    column: 28
+                    absolute: 1886
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 107
+              column: 12
+              absolute: 1871
+            end:
+              line: 107
+              column: 29
+              absolute: 1887
+      block:
+        id: 316
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 315
+            tag: RoundApply
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            calledInsteadOfSquare: false
+            paramOrder:
+            isFirstParamThis: false
+            isAnObjectCopy: false
+            isCallingAConstructor: false
+            callee:
+              id: 314
+              tag: Select
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              ammortized: false
+              owner:
+                id: 310
+                tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                value: n
+              field: at
+            args:
+              0:
+                - 
+                - id: 312
+                  tag: Literal
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  isTypeLiteral: false
+                  type: Number
+                  value: 0
+                  position:
+                    start:
+                      line: 107
+                      column: 38
+                      absolute: 1897
+                    end:
+                      line: 107
+                      column: 40
+                      absolute: 1898
+            position:
+              start:
+                line: 107
+                column: 33
+                absolute: 1892
+              end:
+                line: 108
+                column: 8
+                absolute: 1907
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 107
+        column: 1
+        absolute: 1866
+      end:
+        line: 108
+        column: 8
+        absolute: 1907
+  - id: 323
+    tag: RoundApply
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 319
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: varargs
+    args:
+      0:
+        - 
+        - id: 320
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 1
+          position:
+            start:
+              line: 108
+              column: 9
+              absolute: 1909
+            end:
+              line: 108
+              column: 11
+              absolute: 1910
+      1:
+        - 
+        - id: 321
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 2
+          position:
+            start:
+              line: 108
+              column: 12
+              absolute: 1912
+            end:
+              line: 108
+              column: 14
+              absolute: 1913
+      2:
+        - 
+        - id: 322
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: Number
+          value: 3
+          position:
+            start:
+              line: 108
+              column: 15
+              absolute: 1915
+            end:
+              line: 108
+              column: 17
+              absolute: 1916
+    position:
+      start:
+        line: 108
+        column: 1
+        absolute: 1907
+      end:
+        line: 109
+        column: 8
+        absolute: 1925
+  - id: 329
+    tag: RoundApply
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callee:
+      id: 324
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: varargs
+    args:
+      0:
+        - 
+        - id: 328
+          tag: RoundApply
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          calledInsteadOfSquare: false
+          paramOrder:
+          isFirstParamThis: false
+          isAnObjectCopy: false
+          isCallingAConstructor: false
+          callee:
+            id: 325
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Array@of
+          args:
+            0:
+              - 
+              - id: 326
                 tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
                 type: Number
                 value: 1
-           - 0:
-             1:
-                id: 285
+                position:
+                  start:
+                    line: 109
+                    column: 18
+                    absolute: 1936
+                  end:
+                    line: 109
+                    column: 20
+                    absolute: 1937
+            1:
+              - 
+              - id: 327
                 tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
                 type: Number
                 value: 2
-           - 0:
-             1:
-                id: 286
-                tag: Literal
-                type: Number
-                value: 3
-           - 0:
-             1:
-                id: 287
-                tag: Literal
-                type: Number
-                value: 4
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 102
-           column: 1
-           absolute: 1779
-        end:
-           line: 103
-           column: 1
-           absolute: 1804
-   - id: 295
-     tag: RoundApply
-     calledInsteadOfSquare: false
-     paramOrder:
-     isFirstParamThis: false
-     isAnObjectCopy: false
-     callee:
-        id: 294
-        tag: Select
-        ammortized: false
-        owner:
-           id: 290
-           tag: Identifier
-           value: arr
-        field: at
-     args:
-        0:
-           -
-           - id: 292
-             tag: Literal
-             type: Number
-             value: 0
-             position:
-                start:
-                   line: 103
-                   column: 8
-                   absolute: 1812
-                end:
-                   line: 103
-                   column: 10
-                   absolute: 1813
-     position:
-        start:
-           line: 103
-           column: 1
-           absolute: 1807
-        end:
-           line: 104
-           column: 1
-           absolute: 1815
-   - id: 300
-     tag: RoundApply
-     calledInsteadOfSquare: false
-     paramOrder:
-     isFirstParamThis: false
-     isAnObjectCopy: false
-     callee:
-        id: 299
-        tag: Select
-        ammortized: false
-        owner:
-           id: 296
-           tag: Identifier
-           value: arr
-        field: length
-     args:
-     position:
-        start:
-           line: 104
-           column: 1
-           absolute: 1818
-        end:
-           line: 106
-           column: 1
-           absolute: 1831
-   - id: 317
-     tag: Assignment
-     isMutable: false
-     isParameter: false
-     lhs:
-        id: 301
-        tag: Identifier
-        value: varargs
-     value:
-        id: 316
-        tag: RoundValueToValueLambda
-        params:
-           - id: 307
-             tag: Assignment
-             isMutable: false
-             isParameter: true
-             lhs:
-                id: 302
-                tag: Identifier
-                value: n
-             type:
-                id: 305
-                tag: SquareApply
-                callee:
-                   id: 303
-                   tag: Identifier
-                   value: Array
-                typeArgs:
-                   - id: 304
-                     tag: Identifier
-                     value: Number
-                     position:
-                        start:
-                           line: 107
-                           column: 21
-                           absolute: 1868
-                        end:
-                           line: 107
-                           column: 28
-                           absolute: 1869
-             isDeclaration: false
-             isTypeLevel: false
-             position:
-                start:
-                   line: 107
-                   column: 12
-                   absolute: 1854
-                end:
-                   line: 107
-                   column: 29
-                   absolute: 1870
-        block:
-           id: 315
-           tag: Block
-           statements:
-              - id: 314
-                tag: RoundApply
-                calledInsteadOfSquare: false
-                paramOrder:
-                isFirstParamThis: false
-                isAnObjectCopy: false
-                callee:
-                   id: 313
-                   tag: Select
-                   ammortized: false
-                   owner:
-                      id: 309
-                      tag: Identifier
-                      value: n
-                   field: at
-                args:
-                   0:
-                      -
-                      - id: 311
-                        tag: Literal
-                        type: Number
-                        value: 0
-                        position:
-                           start:
-                              line: 107
-                              column: 38
-                              absolute: 1880
-                           end:
-                              line: 107
-                              column: 40
-                              absolute: 1881
                 position:
-                   start:
-                      line: 107
-                      column: 33
-                      absolute: 1875
-                   end:
-                      line: 108
-                      column: 1
-                      absolute: 1883
-        explicitType: undefined
-     isDeclaration: true
-     isTypeLevel: false
-     position:
-        start:
-           line: 107
-           column: 1
-           absolute: 1849
-        end:
-           line: 108
-           column: 1
-           absolute: 1883
-   - id: 322
-     tag: RoundApply
-     calledInsteadOfSquare: false
-     paramOrder:
-     isFirstParamThis: false
-     isAnObjectCopy: false
-     callee:
-        id: 318
-        tag: Identifier
-        value: varargs
-     args:
-        0:
-           -
-           - id: 319
-             tag: Literal
-             type: Number
-             value: 1
-             position:
-                start:
-                   line: 108
-                   column: 9
-                   absolute: 1892
-                end:
-                   line: 108
-                   column: 11
-                   absolute: 1893
-        1:
-           -
-           - id: 320
-             tag: Literal
-             type: Number
-             value: 2
-             position:
-                start:
-                   line: 108
-                   column: 12
-                   absolute: 1895
-                end:
-                   line: 108
-                   column: 14
-                   absolute: 1896
-        2:
-           -
-           - id: 321
-             tag: Literal
-             type: Number
-             value: 3
-             position:
-                start:
-                   line: 108
-                   column: 15
-                   absolute: 1898
-                end:
-                   line: 108
-                   column: 17
-                   absolute: 1899
-     position:
-        start:
-           line: 108
-           column: 1
-           absolute: 1890
-        end:
-           line: 109
-           column: 1
-           absolute: 1901
-   - id: 328
-     tag: RoundApply
-     calledInsteadOfSquare: false
-     paramOrder:
-     isFirstParamThis: false
-     isAnObjectCopy: false
-     callee:
-        id: 323
-        tag: Identifier
-        value: varargs
-     args:
-        0:
-           -
-           - id: 327
-             tag: RoundApply
-             calledInsteadOfSquare: false
-             paramOrder:
-             isFirstParamThis: false
-             isAnObjectCopy: false
-             callee:
-                id: 324
-                tag: Identifier
-                value: Array@of
-             args:
-                0:
-                   -
-                   - id: 325
-                     tag: Literal
-                     type: Number
-                     value: 1
-                     position:
-                        start:
-                           line: 109
-                           column: 18
-                           absolute: 1919
-                        end:
-                           line: 109
-                           column: 20
-                           absolute: 1920
-                1:
-                   -
-                   - id: 326
-                     tag: Literal
-                     type: Number
-                     value: 2
-                     position:
-                        start:
-                           line: 109
-                           column: 21
-                           absolute: 1922
-                        end:
-                           line: 109
-                           column: 23
-                           absolute: 1923
-             position:
-                start:
-                   line: 109
-                   column: 9
-                   absolute: 1917
-                end:
-                   line: 109
-                   column: 24
-                   absolute: 1924
-     position:
-        start:
-           line: 109
-           column: 1
-           absolute: 1908
-        end:
-           line: 111
-           column: 1
-           absolute: 1928
+                  start:
+                    line: 109
+                    column: 21
+                    absolute: 1939
+                  end:
+                    line: 109
+                    column: 23
+                    absolute: 1940
+          position:
+            start:
+              line: 109
+              column: 9
+              absolute: 1934
+            end:
+              line: 109
+              column: 24
+              absolute: 1941
+    position:
+      start:
+        line: 109
+        column: 1
+        absolute: 1925
+      end: 0

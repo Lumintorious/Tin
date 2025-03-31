@@ -1,97 +1,108 @@
 NEWLINE      |              |   3, 1    
-IDENTIFIER   | Shape        |   3, 1    
-OPERATOR     | =            |   3, 7    
-KEYWORD      | data         |   3, 9    
-OPERATOR     | :            |   3, 13   
+IDENTIFIER   | Box          |   3, 1    
+OPERATOR     | =            |   3, 5    
+KEYWORD      | data         |   3, 7    
+OPERATOR     | :            |   3, 11   
 NEWLINE      |              |   4, 1    
 INDENT       | 4            |   4, 1    
-IDENTIFIER   | area         |   4, 2    
-OPERATOR     | :            |   4, 6    
-PARENS       | (            |   4, 8    
-PARENS       | )            |   4, 9    
-OPERATOR     | ->           |   4, 11   
-IDENTIFIER   | var          |   4, 14   
-IDENTIFIER   | Number       |   4, 18   
+IDENTIFIER   | value        |   4, 2    
+OPERATOR     | :            |   4, 7    
+IDENTIFIER   | var          |   4, 9    
+IDENTIFIER   | Number       |   4, 13   
 NEWLINE      |              |   6, 1    
 DEDENT       | 4            |   6, 1    
-IDENTIFIER   | Rectangle    |   6, 1    
-OPERATOR     | =            |   6, 11   
-KEYWORD      | data         |   6, 13   
-OPERATOR     | :            |   6, 17   
+IDENTIFIER   | box          |   6, 1    
+OPERATOR     | :            |   6, 4    
+IDENTIFIER   | Anything     |   6, 6    
+OPERATOR     | =            |   6, 15   
+IDENTIFIER   | Box          |   6, 17   
+PARENS       | (            |   6, 20   
+IDENTIFIER   | var          |   6, 21   
+NUMBER       | 12           |   6, 25   
+PARENS       | )            |   6, 27   
 NEWLINE      |              |   7, 1    
-INDENT       | 4            |   7, 1    
-IDENTIFIER   | side         |   7, 2    
-OPERATOR     | :            |   7, 6    
-IDENTIFIER   | var          |   7, 8    
-IDENTIFIER   | Number       |   7, 12   
+IDENTIFIER   | vbox         |   7, 1    
+OPERATOR     | :            |   7, 5    
+IDENTIFIER   | Anything     |   7, 7    
+OPERATOR     | =            |   7, 16   
+IDENTIFIER   | Box          |   7, 18   
+PARENS       | (            |   7, 21   
+IDENTIFIER   | var          |   7, 22   
+NUMBER       | 21           |   7, 26   
+PARENS       | )            |   7, 28   
 NEWLINE      |              |   9, 1    
-DEDENT       | 4            |   9, 1    
-IDENTIFIER   | Rectangle@make |   9, 1    
-OPERATOR     | =            |   9, 16   
-PARENS       | (            |   9, 18   
-IDENTIFIER   | sideIn       |   9, 19   
-OPERATOR     | :            |   9, 25   
-IDENTIFIER   | Number       |   9, 27   
-PARENS       | )            |   9, 33   
-OPERATOR     | :            |   9, 34   
-IDENTIFIER   | var          |   9, 36   
-IDENTIFIER   | Rectangle    |   9, 40   
-OPERATOR     | &            |   9, 50   
-IDENTIFIER   | Shape        |   9, 52   
-OPERATOR     | ~>           |   9, 58   
-NEWLINE      |              |  10, 1    
-INDENT       | 4            |  10, 1    
-IDENTIFIER   | side         |  10, 2    
-OPERATOR     | =            |  10, 7    
-IDENTIFIER   | var          |  10, 9    
-IDENTIFIER   | sideIn       |  10, 13   
+IDENTIFIER   | takeInvar    |   9, 1    
+OPERATOR     | =            |   9, 11   
+PARENS       | (            |   9, 13   
+IDENTIFIER   | v            |   9, 14   
+OPERATOR     | :            |   9, 15   
+IDENTIFIER   | Number       |   9, 17   
+PARENS       | )            |   9, 23   
+OPERATOR     | ~>           |   9, 25   
+IDENTIFIER   | print        |   9, 28   
+PARENS       | (            |   9, 33   
+IDENTIFIER   | v            |   9, 34   
+PARENS       | )            |   9, 35   
 NEWLINE      |              |  11, 1    
-IDENTIFIER   | rect         |  11, 2    
-OPERATOR     | =            |  11, 7    
-IDENTIFIER   | Rectangle    |  11, 9    
-PARENS       | (            |  11, 18   
-IDENTIFIER   | side         |  11, 19   
-PARENS       | )            |  11, 23   
-NEWLINE      |              |  12, 1    
-IDENTIFIER   | rect         |  12, 2    
-OPERATOR     | &            |  12, 7    
-IDENTIFIER   | Shape        |  12, 9    
-PARENS       | (            |  12, 14   
-PARENS       | (            |  12, 15   
-PARENS       | )            |  12, 16   
-OPERATOR     | ->           |  12, 18   
-IDENTIFIER   | side         |  12, 21   
-OPERATOR     | **           |  12, 26   
-NUMBER       | 2            |  12, 29   
-PARENS       | )            |  12, 30   
+IDENTIFIER   | takeInvar    |  11, 1    
+PARENS       | (            |  11, 10   
+IDENTIFIER   | var          |  11, 11   
+NUMBER       | 2            |  11, 15   
+PARENS       | )            |  11, 16   
+NEWLINE      |              |  13, 1    
+IDENTIFIER   | f            |  13, 1    
+OPERATOR     | =            |  13, 3    
+PARENS       | (            |  13, 5    
+PARENS       | )            |  13, 6    
+OPERATOR     | ~>           |  13, 8    
 NEWLINE      |              |  14, 1    
-DEDENT       | 4            |  14, 1    
-IDENTIFIER   | copy         |  14, 1    
-OPERATOR     | :            |  14, 5    
-PARENS       | [            |  14, 7    
-IDENTIFIER   | T            |  14, 8    
-PARENS       | ]            |  14, 9    
-OPERATOR     | ->           |  14, 11   
-PARENS       | (            |  14, 14   
-IDENTIFIER   | t            |  14, 15   
-OPERATOR     | :            |  14, 16   
-IDENTIFIER   | T            |  14, 18   
-PARENS       | )            |  14, 19   
-OPERATOR     | ->           |  14, 21   
-IDENTIFIER   | T            |  14, 24   
-OPERATOR     | =            |  14, 26   
-KEYWORD      | external     |  14, 28   
-NEWLINE      |              |  16, 1    
-IDENTIFIER   | rect         |  16, 1    
-OPERATOR     | =            |  16, 6    
-IDENTIFIER   | Rectangle@make |  16, 8    
-PARENS       | (            |  16, 22   
-NUMBER       | 12           |  16, 23   
-PARENS       | )            |  16, 25   
+INDENT       | 4            |  14, 1    
+KEYWORD      | if           |  14, 2    
+IDENTIFIER   | box          |  14, 5    
+OPERATOR     | ::           |  14, 9    
+IDENTIFIER   | Box          |  14, 12   
+NEWLINE      | ,            |  14, 1    
+NEWLINE      |              |  15, 1    
+INDENT       | 8            |  15, 1    
+IDENTIFIER   | print        |  15, 3    
+PARENS       | (            |  15, 8    
+STRING       | Yes1         |  15, 9    
+PARENS       | )            |  15, 15   
 NEWLINE      |              |  17, 1    
-IDENTIFIER   | debug        |  17, 1    
+DEDENT       | 8            |  17, 1    
+DEDENT       | 4            |  17, 1    
+IDENTIFIER   | f2           |  17, 1    
+OPERATOR     | =            |  17, 4    
 PARENS       | (            |  17, 6    
-IDENTIFIER   | rect         |  17, 7    
-PARENS       | )            |  17, 11   
+PARENS       | )            |  17, 7    
+OPERATOR     | ~>           |  17, 9    
 NEWLINE      |              |  18, 1    
+INDENT       | 4            |  18, 1    
+KEYWORD      | if           |  18, 2    
+IDENTIFIER   | vbox         |  18, 5    
+OPERATOR     | ::           |  18, 10   
+IDENTIFIER   | Box          |  18, 13   
+NEWLINE      | ,            |  18, 1    
+NEWLINE      |              |  19, 1    
+INDENT       | 8            |  19, 1    
+IDENTIFIER   | print        |  19, 3    
+PARENS       | (            |  19, 8    
+STRING       | Yes2         |  19, 9    
+OPERATOR     | +            |  19, 9    
+IDENTIFIER   | vbox         |  19, 16   
+OPERATOR     | .            |  19, 20   
+IDENTIFIER   | value        |  19, 21   
+OPERATOR     | +            |  19, 9    
+STRING       |              |  19, 9    
+PARENS       | )            |  19, 28   
+NEWLINE      |              |  22, 1    
+DEDENT       | 8            |  22, 1    
+DEDENT       | 4            |  22, 1    
+IDENTIFIER   | f            |  22, 1    
+PARENS       | (            |  22, 2    
+PARENS       | )            |  22, 3    
+NEWLINE      |              |  23, 1    
+IDENTIFIER   | f2           |  23, 1    
+PARENS       | (            |  23, 3    
+PARENS       | )            |  23, 4    
 --undefined--

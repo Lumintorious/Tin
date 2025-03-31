@@ -25,11 +25,7 @@ export class Return {
 
 Object.prototype.__is_child = function (obj) {
 	if (this._c && this._c.__is_child) {
-		if (obj._) {
-			return this._c.__is_child(obj._)
-		} else {
-			return this._c.__is_child(obj);
-		}
+		return this._c.__is_child(obj)
 	}
 	throw new Error("Unhandled")
 }

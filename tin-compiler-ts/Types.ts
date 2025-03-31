@@ -92,7 +92,7 @@ export class AnyTypeClass extends Type {
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
-      return true;
+      return !(other instanceof MutableType);
    }
 
    extends(other: Type, scope: Scope) {
@@ -100,8 +100,8 @@ export class AnyTypeClass extends Type {
       return other instanceof AnyTypeClass;
    }
 
-   isExtendedBy() {
-      return true;
+   isExtendedBy(other: Type) {
+      return !(other instanceof MutableType);
    }
 
    toString() {
@@ -326,7 +326,11 @@ export class MutableType extends Type {
    type: Type;
    constructor(type: Type) {
       super("MutableType");
-      this.type = type;
+      if (type instanceof MutableType) {
+         this.type = type.type;
+      } else {
+         this.type = type;
+      }
       if (!type) {
          throw new Error("What?");
       }
@@ -465,7 +469,16 @@ export class RoundValueToValueLambdaType extends Type {
          ? !this.capturesMutableValues
          : true;
 
-      return paramCheck && returnCheck && purityCheck && captureCheck;
+      // const varCheck = !(other.returnType instanceof MutableType)
+      //    ? !(this.returnType instanceof MutableType)
+      //    : true;
+      const varCheck =
+         !(other.returnType instanceof MutableType) ===
+         !(this.returnType instanceof MutableType);
+
+      return (
+         paramCheck && returnCheck && purityCheck && captureCheck && varCheck
+      );
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
@@ -775,8 +788,8 @@ export class BinaryOpType extends Type {
          );
       } else if (this.operator === "|") {
          return (
-            other.isAssignableTo(this.left, scope) &&
-            other.isAssignableTo(this.right, scope)
+            this.left.isAssignableTo(other, scope) &&
+            this.right.isAssignableTo(other, scope)
          );
       } else {
          return super.isAssignableTo(other, scope);
@@ -856,6 +869,24 @@ export class MarkerType extends Type {
    }
 }
 
+export class RefinedType extends Type {
+   constructor() {
+      super("RefinedType");
+   }
+
+   extends(other: Type, scope: Scope): boolean {
+      return other instanceof Type && this.name === other.name;
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return other instanceof Type && this.name === other.name;
+   }
+
+   toString(): string {
+      return "refined " + this.name;
+   }
+}
+
 export class StructType extends Type {
    fields: ParamType[];
    constructor(name: string | undefined, fields: ParamType[]) {
@@ -879,7 +910,6 @@ export class StructType extends Type {
    }
 
    isMutable(): boolean {
-      console.log(this.name + " - " + (this.getMutableFields().length > 0));
       return this.getMutableFields().length > 0;
    }
 

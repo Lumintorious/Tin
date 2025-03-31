@@ -76,6 +76,7 @@ export class Lexer {
       this.column = 1;
       this.keywords = [
          "return",
+         "refined",
          "data",
          "if",
          "else",
@@ -91,6 +92,7 @@ export class Lexer {
       this.operators = [
          "...",
          "var",
+         "copy",
          "```",
          "??",
          "?:",
@@ -216,6 +218,10 @@ export class Lexer {
 
       // Tokenize numbers
       if (/\d/.test(char)) return this.tokenizeNumber();
+
+      if (this.input.slice(this.position).startsWith("copy")) {
+         return this.tokenizeOperator("copy");
+      }
 
       // Tokenize identifiers or keywords
       if (/[a-zA-Z_]/.test(char)) return this.tokenizeIdentifierOrKeyword();

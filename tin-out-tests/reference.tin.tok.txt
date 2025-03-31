@@ -33,7 +33,8 @@ NEWLINE      |              |  10, 1
 NEWLINE      |              |  11, 1    
 IDENTIFIER   | m            |  11, 1    
 OPERATOR     | =            |  11, 3    
-NUMBER       | 1            |  11, 5    
+IDENTIFIER   | var          |  11, 5    
+NUMBER       | 1            |  11, 9    
 NEWLINE      |              |  12, 1    
 KEYWORD      | set          |  12, 1    
 IDENTIFIER   | m            |  12, 5    
@@ -78,11 +79,11 @@ IDENTIFIER   | Nothing      |  22, 8
 OPERATOR     | =            |  22, 16   
 IDENTIFIER   | nothing      |  22, 18   
 NEWLINE      |              |  23, 1    
-IDENTIFIER   | any          |  23, 1    
-OPERATOR     | :            |  23, 4    
-IDENTIFIER   | Anything          |  23, 6    
-OPERATOR     | =            |  23, 10   
-STRING       | str          |  23, 12   
+IDENTIFIER   | anyStr       |  23, 1    
+OPERATOR     | :            |  23, 7    
+IDENTIFIER   | Anything     |  23, 9    
+OPERATOR     | =            |  23, 18   
+STRING       | str          |  23, 20   
 NEWLINE      |              |  25, 1    
 NEWLINE      |              |  26, 1    
 IDENTIFIER   | maybeFull    |  26, 1    
@@ -221,7 +222,7 @@ NEWLINE      |              |  58, 1
 DEDENT       | 4            |  58, 1    
 IDENTIFIER   | Cat          |  58, 1    
 OPERATOR     | =            |  58, 5    
-KEYWORD      | type         |  58, 7    
+KEYWORD      | data         |  58, 7    
 OPERATOR     | :            |  58, 11   
 NEWLINE      |              |  59, 1    
 INDENT       | 4            |  59, 1    
@@ -238,7 +239,7 @@ NEWLINE      |              |  62, 1
 DEDENT       | 4            |  62, 1    
 IDENTIFIER   | Mech         |  62, 1    
 OPERATOR     | =            |  62, 6    
-KEYWORD      | type         |  62, 8    
+KEYWORD      | data         |  62, 8    
 OPERATOR     | :            |  62, 12   
 NEWLINE      |              |  63, 1    
 INDENT       | 4            |  63, 1    
@@ -339,9 +340,9 @@ NEWLINE      |              |  91, 1
 NEWLINE      |              |  92, 1    
 IDENTIFIER   | any          |  92, 1    
 OPERATOR     | :            |  92, 4    
-IDENTIFIER   | Anything          |  92, 6    
-OPERATOR     | =            |  92, 10   
-IDENTIFIER   | kitty        |  92, 12   
+IDENTIFIER   | Anything     |  92, 6    
+OPERATOR     | =            |  92, 15   
+IDENTIFIER   | kitty        |  92, 17   
 NEWLINE      |              |  93, 1    
 KEYWORD      | if           |  93, 1    
 IDENTIFIER   | any          |  93, 4    

@@ -29,7 +29,7 @@ import {
    Identifier,
 } from "./Parser";
 import { type } from "os";
-import { TypeDef, AppliedKeyword, Literal, Group } from "./Parser";
+import { TypeDef, AppliedKeyword, Literal, Group, RefinedDef } from "./Parser";
 import { Symbol } from "./Scope";
 import { NamedType, TypeOfTypes, AnyTypeClass, UncheckedType } from "./Types";
 import { SquareTypeToValueLambdaType, MutableType } from "./Types";
@@ -69,20 +69,8 @@ export class TypeBuilder {
          node.statements.forEach((statement) =>
             this.build(statement, innerBlockScope)
          );
-         if (scope.iteration === "RESOLUTION") {
-            const returns: [Term, Type][] = [];
-            this.context.inferencer.findReturns(node, scope, returns);
-            for (const [term, type] of returns) {
-               const dependencies = this.termDependencies(
-                  term,
-                  innerBlockScope
-               );
-               if (dependencies.length === 0) continue;
-               term.clojure = dependencies;
-            }
-         }
       } else if (node instanceof RoundApply) {
-         this.buildRoundApply(node, scope);
+         this.buildRoundApply(node, scope, options);
       } else if (node instanceof AppliedKeyword) {
          this.build(node.param, scope);
       } else if (node instanceof TypeCheck) {
@@ -147,13 +135,17 @@ export class TypeBuilder {
             node.condition instanceof TypeCheck &&
             node.condition.term instanceof Identifier
          ) {
+            const currentType = this.context.inferencer.infer(
+               node.condition.term,
+               innerScope
+            );
             const presumedType = scope.resolveNamedType(
                this.context.translator.translate(node.condition.type, trueScope)
             );
             trueScope.declare(
                new Symbol(
                   node.condition.term.value,
-                  presumedType,
+                  new BinaryOpType(currentType, "&", presumedType, true),
                   node.condition.term
                )
             );
@@ -167,6 +159,8 @@ export class TypeBuilder {
          this.buildSelect(node, scope);
       } else if (node instanceof TypeDef) {
          this.buildTypeDef(node, scope, options);
+      } else if (node instanceof RefinedDef) {
+         this.build(node.lambda, scope, options);
       } else if (node instanceof BinaryExpression) {
          this.buildBinaryExpression(node, scope, options);
       } else if (node instanceof Change) {
@@ -209,6 +203,9 @@ export class TypeBuilder {
       } else if (node instanceof Cast) {
          this.build(node.expression, scope);
          this.build(node.type, scope);
+         const castType = this.context.translator.translate(node.type, scope);
+         const termType = this.context.inferencer.infer(node.expression, scope);
+         this.buildVarTransformations(node, castType, termType);
       } else if (node instanceof Group) {
          this.build(node.value, scope);
       } else if (node instanceof UnaryOperator) {
@@ -237,27 +234,119 @@ export class TypeBuilder {
       if (options.isTypeLevel) {
          node.isTypeLevel = true;
       }
+
+      const leftType = this.context.inferencer.infer(node.left, scope);
+      const rightType = this.context.inferencer.infer(node.right, scope);
       this.build(node.left, scope, { isTypeLevel: options.isTypeLevel });
-      this.build(node.right, scope, { isTypeLevel: options.isTypeLevel });
+      this.build(node.right, scope, {
+         isTypeLevel: options.isTypeLevel,
+         firstPartOfIntersection: leftType,
+      });
       if (options.isTypeLevel) {
          return;
       }
-
-      if (
-         this.context.inferencer.infer(node.left, scope) instanceof MutableType
-      ) {
+      if (leftType instanceof MutableType) {
          node.left.varTypeInInvarPlace = true;
       }
 
-      if (
-         this.context.inferencer.infer(node.right, scope) instanceof MutableType
-      ) {
+      if (rightType instanceof MutableType) {
          node.right.varTypeInInvarPlace = true;
       }
    }
 
-   buildRoundApply(node: RoundApply, scope: Scope) {
+   buildSquareArgsInRoundApply(node: RoundApply, scope: Scope) {
+      const calleeType = this.context.inferencer.infer(node.callee, scope);
+      if (
+         calleeType instanceof SquareTypeToValueLambdaType &&
+         calleeType.returnType instanceof RoundValueToValueLambdaType
+      ) {
+         node.autoFilledSquareParams = [];
+         const expectedTypeParams = calleeType.paramTypes;
+         const expectedParams = calleeType.returnType.params;
+         const appliedParams = node.args;
+         // If Varargs
+         if (
+            expectedParams.length === 1 &&
+            expectedParams[0].type instanceof AppliedGenericType &&
+            expectedParams[0].type.callee instanceof NamedType &&
+            expectedParams[0].type.callee.name === "Array"
+         ) {
+            if (appliedParams.length === 0) {
+               node.takesVarargs = true;
+               return;
+            }
+            let firstAppliedParamType = this.context.inferencer.infer(
+               appliedParams[0][1],
+               scope
+            );
+            if (firstAppliedParamType instanceof LiteralType) {
+               firstAppliedParamType = firstAppliedParamType.type;
+            }
+            // If array past raw, not as varargs 'func(Array@of(1, 2, 3))'
+            if (
+               firstAppliedParamType instanceof AppliedGenericType &&
+               firstAppliedParamType.callee instanceof NamedType &&
+               firstAppliedParamType.callee.name === "Array"
+            ) {
+               if (
+                  expectedParams[0].type.parameterTypes[0] instanceof
+                     GenericNamedType &&
+                  firstAppliedParamType.parameterTypes[0] instanceof NamedType
+               ) {
+                  node.autoFilledSquareParams = [
+                     firstAppliedParamType.parameterTypes[0],
+                  ];
+               } else if (
+                  expectedParams[0].type.parameterTypes[0] instanceof
+                     NamedType &&
+                  firstAppliedParamType.parameterTypes[0] instanceof NamedType
+               ) {
+               }
+               // Varargs
+            } else {
+               node.autoFilledSquareParams = [firstAppliedParamType];
+               node.takesVarargs = true;
+            }
+         } else {
+            // Not Varargs
+            let i = 0;
+            for (let [appliedName, appliedTerm] of appliedParams) {
+               let appliedType = this.context.inferencer.infer(
+                  appliedTerm,
+                  scope
+               );
+               if (appliedType instanceof LiteralType) {
+                  appliedType = appliedType.type;
+               }
+               const expectedType = appliedName
+                  ? expectedParams.find((p) => p.name === appliedName)
+                  : expectedParams[i];
+               if (expectedType && expectedType.type instanceof NamedType) {
+                  let index = -1;
+                  while (index < expectedTypeParams.length) {
+                     if (
+                        expectedTypeParams[index]?.name ===
+                        expectedType.type.name
+                     ) {
+                        node.autoFilledSquareParams[index] = appliedType;
+                        break;
+                     }
+                     index++;
+                  }
+               }
+               i++;
+            }
+         }
+      }
+   }
+
+   buildRoundApply(
+      node: RoundApply,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       let calleeType;
+      let isStructConstructor = false;
       try {
          calleeType = this.context.inferencer.infer(node.callee, scope, {
             typeExpectedAsOwner: node.args[0]?.[1]
@@ -271,7 +360,6 @@ export class TypeBuilder {
             calleeType = scope.lookupType(node.callee.value).typeSymbol;
          }
          let constructor = calleeType.buildConstructor();
-         let isStructConstructor = false;
          if (constructor instanceof RoundValueToValueLambdaType) {
             calleeType = constructor;
             isStructConstructor = true;
@@ -286,90 +374,7 @@ export class TypeBuilder {
       }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
          // will be hanlded in TypeChecker
-         if (
-            calleeType instanceof SquareTypeToValueLambdaType &&
-            calleeType.returnType instanceof RoundValueToValueLambdaType
-         ) {
-            node.autoFilledSquareParams = [];
-            const expectedTypeParams = calleeType.paramTypes;
-            const expectedParams = calleeType.returnType.params;
-            const appliedParams = node.args;
-            // If Varargs
-            if (
-               expectedParams.length === 1 &&
-               expectedParams[0].type instanceof AppliedGenericType &&
-               expectedParams[0].type.callee instanceof NamedType &&
-               expectedParams[0].type.callee.name === "Array"
-            ) {
-               if (appliedParams.length === 0) {
-                  node.takesVarargs = true;
-                  return;
-               }
-               let firstAppliedParamType = this.context.inferencer.infer(
-                  appliedParams[0][1],
-                  scope
-               );
-               if (firstAppliedParamType instanceof LiteralType) {
-                  firstAppliedParamType = firstAppliedParamType.type;
-               }
-               // If array past raw, not as varargs 'func(Array@of(1, 2, 3))'
-               if (
-                  firstAppliedParamType instanceof AppliedGenericType &&
-                  firstAppliedParamType.callee instanceof NamedType &&
-                  firstAppliedParamType.callee.name === "Array"
-               ) {
-                  if (
-                     expectedParams[0].type.parameterTypes[0] instanceof
-                        GenericNamedType &&
-                     firstAppliedParamType.parameterTypes[0] instanceof
-                        NamedType
-                  ) {
-                     node.autoFilledSquareParams = [
-                        firstAppliedParamType.parameterTypes[0],
-                     ];
-                  } else if (
-                     expectedParams[0].type.parameterTypes[0] instanceof
-                        NamedType &&
-                     firstAppliedParamType.parameterTypes[0] instanceof
-                        NamedType
-                  ) {
-                  }
-                  // Varargs
-               } else {
-                  node.autoFilledSquareParams = [firstAppliedParamType];
-                  node.takesVarargs = true;
-               }
-            } else {
-               // Not Varargs
-               let i = 0;
-               for (let [appliedName, appliedTerm] of appliedParams) {
-                  let appliedType = this.context.inferencer.infer(
-                     appliedTerm,
-                     scope
-                  );
-                  if (appliedType instanceof LiteralType) {
-                     appliedType = appliedType.type;
-                  }
-                  const expectedType = appliedName
-                     ? expectedParams.find((p) => p.name === appliedName)
-                     : expectedParams[i];
-                  if (expectedType && expectedType.type instanceof NamedType) {
-                     let index = -1;
-                     while (index < expectedTypeParams.length) {
-                        if (
-                           expectedTypeParams[index]?.name ===
-                           expectedType.type.name
-                        ) {
-                           node.autoFilledSquareParams[index] = appliedType;
-                           break;
-                        }
-                        index++;
-                     }
-                  }
-                  i++;
-               }
-            }
-         }
+         this.buildSquareArgsInRoundApply(node, scope);
       } else {
          const thisOffset = calleeType?.params?.[0]?.name === "this" ? 1 : 0;
          node.args.forEach((statement, i) => {
@@ -381,11 +386,18 @@ export class TypeBuilder {
                   typeExpectedInPlace: expectedType,
                }
             );
-            if (
-               gottenType instanceof MutableType &&
-               !(expectedType instanceof MutableType)
-            ) {
-               statement[1].varTypeInInvarPlace = true;
+            let captureName = undefined;
+            if (isStructConstructor && !(expectedType instanceof MutableType)) {
+               captureName =
+                  statement[1] instanceof Identifier ? statement[1].value : "";
+            }
+            if (scope.iteration === "RESOLUTION") {
+               this.buildVarTransformations(
+                  statement[1],
+                  expectedType,
+                  gottenType,
+                  captureName
+               );
             }
             this.build(statement[1], scope, {
                typeExpectedInPlace: expectedType,
@@ -419,6 +431,7 @@ export class TypeBuilder {
       if (parentType instanceof MutableType) {
          node.owner.varTypeInInvarPlace = true;
       }
+
       let ammortized = false;
       if (parentType instanceof OptionalType && node.ammortized) {
          parentType = parentType.type;
@@ -620,6 +633,19 @@ export class TypeBuilder {
          if (inferredType instanceof RoundValueToValueLambdaType) {
             node.type = inferredType;
             this.convertLambdaToTailrecIfPossible(node, scope, options);
+
+            if (scope.iteration === "RESOLUTION") {
+               const dependencies: Symbol[] = [];
+               for (const statement of node.block.statements) {
+                  dependencies.push(
+                     ...this.termDependencies(statement, scope, innerScope)
+                  );
+                  if (dependencies.length === 0) continue;
+               }
+               if (dependencies.length > 0) {
+                  node.clojure = dependencies;
+               }
+            }
          }
       }
    }
@@ -637,19 +663,30 @@ export class TypeBuilder {
       this.build(node.block, innerScope);
    }
 
-   buildVarTransformations(term: Term, expectedType?: Type, termType?: Type) {
+   buildVarTransformations(
+      term: Term,
+      expectedType?: Type,
+      termType?: Type,
+      capturedName?: string
+   ) {
       const expectedMutable = expectedType instanceof MutableType;
-      if (expectedMutable && !(termType instanceof MutableType)) {
+      if (capturedName !== undefined) {
+         term.capturedName = capturedName;
+      } else if (expectedMutable && !(termType instanceof MutableType)) {
          term.invarTypeInVarPlace = true;
-      }
-      if (!expectedMutable && termType instanceof MutableType) {
+      } else if (!expectedMutable && termType instanceof MutableType) {
          term.varTypeInInvarPlace = true;
       }
    }
 
-   termDependencies(term: Term, scope: Scope): Symbol[] {
+   termDependencies(term: Term, boundaryScope: Scope, scope: Scope): Symbol[] {
       if (term instanceof Identifier) {
-         if (!term.isTypeIdentifier() && scope.hasSymbol(term.value)) {
+         if (
+            !term.isTypeIdentifier() &&
+            boundaryScope.hasSymbol(term.value) &&
+            !scope.hasSymbol(term.value, boundaryScope)
+         ) {
+            term.isFromSelfClojure = true;
             return [scope.lookup(term.value)].filter(
                (s) =>
                   s.isMutable ||
@@ -659,27 +696,76 @@ export class TypeBuilder {
          }
       } else if (term instanceof BinaryExpression) {
          return [
-            ...this.termDependencies(term.left, scope),
-            ...this.termDependencies(term.right, scope),
+            ...this.termDependencies(term.left, boundaryScope, scope),
+            ...this.termDependencies(term.right, boundaryScope, scope),
          ];
       } else if (term instanceof RoundApply) {
          return [
-            ...this.termDependencies(term.callee, scope),
-            ...term.args.flatMap((arg) => this.termDependencies(arg[1], scope)),
+            ...this.termDependencies(term.callee, boundaryScope, scope),
+            ...term.args.flatMap((arg) =>
+               this.termDependencies(arg[1], boundaryScope, scope)
+            ),
          ];
       } else if (term instanceof UnaryOperator && term.operator === "var") {
-         return [...this.termDependencies(term.expression, scope)];
+         return [
+            ...this.termDependencies(term.expression, boundaryScope, scope),
+         ];
       } else if (term instanceof RoundValueToValueLambda) {
          return this.termDependencies(
             term.block,
+            boundaryScope,
             scope.innerScopeOf(term, true)
          );
       } else if (term instanceof Block) {
          return term.statements.flatMap((statement) =>
-            this.termDependencies(statement, scope.innerScopeOf(term, true))
+            this.termDependencies(
+               statement,
+               boundaryScope,
+               scope.innerScopeOf(term, true)
+            )
          );
       } else if (term instanceof Select) {
-         return this.termDependencies(term.owner, scope);
+         return this.termDependencies(term.owner, boundaryScope, scope);
+      } else if (term instanceof Group) {
+         return this.termDependencies(term.value, boundaryScope, scope);
+      }
+      return [];
+   }
+
+   assignClojure(
+      clojure: Symbol[],
+      term: Term,
+      hitLambda: boolean,
+      scope: Scope
+   ) {
+      function getSymbol(name: string) {
+         return clojure.find((t) => t.name === name);
+      }
+      if (term instanceof Identifier) {
+         const symbol = getSymbol(term.value);
+         if (symbol && hitLambda) {
+            term.isFromSelfClojure = true;
+         }
+      } else if (term instanceof BinaryExpression) {
+         this.assignClojure(clojure, term.left, hitLambda, scope);
+         this.assignClojure(clojure, term.right, hitLambda, scope);
+      } else if (term instanceof RoundApply) {
+         this.assignClojure(clojure, term.callee, hitLambda, scope);
+         term.args.forEach((arg) =>
+            this.assignClojure(clojure, arg[1], hitLambda, scope)
+         );
+      } else if (term instanceof UnaryOperator && term.operator === "var") {
+         this.assignClojure(clojure, term.expression, hitLambda, scope);
+      } else if (term instanceof RoundValueToValueLambda) {
+         this.assignClojure(clojure, term.block, true, scope);
+      } else if (term instanceof Block) {
+         term.statements.forEach((statement) =>
+            this.assignClojure(clojure, statement, hitLambda, scope)
+         );
+      } else if (term instanceof Select) {
+         this.assignClojure(clojure, term.owner, hitLambda, scope);
+      } else if (term instanceof Group) {
+         this.assignClojure(clojure, term.value, hitLambda, scope);
       }
       return [];
    }

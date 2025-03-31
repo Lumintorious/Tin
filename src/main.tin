@@ -1,17 +1,23 @@
 # import collections/List
 
-Shape = data:
-	area: () -> var Number
+Box = data:
+	value: var Number
 
-Rectangle = data:
-	side: var Number
+box: Anything = Box(var 12)
+vbox: Anything = Box(var 21)
 
-Rectangle@make = (sideIn: Number): var Rectangle & Shape ~>
-	side = var sideIn
-	rect = Rectangle(side)
-	rect & Shape(() -> side ** 2) 
+takeInvar = (v: Number) ~> print(v)
 
-copy: [T] -> (t: T) -> T = external
+takeInvar(var 2)
 
-rect = Rectangle@make(12)
-debug(rect)
+f = () ~>
+	if box :: Box,
+		print("Yes1")
+
+f2 = () ~>
+	if vbox :: Box,
+		print("Yes2 {vbox.value}")
+
+
+f()
+f2()
