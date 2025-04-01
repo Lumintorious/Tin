@@ -7,11 +7,11 @@ BoxV = data:
 	get: () -> var Number
 
 makeBox = () ->
-	link value = 1
+	value: Number = 1
 	Box(value, () -> value * 10)
 
 makeBoxV = () ->
-	link value = var 1
+	value: var Number = 1
 	BoxV(value, () -> value * 10)
 
 # Invariable values
@@ -23,6 +23,8 @@ assert(box1.value == 1, "Constructor value was incorrect")
 assert(box1.get() == 10, "Constructor clojure was incorrect")
 
 # Check keyword copies into clojures properly
+print(box2)
+print(box2.get())
 assert(box2.value == 99, "Value copy failed")
 assert(box2.get() == 990, "Clojure copy failed")
 
@@ -50,4 +52,4 @@ assert(boxv2.get() == 330, "Reading mutated copy failed")
 assert(boxv1.value == 25, "Copy mutation affected original value")
 assert(boxv1.get() == 250, "Copy mutation affected original clojure")
 
-print("All good")
+

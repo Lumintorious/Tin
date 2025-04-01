@@ -1,0 +1,31 @@
+Health = refined (number: Number) ->
+	number >= 0
+
+Pos3D = data:
+	x: Number
+	y: Number
+	z: Number
+
+Identity = data:
+	id: Number
+	name: String
+
+Entity = data:
+	health: Health
+	position: Pos3D
+
+LivingEntity = refined (entity: Entity) -> entity.health > 0
+DeadEntity   = refined (entity: Entity) -> entity.health == 0
+
+Monster@spawn = (name: String, pos: Pos3D) ->
+	(Identity(0, name) & Entity(5: Health, pos)): LivingEntity
+
+monster = Monster@spawn("Sumpter", Pos3D(0, 0, 0))
+
+instakill = (this: LivingEntity) ->
+	(this copy Entity(health = 0: Health)): DeadEntity
+
+respawn = (this: DeadEntity) ->
+	(this copy Entity(health = 5: Health)): LivingEntity
+
+print(monster.instakill())

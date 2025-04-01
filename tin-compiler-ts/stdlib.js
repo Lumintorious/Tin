@@ -509,6 +509,14 @@ export const _mcOld = (clojure, obj) => {
 	return obj;
 }
 
+export function _cast(obj, type) {
+	if (type.__is_child !== undefined && type.__is_child(obj)) {
+		return obj
+	} else {
+		throw new Error(`'${obj}' was not of type ${(type?._d ?? type)?._s?.description}`)
+	}
+}
+
 export function getRandomInt(min, max) {
 	const minCeiled = Math.ceil(min);
 	const maxFloored = Math.floor(max);
@@ -548,9 +556,9 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 	if (typeof obj === 'object') {
 		let result = sprawl ? '(' : "";
 		let number = 0;
-		if (obj._clojure) {
-			result += `\n[${Object.keys(obj._clojure).join(",")}]\n`
-		}
+		// if (obj._clojure) {
+		// 	result += `\n[${Object.keys(obj._clojure).join(",")}]\n`
+		// }
 		for (let componentKey of Reflect.ownKeys(obj)) {
 			if (!componentKey.description) {
 				continue;

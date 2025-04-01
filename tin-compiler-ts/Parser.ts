@@ -422,7 +422,6 @@ export class ExternalCodeSplice extends Statement {
 
 const PRECEDENCE: { [_: string]: number } = {
    "?:": 110, // Walrus
-   ":": 101,
    ".": 100, // Field access
    "?.": 100, // Field access
    "**": 11, // Exponentiation
@@ -440,6 +439,7 @@ const PRECEDENCE: { [_: string]: number } = {
    "&": 4,
    copy: 4,
    "|": 3,
+   ":": 2,
    // (right-associative)
    "!=": 0, // Inequality
    "==": 0, // Equality

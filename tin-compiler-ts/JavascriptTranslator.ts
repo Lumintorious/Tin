@@ -57,9 +57,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
    run(path: string, isTest?: boolean): void {
       exec(
-         `cd "tin-out${isTest ? "-tests" : ""}"` +
-            " && node --no-warnings --loader ../babel-loader.js " +
-            path,
+         `cd "tin-out${isTest ? "-tests" : ""}"` + " && bun " + path,
          (_, out, err) => {
             console.log(out);
             if (err) {
@@ -367,10 +365,10 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // Cast
       } else if (term instanceof Cast) {
-         return `${this.translate(
+         return `_cast(${this.translate(
             term.expression,
             scope
-         )} /* as ${this.translate(term.type, scope)} */`;
+         )}, ${this.translate(term.type, scope)})`;
 
          // Identifier
       } else if (term instanceof Identifier) {
@@ -613,7 +611,9 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // RefinedDef
       } else if (term instanceof RefinedDef) {
-         return `{__is_child:${this.translate(term.lambda, scope)}}`;
+         return `{__is_child:${this.translate(term.lambda, scope)}}; ${
+            term.translatedType?.name
+         }._s = Symbol("${term.translatedType?.name}");`;
 
          // Optional
       } else if (term instanceof Optional) {

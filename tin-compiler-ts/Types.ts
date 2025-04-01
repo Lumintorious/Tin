@@ -866,16 +866,24 @@ export class MarkerType extends Type {
 }
 
 export class RefinedType extends Type {
-   constructor() {
+   inputType: Type;
+   constructor(inputType: Type) {
       super("RefinedType");
+      this.inputType = inputType;
    }
 
    extends(other: Type, scope: Scope): boolean {
-      return other instanceof Type && this.name === other.name;
+      return (
+         (other instanceof Type && this.name === other.name) ||
+         this.inputType.extends(other, scope)
+      );
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
-      return other instanceof Type && this.name === other.name;
+      return (
+         (other instanceof Type && this.name === other.name) ||
+         this.inputType.isExtendedBy(other, scope)
+      );
    }
 
    toString(): string {

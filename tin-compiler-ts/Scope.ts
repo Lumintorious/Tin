@@ -38,8 +38,8 @@ export class Symbol {
    parentComponent?: Type; // If a field on type ABC, then parentComponent is ABC
    shadowing?: Symbol;
    isMutable: boolean = false;
-	isLink: boolean = false;
-	isPrivate: boolean = false;
+   isLink: boolean = false;
+   isPrivate: boolean = false;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
       this.name = name;
       this.typeSymbol = typeSymbol;

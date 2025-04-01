@@ -1,3 +1,4 @@
+import { RefinedType } from "./Types";
 import {
    AppliedKeyword,
    Assignment,
@@ -592,6 +593,8 @@ export class TypeInferencer {
          return new Map([]);
       } else if (type instanceof MutableType) {
          return this.getAllKnownFields(type.type, scope);
+      } else if (type instanceof RefinedType) {
+         return this.getAllKnownFields(type.inputType, scope);
       } else {
          throw new Error(
             "Could not deduce fields of type " +
@@ -777,8 +780,9 @@ export class TypeInferencer {
 
    DEFINED_OPERATIONS = {
       NumberNumberNumber: ["+", "-", "*", "/", "**", "%"],
-      NumberNumberBoolean: [">", "<", "<=", ">=", "==", "!="],
+      NumberNumberBoolean: [">", "<", "<=", ">="],
       StringAnyString: ["+"],
+      AnyAnyBoolean: ["==", "!="],
       BooleanBooleanBoolean: ["&&", "||"],
    };
 
@@ -819,22 +823,24 @@ export class TypeInferencer {
             leftType instanceof OptionalType ? leftType.type : leftType;
          return this.deduceCommonType(leftType, rightType, scope);
       }
+
+      if (this.DEFINED_OPERATIONS.AnyAnyBoolean.includes(node.operator)) {
+         return make(Boolean.typeSymbol);
+      }
+
       if (
          (leftType.isAssignableTo(Number.typeSymbol, scope) &&
             rightType.isAssignableTo(Number.typeSymbol, scope),
          scope)
       ) {
-         const entry = this.DEFINED_OPERATIONS.NumberNumberNumber;
-         if (entry.includes(node.operator)) {
+         if (
+            this.DEFINED_OPERATIONS.NumberNumberNumber.includes(node.operator)
+         ) {
             return make(Number.typeSymbol);
          }
-      }
-      if (
-         leftType.isAssignableTo(Number.typeSymbol, scope) &&
-         rightType.isAssignableTo(Number.typeSymbol, scope)
-      ) {
-         const entry = this.DEFINED_OPERATIONS.NumberNumberBoolean;
-         if (entry.includes(node.operator)) {
+         if (
+            this.DEFINED_OPERATIONS.NumberNumberBoolean.includes(node.operator)
+         ) {
             return make(Boolean.typeSymbol);
          }
       }
@@ -843,8 +849,11 @@ export class TypeInferencer {
          leftType.isAssignableTo(Boolean.typeSymbol, scope) &&
          rightType.isAssignableTo(Boolean.typeSymbol, scope)
       ) {
-         const entry = this.DEFINED_OPERATIONS.BooleanBooleanBoolean;
-         if (entry.includes(node.operator)) {
+         if (
+            this.DEFINED_OPERATIONS.BooleanBooleanBoolean.includes(
+               node.operator
+            )
+         ) {
             return make(Boolean.typeSymbol);
          }
       }

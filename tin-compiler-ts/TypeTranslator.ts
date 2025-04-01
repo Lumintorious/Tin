@@ -27,7 +27,7 @@ import {
    ThisType,
    RefinedType,
 } from "./Types";
-import { Identifier } from "./Parser";
+import { Identifier, RefinedDef } from "./Parser";
 import { AnyType, MutableType } from "./Types";
 import {
    Type,
@@ -241,7 +241,15 @@ export class TypeTranslator {
                return this.translate(node.value, scope);
             }
          case "RefinedDef":
-            return new RefinedType();
+            if (node instanceof RefinedDef) {
+               const lambdaType = this.context.inferencer.infer(
+                  node.lambda,
+                  scope
+               );
+               if (lambdaType instanceof RoundValueToValueLambdaType) {
+                  return new RefinedType(lambdaType);
+               }
+            }
          default:
             throw new Error("Could not translate " + node.tag);
       }
