@@ -1,7 +1,14 @@
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
-const applyableKeywords = ["return", "set", "import", "unchecked"];
+const applyableKeywords = [
+   "return",
+   "set",
+   "import",
+   "unchecked",
+   "link",
+   "private",
+];
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
    static currentNumber = 0;
@@ -54,6 +61,8 @@ export class Assignment extends AstNode {
    isMutable: boolean = false;
    isParameter: boolean = false;
    isTypeLevel?: boolean;
+   isLink?: boolean;
+   private?: boolean;
    constructor(lhs: Term, value?: Term, isDeclaration = true, type?: Term) {
       super("Assignment"); // tag of the AST node
       this.lhs = lhs; // Name of the variable
@@ -1039,9 +1048,17 @@ export class Parser {
       } else if (
          expression instanceof Assignment &&
          expression.value &&
-         keyword.value === "mutable"
+         keyword.value === "link"
       ) {
-         expression.isMutable = true;
+         expression.private = true;
+         expression.isLink = true;
+         return expression;
+      } else if (
+         expression instanceof Assignment &&
+         expression.value &&
+         keyword.value === "private"
+      ) {
+         expression.private = true;
          return expression;
       } else if (keyword.value === "make") {
          return new Make(expression);

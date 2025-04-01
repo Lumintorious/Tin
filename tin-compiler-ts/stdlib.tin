@@ -52,6 +52,7 @@ Literal = Type & data:
 
 jsonify: (obj: Anything) -> String = external
 dejsonify: (json: String) -> Anything = external
+assert: (condition: Boolean, message: String?) -> Nothing = external
 
 Intersection@of = (left: Type, right: Type) ->
 	check = (obj: Anything) ->

@@ -1,4 +1,4 @@
-import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
+import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out-tests\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
 				globalThis[key] = value;
 		  });;
 export var Box = _S(typeof _sym !== "undefined" ? _sym : Symbol("Box"), (_p0,_p1) => _o({value: _p0,get: _p1}), lazy(Type('Box', (obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(Box._s)))._and(Struct(Array(0)([
@@ -74,5 +74,4 @@ assert((((() => { var _owner = boxv2; return _owner[BoxV._s].get._.call(_owner,)
 assert((boxv2[BoxV._s].value)._ == 33, "Mutating copy failed");
 assert((((() => { var _owner = boxv2; return _owner[BoxV._s].get._.call(_owner,)})()))._ == 330, "Reading mutated copy failed");
 assert(((boxv1)._[BoxV._s].value)._ == 25, "Copy mutation affected original value");
-assert((((() => { var _owner = (boxv1)._; return _owner[BoxV._s].get._.call(_owner,)})()))._ == 250, "Copy mutation affected original clojure");
-print("All good")
+assert((((() => { var _owner = (boxv1)._; return _owner[BoxV._s].get._.call(_owner,)})()))._ == 250, "Copy mutation affected original clojure")

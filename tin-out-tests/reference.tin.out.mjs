@@ -1,4 +1,4 @@
-import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tests\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
+import * as module0 from "file://C:\\Users\\Razvan\\Documents\\Tin\\tin-out-tests\\stdlib.tin.out.mjs";Object.entries(module0).forEach(([key, value]) => {
 				globalThis[key] = value;
 		  });;
 export var v/* Number*/ = 1;
@@ -39,8 +39,12 @@ throw n + 2
 				Number))
 			);
 print("Hello World");
-export var F = _F("Lambda", [Number], Type$get(Number));
-export var FNamed = _F("Lambda", [first, second], Type$get(Number));
+export var F = _F(Symbol("lambda"), function(Number) {try{
+throw Type$get(Number)
+} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, {});
+export var FNamed = _F(Symbol("lambda"), function(first, second) {try{
+throw Type$get(Number)
+} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, {});
 f(24);
 ((v > 0) ? (function(){throw print("Works")})() : (function(){throw print("Doesn't work")})()) ;
 export var ifelse/* Number*/ = ((v > 0) ? (function(){1})() : (function(){2})()) ;
@@ -48,7 +52,7 @@ export var i/* Number*/ = 0;
 while (i < 3) {
  print(i) 
 };
-export var Cat = _S(typeof _sym !== "undefined" ? _sym : Symbol("Cat"), (_p0,_p1 = 1) => _o({name: _p0,age: _p1}), lazy(Type('Cat', (obj) => Reflect.ownKeys(obj).includes(Cat._s))._and(Struct(Array(0)([
+export var Cat = _S(typeof _sym !== "undefined" ? _sym : Symbol("Cat"), (_p0,_p1 = 1) => _o({name: _p0,age: _p1}), lazy(Type('Cat', (obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(Cat._s)))._and(Struct(Array(0)([
 						Parameter("name",
 					Type$of(String),
 					() => { return (undefined)})
@@ -57,7 +61,7 @@ export var Cat = _S(typeof _sym !== "undefined" ? _sym : Symbol("Cat"), (_p0,_p1
 					() => { return (1)})
 		
 			])))), {});
-export var Mech = _S(typeof _sym !== "undefined" ? _sym : Symbol("Mech"), (_p0,_p1) => _o({name: _p0,version: _p1}), lazy(Type('Mech', (obj) => Reflect.ownKeys(obj).includes(Mech._s))._and(Struct(Array(0)([
+export var Mech = _S(typeof _sym !== "undefined" ? _sym : Symbol("Mech"), (_p0,_p1) => _o({name: _p0,version: _p1}), lazy(Type('Mech', (obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(Mech._s)))._and(Struct(Array(0)([
 						Parameter("name",
 					Type$of(String),
 					() => { return (undefined)})

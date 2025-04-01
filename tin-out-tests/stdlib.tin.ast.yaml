@@ -1,16 +1,16 @@
-id: 1544
+id: 3614
 tag: Block
 varTypeInInvarPlace: false
 invarTypeInVarPlace: false
 skipReturn: false
 statements:
-  - id: 1176
+  - id: 3228
     tag: AppliedKeyword
     varTypeInInvarPlace: false
     invarTypeInVarPlace: false
     keyword: external
     param:
-      id: 1175
+      id: 3227
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -28,28 +28,28 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 4
         column: 5
         absolute: 182
-  - id: 1223
+  - id: 3275
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1177
+      id: 3229
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Type
     value:
-      id: 1222
+      id: 3274
       tag: TypeDef
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       fieldDefs:
-        - id: 1181
+        - id: 3233
           tag: FieldDef
           mutable: false
           name: name
           type:
-            id: 1179
+            id: 3231
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -64,30 +64,30 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 6
               column: 7
               absolute: 214
-        - id: 1194
+        - id: 3246
           tag: FieldDef
           mutable: false
           name: check
           defaultValue:
-            id: 1192
+            id: 3244
             tag: RoundValueToValueLambda
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             pure: true
             capturesMutableValues: false
             params:
-              - id: 1186
+              - id: 3238
                 tag: Assignment
                 isMutable: false
                 isParameter: true
                 lhs:
-                  id: 1183
+                  id: 3235
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   value: obj
                 type:
-                  id: 1184
+                  id: 3236
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -104,18 +104,18 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                     column: 25
                     absolute: 232
             block:
-              id: 1191
+              id: 3243
               tag: Block
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               skipReturn: false
               statements:
-                - id: 1190
+                - id: 3242
                   tag: Cast
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   expression:
-                    id: 1188
+                    id: 3240
                     tag: Literal
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -123,7 +123,7 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                     type: Boolean
                     value: false
                   type:
-                    id: 1189
+                    id: 3241
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -148,30 +148,30 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 7
               column: 16
               absolute: 267
-        - id: 1207
+        - id: 3259
           tag: FieldDef
           mutable: false
           name: checkIntegrity
           defaultValue:
-            id: 1205
+            id: 3257
             tag: RoundValueToValueLambda
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             pure: true
             capturesMutableValues: false
             params:
-              - id: 1199
+              - id: 3251
                 tag: Assignment
                 isMutable: false
                 isParameter: true
                 lhs:
-                  id: 1196
+                  id: 3248
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   value: obj
                 type:
-                  id: 1197
+                  id: 3249
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -188,18 +188,18 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                     column: 34
                     absolute: 285
             block:
-              id: 1204
+              id: 3256
               tag: Block
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               skipReturn: false
               statements:
-                - id: 1203
+                - id: 3255
                   tag: Cast
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   expression:
-                    id: 1201
+                    id: 3253
                     tag: Literal
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -207,7 +207,7 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                     type: Boolean
                     value: false
                   type:
-                    id: 1202
+                    id: 3254
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -232,30 +232,30 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 8
               column: 4
               absolute: 308
-        - id: 1220
+        - id: 3272
           tag: FieldDef
           mutable: false
           name: is
           defaultValue:
-            id: 1218
+            id: 3270
             tag: RoundValueToValueLambda
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             pure: true
             capturesMutableValues: false
             params:
-              - id: 1212
+              - id: 3264
                 tag: Assignment
                 isMutable: false
                 isParameter: true
                 lhs:
-                  id: 1209
+                  id: 3261
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   value: parent
                 type:
-                  id: 1210
+                  id: 3262
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -272,18 +272,18 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                     column: 21
                     absolute: 325
             block:
-              id: 1217
+              id: 3269
               tag: Block
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               skipReturn: false
               statements:
-                - id: 1216
+                - id: 3268
                   tag: Cast
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   expression:
-                    id: 1214
+                    id: 3266
                     tag: Literal
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -291,7 +291,7 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                     type: Boolean
                     value: false
                   type:
-                    id: 1215
+                    id: 3267
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -327,18 +327,18 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 10
         column: 8
         absolute: 354
-  - id: 1235
+  - id: 3287
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1224
+      id: 3276
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Type@of
     value:
-      id: 1234
+      id: 3286
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -346,25 +346,25 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
       type: Anything
       value: 
     type:
-      id: 1232
+      id: 3284
       tag: RoundValueToValueLambda
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       pure: true
       capturesMutableValues: false
       params:
-        - id: 1228
+        - id: 3280
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 1225
+            id: 3277
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             value: obj
           type:
-            id: 1226
+            id: 3278
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -381,13 +381,13 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               column: 25
               absolute: 371
       block:
-        id: 1231
+        id: 3283
         tag: Block
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         skipReturn: false
         statements:
-          - id: 1230
+          - id: 3282
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -413,28 +413,28 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 12
         column: 6
         absolute: 399
-  - id: 1255
+  - id: 3307
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1236
+      id: 3288
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Field
     value:
-      id: 1254
+      id: 3306
       tag: TypeDef
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       fieldDefs:
-        - id: 1240
+        - id: 3292
           tag: FieldDef
           mutable: false
           name: name
           type:
-            id: 1238
+            id: 3290
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -449,12 +449,12 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 14
               column: 5
               absolute: 428
-        - id: 1244
+        - id: 3296
           tag: FieldDef
           mutable: false
           name: tpe
           type:
-            id: 1242
+            id: 3294
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -469,23 +469,23 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 15
               column: 14
               absolute: 449
-        - id: 1252
+        - id: 3304
           tag: FieldDef
           mutable: false
           name: defaultValue
           type:
-            id: 1250
+            id: 3302
             tag: Optional
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             doubleQuestionMark: false
             expression:
-              id: 1249
+              id: 3301
               tag: Group
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               value:
-                id: 1248
+                id: 3300
                 tag: RoundValueToValueLambda
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
@@ -493,13 +493,13 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                 capturesMutableValues: false
                 params:
                 block:
-                  id: 1247
+                  id: 3299
                   tag: Block
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   skipReturn: false
                   statements:
-                    - id: 1246
+                    - id: 3298
                       tag: Identifier
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -535,34 +535,34 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 17
         column: 10
         absolute: 481
-  - id: 1276
+  - id: 3328
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1256
+      id: 3308
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Parameter
     value:
-      id: 1275
+      id: 3327
       tag: TypeDef
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       fieldDefs:
-        - id: 1261
+        - id: 3313
           tag: FieldDef
           mutable: false
           name: name
           type:
-            id: 1259
+            id: 3311
             tag: Optional
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             doubleQuestionMark: false
             expression:
-              id: 1258
+              id: 3310
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -577,12 +577,12 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 19
               column: 5
               absolute: 511
-        - id: 1265
+        - id: 3317
           tag: FieldDef
           mutable: false
           name: tpe
           type:
-            id: 1263
+            id: 3315
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -597,23 +597,23 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               line: 20
               column: 14
               absolute: 532
-        - id: 1273
+        - id: 3325
           tag: FieldDef
           mutable: false
           name: defaultValue
           type:
-            id: 1271
+            id: 3323
             tag: Optional
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             doubleQuestionMark: false
             expression:
-              id: 1270
+              id: 3322
               tag: Group
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               value:
-                id: 1269
+                id: 3321
                 tag: RoundValueToValueLambda
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
@@ -621,13 +621,13 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                 capturesMutableValues: false
                 params:
                 block:
-                  id: 1268
+                  id: 3320
                   tag: Block
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   skipReturn: false
                   statements:
-                    - id: 1267
+                    - id: 3319
                       tag: Identifier
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -663,40 +663,40 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 22
         column: 13
         absolute: 567
-  - id: 1290
+  - id: 3342
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1277
+      id: 3329
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Intersection
     value:
-      id: 1289
+      id: 3341
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1278
+        id: 3330
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Type
       operator: &
       right:
-        id: 1288
+        id: 3340
         tag: TypeDef
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         fieldDefs:
-          - id: 1282
+          - id: 3334
             tag: FieldDef
             mutable: false
             name: left
             type:
-              id: 1280
+              id: 3332
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -711,12 +711,12 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                 line: 24
                 column: 7
                 absolute: 603
-          - id: 1286
+          - id: 3338
             tag: FieldDef
             mutable: false
             name: right
             type:
-              id: 1284
+              id: 3336
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -742,40 +742,40 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 26
         column: 6
         absolute: 618
-  - id: 1304
+  - id: 3356
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1291
+      id: 3343
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Union
     value:
-      id: 1303
+      id: 3355
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1292
+        id: 3344
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Type
       operator: &
       right:
-        id: 1302
+        id: 3354
         tag: TypeDef
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         fieldDefs:
-          - id: 1296
+          - id: 3348
             tag: FieldDef
             mutable: false
             name: left
             type:
-              id: 1294
+              id: 3346
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -790,12 +790,12 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                 line: 28
                 column: 7
                 absolute: 654
-          - id: 1300
+          - id: 3352
             tag: FieldDef
             mutable: false
             name: right
             type:
-              id: 1298
+              id: 3350
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -821,52 +821,52 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 30
         column: 7
         absolute: 670
-  - id: 1316
+  - id: 3368
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1305
+      id: 3357
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Struct
     value:
-      id: 1315
+      id: 3367
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1306
+        id: 3358
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Type
       operator: &
       right:
-        id: 1314
+        id: 3366
         tag: TypeDef
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         fieldDefs:
-          - id: 1312
+          - id: 3364
             tag: FieldDef
             mutable: false
             name: fields
             type:
-              id: 1310
+              id: 3362
               tag: SquareApply
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               isCallingAConstructor: false
               callee:
-                id: 1308
+                id: 3360
                 tag: Identifier
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 value: Array
               typeArgs:
-                - id: 1309
+                - id: 3361
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -901,52 +901,52 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 33
         column: 7
         absolute: 718
-  - id: 1332
+  - id: 3384
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1317
+      id: 3369
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Lambda
     value:
-      id: 1331
+      id: 3383
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1318
+        id: 3370
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Type
       operator: &
       right:
-        id: 1330
+        id: 3382
         tag: TypeDef
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         fieldDefs:
-          - id: 1324
+          - id: 3376
             tag: FieldDef
             mutable: false
             name: params
             type:
-              id: 1322
+              id: 3374
               tag: SquareApply
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               isCallingAConstructor: false
               callee:
-                id: 1320
+                id: 3372
                 tag: Identifier
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 value: Array
               typeArgs:
-                - id: 1321
+                - id: 3373
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -970,12 +970,12 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
                 line: 35
                 column: 12
                 absolute: 773
-          - id: 1328
+          - id: 3380
             tag: FieldDef
             mutable: false
             name: resultType
             type:
-              id: 1326
+              id: 3378
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -1001,40 +1001,40 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 37
         column: 8
         absolute: 790
-  - id: 1344
+  - id: 3396
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1333
+      id: 3385
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: RefType
     value:
-      id: 1343
+      id: 3395
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1334
+        id: 3386
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Type
       operator: &
       right:
-        id: 1342
+        id: 3394
         tag: TypeDef
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         fieldDefs:
-          - id: 1340
+          - id: 3392
             tag: FieldDef
             mutable: false
             name: get
             type:
-              id: 1338
+              id: 3390
               tag: RoundValueToValueLambda
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -1042,13 +1042,13 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
               capturesMutableValues: false
               params:
               block:
-                id: 1337
+                id: 3389
                 tag: Block
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 skipReturn: false
                 statements:
-                  - id: 1336
+                  - id: 3388
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -1084,13 +1084,13 @@ export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type(
         line: 40
         column: 9
         absolute: 835
-  - id: 1346
+  - id: 3398
     tag: AppliedKeyword
     varTypeInInvarPlace: false
     invarTypeInVarPlace: false
     keyword: external
     param:
-      id: 1345
+      id: 3397
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -1111,76 +1111,76 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
         line: 42
         column: 8
         absolute: 1457
-  - id: 1366
+  - id: 3418
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1347
+      id: 3399
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Literal
     value:
-      id: 1365
+      id: 3417
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1348
+        id: 3400
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Type
       operator: &
       right:
-        id: 1364
+        id: 3416
         tag: TypeDef
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         fieldDefs:
-          - id: 1358
+          - id: 3410
             tag: FieldDef
             mutable: false
             name: value
             type:
-              id: 1356
+              id: 3408
               tag: BinaryExpression
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               left:
-                id: 1354
+                id: 3406
                 tag: BinaryExpression
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 left:
-                  id: 1352
+                  id: 3404
                   tag: BinaryExpression
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   left:
-                    id: 1350
+                    id: 3402
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: String
                   operator: |
                   right:
-                    id: 1351
+                    id: 3403
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: Number
                 operator: |
                 right:
-                  id: 1353
+                  id: 3405
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   value: Boolean
               operator: |
               right:
-                id: 1355
+                id: 3407
                 tag: Identifier
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
@@ -1195,12 +1195,12 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                 line: 44
                 column: 6
                 absolute: 1524
-          - id: 1362
+          - id: 3414
             tag: FieldDef
             mutable: false
             name: type
             type:
-              id: 1360
+              id: 3412
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -1226,18 +1226,18 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
         line: 46
         column: 8
         absolute: 1541
-  - id: 1378
+  - id: 3430
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1367
+      id: 3419
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: jsonify
     value:
-      id: 1377
+      id: 3429
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -1245,25 +1245,25 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
       type: Anything
       value: 
     type:
-      id: 1375
+      id: 3427
       tag: RoundValueToValueLambda
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       pure: true
       capturesMutableValues: false
       params:
-        - id: 1371
+        - id: 3423
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 1368
+            id: 3420
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             value: obj
           type:
-            id: 1369
+            id: 3421
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -1280,13 +1280,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               column: 25
               absolute: 1558
       block:
-        id: 1374
+        id: 3426
         tag: Block
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         skipReturn: false
         statements:
-          - id: 1373
+          - id: 3425
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -1312,18 +1312,18 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
         line: 47
         column: 10
         absolute: 1590
-  - id: 1390
+  - id: 3442
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1379
+      id: 3431
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: dejsonify
     value:
-      id: 1389
+      id: 3441
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -1331,25 +1331,25 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
       type: Anything
       value: 
     type:
-      id: 1387
+      id: 3439
       tag: RoundValueToValueLambda
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       pure: true
       capturesMutableValues: false
       params:
-        - id: 1383
+        - id: 3435
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 1380
+            id: 3432
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             value: json
           type:
-            id: 1381
+            id: 3433
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -1366,13 +1366,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               column: 26
               absolute: 1606
       block:
-        id: 1386
+        id: 3438
         tag: Block
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         skipReturn: false
         statements:
-          - id: 1385
+          - id: 3437
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -1395,118 +1395,237 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
         column: 1
         absolute: 1590
       end:
-        line: 49
-        column: 16
-        absolute: 1648
-  - id: 1458
+        line: 48
+        column: 7
+        absolute: 1637
+  - id: 3460
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1391
+      id: 3443
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
-      value: Intersection@of
+      value: assert
     value:
-      id: 1457
+      id: 3459
+      tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
+      type: Anything
+      value: 
+    type:
+      id: 3457
       tag: RoundValueToValueLambda
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       pure: true
       capturesMutableValues: false
       params:
-        - id: 1395
+        - id: 3447
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 1392
+            id: 3444
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
-            value: left
+            value: condition
           type:
-            id: 1393
+            id: 3445
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
-            value: Type
+            value: Boolean
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
-              line: 49
-              column: 20
-              absolute: 1656
+              line: 48
+              column: 10
+              absolute: 1649
             end:
-              line: 49
-              column: 31
-              absolute: 1663
-        - id: 1400
+              line: 48
+              column: 29
+              absolute: 1659
+        - id: 3453
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 1397
+            id: 3449
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
-            value: right
+            value: message
           type:
-            id: 1398
-            tag: Identifier
+            id: 3451
+            tag: Optional
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
-            value: Type
+            doubleQuestionMark: false
+            expression:
+              id: 3450
+              tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              value: String
           isDeclaration: false
           isTypeLevel: false
           position:
             start:
-              line: 49
-              column: 32
-              absolute: 1669
+              line: 48
+              column: 30
+              absolute: 1667
             end:
-              line: 49
-              column: 44
-              absolute: 1676
+              line: 48
+              column: 47
+              absolute: 1677
       block:
-        id: 1456
+        id: 3456
         tag: Block
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         skipReturn: false
         statements:
-          - id: 1423
+          - id: 3455
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Nothing
+            position:
+              start:
+                line: 48
+                column: 51
+                absolute: 1688
+              end:
+                line: 48
+                column: 60
+                absolute: 1690
+      specifiedType: undefined
+    isDeclaration: true
+    isTypeLevel: false
+    position:
+      start:
+        line: 48
+        column: 1
+        absolute: 1637
+      end:
+        line: 50
+        column: 16
+        absolute: 1718
+  - id: 3528
+    tag: Assignment
+    isMutable: false
+    isParameter: false
+    lhs:
+      id: 3461
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: Intersection@of
+    value:
+      id: 3527
+      tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
+      params:
+        - id: 3465
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 3462
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: left
+          type:
+            id: 3463
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 50
+              column: 20
+              absolute: 1726
+            end:
+              line: 50
+              column: 31
+              absolute: 1733
+        - id: 3470
+          tag: Assignment
+          isMutable: false
+          isParameter: true
+          lhs:
+            id: 3467
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: right
+          type:
+            id: 3468
+            tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
+            value: Type
+          isDeclaration: false
+          isTypeLevel: false
+          position:
+            start:
+              line: 50
+              column: 32
+              absolute: 1739
+            end:
+              line: 50
+              column: 44
+              absolute: 1746
+      block:
+        id: 3526
+        tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
+        statements:
+          - id: 3493
             tag: Assignment
             isMutable: false
             isParameter: false
             lhs:
-              id: 1402
+              id: 3472
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               value: check
             value:
-              id: 1422
+              id: 3492
               tag: RoundValueToValueLambda
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               pure: true
               capturesMutableValues: false
               params:
-                - id: 1406
+                - id: 3476
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 1403
+                    id: 3473
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: obj
                   type:
-                    id: 1404
+                    id: 3474
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -1515,26 +1634,26 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                   isTypeLevel: false
                   position:
                     start:
-                      line: 50
+                      line: 51
                       column: 11
-                      absolute: 1694
+                      absolute: 1764
                     end:
-                      line: 50
+                      line: 51
                       column: 25
-                      absolute: 1705
+                      absolute: 1775
               block:
-                id: 1421
+                id: 3491
                 tag: Block
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 skipReturn: false
                 statements:
-                  - id: 1420
+                  - id: 3490
                     tag: BinaryExpression
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     left:
-                      id: 1413
+                      id: 3483
                       tag: RoundApply
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -1544,13 +1663,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       isAnObjectCopy: false
                       isCallingAConstructor: false
                       callee:
-                        id: 1412
+                        id: 3482
                         tag: Select
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         ammortized: false
                         owner:
-                          id: 1408
+                          id: 3478
                           tag: Identifier
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
@@ -1559,14 +1678,14 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       args:
                         - 0: 
                           1:
-                            id: 1410
+                            id: 3480
                             tag: Identifier
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
                             value: obj
                     operator: &&
                     right:
-                      id: 1419
+                      id: 3489
                       tag: RoundApply
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -1576,13 +1695,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       isAnObjectCopy: false
                       isCallingAConstructor: false
                       callee:
-                        id: 1418
+                        id: 3488
                         tag: Select
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         ammortized: false
                         owner:
-                          id: 1414
+                          id: 3484
                           tag: Identifier
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
@@ -1591,62 +1710,62 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       args:
                         - 0: 
                           1:
-                            id: 1416
+                            id: 3486
                             tag: Identifier
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
                             value: obj
                     position:
                       start:
-                        line: 51
+                        line: 52
                         column: 3
-                        absolute: 1716
+                        absolute: 1786
                       end:
-                        line: 53
+                        line: 54
                         column: 2
-                        absolute: 1752
+                        absolute: 1822
               specifiedType: undefined
             isDeclaration: true
             isTypeLevel: false
             position:
               start:
-                line: 50
+                line: 51
                 column: 2
-                absolute: 1687
+                absolute: 1757
               end:
-                line: 53
+                line: 54
                 column: 16
-                absolute: 1766
-          - id: 1445
+                absolute: 1836
+          - id: 3515
             tag: Assignment
             isMutable: false
             isParameter: false
             lhs:
-              id: 1424
+              id: 3494
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               value: checkIntegrity
             value:
-              id: 1444
+              id: 3514
               tag: RoundValueToValueLambda
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               pure: true
               capturesMutableValues: false
               params:
-                - id: 1428
+                - id: 3498
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 1425
+                    id: 3495
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: obj
                   type:
-                    id: 1426
+                    id: 3496
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -1655,26 +1774,26 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                   isTypeLevel: false
                   position:
                     start:
-                      line: 53
+                      line: 54
                       column: 20
-                      absolute: 1773
+                      absolute: 1843
                     end:
-                      line: 53
+                      line: 54
                       column: 34
-                      absolute: 1784
+                      absolute: 1854
               block:
-                id: 1443
+                id: 3513
                 tag: Block
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 skipReturn: false
                 statements:
-                  - id: 1442
+                  - id: 3512
                     tag: BinaryExpression
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     left:
-                      id: 1435
+                      id: 3505
                       tag: RoundApply
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -1684,13 +1803,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       isAnObjectCopy: false
                       isCallingAConstructor: false
                       callee:
-                        id: 1434
+                        id: 3504
                         tag: Select
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         ammortized: false
                         owner:
-                          id: 1430
+                          id: 3500
                           tag: Identifier
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
@@ -1699,14 +1818,14 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       args:
                         - 0: 
                           1:
-                            id: 1432
+                            id: 3502
                             tag: Identifier
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
                             value: obj
                     operator: &&
                     right:
-                      id: 1441
+                      id: 3511
                       tag: RoundApply
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -1716,13 +1835,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       isAnObjectCopy: false
                       isCallingAConstructor: false
                       callee:
-                        id: 1440
+                        id: 3510
                         tag: Select
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         ammortized: false
                         owner:
-                          id: 1436
+                          id: 3506
                           tag: Identifier
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
@@ -1731,38 +1850,38 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       args:
                         - 0: 
                           1:
-                            id: 1438
+                            id: 3508
                             tag: Identifier
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
                             value: obj
                     position:
                       start:
-                        line: 54
+                        line: 55
                         column: 3
-                        absolute: 1795
+                        absolute: 1865
                       end:
-                        line: 56
+                        line: 57
                         column: 2
-                        absolute: 1849
+                        absolute: 1919
               specifiedType: undefined
             isDeclaration: true
             isTypeLevel: false
             position:
               start:
-                line: 53
+                line: 54
                 column: 2
-                absolute: 1766
+                absolute: 1836
               end:
-                line: 56
+                line: 57
                 column: 6
-                absolute: 1853
-          - id: 1455
+                absolute: 1923
+          - id: 3525
             tag: BinaryExpression
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             left:
-              id: 1450
+              id: 3520
               tag: RoundApply
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -1772,7 +1891,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               isAnObjectCopy: false
               isCallingAConstructor: false
               callee:
-                id: 1446
+                id: 3516
                 tag: Identifier
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
@@ -1780,7 +1899,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               args:
                 - 0: 
                   1:
-                    id: 1447
+                    id: 3517
                     tag: Literal
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -1789,21 +1908,21 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                     value: Intersection
                 - 0: 
                   1:
-                    id: 1448
+                    id: 3518
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: check
                 - 0: 
                   1:
-                    id: 1449
+                    id: 3519
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: checkIntegrity
             operator: &
             right:
-              id: 1454
+              id: 3524
               tag: RoundApply
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -1813,7 +1932,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               isAnObjectCopy: false
               isCallingAConstructor: false
               callee:
-                id: 1451
+                id: 3521
                 tag: Identifier
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
@@ -1821,96 +1940,96 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               args:
                 - 0: 
                   1:
-                    id: 1452
+                    id: 3522
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: left
                 - 0: 
                   1:
-                    id: 1453
+                    id: 3523
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: right
             position:
               start:
-                line: 56
+                line: 57
                 column: 2
-                absolute: 1853
+                absolute: 1923
               end:
-                line: 58
+                line: 59
                 column: 1
-                absolute: 1924
+                absolute: 1994
       specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 49
+        line: 50
         column: 1
-        absolute: 1648
+        absolute: 1718
       end:
-        line: 58
+        line: 59
         column: 6
-        absolute: 1929
-  - id: 1479
+        absolute: 1999
+  - id: 3549
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1459
+      id: 3529
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Digit
     value:
-      id: 1478
+      id: 3548
       tag: BinaryExpression
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       left:
-        id: 1476
+        id: 3546
         tag: BinaryExpression
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         left:
-          id: 1474
+          id: 3544
           tag: BinaryExpression
           varTypeInInvarPlace: false
           invarTypeInVarPlace: false
           left:
-            id: 1472
+            id: 3542
             tag: BinaryExpression
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
             left:
-              id: 1470
+              id: 3540
               tag: BinaryExpression
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               left:
-                id: 1468
+                id: 3538
                 tag: BinaryExpression
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 left:
-                  id: 1466
+                  id: 3536
                   tag: BinaryExpression
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   left:
-                    id: 1464
+                    id: 3534
                     tag: BinaryExpression
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     left:
-                      id: 1462
+                      id: 3532
                       tag: BinaryExpression
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
                       left:
-                        id: 1460
+                        id: 3530
                         tag: Literal
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
@@ -1919,7 +2038,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                         value: 0
                       operator: |
                       right:
-                        id: 1461
+                        id: 3531
                         tag: Literal
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
@@ -1928,7 +2047,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                         value: 1
                     operator: |
                     right:
-                      id: 1463
+                      id: 3533
                       tag: Literal
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
@@ -1937,7 +2056,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                       value: 2
                   operator: |
                   right:
-                    id: 1465
+                    id: 3535
                     tag: Literal
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -1946,7 +2065,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                     value: 3
                 operator: |
                 right:
-                  id: 1467
+                  id: 3537
                   tag: Literal
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -1955,7 +2074,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                   value: 4
               operator: |
               right:
-                id: 1469
+                id: 3539
                 tag: Literal
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
@@ -1964,7 +2083,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                 value: 5
             operator: |
             right:
-              id: 1471
+              id: 3541
               tag: Literal
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -1973,7 +2092,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
               value: 6
           operator: |
           right:
-            id: 1473
+            id: 3543
             tag: Literal
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -1982,7 +2101,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
             value: 7
         operator: |
         right:
-          id: 1475
+          id: 3545
           tag: Literal
           varTypeInInvarPlace: false
           invarTypeInVarPlace: false
@@ -1991,7 +2110,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
           value: 8
       operator: |
       right:
-        id: 1477
+        id: 3547
         tag: Literal
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
@@ -2002,25 +2121,25 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
     isTypeLevel: true
     position:
       start:
-        line: 58
-        column: 1
-        absolute: 1929
-      end:
         line: 59
+        column: 1
+        absolute: 1999
+      end:
+        line: 60
         column: 4
-        absolute: 1974
-  - id: 1482
+        absolute: 2044
+  - id: 3552
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1480
+      id: 3550
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: One
     value:
-      id: 1481
+      id: 3551
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -2031,36 +2150,36 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
     isTypeLevel: true
     position:
       start:
-        line: 59
+        line: 60
         column: 1
-        absolute: 1974
+        absolute: 2044
       end:
-        line: 61
+        line: 62
         column: 13
-        absolute: 1994
-  - id: 1543
+        absolute: 2064
+  - id: 3613
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1483
+      id: 3553
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Union@values
     value:
-      id: 1542
+      id: 3612
       tag: SquareTypeToValueLambda
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       capturesMutableValues: false
       parameterTypes:
-        - id: 1485
+        - id: 3555
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 1484
+            id: 3554
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -2069,50 +2188,50 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
           isTypeLevel: true
           position:
             start:
-              line: 61
+              line: 62
               column: 17
-              absolute: 1999
+              absolute: 2069
             end:
-              line: 61
+              line: 62
               column: 19
-              absolute: 2000
+              absolute: 2070
       block:
-        id: 1541
+        id: 3611
         tag: Block
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         skipReturn: false
         statements:
-          - id: 1537
+          - id: 3607
             tag: Assignment
             isMutable: false
             isParameter: false
             lhs:
-              id: 1487
+              id: 3557
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               value: go
             value:
-              id: 1536
+              id: 3606
               tag: RoundValueToValueLambda
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
               pure: true
               capturesMutableValues: false
               params:
-                - id: 1491
+                - id: 3561
                   tag: Assignment
                   isMutable: false
                   isParameter: true
                   lhs:
-                    id: 1488
+                    id: 3558
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: type
                   type:
-                    id: 1489
+                    id: 3559
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
@@ -2121,49 +2240,49 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                   isTypeLevel: false
                   position:
                     start:
-                      line: 62
+                      line: 63
                       column: 8
-                      absolute: 2016
+                      absolute: 2086
                     end:
-                      line: 62
+                      line: 63
                       column: 19
-                      absolute: 2023
+                      absolute: 2093
               block:
-                id: 1535
+                id: 3605
                 tag: Block
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 skipReturn: false
                 statements:
-                  - id: 1534
+                  - id: 3604
                     tag: IfStatement
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     condition:
-                      id: 1498
+                      id: 3568
                       tag: TypeCheck
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
                       term:
-                        id: 1496
+                        id: 3566
                         tag: Identifier
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         value: type
                       type:
-                        id: 1497
+                        id: 3567
                         tag: Identifier
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         value: Literal
                     trueBranch:
-                      id: 1509
+                      id: 3579
                       tag: Block
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
                       skipReturn: false
                       statements:
-                        - id: 1508
+                        - id: 3578
                           tag: RoundApply
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
@@ -2173,111 +2292,111 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                           isAnObjectCopy: false
                           isCallingAConstructor: false
                           callee:
-                            id: 1501
+                            id: 3571
                             tag: SquareApply
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
                             isCallingAConstructor: false
                             callee:
-                              id: 1499
+                              id: 3569
                               tag: Identifier
                               varTypeInInvarPlace: false
                               invarTypeInVarPlace: false
                               value: Array@of
                             typeArgs:
-                              - id: 1500
+                              - id: 3570
                                 tag: Identifier
                                 varTypeInInvarPlace: false
                                 invarTypeInVarPlace: false
                                 value: T
                                 position:
                                   start:
-                                    line: 64
+                                    line: 65
                                     column: 13
-                                    absolute: 2074
+                                    absolute: 2144
                                   end:
-                                    line: 64
+                                    line: 65
                                     column: 15
-                                    absolute: 2075
+                                    absolute: 2145
                           args:
                             0:
                               - 
-                              - id: 1507
+                              - id: 3577
                                 tag: Cast
                                 varTypeInInvarPlace: false
                                 invarTypeInVarPlace: false
                                 expression:
-                                  id: 1506
+                                  id: 3576
                                   tag: Group
                                   varTypeInInvarPlace: false
                                   invarTypeInVarPlace: false
                                   value:
-                                    id: 1504
+                                    id: 3574
                                     tag: Select
                                     varTypeInInvarPlace: false
                                     invarTypeInVarPlace: false
                                     ammortized: false
                                     owner:
-                                      id: 1502
+                                      id: 3572
                                       tag: Identifier
                                       varTypeInInvarPlace: false
                                       invarTypeInVarPlace: false
                                       value: type
                                     field: value
                                 type:
-                                  id: 1505
+                                  id: 3575
                                   tag: Identifier
                                   varTypeInInvarPlace: false
                                   invarTypeInVarPlace: false
                                   value: T
                                 position:
                                   start:
-                                    line: 64
+                                    line: 65
                                     column: 16
-                                    absolute: 2077
+                                    absolute: 2147
                                   end:
-                                    line: 64
+                                    line: 65
                                     column: 32
-                                    absolute: 2092
+                                    absolute: 2162
                           position:
                             start:
-                              line: 64
-                              column: 4
-                              absolute: 2072
-                            end:
                               line: 65
+                              column: 4
+                              absolute: 2142
+                            end:
+                              line: 66
                               column: 3
-                              absolute: 2096
+                              absolute: 2166
                     falseBranch:
-                      id: 1533
+                      id: 3603
                       tag: IfStatement
                       varTypeInInvarPlace: false
                       invarTypeInVarPlace: false
                       condition:
-                        id: 1512
+                        id: 3582
                         tag: TypeCheck
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         term:
-                          id: 1510
+                          id: 3580
                           tag: Identifier
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
                           value: type
                         type:
-                          id: 1511
+                          id: 3581
                           tag: Identifier
                           varTypeInInvarPlace: false
                           invarTypeInVarPlace: false
                           value: Union
                       trueBranch:
-                        id: 1527
+                        id: 3597
                         tag: Block
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         skipReturn: false
                         statements:
-                          - id: 1526
+                          - id: 3596
                             tag: RoundApply
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
@@ -2287,13 +2406,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                             isAnObjectCopy: false
                             isCallingAConstructor: false
                             callee:
-                              id: 1525
+                              id: 3595
                               tag: Select
                               varTypeInInvarPlace: false
                               invarTypeInVarPlace: false
                               ammortized: false
                               owner:
-                                id: 1517
+                                id: 3587
                                 tag: RoundApply
                                 varTypeInInvarPlace: false
                                 invarTypeInVarPlace: false
@@ -2303,7 +2422,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                 isAnObjectCopy: false
                                 isCallingAConstructor: false
                                 callee:
-                                  id: 1513
+                                  id: 3583
                                   tag: Identifier
                                   varTypeInInvarPlace: false
                                   invarTypeInVarPlace: false
@@ -2311,13 +2430,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                 args:
                                   - 0: 
                                     1:
-                                      id: 1516
+                                      id: 3586
                                       tag: Select
                                       varTypeInInvarPlace: false
                                       invarTypeInVarPlace: false
                                       ammortized: false
                                       owner:
-                                        id: 1514
+                                        id: 3584
                                         tag: Identifier
                                         varTypeInInvarPlace: false
                                         invarTypeInVarPlace: false
@@ -2327,7 +2446,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                             args:
                               0:
                                 - 
-                                - id: 1523
+                                - id: 3593
                                   tag: RoundApply
                                   varTypeInInvarPlace: false
                                   invarTypeInVarPlace: false
@@ -2337,7 +2456,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                   isAnObjectCopy: false
                                   isCallingAConstructor: false
                                   callee:
-                                    id: 1519
+                                    id: 3589
                                     tag: Identifier
                                     varTypeInInvarPlace: false
                                     invarTypeInVarPlace: false
@@ -2345,13 +2464,13 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                   args:
                                     0:
                                       - 
-                                      - id: 1522
+                                      - id: 3592
                                         tag: Select
                                         varTypeInInvarPlace: false
                                         invarTypeInVarPlace: false
                                         ammortized: false
                                         owner:
-                                          id: 1520
+                                          id: 3590
                                           tag: Identifier
                                           varTypeInInvarPlace: false
                                           invarTypeInVarPlace: false
@@ -2359,39 +2478,39 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                                         field: right
                                         position:
                                           start:
-                                            line: 66
+                                            line: 67
                                             column: 25
-                                            absolute: 2148
+                                            absolute: 2218
                                           end:
-                                            line: 66
+                                            line: 67
                                             column: 36
-                                            absolute: 2155
+                                            absolute: 2225
                                   position:
                                     start:
-                                      line: 66
+                                      line: 67
                                       column: 22
-                                      absolute: 2143
+                                      absolute: 2213
                                     end:
-                                      line: 66
+                                      line: 67
                                       column: 37
-                                      absolute: 2156
+                                      absolute: 2226
                             position:
                               start:
-                                line: 66
-                                column: 4
-                                absolute: 2125
-                              end:
                                 line: 67
+                                column: 4
+                                absolute: 2195
+                              end:
+                                line: 68
                                 column: 3
-                                absolute: 2160
+                                absolute: 2230
                       falseBranch:
-                        id: 1532
+                        id: 3602
                         tag: Block
                         varTypeInInvarPlace: false
                         invarTypeInVarPlace: false
                         skipReturn: false
                         statements:
-                          - id: 1531
+                          - id: 3601
                             tag: RoundApply
                             varTypeInInvarPlace: false
                             invarTypeInVarPlace: false
@@ -2401,90 +2520,90 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
                             isAnObjectCopy: false
                             isCallingAConstructor: false
                             callee:
-                              id: 1530
+                              id: 3600
                               tag: SquareApply
                               varTypeInInvarPlace: false
                               invarTypeInVarPlace: false
                               isCallingAConstructor: false
                               callee:
-                                id: 1528
+                                id: 3598
                                 tag: Identifier
                                 varTypeInInvarPlace: false
                                 invarTypeInVarPlace: false
                                 value: Array@of
                               typeArgs:
-                                - id: 1529
+                                - id: 3599
                                   tag: Identifier
                                   varTypeInInvarPlace: false
                                   invarTypeInVarPlace: false
                                   value: T
                                   position:
                                     start:
-                                      line: 68
+                                      line: 69
                                       column: 13
-                                      absolute: 2179
+                                      absolute: 2249
                                     end:
-                                      line: 68
+                                      line: 69
                                       column: 15
-                                      absolute: 2180
+                                      absolute: 2250
                             args:
                             position:
                               start:
-                                line: 68
-                                column: 4
-                                absolute: 2177
-                              end:
                                 line: 69
+                                column: 4
+                                absolute: 2247
+                              end:
+                                line: 70
                                 column: 2
-                                absolute: 2185
+                                absolute: 2255
                     position:
                       start:
-                        line: 63
+                        line: 64
                         column: 3
-                        absolute: 2042
+                        absolute: 2112
                       end:
-                        line: 69
+                        line: 70
                         column: 2
-                        absolute: 2185
+                        absolute: 2255
               specifiedType:
-                id: 1495
+                id: 3565
                 tag: SquareApply
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 isCallingAConstructor: false
                 callee:
-                  id: 1493
+                  id: 3563
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   value: Array
                 typeArgs:
-                  - id: 1494
+                  - id: 3564
                     tag: Identifier
                     varTypeInInvarPlace: false
                     invarTypeInVarPlace: false
                     value: T
                     position:
                       start:
-                        line: 62
+                        line: 63
                         column: 27
-                        absolute: 2032
+                        absolute: 2102
                       end:
-                        line: 62
+                        line: 63
                         column: 29
-                        absolute: 2033
+                        absolute: 2103
             isDeclaration: true
             isTypeLevel: false
             position:
               start:
-                line: 62
+                line: 63
                 column: 2
-                absolute: 2008
+                absolute: 2078
               end:
-                line: 69
+                line: 70
                 column: 4
-                absolute: 2187
-          - id: 1540
+                absolute: 2257
+          - id: 3610
             tag: RoundApply
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -2494,7 +2613,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
             isAnObjectCopy: false
             isCallingAConstructor: false
             callee:
-              id: 1538
+              id: 3608
               tag: Identifier
               varTypeInInvarPlace: false
               invarTypeInVarPlace: false
@@ -2502,32 +2621,32 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
             args:
               0:
                 - 
-                - id: 1539
+                - id: 3609
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
                   value: T
                   position:
                     start:
-                      line: 69
+                      line: 70
                       column: 5
-                      absolute: 2189
+                      absolute: 2259
                     end:
-                      line: 69
+                      line: 70
                       column: 7
-                      absolute: 2190
+                      absolute: 2260
             position:
               start:
-                line: 69
+                line: 70
                 column: 2
-                absolute: 2187
+                absolute: 2257
               end: 0
       pure: true
     isDeclaration: true
     isTypeLevel: false
     position:
       start:
-        line: 61
+        line: 62
         column: 1
-        absolute: 1994
+        absolute: 2064
       end: 0

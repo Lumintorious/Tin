@@ -1,31 +1,31 @@
-id: 1173
+id: 2700
 tag: Block
 varTypeInInvarPlace: false
 invarTypeInVarPlace: false
 skipReturn: false
 statements:
-  - id: 1158
+  - id: 2685
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1151
+      id: 2678
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: Tp
     value:
-      id: 1157
+      id: 2684
       tag: TypeDef
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       fieldDefs:
-        - id: 1155
+        - id: 2682
           tag: FieldDef
           mutable: false
           name: value
           type:
-            id: 1153
+            id: 2680
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -51,18 +51,18 @@ statements:
         line: 4
         column: 2
         absolute: 31
-  - id: 1161
+  - id: 2688
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 1159
+      id: 2686
       tag: Identifier
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       value: a
     value:
-      id: 1160
+      id: 2687
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
@@ -80,35 +80,35 @@ statements:
         line: 5
         column: 3
         absolute: 39
-  - id: 1172
+  - id: 2699
     tag: IfStatement
     varTypeInInvarPlace: false
     invarTypeInVarPlace: false
     condition:
-      id: 1164
+      id: 2691
       tag: TypeCheck
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       term:
-        id: 1162
+        id: 2689
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: a
       type:
-        id: 1163
+        id: 2690
         tag: Identifier
         varTypeInInvarPlace: false
         invarTypeInVarPlace: false
         value: Tp
     trueBranch:
-      id: 1170
+      id: 2697
       tag: Block
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false
       skipReturn: false
       statements:
-        - id: 1169
+        - id: 2696
           tag: RoundApply
           varTypeInInvarPlace: false
           invarTypeInVarPlace: false
@@ -118,7 +118,7 @@ statements:
           isAnObjectCopy: false
           isCallingAConstructor: false
           callee:
-            id: 1165
+            id: 2692
             tag: Identifier
             varTypeInInvarPlace: false
             invarTypeInVarPlace: false
@@ -126,13 +126,13 @@ statements:
           args:
             0:
               - 
-              - id: 1168
+              - id: 2695
                 tag: Select
                 varTypeInInvarPlace: false
                 invarTypeInVarPlace: false
                 ammortized: false
                 owner:
-                  id: 1166
+                  id: 2693
                   tag: Identifier
                   varTypeInInvarPlace: false
                   invarTypeInVarPlace: false
@@ -154,7 +154,7 @@ statements:
               absolute: 56
             end: 0
     falseBranch:
-      id: 1171
+      id: 2698
       tag: Literal
       varTypeInInvarPlace: false
       invarTypeInVarPlace: false

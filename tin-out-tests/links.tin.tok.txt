@@ -43,10 +43,11 @@ PARENS       | )            |   9, 12
 OPERATOR     | ->           |   9, 14   
 NEWLINE      |              |  10, 1    
 INDENT       | 4            |  10, 1    
-KEYWORD      | link         |  10, 2    
-IDENTIFIER   | value        |  10, 7    
-OPERATOR     | =            |  10, 13   
-NUMBER       | 1            |  10, 15   
+IDENTIFIER   | value        |  10, 2    
+OPERATOR     | :            |  10, 7    
+IDENTIFIER   | Number       |  10, 9    
+OPERATOR     | =            |  10, 16   
+NUMBER       | 1            |  10, 18   
 NEWLINE      |              |  11, 1    
 IDENTIFIER   | Box          |  11, 2    
 PARENS       | (            |  11, 5    
@@ -68,11 +69,12 @@ PARENS       | )            |  13, 13
 OPERATOR     | ->           |  13, 15   
 NEWLINE      |              |  14, 1    
 INDENT       | 4            |  14, 1    
-KEYWORD      | link         |  14, 2    
-IDENTIFIER   | value        |  14, 7    
-OPERATOR     | =            |  14, 13   
-IDENTIFIER   | var          |  14, 15   
-NUMBER       | 1            |  14, 19   
+IDENTIFIER   | value        |  14, 2    
+OPERATOR     | :            |  14, 7    
+IDENTIFIER   | var          |  14, 9    
+IDENTIFIER   | Number       |  14, 13   
+OPERATOR     | =            |  14, 20   
+NUMBER       | 1            |  14, 22   
 NEWLINE      |              |  15, 1    
 IDENTIFIER   | BoxV         |  15, 2    
 PARENS       | (            |  15, 6    
@@ -310,10 +312,5 @@ NUMBER       | 250          |  51, 23
 NEWLINE      | ,            |  51, 1    
 STRING       | Copy mutation affected original clojure |  51, 28   
 PARENS       | )            |  51, 69   
-NEWLINE      |              |  53, 1    
-IDENTIFIER   | print        |  53, 1    
-PARENS       | (            |  53, 6    
-STRING       | All good     |  53, 7    
-PARENS       | )            |  53, 17   
 NEWLINE      |              |  54, 1    
 --undefined--

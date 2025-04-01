@@ -421,7 +421,6 @@ export class RoundValueToValueLambdaType extends Type {
    params: ParamType[];
    returnType: Type;
    isFirstParamThis: boolean = false;
-   isGeneric?: boolean;
    pure: boolean;
    capturesMutableValues: boolean;
    constructor(
@@ -439,7 +438,6 @@ export class RoundValueToValueLambdaType extends Type {
       }
       this.params = params;
       this.returnType = returnType;
-      this.isGeneric = isGeneric;
       this.isForwardReferenceable = true;
       this.pure = pure;
       this.capturesMutableValues = capturesMutableValues;
@@ -492,11 +490,9 @@ export class RoundValueToValueLambdaType extends Type {
       const paramsStr = this.params
          .map((t) => `${t.name ? t.name + ":" : ""}${t.type.toString()}`)
          .join(", ");
-      return `${this.isGeneric ? "[" : "("}${paramsStr}${
-         this.isGeneric ? "]" : ")"
-      } ${this.capturesMutableValues ? "~" : ""}${this.pure ? "->" : "~>"} ${
-         this.returnType ? this.returnType.toString() : "undefined"
-      }`;
+      return `(${paramsStr}) ${this.capturesMutableValues ? "~" : ""}${
+         this.pure ? "->" : "~>"
+      } ${this.returnType ? this.returnType.toString() : "undefined"}`;
    }
 }
 

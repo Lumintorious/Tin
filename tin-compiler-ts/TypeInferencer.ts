@@ -87,7 +87,7 @@ export class TypeInferencer {
       let inferredType: Type;
       switch (node.tag) {
          case "Literal":
-            inferredType = this.inferLiteral(node as Literal, scope);
+            inferredType = this.inferLiteral(node as Literal, scope, options);
             break;
          case "Identifier":
             inferredType = this.inferIdentifier(
@@ -179,7 +179,9 @@ export class TypeInferencer {
             break;
          case "UnaryOperator":
             inferredType = new MutableType(
-               this.infer((node as UnaryOperator).expression, scope)
+               this.infer((node as UnaryOperator).expression, scope, {
+                  expectsBroadenedType: options.expectsBroadenedType,
+               })
             );
             break;
          case "RefinedDef":
@@ -344,14 +346,11 @@ export class TypeInferencer {
                   scope
                )
             ) {
-               // obj.field(p1, p2)
-               // field(obj, p1, p2)
                const owner = node.callee.owner;
                node.callee = new Identifier(symbol.name);
                node.bakedInThis = owner;
                this.context.builder.build(node.callee, scope);
                this.context.builder.build(node, scope);
-               console.log(node);
             }
          } catch (e) {
             //
@@ -710,8 +709,15 @@ export class TypeInferencer {
       }
    }
 
-   inferLiteral(node: Literal, scope: Scope) {
+   inferLiteral(
+      node: Literal,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       // Handle different literal types (assuming 'Number' is one type)
+      if (options.expectsBroadenedType) {
+         return scope.lookupType(node.type).typeSymbol;
+      }
       if (node.type === "Anything" && node.value === "") {
          return AnyType;
       }
@@ -770,8 +776,8 @@ export class TypeInferencer {
    }
 
    DEFINED_OPERATIONS = {
-      NumberNumberNumber: ["+", "-", "*", "/", "**"],
-      NumberNumberBoolean: [">", "<", "<=", ">=", "=="],
+      NumberNumberNumber: ["+", "-", "*", "/", "**", "%"],
+      NumberNumberBoolean: [">", "<", "<=", ">=", "==", "!="],
       StringAnyString: ["+"],
       BooleanBooleanBoolean: ["&&", "||"],
    };

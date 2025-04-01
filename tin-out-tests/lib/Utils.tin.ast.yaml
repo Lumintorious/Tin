@@ -1,29 +1,42 @@
-id: 463
+id: 3740
 tag: Block
+varTypeInInvarPlace: false
+invarTypeInVarPlace: false
+skipReturn: false
 statements:
-  - id: 390
+  - id: 3667
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 371
+      id: 3648
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: max
     value:
-      id: 389
+      id: 3666
       tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 375
+        - id: 3652
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 372
+            id: 3649
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: a
           type:
-            id: 373
+            id: 3650
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -36,17 +49,21 @@ statements:
               line: 1
               column: 18
               absolute: 17
-        - id: 380
+        - id: 3657
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 377
+            id: 3654
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: b
           type:
-            id: 378
+            id: 3655
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -60,30 +77,45 @@ statements:
               column: 29
               absolute: 28
       block:
-        id: 388
+        id: 3665
         tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
         statements:
-          - id: 387
+          - id: 3664
             tag: IfStatement
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             condition:
-              id: 384
+              id: 3661
               tag: BinaryExpression
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               left:
-                id: 382
+                id: 3659
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: a
               operator: >
               right:
-                id: 383
+                id: 3660
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: b
             trueBranch:
-              id: 385
+              id: 3662
               tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value: a
             falseBranch:
-              id: 386
+              id: 3663
               tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value: b
             position:
               start:
@@ -94,7 +126,7 @@ statements:
                 line: 4
                 column: 1
                 absolute: 56
-      explicitType: undefined
+      specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
@@ -106,29 +138,39 @@ statements:
         line: 4
         column: 4
         absolute: 59
-  - id: 410
+  - id: 3687
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 391
+      id: 3668
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: min
     value:
-      id: 409
+      id: 3686
       tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 395
+        - id: 3672
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 392
+            id: 3669
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: a
           type:
-            id: 393
+            id: 3670
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -141,17 +183,21 @@ statements:
               line: 4
               column: 18
               absolute: 73
-        - id: 400
+        - id: 3677
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 397
+            id: 3674
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: b
           type:
-            id: 398
+            id: 3675
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -165,30 +211,45 @@ statements:
               column: 29
               absolute: 84
       block:
-        id: 408
+        id: 3685
         tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
         statements:
-          - id: 407
+          - id: 3684
             tag: IfStatement
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             condition:
-              id: 404
+              id: 3681
               tag: BinaryExpression
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               left:
-                id: 402
+                id: 3679
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: a
               operator: <
               right:
-                id: 403
+                id: 3680
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: b
             trueBranch:
-              id: 405
+              id: 3682
               tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value: a
             falseBranch:
-              id: 406
+              id: 3683
               tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value: b
             position:
               start:
@@ -199,7 +260,7 @@ statements:
                 line: 7
                 column: 1
                 absolute: 112
-      explicitType: undefined
+      specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
@@ -211,29 +272,39 @@ statements:
         line: 7
         column: 6
         absolute: 117
-  - id: 425
+  - id: 3702
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 411
+      id: 3688
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: floor
     value:
-      id: 424
+      id: 3701
       tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 415
+        - id: 3692
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 412
+            id: 3689
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: n
           type:
-            id: 413
+            id: 3690
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -247,30 +318,46 @@ statements:
               column: 20
               absolute: 131
       block:
-        id: 423
+        id: 3700
         tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
         statements:
-          - id: 422
+          - id: 3699
             tag: BinaryExpression
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             left:
-              id: 417
+              id: 3694
               tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value: n
             operator: -
             right:
-              id: 421
+              id: 3698
               tag: Group
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value:
-                id: 420
+                id: 3697
                 tag: BinaryExpression
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 left:
-                  id: 418
+                  id: 3695
                   tag: Identifier
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
                   value: n
                 operator: %
                 right:
-                  id: 419
+                  id: 3696
                   tag: Literal
+                  varTypeInInvarPlace: false
+                  invarTypeInVarPlace: false
+                  isTypeLiteral: false
                   type: Number
                   value: 1
             position:
@@ -282,7 +369,7 @@ statements:
                 line: 10
                 column: 1
                 absolute: 152
-      explicitType: undefined
+      specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
@@ -294,29 +381,39 @@ statements:
         line: 10
         column: 8
         absolute: 159
-  - id: 439
+  - id: 3716
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 426
+      id: 3703
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: ceiling
     value:
-      id: 438
+      id: 3715
       tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 430
+        - id: 3707
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 427
+            id: 3704
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: n
           type:
-            id: 428
+            id: 3705
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -330,32 +427,47 @@ statements:
               column: 22
               absolute: 173
       block:
-        id: 437
+        id: 3714
         tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
         statements:
-          - id: 436
+          - id: 3713
             tag: BinaryExpression
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             left:
-              id: 434
+              id: 3711
               tag: RoundApply
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               calledInsteadOfSquare: false
               paramOrder:
               isFirstParamThis: false
               isAnObjectCopy: false
+              isCallingAConstructor: false
               callee:
-                id: 432
+                id: 3709
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: floor
               args:
                 - 0: 
                   1:
-                    id: 433
+                    id: 3710
                     tag: Identifier
+                    varTypeInInvarPlace: false
+                    invarTypeInVarPlace: false
                     value: n
             operator: +
             right:
-              id: 435
+              id: 3712
               tag: Literal
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
+              isTypeLiteral: false
               type: Number
               value: 1
             position:
@@ -367,7 +479,7 @@ statements:
                 line: 13
                 column: 1
                 absolute: 195
-      explicitType: undefined
+      specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
@@ -379,29 +491,39 @@ statements:
         line: 13
         column: 9
         absolute: 203
-  - id: 456
+  - id: 3733
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 440
+      id: 3717
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: absolute
     value:
-      id: 455
+      id: 3732
       tag: RoundValueToValueLambda
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      pure: true
+      capturesMutableValues: false
       params:
-        - id: 444
+        - id: 3721
           tag: Assignment
           isMutable: false
           isParameter: true
           lhs:
-            id: 441
+            id: 3718
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: n
           type:
-            id: 442
+            id: 3719
             tag: Identifier
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             value: Number
           isDeclaration: false
           isTypeLevel: false
@@ -415,40 +537,61 @@ statements:
               column: 23
               absolute: 217
       block:
-        id: 454
+        id: 3731
         tag: Block
+        varTypeInInvarPlace: false
+        invarTypeInVarPlace: false
+        skipReturn: false
         statements:
-          - id: 453
+          - id: 3730
             tag: IfStatement
+            varTypeInInvarPlace: false
+            invarTypeInVarPlace: false
             condition:
-              id: 448
+              id: 3725
               tag: BinaryExpression
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               left:
-                id: 446
+                id: 3723
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: n
               operator: <
               right:
-                id: 447
+                id: 3724
                 tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
                 type: Number
                 value: 0
             trueBranch:
-              id: 451
+              id: 3728
               tag: BinaryExpression
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               left:
-                id: 449
+                id: 3726
                 tag: Literal
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
+                isTypeLiteral: false
                 type: Number
                 value: 0
               operator: -
               right:
-                id: 450
+                id: 3727
                 tag: Identifier
+                varTypeInInvarPlace: false
+                invarTypeInVarPlace: false
                 value: n
             falseBranch:
-              id: 452
+              id: 3729
               tag: Identifier
+              varTypeInInvarPlace: false
+              invarTypeInVarPlace: false
               value: n
             position:
               start:
@@ -459,7 +602,7 @@ statements:
                 line: 16
                 column: 1
                 absolute: 249
-      explicitType: undefined
+      specifiedType: undefined
     isDeclaration: true
     isTypeLevel: false
     position:
@@ -471,17 +614,22 @@ statements:
         line: 16
         column: 3
         absolute: 251
-  - id: 459
+  - id: 3736
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 457
+      id: 3734
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: pi
     value:
-      id: 458
+      id: 3735
       tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
       type: Number
       value: 3.141592653589793
     isDeclaration: true
@@ -493,19 +641,24 @@ statements:
         absolute: 251
       end:
         line: 17
-        column: 1
-        absolute: 273
-  - id: 462
+        column: 2
+        absolute: 274
+  - id: 3739
     tag: Assignment
     isMutable: false
     isParameter: false
     lhs:
-      id: 460
+      id: 3737
       tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
       value: e
     value:
-      id: 461
+      id: 3738
       tag: Literal
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      isTypeLiteral: false
       type: Number
       value: 2.718281828459045
     isDeclaration: true

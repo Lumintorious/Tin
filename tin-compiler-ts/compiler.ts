@@ -335,14 +335,20 @@ async function run() {
       async function doTest(pathStr: string, file: fs.Dirent) {
          if (file.name.endsWith(".tin")) {
             const fileNameShort = file.name;
-            const fileName = path.resolve(pathStr, fileNameShort);
+            const fileName = path.resolve(file.parentPath, fileNameShort);
+            // console.log(file.parentPath);
             const log = console.log;
             const nameToLog = fileName.substring(folderPath.length + 1);
             console.log = () => {};
+            const stdlib = await compile(
+               path.resolve(process.cwd(), "tin-compiler-ts", "stdlib.tin"),
+               false,
+               new Map()
+            );
             try {
                process.stdout.write("\x1b[34m[ ] " + nameToLog + "\x1b[0m");
                console.log = () => {};
-               await compile(fileName, false, new Map());
+               await compile(fileName, true, new Map([["stdlib", stdlib]]));
                console.log = log;
                process.stdout.write("\r\x1b[K");
                process.stdout.write(`\x1b[32m[✓] ${nameToLog}\x1b[0m\n`);

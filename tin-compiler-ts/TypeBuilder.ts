@@ -686,13 +686,13 @@ export class TypeBuilder {
             boundaryScope.hasSymbol(term.value) &&
             !scope.hasSymbol(term.value, boundaryScope)
          ) {
-            term.isFromSelfClojure = true;
-            return [scope.lookup(term.value)].filter(
-               (s) =>
-                  s.isMutable ||
-                  s.typeSymbol instanceof MutableType ||
-                  s.typeSymbol.isMutable
-            );
+            const symbol = scope.lookup(term.value);
+            if (symbol.isLink) {
+               term.isFromSelfClojure = true;
+               return [symbol];
+            } else {
+               return [];
+            }
          }
       } else if (term instanceof BinaryExpression) {
          return [
@@ -786,10 +786,11 @@ export class TypeBuilder {
             throw new Error("Redeclaration of assignment " + lhs.value);
          }
 
-         // if (lhs.isTypeIdentifier()) {
-         //    scope.declareType(new Symbol(lhs.value, new UncheckedType()));
-         // } else {
-         // }
+         if (lhs.isTypeIdentifier()) {
+            scope.declareType(new Symbol(lhs.value, new UncheckedType()));
+         } else {
+            // scope.declare(new Symbol(lhs.value, new UncheckedType()));
+         }
       }
 
       // When lambda like (i) -> i + 1 with i having an expected type
@@ -834,6 +835,7 @@ export class TypeBuilder {
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
+         expectsBroadenedType: true,
       });
       let isMutable = rhsType instanceof MutableType;
       if (!node.type) {
@@ -931,7 +933,8 @@ export class TypeBuilder {
 
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
-         // if (!scope.hasSymbol(lhs.value)) {
+         symbol.isPrivate = node.private === true;
+         symbol.isLink = node.isLink === true;
          scope.declare(symbol.mutable(isMutable), true);
          node.symbol = symbol;
          // }

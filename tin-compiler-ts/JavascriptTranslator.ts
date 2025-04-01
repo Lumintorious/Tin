@@ -55,9 +55,9 @@ export class JavascriptTranslator implements OutputTranslator {
       this.isStdLib = isStdLib;
    }
 
-   run(path: string): void {
+   run(path: string, isTest?: boolean): void {
       exec(
-         'cd "tin-out"' +
+         `cd "tin-out${isTest ? "-tests" : ""}"` +
             " && node --no-warnings --loader ../babel-loader.js " +
             path,
          (_, out, err) => {
@@ -67,6 +67,15 @@ export class JavascriptTranslator implements OutputTranslator {
             }
          }
       );
+   }
+
+   accessMutable = "._";
+   makeMutable(value: string, condition: boolean) {
+      if (condition) {
+         return `{_:(${value})}`;
+      } else {
+         return value;
+      }
    }
 
    createPrototype(
@@ -156,7 +165,7 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof Term && term.invarTypeInVarPlace) {
          result = `{_:(${result})}`;
       } else if (term instanceof Term && term.varTypeInInvarPlace) {
-         result = "(" + result + ")._";
+         result = "(" + result + ")" + this.accessMutable;
       }
       if (term instanceof Term && term.clojure) {
          result = `_makeClojure({${term.clojure
@@ -195,9 +204,10 @@ export class JavascriptTranslator implements OutputTranslator {
             args &&
             args.returnLast &&
             !(last instanceof WhileLoop || last instanceof AppliedKeyword);
+         const forceReturn = args.forceReturn;
          let result = [
             ...term.statements.map((st) => this.translate(st, scope)),
-            (shouldReturn ? "throw " : "") +
+            (shouldReturn ? "throw " : shouldReturn ? " " : "") +
                `${this.translate(last, scope)}` +
                (shouldReturn ? "" : ""),
          ].join(";\n");
@@ -239,10 +249,9 @@ export class JavascriptTranslator implements OutputTranslator {
                term.owner.value.startsWith("_")
             )
          ) {
-            console.log(termType?.toString());
          }
          if (!term.varTypeInInvarPlace) {
-            selectionBase += "._";
+            selectionBase += this.accessMutable;
          }
          return `${this.translate(term.owner, scope)}${selectionBase}`;
 
@@ -271,10 +280,12 @@ export class JavascriptTranslator implements OutputTranslator {
          const termValueType = term.value.inferredType;
          const start = termValueType instanceof MutableType ? "(" : "";
          const ifTermValueMutable =
-            termValueType instanceof MutableType ? ")._" : "";
+            termValueType instanceof MutableType
+               ? ")" + this.accessMutable
+               : "";
          const isNotSelect = !(term.lhs instanceof Select);
          return `(${this.translate(term.lhs, scope)})${
-            isNotSelect ? "._" : ""
+            isNotSelect ? this.accessMutable : ""
          } = ${start}${this.translate(term.value, scope)}${ifTermValueMutable}`;
 
          // Assignment
@@ -292,15 +303,9 @@ export class JavascriptTranslator implements OutputTranslator {
          keyword = doExport + keyword;
          const lhs = this.translate(term.lhs, scope);
          const isMutable = term.type?.translatedType instanceof MutableType;
-         function mutableWrapper(str: string) {
-            if (isMutable) {
-               return `{_:(${str})}`;
-            } else {
-               return str;
-            }
-         }
          const value = term.value
-            ? " = " + mutableWrapper(this.translate(term.value, scope))
+            ? " = " +
+              this.makeMutable(this.translate(term.value, scope), isMutable)
             : "";
          let type = "";
          if (!term.isTypeLevel) {
@@ -381,9 +386,9 @@ export class JavascriptTranslator implements OutputTranslator {
          }
          if (term.isFromSelfClojure) {
             value = `this._clojure.${value}`;
-            // Otherwise "._" is added in the wrapper translate() (non-raw)
+            // Otherwise accessMutable is added in the wrapper translate() (non-raw)
             if (!term.varTypeInInvarPlace) {
-               value += "._";
+               value += this.accessMutable;
             }
          }
 
@@ -391,30 +396,21 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // RoundValueToValueLambda
       } else if (term instanceof RoundValueToValueLambda) {
-         if (!term.isTypeLambda) {
-            const params = term.isFirstParamThis()
-               ? term.params.slice(1, term.params.length)
-               : term.params;
-            return `_F(Symbol("lambda"), function(${params
-               .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
-               .join(", ")}) {try{\n${this.translate(
-               term.block,
-               scope.innerScopeOf(term, true),
-               {
-                  returnLast: true,
-               }
-            )}\n} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, ${this.translateType(
-               term.inferredType,
-               scope
-            )})`;
-         } else {
-            return `_F("Lambda", [${term.params
-               .map((t) => this.translate(t, scope.innerScopeOf(term, true)))
-               .join(", ")}], ${this.translate(
-               term.block,
-               scope.innerScopeOf(term, true)
-            )})`;
-         }
+         const params = term.isFirstParamThis()
+            ? term.params.slice(1, term.params.length)
+            : term.params;
+         return `_F(Symbol("lambda"), function(${params
+            .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
+            .join(", ")}) {try{\n${this.translate(
+            term.block,
+            scope.innerScopeOf(term, true),
+            {
+               returnLast: true,
+            }
+         )}\n} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, ${this.translateType(
+            term.inferredType,
+            scope
+         )})`;
 
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
@@ -636,9 +632,10 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof Import) {
          return `import * as module${this.moduleNumber} from "file://${term.path
             .replaceAll("\\", "\\\\")
+            .replaceAll("\\src\\", "\\tin-out\\")
             .replaceAll(
-               "\\src\\",
-               "\\tin-out\\"
+               "\\tests\\",
+               "\\tin-out-tests\\"
             )}.tin.out.mjs";Object.entries(module${this
             .moduleNumber++}).forEach(([key, value]) => {
 				globalThis[key] = value;
@@ -647,11 +644,7 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof UnaryOperator) {
          if (term.operator === "var") {
             const v = term.invarTypeInVarPlace;
-            return (
-               (!v ? "{_:(" : "") +
-               this.translate(term.expression, scope) +
-               (!v ? ")}" : "")
-            );
+            return this.makeMutable(this.translate(term.expression, scope), !v);
          } else {
             return "(? " + term.tag + " " + term.operator + " ?)";
          }
@@ -664,9 +657,11 @@ export class JavascriptTranslator implements OutputTranslator {
       if (type instanceof NamedType) {
          return "" + type.name;
       } else if (type instanceof StructType) {
-         return `Type('${type.name}', (obj) => Reflect.ownKeys(obj).includes(${
+         return `Type('${
             type.name
-         }._s))._and(Struct(Array(0)([
+         }', (obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(${
+            type.name
+         }._s)))._and(Struct(Array(0)([
 						${type.fields.map((f) => `${this.translateType(f, scope)}`)}
 			])))`;
       } else if (type instanceof ParamType) {

@@ -38,6 +38,8 @@ export class Symbol {
    parentComponent?: Type; // If a field on type ABC, then parentComponent is ABC
    shadowing?: Symbol;
    isMutable: boolean = false;
+	isLink: boolean = false;
+	isPrivate: boolean = false;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
       this.name = name;
       this.typeSymbol = typeSymbol;
@@ -251,7 +253,7 @@ export class Scope {
             "\x1b[36m" +
             name.padStart(10, " ") +
             "\x1b[37m: \x1b[33m" +
-            typeSymbol.toString().padEnd(25, " ") +
+            (typeSymbol.toString() + " .. " + typeSymbol.tag).padEnd(25, " ") +
             " \x1b[30m# " +
             this.toPath() +
             "\x1b[0m"
@@ -446,7 +448,7 @@ export class Scope {
             const result = new RoundValueToValueLambdaType(
                resolvedParams,
                returnType,
-               lambdaType.isGeneric === true,
+               false,
                lambdaType.pure
             );
             result.isFirstParamThis = lambdaType.isFirstParamThis;
@@ -521,6 +523,7 @@ export type RecursiveResolutionOptions = {
    assignedName?: string;
    isTypeLevel?: boolean;
    isWithinCopyStructure?: boolean;
+   expectsBroadenedType?: boolean;
 };
 
 export class CompilerFlags {

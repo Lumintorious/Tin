@@ -88,6 +88,7 @@ export class Lexer {
          "unchecked",
          "external",
          "import",
+         "link",
       ];
       this.operators = [
          "...",

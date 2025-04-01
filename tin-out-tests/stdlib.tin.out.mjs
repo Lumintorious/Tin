@@ -25,7 +25,7 @@ export class Return {
 
 Object.prototype.__is_child = function (obj) {
 	if (this._c && this._c.__is_child) {
-		if (obj._) {
+		if (obj._ !== undefined) {
 			return this._c.__is_child(obj._)
 		} else {
 			return this._c.__is_child(obj);
@@ -313,13 +313,13 @@ export const _v = (v) => { _: v }
 export const Array$of = (t) => (args) => args
 Array._typeId = "Array"
 export const copy = (obj, replacers) => {
-	if (obj._) {
+	if (obj._ !== undefined) {
 		return { _: copy(obj._), _cn: obj._cn }
 	}
 
 	let newObj = { _type: obj._type };
 	let wasUnderscore = false;
-	if (obj._) {
+	if (obj._ !== undefined) {
 		obj = obj._
 		wasUnderscore = true;
 	}
@@ -379,6 +379,9 @@ export const copy = (obj, replacers) => {
 }
 
 export function _replaceComponentFields(obj, replacer) {
+	if (replacer === undefined) {
+		return obj;
+	}
 	for (const componentKey of Reflect.ownKeys(replacer)) {
 		if (typeof componentKey !== 'symbol') {
 			continue;
@@ -391,9 +394,21 @@ export function _replaceComponentFields(obj, replacer) {
 				obj[componentKey][fieldKey] = replacerField
 				if (objField._cn && !replacerField._cn) {
 					replacerField._cn = objField._cn
+
+					if (replacerField._cn && obj._clojure[replacerField._cn]) {
+						obj._clojure[replacerField._cn] = replacerField
+					}
 				}
-				if (replacerField._cn && obj._clojure[replacerField._cn]) {
-					obj._clojure[replacerField._cn] = replacerField
+				if (objField._ !== undefined && !objField._cn) {
+					const oldObjField = objField
+					obj[componentKey][fieldKey] = replacerField;
+					for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
+						const clojureField = obj._clojure[clojureKey]
+						if (clojureField === oldObjField) {
+							obj._clojure[clojureKey] = replacerField
+							replacerField.HELLO = "HELLO"
+						}
+					}
 				}
 			}
 		}
@@ -405,7 +420,7 @@ export function _replaceComponentFields(obj, replacer) {
 
 export const _o = function (objParam) {
 	let obj = objParam;
-	if (obj._) {
+	if (obj._ !== undefined) {
 		obj = obj._
 	}
 	if (!obj._clojure) {
@@ -464,7 +479,7 @@ export const _makeClojure = (clojure, objParam) => {
 }
 
 export const _mcOld = (clojure, obj) => {
-	if (obj._) {
+	if (obj._ !== undefined) {
 		obj = obj._
 	}
 	for (const key of Reflect.ownKeys(clojure)) {
@@ -483,7 +498,7 @@ export const _mcOld = (clojure, obj) => {
 	if (typeof obj !== "object" && typeof obj !== "function") {
 		return obj;
 	}
-	if (obj._) {
+	if (obj._ !== undefined) {
 		if (typeof obj._ !== "object" && typeof obj !== "function") {
 			return obj;
 		}
@@ -507,11 +522,12 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 	if (obj === null) return 'nothing';
 	if (typeof obj === 'undefined') return 'nothing';
-	if (obj._) {
+	if (obj._ !== undefined) {
 		obj = obj._
 	}
+
 	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
-	if (typeof obj === 'number') return obj.toString();
+	if (typeof obj === 'number') return "" + obj;
 	if (typeof obj === 'string') return indent > 0 ? `"${obj}"` : obj;
 	if (typeof obj === 'symbol') return obj.description;
 
@@ -654,6 +670,12 @@ export function lazy(make) {
 	})
 }
 
+export const assert = (condition, message) => {
+	if (!condition) {
+		throw new Error(message ?? "Assertion failed")
+	}
+}
+
 // COMPILED TIN
 ;
 
@@ -679,6 +701,7 @@ export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String",
 
 ;
 export var Literal = (() => { const _left = Type$get(Type); return _A(_left, _S(typeof _sym !== "undefined" ? _sym : Symbol("Literal"), (_p0,_p1) => _o({value: _p0,type: _p1}), lazy({isReflectionType: true}), {}), true);})();
+;
 ;
 ;
 export var Intersection$of/* (left:Type, right:Type) -> Type & Intersection*/ = _F(Symbol("lambda"), function(left, right) {try{

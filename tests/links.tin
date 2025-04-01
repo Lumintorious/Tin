@@ -7,11 +7,11 @@ BoxV = data:
 	get: () -> var Number
 
 makeBox = () ->
-	link value = 1
+	value: Number = 1
 	Box(value, () -> value * 10)
 
 makeBoxV = () ->
-	link value = var 1
+	value: var Number = 1
 	BoxV(value, () -> value * 10)
 
 # Invariable values
@@ -50,4 +50,4 @@ assert(boxv2.get() == 330, "Reading mutated copy failed")
 assert(boxv1.value == 25, "Copy mutation affected original value")
 assert(boxv1.get() == 250, "Copy mutation affected original clojure")
 
-print("All good")
+
