@@ -70,6 +70,7 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 		}
 		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol)
 	}
+	descriptor.__is_child = constructor.__is_child
 
 	return constructor;
 }
@@ -250,7 +251,7 @@ export const _U = function (obj1, obj2) {
 		obj2 = obj2._d
 	}
 	function check(obj) {
-		return obj1[Type._s].check(obj) || obj2[Type._s].check(obj);
+		return obj1.__is_child(obj) || obj2.__is_child(obj);
 	}
 
 	const result = Type("Union", check)._and(Union(obj1, obj2));
@@ -278,7 +279,7 @@ export function _L(value) {
 	return result
 }
 
-export const nothing = undefined;
+export const nothing = null;
 
 
 export function arraySymbol() {
@@ -523,38 +524,58 @@ export function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
+function blue(str) {
+	return `\x1b[34m${str}\x1b[0m`
+}
+
+function yellow(str) {
+	return `\x1b[93m${str}\x1b[0m`
+}
+
+function white(str) {
+	return `\x1b[37m${str}\x1b[0m`
+}
+
+function orange(str) {
+	return `\x1b[33m${str}\x1b[0m`
+}
+
+function green(str) {
+	return `\x1b[32m${str}\x1b[0m`
+}
+
 export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 	function padd(currentIndentChange = 0) {
 		return "".padStart((currentIndent + currentIndentChange * indent), " ".padEnd(indent, " "))
 	}
 
-	if (obj === null) return 'nothing';
-	if (typeof obj === 'undefined') return 'nothing';
+	if (obj === null) return green('nothing');
+	if (typeof obj === 'undefined') returngreen('nothing');
 	if (obj._ !== undefined) {
 		obj = obj._
 	}
 
-	if (typeof obj === 'boolean') return obj ? 'true' : 'false';
-	if (typeof obj === 'number') return "" + obj;
-	if (typeof obj === 'string') return indent > 0 ? `"${obj}"` : obj;
+	if (typeof obj === 'boolean') return green(obj ? 'true' : 'false');
+	if (typeof obj === 'number') return green("" + obj);
+	if (typeof obj === 'string') return green(indent > 0 ? `"${obj}"` : obj);
 	if (typeof obj === 'symbol') return obj.description;
 
 	if (typeof obj === 'function') {
-		return 'λ'
+		return blue('λ')
 	}
 
 	if (Reflect.ownKeys(obj).includes(Array._s)) {
-		let result = 'Array(' + (indent > 0 ? "\n" : "");
+		let result = yellow("Array") + white('(') + (indent > 0 ? "\n" : "");
 		for (let i = 0; i < obj[Array._s].length(); i++) {
-			result += (typeof obj[Array._s].at(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length() - 1 ? "" : ", ") + (indent > 0 ? "\n" : "")
+			result += (typeof obj[Array._s].at(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length() - 1 ? "" : white(", ")) + (indent > 0 ? "\n" : "")
 		}
 
 		currentIndent -= indent;
-		return result + padd() + ")"
+		return result + padd() + white(")")
 	}
 
 	if (typeof obj === 'object') {
-		let result = sprawl ? '(' : "";
+		let result = sprawl ? white('(') : "";
 		let number = 0;
 		// if (obj._clojure) {
 		// 	result += `\n[${Object.keys(obj._clojure).join(",")}]\n`
@@ -565,7 +586,7 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 			}
 			const component = obj[componentKey]
 			if (!sprawl) {
-				result += componentKey.description + "(" + (indent > 0 ? "\n" : "")
+				result += yellow(componentKey.description) + white("(") + (indent > 0 ? "\n" : "")
 				currentIndent += indent;
 			}
 			for (let key in component) {
@@ -576,24 +597,24 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 					result += componentKey.description + "."
 				}
 				if (!key.startsWith("_") && component[key] != obj) {
-					result += padd() + key + " = " + makeString(component[key], sprawl, indent, currentIndent + indent) + ', ' + (indent > 0 ? "\n" : "");
+					result += padd() + blue(key) + white(" = ") + makeString(component[key], sprawl, indent, currentIndent + indent) + white(', ') + (indent > 0 ? "\n" : "");
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {
 				result = result.slice(0, -2); // Remove trailing comma and space
 			}
 			result += indent > 0 ? padd(-1) : ""
-			result += sprawl ? ", " : ") & "
+			result += sprawl ? white(", ") : white(") & ")
 			result += indent > 0 ? "\n" : ""
 			currentIndent -= indent;
 		}
-		if (result.length > 1 && ((sprawl && result[result.length - 2] === ",") || (!sprawl && result[result.length - 2] === "&"))) {
-			result = result.slice(0, sprawl ? -2 : -3); // Remove trailing comma and space
+		// if (result.length > 1 && ((sprawl && result[result.length - 2] === ",") || (!sprawl && result[result.length - 3] === "4"))) {
+		// 	result = result.slice(0, sprawl ? -4 : -3); // Remove trailing comma and space
+		// }
+		if (result.length > 2 && indent > 0 && result[result.length - 7] === "&") {
+			result = result.slice(0, -7)
 		}
-		if (result.length > 2 && indent > 0 && result[result.length - 3] === "&") {
-			result = result.slice(0, -4)
-		}
-		result = result + (sprawl ? ')' : "")
+		result = result + (sprawl ? white(')') : "")
 		return result;
 	}
 

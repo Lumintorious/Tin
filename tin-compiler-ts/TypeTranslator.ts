@@ -28,7 +28,7 @@ import {
    RefinedType,
 } from "./Types";
 import { Identifier, RefinedDef } from "./Parser";
-import { AnyType, MutableType } from "./Types";
+import { Any, MutableType } from "./Types";
 import {
    Type,
    NamedType,
@@ -67,7 +67,7 @@ export class TypeTranslator {
                return new ThisType();
             }
             if ((node as Identifier).value === "Anything") {
-               return AnyType;
+               return Any;
             }
             return new NamedType((node as Identifier).value);
          case "Literal":
@@ -289,7 +289,7 @@ export class TypeTranslator {
          const name = node.lhs.value;
          const value = node.value;
 
-         let type: Type = AnyType;
+         let type: Type = Any;
          if (explicitType && inferredType) {
             // Check if inferred extends explicit
             if (!inferredType.isAssignableTo(explicitType, scope)) {

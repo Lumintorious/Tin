@@ -1,6 +1,6 @@
 import { TokenPos } from "./Lexer";
-import { AstNode, Term, RoundValueToValueLambda, TypeDef } from "./Parser";
-import { Symbol, Scope } from "./Scope";
+import { AstNode, Term, TypeDef } from "./Parser";
+import { Scope } from "./Scope";
 
 export class Type {
    tag: string;
@@ -34,7 +34,7 @@ export class Type {
       if (!other) {
          throw new Error("Found undefined type");
       }
-      if (other instanceof AnyTypeClass) {
+      if (other instanceof AnyType) {
          return true;
       }
       return this.extends(other, scope) || other.isExtendedBy(this, scope);
@@ -86,18 +86,17 @@ export class UncheckedType extends Type {
    }
 }
 
-export class AnyTypeClass extends Type {
+export class AnyType extends Type {
    constructor() {
       super("Anything");
    }
 
-   isAssignableTo(other: Type, scope: Scope): boolean {
+   isAssignableTo(other: Type): boolean {
       return !(other instanceof MutableType);
    }
 
-   extends(other: Type, scope: Scope) {
-      // Named types are assignable if they are equal (same name)
-      return other instanceof AnyTypeClass;
+   extends(other: Type) {
+      return other instanceof AnyType;
    }
 
    isExtendedBy(other: Type) {
@@ -109,7 +108,71 @@ export class AnyTypeClass extends Type {
    }
 }
 
-export const AnyType = new AnyTypeClass();
+export const Any = new AnyType();
+
+export class PrimitiveType extends Type {
+   static Number = new PrimitiveType("Number");
+   static String = new PrimitiveType("String");
+   static Boolean = new PrimitiveType("Boolean");
+
+   name: string;
+   constructor(name: string) {
+      super("PrimitiveType");
+      this.name = name;
+   }
+
+   extends(other: Type): boolean {
+      return this === other;
+   }
+
+   isExtendedBy(other: Type): boolean {
+      return this === other;
+   }
+
+   toString(): string {
+      return this.name;
+   }
+}
+
+export class NothingType extends Type {
+   constructor() {
+      super("Nothing");
+   }
+
+   extends(other: Type): boolean {
+      return other instanceof NothingType;
+   }
+
+   isExtendedBy(other: Type): boolean {
+      return other instanceof NothingType;
+   }
+
+   toString(): string {
+      return "Nothing";
+   }
+}
+
+export const Nothing = new NothingType();
+
+export class NeverType extends Type {
+   constructor() {
+      super("Never");
+   }
+
+   extends(other: Type): boolean {
+      return other instanceof NeverType;
+   }
+
+   isExtendedBy(other: Type): boolean {
+      return other instanceof NeverType;
+   }
+
+   toString(): string {
+      return "Never";
+   }
+}
+
+export const Never = new NeverType();
 
 export class ThisType extends Type {
    constructor() {
@@ -140,7 +203,7 @@ export class NamedType extends Type {
       Nothing: new NamedType("Nothing"),
       Never: new NamedType("Never"),
       This: new NamedType("This"),
-      Anything: AnyType,
+      Anything: Any,
    };
 
    name: string;
@@ -154,9 +217,9 @@ export class NamedType extends Type {
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
-      if (this.name === "Nothing") {
-         return true;
-      }
+      // if (this.name === "Nothing") {
+      //    return true;
+      // }
       const realType = scope.lookupType(this.name);
       if (
          (other instanceof NamedType || other instanceof GenericNamedType) &&
@@ -235,7 +298,7 @@ export class LiteralType extends Type {
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
-      if (other instanceof AnyTypeClass) {
+      if (other instanceof AnyType) {
          return true;
       }
 
@@ -243,7 +306,7 @@ export class LiteralType extends Type {
    }
 
    extends(other: Type, scope: Scope) {
-      if (other instanceof AnyTypeClass) {
+      if (other instanceof AnyType) {
          return true;
       }
       if (
@@ -416,7 +479,7 @@ export class ParamType {
    }
 }
 
-// Type of a RoundValueToValueLambda: (Int) => String
+// Type of a RoundValueToValueLambda: (Int) -> String
 export class RoundValueToValueLambdaType extends Type {
    params: ParamType[];
    returnType: Type;
@@ -459,7 +522,7 @@ export class RoundValueToValueLambdaType extends Type {
 
       // Return type must be covariant
       const returnCheck =
-         other.returnType.name === "Nothing" ||
+         // other.returnType.name === "Nothing" ||
          this.returnType.isAssignableTo(other.returnType, scope);
 
       const purityCheck = other.pure ? this.pure : true;
@@ -493,25 +556,6 @@ export class RoundValueToValueLambdaType extends Type {
       return `(${paramsStr}) ${this.capturesMutableValues ? "~" : ""}${
          this.pure ? "->" : "~>"
       } ${this.returnType ? this.returnType.toString() : "undefined"}`;
-   }
-}
-
-// A RoundValueToValueLambda of Types: [T] => List[T]
-// ???
-export class TypeRoundValueToValueLambda extends Type {
-   paramTypes: Type[];
-   returnType: Type;
-   constructor(paramTypes: Type[], returnType: Type) {
-      super("TypeRoundValueToValueLambda");
-      this.paramTypes = paramTypes;
-      this.returnType = returnType;
-   }
-
-   toString() {
-      const paramsStr = this.paramTypes.map((t) => t.toString()).join(", ");
-      return `[${paramsStr}] => ${
-         this.returnType ? this.returnType.toString() : "undefined"
-      }`;
    }
 }
 
@@ -651,6 +695,99 @@ export class AppliedGenericType extends Type {
    }
 }
 
+export class UnionType extends Type {
+   left: Type;
+   right: Type;
+   constructor(left: Type, right: Type, simplify = true) {
+      super("UnionType");
+      this.left = left;
+      this.right = right;
+   }
+}
+
+export class IntersectionType extends Type {
+   left: Type;
+   right: Type;
+   constructor(left: Type, right: Type, simplify = true) {
+      super("IntersectionType");
+      this.left = left;
+      this.right = right;
+   }
+
+   buildConstructor(): Type | undefined {
+      const allTypes = [...this.getAllIntersectedTypes()];
+      const lastType = allTypes[allTypes.length - 1];
+      if (!(lastType instanceof StructType)) {
+         return;
+      }
+      lastType.name = this.name;
+      const constructor = lastType.buildConstructor();
+      if (!(constructor instanceof RoundValueToValueLambdaType)) {
+         return;
+      }
+      constructor.name = this.name;
+      (lastType.ast as TypeDef).name = this.name;
+      const expectedType = this.getAllTypesIntersected(
+         allTypes.slice(0, allTypes.length - 1)
+      );
+      constructor.params = [
+         new ParamType(expectedType, "this"),
+         ...constructor.params,
+      ];
+      return constructor;
+   }
+
+   getAllTypesIntersected(types: Type[]): Type {
+      types = [...types];
+      if (types.length === 0) {
+         throw new Error("Attempted to unite a list of 0 types.");
+      } else if (types.length === 1) {
+         return types[0];
+      } else {
+         const leftType = types[0];
+         types.shift();
+         return new IntersectionType(
+            leftType,
+            this.getAllTypesIntersected(types)
+         );
+      }
+   }
+
+   getAllIntersectedTypes(): Set<Type> {
+      let set = new Set<Type>();
+      if (this.left instanceof IntersectionType) {
+         set = new Set([...set, ...this.left.getAllIntersectedTypes()]);
+      } else {
+         set.add(this.left);
+      }
+      if (this.right instanceof IntersectionType) {
+         set = new Set([...set, ...this.right.getAllIntersectedTypes()]);
+      } else {
+         set.add(this.right);
+      }
+
+      return set;
+   }
+
+   simplified(): Type {
+      let types = this.getAllIntersectedTypes();
+      if (types.size === 1) {
+         return [...types][0];
+      } else if (types.size === 2) {
+         return new IntersectionType([...types][0], [...types][1]);
+      }
+      let type: Type | null = null;
+      for (let t of types) {
+         if (type === null) {
+            type = t;
+         } else {
+            type = new IntersectionType(type, t, false);
+         }
+      }
+      return type || this;
+   }
+}
+
 export class BinaryOpType extends Type {
    left: Type;
    operator: string;
@@ -783,9 +920,29 @@ export class BinaryOpType extends Type {
                this.left.extends(other.right, scope))
          );
       } else if (this.operator === "|") {
+         if (other instanceof OptionalType) {
+            if (
+               this.left.isAssignableTo(other.type, scope) &&
+               this.right.isAssignableTo(
+                  NamedType.PRIMITIVE_TYPES.Nothing,
+                  scope
+               )
+            ) {
+               return true;
+            } else if (
+               this.right.isAssignableTo(other.type, scope) &&
+               this.left.isAssignableTo(
+                  NamedType.PRIMITIVE_TYPES.Nothing,
+                  scope
+               )
+            ) {
+               return true;
+            }
+         }
          return (
-            this.left.isAssignableTo(other, scope) &&
-            this.right.isAssignableTo(other, scope)
+            other.isExtendedBy(this, scope) ||
+            (this.left.isAssignableTo(other, scope) &&
+               this.right.isAssignableTo(other, scope))
          );
       } else {
          return super.isAssignableTo(other, scope);
@@ -812,8 +969,9 @@ export class BinaryOpType extends Type {
          );
       } else if (this.operator === "|") {
          return (
-            other.isAssignableTo(this.left, scope) &&
-            other.isAssignableTo(this.right, scope)
+            other.isExtendedBy(this, scope) ||
+            (other.isAssignableTo(this.left, scope) &&
+               other.isAssignableTo(this.right, scope))
          );
       }
       return false;
@@ -832,6 +990,19 @@ export class BinaryOpType extends Type {
             this.left.isExtendedBy(other.right, scope)
          );
       } else if (this.operator === "|") {
+         if (other instanceof OptionalType) {
+            if (
+               this.left.isExtendedBy(other.type, scope) &&
+               this.right.isExtendedBy(NamedType.PRIMITIVE_TYPES.Nothing, scope)
+            ) {
+               return true;
+            } else if (
+               this.right.isExtendedBy(other.type, scope) &&
+               this.left.isExtendedBy(NamedType.PRIMITIVE_TYPES.Nothing, scope)
+            ) {
+               return true;
+            }
+         }
          return (
             other.isAssignableTo(this.left, scope) ||
             other.isAssignableTo(this.right, scope)
@@ -852,12 +1023,12 @@ export class MarkerType extends Type {
       super("MarkerType");
    }
 
-   extends(other: Type, scope: Scope): boolean {
+   extends(other: Type): boolean {
       return other instanceof MarkerType && other.name === this.name;
    }
 
-   isExtendedBy(other: Type, scope: Scope): boolean {
-      return other instanceof AnyTypeClass;
+   isExtendedBy(other: Type): boolean {
+      return other instanceof AnyType;
    }
 
    toString(): string {

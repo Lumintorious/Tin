@@ -7,7 +7,11 @@
       },
       {
          "name": "keyword.control.tin",
-         "match": "\\b(if|var|else|while|copy|refined|return|true|false|nothing|external|data|set|import|this|unchecked|link|private)\\b"
+         "match": "\\b(if|var|else|while|copy|refined|return|external|data|set|import|this|unchecked|link|private)\\b"
+      },
+      {
+         "name": "constant.tin",
+         "match": "\\b(true|false|nothing|this)\\b"
       },
       {
          "match": "\\b([a-z][a-zA-Z0-9_]*)\\b[ ]*(=|:)[ ]*(\\(|\\[)",

@@ -31,7 +31,7 @@ import {
 import { type } from "os";
 import { TypeDef, AppliedKeyword, Literal, Group, RefinedDef } from "./Parser";
 import { Symbol } from "./Scope";
-import { NamedType, TypeOfTypes, AnyTypeClass, UncheckedType } from "./Types";
+import { NamedType, TypeOfTypes, AnyType, UncheckedType } from "./Types";
 import { SquareTypeToValueLambdaType, MutableType } from "./Types";
 import {
    OptionalType,

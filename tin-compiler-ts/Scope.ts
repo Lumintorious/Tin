@@ -12,7 +12,7 @@ import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
 import {
-   AnyType,
+   Any,
    AppliedGenericType,
    BinaryOpType,
    GenericNamedType,
@@ -483,7 +483,7 @@ export class Scope {
                this.resolveGenericTypes(bType.right, parameters)
             );
          case "Anything":
-            return AnyType;
+            return Any;
          case "Unchecked":
             return type;
          case "This":

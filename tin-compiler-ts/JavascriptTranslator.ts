@@ -620,7 +620,7 @@ export class JavascriptTranslator implements OutputTranslator {
          if (term.expression.isTypeLevel || !term.doubleQuestionMark) {
             return this.translate(term.expression, scope);
          } else {
-            return `(${this.translate(term.expression, scope)} !== undefined)`;
+            return `${this.translate(term.expression, scope)} ?? return null`;
          }
          // TypeCheck
       } else if (term instanceof TypeCheck) {

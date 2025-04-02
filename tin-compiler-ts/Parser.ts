@@ -9,6 +9,11 @@ const applyableKeywords = [
    "link",
    "private",
 ];
+
+class Modifier extends null {
+   constructor() {}
+}
+
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
    static currentNumber = 0;
@@ -17,9 +22,18 @@ export class AstNode {
    isTypeLevel?: boolean;
    isInValueContext?: boolean;
    id: number = AstNode.currentNumber++;
+   modifiers = new Set<Modifier>();
    constructor(tag: string) {
       this.tag = tag;
       AstNode.toCheckForPosition.push(this);
+   }
+
+   modify(modifier: Modifier) {
+      this.modifiers.add(modifier);
+   }
+
+   is(modifier: Modifier) {
+      return this.modifiers.has(modifier);
    }
 
    show() {

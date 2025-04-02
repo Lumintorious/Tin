@@ -1,55 +1,15 @@
-Box = data:
-	value: Number
-	get: () -> Number
 
-BoxV = data:
-	value: var Number
-	get: () -> var Number
 
-makeBox = () ->
-	value: Number = 1
-	Box(value, () -> value * 10)
+User = data:
+	name: String
 
-makeBoxV = () ->
-	value: var Number = 1
-	BoxV(value, () -> value * 10)
+Err = data:
+	message: String
 
-# Invariable values
-box1 = makeBox()
-box2 = box1 copy Box(value = 99)
+FalseyNum = refined (n: Number) -> n == 0
+FalseyStr = refined (s: String) -> s == ""
+FalseyBool = refined (b: Boolean) -> b
+Falsey = FalseyNum | FalseyStr | FalseyBool
 
-# Basic check for values
-assert(box1.value == 1, "Constructor value was incorrect")
-assert(box1.get() == 10, "Constructor clojure was incorrect")
-
-# Check keyword copies into clojures properly
-print(box2)
-print(box2.get())
-assert(box2.value == 99, "Value copy failed")
-assert(box2.get() == 990, "Clojure copy failed")
-
-# Variable values
-boxv1 = makeBoxV()
-boxv2 = boxv1 copy BoxV(value = 99)
-
-# Basic check for variables
-assert(boxv1.value == 1, "Constructor var was incorrect")
-assert(boxv1.get() == 10, "Constructor clojure including 'var' was incorrect")
-
-# Check that setting works properly
-set boxv1.value = 25
-assert(boxv1.value == 25, "Mutating variable failed")
-assert(boxv1.get() == 250, "Reading mutated variable from clojure failed")
-
-# Check keyword copies vars into clojures properly
-assert(boxv2.value == 99, "Variable copy failed")
-assert(boxv2.get() == 990, "Clojure with 'var' failed to copy")
-
-# Check setting boxv2.value did not change boxv1
-set boxv2.value = 33
-assert(boxv2.value == 33, "Mutating copy failed")
-assert(boxv2.get() == 330, "Reading mutated copy failed")
-assert(boxv1.value == 25, "Copy mutation affected original value")
-assert(boxv1.get() == 250, "Copy mutation affected original clojure")
-
+print(false :: Falsey)
 
