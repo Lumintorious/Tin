@@ -11,6 +11,7 @@
       "devGo": "nodemon --quiet --watch ./tin-compiler-ts/ --watch ./src/**/* --ext js,tin,ts --exec npx --trace-uncaught tsx ./tin-compiler-ts/compiler.ts main --run --targetLanguage:go",
       "devVerbose": "nodemon --quiet --watch ./tin-compiler-ts/ --watch ./tin.settings.json --watch ./src/**/* --ext js,tin,ts --exec \"npx tsx ./tin-compiler-ts/compiler.ts main --run --verbose\"",
       "watch": "bun --watch --hot \"/tin-compiler-ts/compiler.ts\" main --run",
+      "buildExtension": "cd \"vscode/Tin Syntax Hightlighting\" && vsce package",
       "test": "npx tsx ./tin-compiler-ts/compiler.ts --test"
    },
    "author": "Lumintorious",

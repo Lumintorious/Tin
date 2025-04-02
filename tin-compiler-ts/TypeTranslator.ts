@@ -26,6 +26,8 @@ import {
    SquareTypeToValueLambdaType,
    ThisType,
    RefinedType,
+   Nothing,
+   PrimitiveType,
 } from "./Types";
 import { Identifier, RefinedDef } from "./Parser";
 import { Any, MutableType } from "./Types";
@@ -69,14 +71,39 @@ export class TypeTranslator {
             if ((node as Identifier).value === "Anything") {
                return Any;
             }
+            if ((node as Identifier).value === "Nothing") {
+               return Nothing;
+            }
+            if ((node as Identifier).value === "Boolean") {
+               return PrimitiveType.Boolean;
+            }
+            if ((node as Identifier).value === "String") {
+               return PrimitiveType.String;
+            }
+            if ((node as Identifier).value === "Number") {
+               return PrimitiveType.Number;
+            }
+
             return new NamedType((node as Identifier).value);
          case "Literal":
             const literal = node as Literal;
-
-            return new LiteralType(
-               String(literal.value),
-               NamedType.PRIMITIVE_TYPES[literal.type]
-            );
+            let resultType: Type = Any;
+            if (literal.type === "Anything" && literal.value === "") {
+               return Any;
+            }
+            if (literal.type === "Void") {
+               return Nothing;
+            }
+            if (literal.type === "String") {
+               resultType = PrimitiveType.String;
+            }
+            if (literal.type === "Number") {
+               resultType = PrimitiveType.Number;
+            }
+            if (literal.type === "Boolean") {
+               resultType = PrimitiveType.Boolean;
+            }
+            return new LiteralType(String(literal.value), resultType);
          case "Assignment":
             if (
                node instanceof Assignment &&
@@ -118,7 +145,6 @@ export class TypeTranslator {
                throw new Error("Weird type");
             }
             const innerScope = scope.innerScopeOf(node, true);
-            // innerScope.declareType("T", new NamedType("T"));
             const type = new RoundValueToValueLambdaType(
                node.params.map((p) =>
                   this.translateRoundTypeToTypeLambdaParameter(

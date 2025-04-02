@@ -1,5 +1,3 @@
-
-
 User = data:
 	name: String
 
@@ -13,3 +11,7 @@ Falsey = FalseyNum | FalseyStr | FalseyBool
 
 print(false :: Falsey)
 
+x = User.name
+
+print(User)
+print(x)

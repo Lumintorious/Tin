@@ -1,4 +1,4 @@
-import { RefinedType } from "./Types";
+import { Nothing, RefinedType, NamedType, PrimitiveType } from "./Types";
 import { Optional } from "./Parser";
 import {
    AppliedKeyword,
@@ -37,7 +37,6 @@ import {
    GenericNamedType,
    LiteralType,
    MutableType,
-   NamedType,
    OptionalType,
    ParamType,
    RoundValueToValueLambdaType,
@@ -57,10 +56,10 @@ export class TypeInferencer {
    }
 
    deduceCommonType(type1: Type, type2: Type, scope: Scope): Type {
-      if (type1 === NamedType.PRIMITIVE_TYPES.Nothing) {
+      if (type1 === Nothing) {
          return new OptionalType(type2);
       }
-      if (type2 === NamedType.PRIMITIVE_TYPES.Nothing) {
+      if (type2 === Nothing) {
          return new OptionalType(type1);
       }
       if (type1 instanceof AnyType) {
@@ -107,19 +106,9 @@ export class TypeInferencer {
                inferredType instanceof BinaryOpType &&
                inferredType.operator === "|"
             ) {
-               if (
-                  inferredType.left.isAssignableTo(
-                     NamedType.PRIMITIVE_TYPES.Nothing,
-                     scope
-                  )
-               ) {
+               if (inferredType.left.isAssignableTo(Nothing, scope)) {
                   inferredType = inferredType.right;
-               } else if (
-                  inferredType.right.isAssignableTo(
-                     NamedType.PRIMITIVE_TYPES.Nothing,
-                     scope
-                  )
-               ) {
+               } else if (inferredType.right.isAssignableTo(Nothing, scope)) {
                   inferredType = inferredType.left;
                }
             }
@@ -177,10 +166,10 @@ export class TypeInferencer {
             inferredType = this.inferData(node as DataDef, scope);
             break;
          case "Assignment":
-            inferredType = NamedType.PRIMITIVE_TYPES.Nothing;
+            inferredType = Nothing;
             break;
          case "TypeCheck":
-            inferredType = NamedType.PRIMITIVE_TYPES.Boolean;
+            inferredType = PrimitiveType.Boolean;
             break;
          case "Cast":
             this.infer((node as Cast).expression, scope); // for building purposes
@@ -191,7 +180,7 @@ export class TypeInferencer {
             scope.resolveNamedType(inferredType);
             break;
          case "WhileLoop":
-            inferredType = NamedType.PRIMITIVE_TYPES.Nothing;
+            inferredType = Nothing;
             break;
          case "Group":
             inferredType = this.infer((node as Group).value, scope) as any;
@@ -237,7 +226,7 @@ export class TypeInferencer {
          node.trueBranch,
          innerScope.innerScopeOf(node.trueBranch, true)
       );
-      let falseBranchType = NamedType.PRIMITIVE_TYPES.Nothing;
+      let falseBranchType: Type = Nothing;
       if (node.falseBranch !== undefined) {
          falseBranchType = this.infer(node.falseBranch, innerScope);
       }
@@ -303,13 +292,12 @@ export class TypeInferencer {
             calleeType = constructor;
          }
       } catch (e) {
-         calleeType = NamedType.PRIMITIVE_TYPES.Type;
-         // (e as any).message = "Was Type";
+         calleeType = PrimitiveType.Type;
          throw e;
       }
       // For future, check if calleeType is Type, only then go into Generic[Type] building
       if (
-         calleeType.toString() == "Type" ||
+         calleeType === PrimitiveType.Type ||
          calleeType instanceof SquareTypeToTypeLambdaType
       ) {
          const calleeAsType =
@@ -569,9 +557,6 @@ export class TypeInferencer {
       }
 
       if (type instanceof NamedType) {
-         if (type.isPrimitive()) {
-            return new Map([]);
-         }
          return this.getAllKnownFields(scope.resolveNamedType(type), scope);
       } else if (type instanceof StructType) {
          if (!type.name) {
@@ -619,13 +604,15 @@ export class TypeInferencer {
          return this.getAllKnownFields(type.type, scope);
       } else if (type instanceof RefinedType) {
          return this.getAllKnownFields(type.inputType, scope);
+      } else if (type instanceof PrimitiveType) {
+         return new Map();
       } else {
-         throw new Error(
-            "Could not deduce fields of type " +
-               type.tag +
-               " -" +
-               type.toString()
-         );
+         // throw new Error(
+         //    "Could not deduce fields of type " +
+         //       type.tag +
+         //       " -" +
+         //       type.toString()
+         // );
       }
       return new Map();
    }
@@ -637,20 +624,14 @@ export class TypeInferencer {
          const innerType = this.infer(node.expression, thisScope);
          if (innerType instanceof BinaryOpType && innerType.operator === "|") {
             if (
-               innerType.left.isAssignableTo(
-                  NamedType.PRIMITIVE_TYPES.Nothing,
-                  thisScope
-               ) ||
-               innerType.right.isAssignableTo(
-                  NamedType.PRIMITIVE_TYPES.Nothing,
-                  thisScope
-               )
+               innerType.left.isAssignableTo(Nothing, thisScope) ||
+               innerType.right.isAssignableTo(Nothing, thisScope)
             ) {
-               acc.push([node, NamedType.PRIMITIVE_TYPES.Nothing]);
+               acc.push([node, Nothing]);
             }
          }
          if (innerType instanceof OptionalType) {
-            acc.push([node, NamedType.PRIMITIVE_TYPES.Nothing]);
+            acc.push([node, Nothing]);
          }
       } else if (node instanceof Block) {
          const innerScope = thisScope.innerScopeOf(node, true);
@@ -747,7 +728,7 @@ export class TypeInferencer {
                scope
             );
          }
-         return i === 0 ? NamedType.PRIMITIVE_TYPES.Nothing : commonType;
+         return i === 0 ? Nothing : commonType;
       } catch (e) {
          if (scope.iteration === "DECLARATION") {
             return new UncheckedType();
@@ -762,20 +743,26 @@ export class TypeInferencer {
       scope: Scope,
       options: RecursiveResolutionOptions
    ) {
-      // Handle different literal types (assuming 'Number' is one type)
-      if (options.expectsBroadenedType) {
-         return scope.lookupType(node.type).typeSymbol;
-      }
+      let type: Type = Any;
       if (node.type === "Anything" && node.value === "") {
          return Any;
       }
       if (node.type === "Void") {
-         return NamedType.PRIMITIVE_TYPES.Nothing;
+         return Nothing;
       }
-      return new LiteralType(
-         String(node.value),
-         scope.lookupType(node.type).typeSymbol
-      );
+      if (node.type === "String") {
+         type = PrimitiveType.String;
+      }
+      if (node.type === "Number") {
+         type = PrimitiveType.Number;
+      }
+      if (node.type === "Boolean") {
+         type = PrimitiveType.Boolean;
+      }
+      if (options.expectsBroadenedType) {
+         return type;
+      }
+      return new LiteralType(String(node.value), type);
    }
 
    inferIdentifier(
@@ -787,22 +774,11 @@ export class TypeInferencer {
          const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
 
          if (!symbol) {
-            // if (
-            //    node.value.charAt(0) === node.value.charAt(0).toUpperCase() &&
-            //    !node.value.includes("@") &&
-            //    !node.value.includes(".")
-            // ) {
-            //    return NamedType.PRIMITIVE_TYPES.Type;
-            // }
             throw new Error(`Undefined identifier: ${node.value}`);
          }
-         // if (symbol.typeSymbol instanceof MutableType) {
-         //    return symbol.typeSymbol.type;
-         // }
          return symbol.typeSymbol;
       } catch (e) {
          if (node.isTypeIdentifier()) {
-            const sym = scope.lookupType(node.value);
             node.isInValueContext = true;
             return new NamedType("Type");
          }
@@ -854,13 +830,10 @@ export class TypeInferencer {
          }
       }
 
-      const Number = scope.lookupType("Number");
-      const String = scope.lookupType("String");
-      const Boolean = scope.lookupType("Boolean");
-      if (leftType.isAssignableTo(String.typeSymbol, scope)) {
+      if (leftType.isAssignableTo(PrimitiveType.String, scope)) {
          const entry = this.DEFINED_OPERATIONS.StringAnyString;
          if (entry.includes(node.operator)) {
-            return make(String.typeSymbol);
+            return make(PrimitiveType.String);
          }
       }
       if (node.operator === "?:") {
@@ -870,36 +843,36 @@ export class TypeInferencer {
       }
 
       if (this.DEFINED_OPERATIONS.AnyAnyBoolean.includes(node.operator)) {
-         return make(Boolean.typeSymbol);
+         return make(PrimitiveType.Boolean);
       }
 
       if (
-         (leftType.isAssignableTo(Number.typeSymbol, scope) &&
-            rightType.isAssignableTo(Number.typeSymbol, scope),
+         (leftType.isAssignableTo(PrimitiveType.Number, scope) &&
+            rightType.isAssignableTo(PrimitiveType.Number, scope),
          scope)
       ) {
          if (
             this.DEFINED_OPERATIONS.NumberNumberNumber.includes(node.operator)
          ) {
-            return make(Number.typeSymbol);
+            return make(PrimitiveType.Number);
          }
          if (
             this.DEFINED_OPERATIONS.NumberNumberBoolean.includes(node.operator)
          ) {
-            return make(Boolean.typeSymbol);
+            return make(PrimitiveType.Boolean);
          }
       }
 
       if (
-         leftType.isAssignableTo(Boolean.typeSymbol, scope) &&
-         rightType.isAssignableTo(Boolean.typeSymbol, scope)
+         leftType.isAssignableTo(PrimitiveType.Boolean, scope) &&
+         rightType.isAssignableTo(PrimitiveType.Boolean, scope)
       ) {
          if (
             this.DEFINED_OPERATIONS.BooleanBooleanBoolean.includes(
                node.operator
             )
          ) {
-            return make(Boolean.typeSymbol);
+            return make(PrimitiveType.Boolean);
          }
       }
 

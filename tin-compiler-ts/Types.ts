@@ -114,6 +114,7 @@ export class PrimitiveType extends Type {
    static Number = new PrimitiveType("Number");
    static String = new PrimitiveType("String");
    static Boolean = new PrimitiveType("Boolean");
+   static Type = new PrimitiveType("Type");
 
    name: string;
    constructor(name: string) {
@@ -195,31 +196,13 @@ export class TypeOfTypes extends Type {
 }
 
 export class NamedType extends Type {
-   static PRIMITIVE_TYPES: { [_: string]: Type } = {
-      Int: new NamedType("Int"),
-      Number: new NamedType("Number"),
-      String: new NamedType("String"),
-      Boolean: new NamedType("Boolean"),
-      Nothing: new NamedType("Nothing"),
-      Never: new NamedType("Never"),
-      This: new NamedType("This"),
-      Anything: Any,
-   };
-
    name: string;
    constructor(name: string) {
       super("NamedType");
       this.name = name;
    }
 
-   isPrimitive() {
-      return Object.keys(NamedType.PRIMITIVE_TYPES).includes(this.name);
-   }
-
    isAssignableTo(other: Type, scope: Scope): boolean {
-      // if (this.name === "Nothing") {
-      //    return true;
-      // }
       const realType = scope.lookupType(this.name);
       if (
          (other instanceof NamedType || other instanceof GenericNamedType) &&
@@ -230,12 +213,6 @@ export class NamedType extends Type {
       }
       if (realType.typeSymbol instanceof NamedType) {
          if (super.isAssignableTo(other, scope)) {
-            return true;
-         }
-         if (
-            this.name === other.name &&
-            Object.keys(NamedType.PRIMITIVE_TYPES).includes(this.name)
-         ) {
             return true;
          }
          return false;
@@ -250,16 +227,7 @@ export class NamedType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope) {
-      let realType: Type | undefined;
-      if (this.isPrimitive()) {
-         realType = undefined;
-      } else {
-         try {
-            realType = scope.lookup(this.name).typeSymbol;
-         } catch (e) {
-            // Nothing
-         }
-      }
+      let realType = scope.lookupType(this.name).typeSymbol;
       return (
          (other instanceof NamedType && this.name === other.name) ||
          (other.name !== undefined && other.name === this.name) ||
@@ -449,10 +417,7 @@ export class OptionalType extends Type {
       if (other instanceof OptionalType && this.isSame(other, scope)) {
          return true;
       }
-      return (
-         other.isAssignableTo(this.type, scope) ||
-         other === NamedType.PRIMITIVE_TYPES.Nothing
-      );
+      return other.isAssignableTo(this.type, scope) || other === Nothing;
    }
 
    toString() {
@@ -521,9 +486,10 @@ export class RoundValueToValueLambdaType extends Type {
          });
 
       // Return type must be covariant
-      const returnCheck =
-         // other.returnType.name === "Nothing" ||
-         this.returnType.isAssignableTo(other.returnType, scope);
+      const returnCheck = this.returnType.isAssignableTo(
+         other.returnType,
+         scope
+      );
 
       const purityCheck = other.pure ? this.pure : true;
       const captureCheck = !other.capturesMutableValues
@@ -923,18 +889,12 @@ export class BinaryOpType extends Type {
          if (other instanceof OptionalType) {
             if (
                this.left.isAssignableTo(other.type, scope) &&
-               this.right.isAssignableTo(
-                  NamedType.PRIMITIVE_TYPES.Nothing,
-                  scope
-               )
+               this.right.isAssignableTo(Nothing, scope)
             ) {
                return true;
             } else if (
                this.right.isAssignableTo(other.type, scope) &&
-               this.left.isAssignableTo(
-                  NamedType.PRIMITIVE_TYPES.Nothing,
-                  scope
-               )
+               this.left.isAssignableTo(Nothing, scope)
             ) {
                return true;
             }
@@ -993,12 +953,12 @@ export class BinaryOpType extends Type {
          if (other instanceof OptionalType) {
             if (
                this.left.isExtendedBy(other.type, scope) &&
-               this.right.isExtendedBy(NamedType.PRIMITIVE_TYPES.Nothing, scope)
+               this.right.isExtendedBy(Nothing, scope)
             ) {
                return true;
             } else if (
                this.right.isExtendedBy(other.type, scope) &&
-               this.left.isExtendedBy(NamedType.PRIMITIVE_TYPES.Nothing, scope)
+               this.left.isExtendedBy(Nothing, scope)
             ) {
                return true;
             }

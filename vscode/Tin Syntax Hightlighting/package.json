@@ -7,6 +7,7 @@
    "engines": {
       "vscode": "^1.50.0"
    },
+   "repository": {},
    "main": "./extension.js",
    "contributes": {
       "languages": [

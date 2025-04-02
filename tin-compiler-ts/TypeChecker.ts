@@ -41,7 +41,6 @@ import {
    StructType,
    Type,
    TypeOfTypes,
-   TypeRoundValueToValueLambda,
    VarargsType,
 } from "./Types";
 

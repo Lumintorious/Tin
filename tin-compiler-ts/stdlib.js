@@ -38,13 +38,14 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 	descriptor._s = symbol;
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		for (let key in Reflect.ownKeys(result)) {
+		// console.log(Reflect.ownKeys(result))
+		for (let key of Reflect.ownKeys(result)) {
+			if (typeof key === "string" && key.startsWith("_")) continue;
 			if (result[key] === undefined) {
 				delete result[key]
+			} else if (result[key]._ === undefined) {
+				result[key] = { _: result[key] }
 			}
-			// if (!result[key]._) {
-			// 	result[key] = { _: result[key] }
-			// }
 		}
 		Object.setPrototypeOf(result, proto)
 		const _clojure = result._clojure ? { ...result._clojure } : {};
@@ -65,7 +66,7 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 		return descriptor.toString()
 	}
 	constructor.__is_child = (obj) => {
-		if (descriptor[Type._s]?.check && descriptor[Type._s]?.check(obj)) {
+		if (descriptor[Type._s]?.check?._ && descriptor[Type._s]?.check._(obj)) {
 			return true;
 		}
 		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol)
@@ -112,18 +113,6 @@ export function Type$get(obj) {
 	return result;
 }
 
-export function Union$getValuesRaw(objType) {
-	if (objType[Union._s]) {
-		const left = Union$getValuesRaw(objType[Union._s].left)
-		const right = Union$getValuesRaw(objType[Union._s].right)
-		return Array(objType)([...left[Array._s]._rawArray, ...right[Array._s]._rawArray])
-	} else if (objType[Literal._s]) {
-		return Array(objType)([objType[Literal._s].value])
-	} else {
-		return Array(Nothing)([])
-	}
-}
-
 export function _F(typeId, lambda, type) {
 	lambda._type = type;
 	lambda._typeId = typeId;
@@ -161,7 +150,7 @@ export const _A = function (obj1, obj2, isReflection = false) {
 			descriptor = Type(
 				"Hello",
 				(obj) => {
-					return obj1Descriptor[Type._s].check(obj) && obj2Descriptor[Type._s].check(obj)
+					return obj1Descriptor[Type._s].check._(obj) && obj2Descriptor[Type._s].check._(obj)
 				})._and(
 					Intersection(obj1Descriptor, obj2Descriptor)
 				)
@@ -550,7 +539,7 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 	}
 
 	if (obj === null) return green('nothing');
-	if (typeof obj === 'undefined') returngreen('nothing');
+	if (typeof obj === 'undefined') return green('nothing');
 	if (obj._ !== undefined) {
 		obj = obj._
 	}
@@ -566,8 +555,8 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 	if (Reflect.ownKeys(obj).includes(Array._s)) {
 		let result = yellow("Array") + white('(') + (indent > 0 ? "\n" : "");
-		for (let i = 0; i < obj[Array._s].length(); i++) {
-			result += (typeof obj[Array._s].at(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length() - 1 ? "" : white(", ")) + (indent > 0 ? "\n" : "")
+		for (let i = 0; i < obj[Array._s].length._(); i++) {
+			result += (typeof obj[Array._s].at._(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at._(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length._() - 1 ? "" : white(", ")) + (indent > 0 ? "\n" : "")
 		}
 
 		currentIndent -= indent;
@@ -597,7 +586,7 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 					result += componentKey.description + "."
 				}
 				if (!key.startsWith("_") && component[key] != obj) {
-					result += padd() + blue(key) + white(" = ") + makeString(component[key], sprawl, indent, currentIndent + indent) + white(', ') + (indent > 0 ? "\n" : "");
+					result += padd() + key + white(" = ") + makeString(component[key], sprawl, indent, currentIndent + indent) + white(', ') + (indent > 0 ? "\n" : "");
 				}
 			}
 			if (result.length > 1 && result[result.length - 2] === ",") {

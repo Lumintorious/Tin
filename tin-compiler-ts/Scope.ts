@@ -11,6 +11,7 @@ import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
+import { PrimitiveType } from "./Types";
 import {
    Any,
    AppliedGenericType,
@@ -18,6 +19,7 @@ import {
    GenericNamedType,
    MutableType,
    NamedType,
+   Nothing,
    OptionalType,
    ParamType,
    RoundValueToValueLambdaType,
@@ -492,6 +494,14 @@ export class Scope {
             return new MutableType(
                this.resolveGenericTypes((type as MutableType).type)
             );
+         case "PrimitiveType":
+            return type;
+         case "Nothing":
+            return type;
+         case "Never":
+            return type;
+         case "Any":
+            return type;
          default:
             throw new Error(
                "Can't handle type " +
@@ -503,11 +513,7 @@ export class Scope {
 
    resolveFully(type: Type): Type {
       if (type instanceof NamedType) {
-         if (type.isPrimitive()) {
-            return type;
-         } else {
-            return this.resolveFully(this.resolveNamedType(type));
-         }
+         return this.resolveFully(this.resolveNamedType(type));
       } else if (type instanceof AppliedGenericType) {
          return this.resolveFully(this.resolveAppliedGenericTypes(type));
       } else {
@@ -559,18 +565,12 @@ export class TypePhaseContext {
       existingFileScopes.forEach((s) => {
          this.fileScope.absorbAllFrom(s);
       });
-      for (const t in NamedType.PRIMITIVE_TYPES) {
-         this.languageScope.typeSymbols.set(
-            t,
-            new Symbol(t, NamedType.PRIMITIVE_TYPES[t])
-         );
-      }
       this.languageScope.declare(
          new Symbol(
             "print",
             new RoundValueToValueLambdaType(
-               [new ParamType(NamedType.PRIMITIVE_TYPES.Anything)],
-               NamedType.PRIMITIVE_TYPES.Nothing,
+               [new ParamType(Any)],
+               Nothing,
                false,
                false
             ),
@@ -581,8 +581,8 @@ export class TypePhaseContext {
          new Symbol(
             "debug",
             new RoundValueToValueLambdaType(
-               [new ParamType(NamedType.PRIMITIVE_TYPES.Anything)],
-               NamedType.PRIMITIVE_TYPES.Nothing,
+               [new ParamType(Any)],
+               Nothing,
                false,
                false
             ),
@@ -595,7 +595,7 @@ export class TypePhaseContext {
          new ParamType(
             new RoundValueToValueLambdaType(
                [],
-               this.languageScope.lookupType("Number").typeSymbol,
+               PrimitiveType.Number,
                false,
                true
             ),
@@ -603,7 +603,7 @@ export class TypePhaseContext {
          ),
          new ParamType(
             new RoundValueToValueLambdaType(
-               [new ParamType(new NamedType("Number"))],
+               [new ParamType(PrimitiveType.Number)],
                new GenericNamedType("T"),
                false,
                true
@@ -660,11 +660,7 @@ export class TypePhaseContext {
          true
       );
       this.languageScope.declare(
-         new Symbol(
-            "nothing",
-            NamedType.PRIMITIVE_TYPES.Nothing,
-            new Identifier("nothing")
-         )
+         new Symbol("nothing", Nothing, new Identifier("nothing"))
       );
 
       this.languageScope.setIteration("DECLARATION");

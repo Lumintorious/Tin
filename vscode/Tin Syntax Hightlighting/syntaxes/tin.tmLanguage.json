@@ -41,6 +41,33 @@
          }
       },
       {
+         "match": "(\\.)\\b([a-z][a-zA-Z0-9_]*)\\b(\\(|\\[)",
+         "name": "field.tin",
+         "captures": {
+            "1": {
+               "name": "operator.tin"
+            },
+            "2": {
+               "name": "function.tin"
+            },
+            "3": {
+               "name": "operator.tin"
+            }
+         }
+      },
+      {
+         "match": "(\\.)\\b([a-z][a-zA-Z0-9_]*)",
+         "name": "field.tin",
+         "captures": {
+            "1": {
+               "name": "operator.tin"
+            },
+            "2": {
+               "name": "field.tin"
+            }
+         }
+      },
+      {
          "name": "variable.parameter.tin",
          "match": "\\b([a-z][a-zA-Z0-9_]*)\\b"
       },
