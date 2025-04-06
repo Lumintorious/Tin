@@ -1,46 +1,65 @@
-Iterator = [T] => data:
-	next: () ~> T?
+Iterator = [T] -> data:
+	next: () ~> var T?
 
-Accessible = [T] => data:
-	at: (index: Number) -> T
-	length: () -> Number
+Iterable = [T] -> data:
+	makeIterator: () -> Iterator[T]
 
-makeString: (Anything) -> String = external
+MapOps = [K, V] -> data:
+	get: (K) -> V?
+	with: (K, V) -> Map[K, V]
 
-ToString = data:
-	toString: (this: Anything) -> String
+Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 
-stringOf = (obj: Anything) ->
-	if obj :: ToString,
-		obj.toString()
-	else
-		makeString(obj)
+external "
+	function _arrToMap(arr) \{
+		return new Map(arr[Array._s]._rawArray.map(tup => [tup[Tuple2._s].left._, tup[Tuple2._s].right._]))
+	\}
 
-Iterable = [T] => data:
-	getIterator: () -> Iterator[T]
+	function _mapFromJsMap(K, V, jsMap) \{
+		return ((MapOps(K, V)(\{_: function(k)\{ return jsMap.get(k)\} \}, \{_: function(k, v)\{
+			const newJsMap = new Map(jsMap);
+			newJsMap.set(k, v);
+			return _mapFromJsMap(K, V, newJsMap);
+		\}\}))._and(ToString(\{_: function() \{
+			return `Map($\{[...jsMap].map(([k, v]) => `($\{k\},$\{v\})`).toString()\})`
+		\}\})))._and(Iterable(Tuple2(K, V))(() => \{
+			const entryArray = [...jsMap]
+			let i = 0;
+			if (i < entryArray.length) \{
+				const entry = entryArray[i]
+				return Tuple2(K, V)(entry[0], entry[1])
+			\}
+			return 1 + 2
+		\}))
+	\}
+	export const Map$of = (K, V) => (arr) => \{
+		const jsMap = _arrToMap(arr)
+		const map = _mapFromJsMap(K, V, jsMap)
+		return map;
+	\}
+"
 
-	forEach = (this: Iterable[T], fn: (T) ~> Nothing): var Anything ~>
-		iterator = this.getIterator()
-		current: var T? = iterator.next()
-		if current != nothing,
-			set current = nothing
-		# while current != nothing,
-		# 	fn(current)
-		# 	set current = iterator.next()
+Map@of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
 
-	mkString = (this: Iterable[T], separator: String, left: String, right: String): var String ~>
-		string: var String = ""
-		fn = (t: T): var String ~>
-			comma = if string == "", "" else separator
-			set string = "{string}{comma}{t}"
-		this.forEach(fn)
-		"{left}{string}{right}"
+Iterable@forEach = [T] -> (iterable: Iterable[T], fn: (T) ~> Nothing) ~>
+	iterator = iterable.makeIterator()
+	current: var T? = iterator.next()
+	while current !: Nothing,
+		fn(current: T)
+		set current = iterator.next()
 
-	count = (this: Iterable[T], pred: (T) -> Boolean): var Number ~>
-		num: var Number = 0
-		this.forEach((t: T): var Anything ~> if pred(t), set num = num + 1)
-		num
+	nothing
 
+Iterable@fromArray = [T] -> (arr: Array[T]) ->
+	Iterable[T](() ->
+		i = var (-1)
+		Iterator[T](() ~>
+			set i = i + 1
+			arr.at(i)
+		)
+	)
 
-ssss = 2
-	
+it = Iterable@fromArray(1, 2, 3)
+
+# print(it)
+Iterable@forEach(it, print)

@@ -1,5 +1,6 @@
 import { cp } from "fs";
 
+
 export const __tin_varargs_marker = Symbol();
 
 export const TIN_TYPE_CACHE = new Map()
@@ -24,11 +25,12 @@ export class Return {
 }
 
 Object.prototype.__is_child = function (obj) {
-	if (this._c && this._c.__is_child) {
-		if (obj._ !== undefined) {
-			return this._c.__is_child(obj._)
+	const type = this._ ? this._ : this
+	if (type._c && type._c.__is_child) {
+		if ("_" in obj) {
+			return type._c.__is_child(obj._)
 		} else {
-			return this._c.__is_child(obj);
+			return type._c.__is_child(obj);
 		}
 	}
 	throw new Error("Unhandled")
@@ -78,7 +80,7 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 
 export function _Q(symbol, func, descriptor) {
 	func._s = symbol;
-	return func
+	return func;
 }
 
 export function Type$of(obj) {
@@ -102,6 +104,9 @@ export function Type$of(obj) {
 }
 
 export function Type$get(obj) {
+	if (obj === undefined || obj === null) {
+		return Nothing;
+	}
 	let result = obj
 
 	if (result._d) {
@@ -221,6 +226,13 @@ export const _A = function (obj1, obj2, isReflection = false) {
 	newObj._clojure = newClojure;
 	newObj._type = _A(obj1._type, obj2._type)
 	return newObj
+}
+
+export const _N = function (type) {
+	return {
+		__is_child: (obj) => !type.__is_child(obj),
+		_s: Symbol("!" + type._s.description)
+	}
 }
 
 export const _U = function (obj1, obj2) {
@@ -369,7 +381,10 @@ export const copy = (obj, replacers) => {
 }
 
 export function _replaceComponentFields(obj, replacer) {
-	if (replacer === undefined) {
+	if (typeof obj !== "object") {
+		return obj;
+	}
+	if (typeof replacer !== 'object' || replacer === null) {
 		return obj;
 	}
 	for (const componentKey of Reflect.ownKeys(replacer)) {
@@ -499,11 +514,23 @@ export const _mcOld = (clojure, obj) => {
 	return obj;
 }
 
+export function _call(owner, fn, params) {
+	return fn.call(owner, ...params)
+}
+
 export function _cast(obj, type) {
-	if (type.__is_child !== undefined && type.__is_child(obj)) {
+	if (type._) {
+		type = type._
+	}
+	let objToTest = obj;
+	if (typeof obj === "object" && "_" in obj) {
+		objToTest = obj._;
+	}
+
+	if (type.__is_child !== undefined && type.__is_child(objToTest)) {
 		return obj
 	} else {
-		throw new Error(`'${obj}' was not of type ${(type?._d ?? type)?._s?.description}`)
+		throw new Error(`'${makeStr(objToTest, true, true)}' was not of type ${(type?._d ?? type)?._s?.description}`)
 	}
 }
 
@@ -546,7 +573,7 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 	if (typeof obj === 'boolean') return green(obj ? 'true' : 'false');
 	if (typeof obj === 'number') return green("" + obj);
-	if (typeof obj === 'string') return green(indent > 0 ? `"${obj}"` : obj);
+	if (typeof obj === 'string') return green(currentIndent > 0 ? `"${obj}"` : obj);
 	if (typeof obj === 'symbol') return obj.description;
 
 	if (typeof obj === 'function') {
@@ -564,6 +591,10 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 	}
 
 	if (typeof obj === 'object') {
+		if (obj[ToString._s]?.toString?._) {
+			return obj[ToString._s]?.toString?._.call(obj)
+		}
+
 		let result = sprawl ? white('(') : "";
 		let number = 0;
 		// if (obj._clojure) {
@@ -610,18 +641,70 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 	return ''; // For other types like functions, symbols, etc.
 }
 
+export function makeStr(obj, useToString, firstLayer = false) {
+
+	if (obj === null) return green('nothing');
+	if (typeof obj === 'undefined') return green('nothing');
+	if (obj._ !== undefined) {
+		obj = obj._
+	}
+
+	if (typeof obj === 'boolean') return green(obj ? 'true' : 'false');
+	if (typeof obj === 'number') return green("" + obj);
+	if (typeof obj === 'string') return !firstLayer ? green(`"${obj}"`) : green(obj);
+	if (typeof obj === 'symbol') return obj.description;
+
+	if (typeof obj === 'function') {
+		return blue('λ')
+	}
+
+	if (Reflect.ownKeys(obj).includes(Array._s)) {
+		let result = yellow("Array") + white('(');
+		for (let i = 0; i < obj[Array._s].length._(); i++) {
+			result += makeStr(obj[Array._s].at._(i)) + (i === obj[Array._s].length._() - 1 ? "" : white(", "))
+		}
+
+		return result + white(")")
+	}
+
+	if (useToString && obj[ToString._s]?.toString?._) {
+		return obj[ToString._s]?.toString?._.call(obj)
+	}
+
+	const results = [];
+	for (const componentKey of Reflect.ownKeys(obj)) {
+		if (typeof componentKey !== 'symbol') continue;
+		const component = obj[componentKey]
+		const componentName = (componentKey.description === "Tuple2" || componentKey.description === "Tuple3") ? "" : componentKey.description
+		results.push(yellow(componentName) + white("(") + Reflect.ownKeys(component).map(k => makeStr(component[k])).join(white(", ")) + white(")"))
+	}
+
+	return results.join(" & ")
+}
+
+export function matches(str, regex) {
+	return str.match(regex) !== null
+}
+
+export const printRaw = (arg) => {
+	console.log(makeStr(arg, false, true))
+}
+
 export const print = (arg) => {
-	console.log(makeString(arg, false, 2))
+	console.log(makeStr(arg, true, true))
 }
 
 export const debug = (...args) => {
 	console.dir(...args.map(arg => {
-		if (arg._type) {
-			const { _type, ...rest } = arg
-			return rest;
-		} else {
-			return arg;
-		}
+		if (arg === undefined) {
+			return undefined;
+		} else
+			if (arg._type) {
+				const { _type, ...rest } = arg
+				return rest;
+			} else {
+				return arg;
+			}
 	}), { depth: null })
 }
 

@@ -74,3 +74,17 @@ Union@values = [T] ->
 		else
 			Array@of[T]()
 	go(T)
+
+
+external "
+	
+
+console.log('Hi')
+Nothing.__is_child
+
+
+console.log('Hi')
+"
+
+x = 2
+print("Hello")

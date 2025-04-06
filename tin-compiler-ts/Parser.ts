@@ -1,3 +1,4 @@
+import { group } from "console";
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
@@ -10,9 +11,16 @@ const applyableKeywords = [
    "private",
 ];
 
-class Modifier extends null {
-   constructor() {}
+class Modifier<T = undefined> {
+   readonly value: T;
+   constructor(value: T = undefined as any) {
+      this.value = value;
+   }
 }
+
+export const IN_RETURN_BRANCH = new Modifier();
+export const VAR_RETURNING_FUNC_IN_INVAR_PLACE = new Modifier();
+export const INVAR_RETURNING_FUNC_IN_VAR_PLACE = new Modifier();
 
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
@@ -28,12 +36,20 @@ export class AstNode {
       AstNode.toCheckForPosition.push(this);
    }
 
+   is(modifier: Modifier) {
+      return this.modifiers.has(modifier);
+   }
+
    modify(modifier: Modifier) {
       this.modifiers.add(modifier);
    }
 
-   is(modifier: Modifier) {
-      return this.modifiers.has(modifier);
+   modifyFrom(other: AstNode, modifier: Modifier) {
+      if (other.modifiers.has(modifier)) {
+         this.modifiers.add(modifier);
+      } else {
+         this.modifiers.delete(modifier);
+      }
    }
 
    show() {
@@ -128,6 +144,14 @@ export class Cast extends Term {
    }
 }
 
+export class Tuple extends Term {
+   expressions: Term[];
+   constructor(expressions: Term[]) {
+      super("Tuple");
+      this.expressions = expressions;
+   }
+}
+
 export class IfStatement extends Term {
    condition: Term;
    trueBranch: Term;
@@ -135,8 +159,14 @@ export class IfStatement extends Term {
    constructor(condition: Term, trueBranch: Term, falseBranch?: Term) {
       super("IfStatement");
       this.condition = condition;
-      this.trueBranch = trueBranch;
-      this.falseBranch = falseBranch;
+      this.trueBranch =
+         trueBranch instanceof Block ? trueBranch : new Block([trueBranch]);
+      this.falseBranch =
+         falseBranch instanceof Block
+            ? falseBranch
+            : falseBranch
+            ? new Block([falseBranch])
+            : undefined;
    }
 }
 
@@ -188,7 +218,7 @@ export class RoundValueToValueLambda extends Term {
       if (
          this.params[0] instanceof Assignment &&
          this.params[0].lhs instanceof Identifier &&
-         this.params[0].lhs.value === "this"
+         this.params[0].lhs.value === "self"
       ) {
          return true;
       }
@@ -391,10 +421,12 @@ export class Select extends Term {
 export class TypeCheck extends Term {
    term: Term;
    type: Term;
-   constructor(term: Term, type: Term) {
+   negative: boolean = false;
+   constructor(term: Term, type: Term, negative: boolean = false) {
       super("TypeCheck");
       this.term = term;
       this.type = type;
+      this.negative = negative;
    }
 }
 
@@ -438,28 +470,29 @@ const PRECEDENCE: { [_: string]: number } = {
    "?:": 110, // Walrus
    ".": 100, // Field access
    "?.": 100, // Field access
-   "**": 11, // Exponentiation
-   "*": 10, // Multiplication
-   "/": 10, // Division
-   "%": 10, // Division
-   "+": 9, // Addition
-   "-": 9, // Subtraction
-   "<": 7, // Less than
-   ">": 7, // Greater than
-   "<=": 7, // Less than or equal to
-   ">=": 7, // Greater than or equal to
-   "&&": 6, // Logical AND
-   "||": 5, // Logical OR
-   "&": 4,
-   copy: 4,
-   "|": 3,
-   ":": 2,
+   "**": 50, // Exponentiation
+   "*": 40, // Multiplication
+   "/": 40, // Division
+   "%": 40, // Division
+   "+": 30, // Addition
+   "-": 30, // Subtraction
+   "<": 20, // Less than
+   ">": 20, // Greater than
+   "<=": 20, // Less than or equal to
+   ">=": 20, // Greater than or equal to
+   "!=": 18, // Inequality
+   "==": 18, // Equality
+   "::": 18, // Type Check
+   "!:": 18, // Type Check
+   "&&": 15, // Logical AND
+   "||": 14, // Logical OR
+   "&": 13,
+   "|": 12,
+   ":": 5,
    // (right-associative)
-   "!=": 0, // Inequality
-   "==": 0, // Equality
-   "::": 0, // Type Check
+   copy: 1,
+   where: 1,
    "=": 0, // Assignment
-   "~=": 0, // Assignment
 };
 
 export class Parser {
@@ -567,7 +600,7 @@ export class Parser {
             (this.peek().tag === "NEWLINE" || this.peek().tag === "OPERATOR") &&
             this.peek().value === ","
          ) {
-            this.consume("OPERATOR", ",");
+            this.consume();
          }
       }
 
@@ -615,10 +648,14 @@ export class Parser {
       const startPos = this.peek().position;
       let left: Term; // Parse the left-hand side (like a literal or identifier)
 
-      if (this.peek() && this.peek().value === "...") {
-         this.consume("OPERATOR", "...");
+      if (this.peek() && this.peek().value === "!") {
+         this.consume("OPERATOR", "!");
          left = this.parsePrimary();
-         left = new UnaryOperator("...", left);
+         left = new UnaryOperator("!", left);
+      } else if (this.peek() && this.peek().value === "-") {
+         this.consume("OPERATOR", "-");
+         left = this.parsePrimary();
+         left = new UnaryOperator("-", left);
       } else if (this.peek() && this.peek().value === "var") {
          this.consume("OPERATOR", "var");
          left = this.parseExpression(precedence, true, false, true);
@@ -664,7 +701,14 @@ export class Parser {
          // this.peek(1).tag === "INDENT" ||
          // this.peek(1).tag === "DEDENT")
       ) {
-         while (this.peek()?.tag === "NEWLINE" && this.peek().value === "\n") {
+         const operator = this.peek().value;
+         if (this.peek().tag !== "OPERATOR") {
+            break;
+         }
+         if (operator === "where") {
+            this.consume("OPERATOR", ":");
+         }
+         if (this.peek()?.tag === "NEWLINE" && this.peek().value === "\n") {
             this.consume("NEWLINE");
             if (this.peek()?.tag === "INDENT") {
                this.consume("INDENT");
@@ -675,7 +719,6 @@ export class Parser {
          if (!this.peek() || !this.isBinaryOperator(this.peek())) {
             break;
          }
-         const operator = this.peek().value;
          const operatorPrecedence = PRECEDENCE[operator];
          const thisLoopStart = this.positionNow();
          left = left.fromTo(whileLoopStart, thisLoopStart);
@@ -707,6 +750,11 @@ export class Parser {
          }
 
          let right;
+         if (this.is("NEWLINE")) {
+            this.consume("NEWLINE");
+            this.consume("INDENT");
+         }
+
          right = this.parseExpression(operatorPrecedence + 1);
 
          // Parse the right-hand side with precedence rules (note: higher precedence for right-side)
@@ -806,11 +854,30 @@ export class Parser {
          } else if (operator === "::" && right) {
             const typeCheck = new TypeCheck(left, right);
             left = typeCheck;
+         } else if (operator === "!:" && right) {
+            const typeCheck = new TypeCheck(left, right, true);
+            left = typeCheck;
          } else {
-            left = new BinaryExpression(left, operator, right);
+            if (operator === "where") {
+               const param = new Assignment(
+                  new Identifier("self"),
+                  undefined,
+                  undefined,
+                  left
+               );
+               if (!(right instanceof Block)) {
+                  right = new Block([right]);
+               }
+               left = new RefinedDef(
+                  new RoundValueToValueLambda([param], right)
+               );
+            } else {
+               left = new BinaryExpression(left, operator, right);
+            }
          }
          left = left.fromTo(whileLoopStart, this.positionNow());
       }
+      // this.omit("INDENT");
 
       // if (this.isOnNewLine) {
       //    this.consume("NEWLINE");
@@ -867,7 +934,7 @@ export class Parser {
       let isTypeLevel = false;
 
       const parameters: Term[] = [];
-      let groupCatch: Term | undefined = undefined;
+      const groupCatch: Term[] = [];
       const lambdaStart = this.positionNow();
 
       // Parse parameters until we reach the closing parenthesis
@@ -886,12 +953,18 @@ export class Parser {
          if (param instanceof Assignment) {
             param.isDeclaration = false;
             param.isParameter = true;
-            groupCatch = new Cast(param.lhs, param.type).fromTo(
-               paramStart,
-               this.positionNow()
-            );
+            if (param.type && !param.value) {
+               groupCatch.push(
+                  new Cast(param.lhs, param.type).fromTo(
+                     paramStart,
+                     this.positionNow()
+                  )
+               );
+            } else {
+               groupCatch.push(param.lhs);
+            }
          } else {
-            groupCatch = param;
+            groupCatch.push(param);
          }
          parameters.push(param);
 
@@ -920,13 +993,21 @@ export class Parser {
                this.peek().value != "~>" &&
                this.peek().value != "~~>" &&
                (this.peek().value != "=>" || !isSquare))) &&
-         groupCatch !== undefined
+         groupCatch.length > 0
       ) {
-         this.omit("NEWLINE");
-         let result: Term = new Group(groupCatch).fromTo(
+         if (this.peek().value !== ",") {
+            this.omit("NEWLINE");
+         }
+         let result: Term = new Group(groupCatch[0]).fromTo(
             lambdaStart,
             this.positionNow()
          );
+         if (groupCatch.length > 1) {
+            result = new Tuple(groupCatch).fromTo(
+               lambdaStart,
+               this.positionNow()
+            );
+         }
          if (specifiedType) {
             result = new Cast(result, specifiedType);
          }
@@ -1059,11 +1140,11 @@ export class Parser {
          keyword.value === "set"
       ) {
          return new Change(expression.lhs, expression.value);
-      } else if (
-         expression instanceof Assignment &&
-         expression.value &&
-         keyword.value === "link"
-      ) {
+      } else if (expression instanceof Assignment && keyword.value === "link") {
+         expression.private = true;
+         expression.isLink = true;
+         return expression;
+      } else if (expression instanceof Assignment && keyword.value === "link") {
          expression.private = true;
          expression.isLink = true;
          return expression;
@@ -1149,6 +1230,11 @@ export class Parser {
    parsePrimaryRaw(): Term {
       const token = this.consume();
 
+      if (token.value === "data") {
+         this.current--;
+         return parseNewType(this);
+      }
+
       if (applyableKeywords.includes(token.value)) {
          this.current--;
          return this.parseAppliedKeyword();
@@ -1180,11 +1266,6 @@ export class Parser {
             token.position,
             token.position
          );
-      }
-
-      if (token.value === "data") {
-         this.current--;
-         return parseNewType(this);
       }
 
       if (token.value === "refined") {
@@ -1263,9 +1344,9 @@ export class Parser {
 
    createError(message: string, token: Token): any {
       const position = token.position || { line: 0, column: 0 };
-      this.tokens
-         .slice(0, this.current)
-         .forEach((t) => console.error(t.tag, t.value));
+      // this.tokens
+      //    .slice(0, this.current)
+      //    .forEach((t) => console.error(t.tag, t.value));
       throw new Error(
          `${message} at line ${token.position.start.line}, column ${token.position.start.column}, token = ${token.tag}`
       );
@@ -1348,7 +1429,6 @@ export function parseObject(parser: Parser): DataDef {
    if (parser.peek().value != ":") {
       return new DataDef([]).fromTo(start, parser.positionNow());
    }
-
    let token = parser.consume("OPERATOR", ":");
 
    // Expect INDENT (start of type block)

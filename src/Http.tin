@@ -1,0 +1,35 @@
+HttpMethod = "GET" | "POST" | "PUT" | "DELETE"
+UrlParams = Array[(String, String)]
+Headers = Array[(String, String)]
+
+UrlString = String where:
+	matches(self, "^(https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]\{2,\}(?:\/[a-zA-Z0-9\-\.]*)*\/?$")
+
+Port = Number where:
+	self > 0 && self < 65536
+
+Byte = Number where:
+	self > 0 && self < 256
+
+ByteBuffer = Array[Byte]
+
+Url = data:
+	baseUrl: UrlString
+	port: Port
+	params: UrlParams
+
+Request = data:
+	meyhod: HttpMethod
+	url: Url
+	headers: Headers
+	body: ByteBuffer
+
+Url@make = (url: String, port: Number, params: UrlParams) ->
+	if url !: UrlString, return Error("Url was wrong")
+	if port !: Port, return Error("Port was wrong")
+	
+	Url(url, port, params)
+
+Request@make = (method: HttpMethod, urlTry: Url | Error, headers: Headers, body: ByteBuffer) ->
+	Request(method, urlTry?, headers, body)
+

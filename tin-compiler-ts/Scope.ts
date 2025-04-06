@@ -11,11 +11,10 @@ import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
-import { PrimitiveType } from "./Types";
+import { IntersectionType, PrimitiveType, UnionType } from "./Types";
 import {
    Any,
    AppliedGenericType,
-   BinaryOpType,
    GenericNamedType,
    MutableType,
    NamedType,
@@ -397,11 +396,11 @@ export class Scope {
       type: Type,
       parameters: { [genericName: string]: Type } = {}
    ): Type {
-      for (let param in parameters) {
-         if (!parameters[param]) {
-            throw new Error("Undefined type at " + param);
-         }
-      }
+      // for (let param in parameters) {
+      //    if (!parameters[param]) {
+      //       throw new Error("Undefined type at " + param);
+      //    }
+      // }
       switch (type.tag) {
          case "NamedType":
             if (type.name && Object.keys(parameters).includes(type.name)) {
@@ -453,6 +452,7 @@ export class Scope {
                false,
                lambdaType.pure
             );
+            result.isConstructor = lambdaType.isConstructor;
             result.isFirstParamThis = lambdaType.isFirstParamThis;
             result.isForwardReferenceable = lambdaType.isForwardReferenceable;
             return result;
@@ -477,12 +477,17 @@ export class Scope {
             return new OptionalType(newInnerType);
          case "LiteralType":
             return type;
-         case "BinaryOpType":
-            const bType = type as BinaryOpType;
-            return new BinaryOpType(
-               this.resolveGenericTypes(bType.left, parameters),
-               bType.operator,
-               this.resolveGenericTypes(bType.right, parameters)
+         case "UnionType":
+            const uType = type as UnionType;
+            return new UnionType(
+               this.resolveGenericTypes(uType.left, parameters),
+               this.resolveGenericTypes(uType.right, parameters)
+            );
+         case "IntersectionType":
+            const iType = type as IntersectionType;
+            return new IntersectionType(
+               this.resolveGenericTypes(iType.left, parameters),
+               this.resolveGenericTypes(iType.right, parameters)
             );
          case "Anything":
             return Any;
@@ -550,10 +555,12 @@ export class TypePhaseContext {
    constructor(
       fileName: string,
       ast: AstNode,
-      existingFileScopes: Scope[] = []
+      existingFileScopes: Scope[] = [],
+      languageScope?: Scope
    ) {
       this.fileName = fileName;
-      this.languageScope = new Scope("Language(");
+      const receivedLanguageScope = !!languageScope;
+      this.languageScope = languageScope ?? new Scope("Language(");
       this.fileScope = new Scope("File(", this.languageScope);
       this.builder = new TypeBuilder(this);
       this.inferencer = new TypeInferencer(this);
@@ -565,103 +572,107 @@ export class TypePhaseContext {
       existingFileScopes.forEach((s) => {
          this.fileScope.absorbAllFrom(s);
       });
-      this.languageScope.declare(
-         new Symbol(
-            "print",
-            new RoundValueToValueLambdaType(
-               [new ParamType(Any)],
-               Nothing,
-               false,
-               false
-            ),
-            new RoundValueToValueLambda([], new Block([]))
-         )
-      );
-      this.languageScope.declare(
-         new Symbol(
-            "debug",
-            new RoundValueToValueLambdaType(
-               [new ParamType(Any)],
-               Nothing,
-               false,
-               false
-            ),
-            new RoundValueToValueLambda([], new Block([]))
-         )
-      );
-      const innerArrayScope = new Scope("inner-array", this.languageScope);
-      innerArrayScope.declareType(new Symbol("T", new GenericNamedType("T")));
-      const arrayStruct = new StructType("Array", [
-         new ParamType(
-            new RoundValueToValueLambdaType(
-               [],
-               PrimitiveType.Number,
-               false,
-               true
-            ),
-            "length"
-         ),
-         new ParamType(
-            new RoundValueToValueLambdaType(
-               [new ParamType(PrimitiveType.Number)],
-               new GenericNamedType("T"),
-               false,
-               true
-            ),
-            "at"
-         ),
-         new ParamType(
-            new RoundValueToValueLambdaType(
-               [
-                  new ParamType(
-                     new AppliedGenericType(new NamedType("Array"), [
-                        new GenericNamedType("T"),
-                     ])
-                  ),
-               ],
-               new AppliedGenericType(new NamedType("Array"), [
-                  new GenericNamedType("T"),
-               ]),
-               false,
-               true
-            ),
-            "and"
-         ),
-      ]);
-      const arrayLambdaType = new SquareTypeToTypeLambdaType(
-         [new GenericNamedType("T")],
-         arrayStruct
-      );
-      arrayStruct.name = "Array";
-      arrayLambdaType.name = "Array";
-      this.languageScope.declareType(new Symbol("Array", arrayLambdaType));
-      this.languageScope.declare(
-         new Symbol(
-            "Array@of",
-            new SquareTypeToValueLambdaType(
-               [new GenericNamedType("T")],
-               new RoundValueToValueLambdaType(
-                  [
-                     new ParamType(
-                        new AppliedGenericType(new NamedType("Array"), [
-                           new GenericNamedType("T"),
-                        ])
-                     ),
-                  ],
-                  new AppliedGenericType(new NamedType("Array"), [
-                     new GenericNamedType("T"),
-                  ]),
-                  true,
-                  true
-               ),
-               true
-            )
-         ),
-         true
-      );
-      this.languageScope.declare(
-         new Symbol("nothing", Nothing, new Identifier("nothing"))
-      );
+      if (!receivedLanguageScope) {
+         // this.languageScope.declare(
+         //    new Symbol(
+         //       "print",
+         //       new RoundValueToValueLambdaType(
+         //          [new ParamType(Any)],
+         //          Nothing,
+         //          false,
+         //          true
+         //       ),
+         //       new RoundValueToValueLambda([], new Block([]))
+         //    )
+         // );
+         // this.languageScope.declare(
+         //    new Symbol(
+         //       "debug",
+         //       new RoundValueToValueLambdaType(
+         //          [new ParamType(Any)],
+         //          Nothing,
+         //          false,
+         //          true
+         //       ),
+         //       new RoundValueToValueLambda([], new Block([]))
+         //    )
+         // );
+         // const innerArrayScope = new Scope("inner-array", this.languageScope);
+         // innerArrayScope.declareType(
+         //    new Symbol("T", new GenericNamedType("T"))
+         // );
+         // const arrayStruct = new StructType("Array", [
+         //    new ParamType(
+         //       new RoundValueToValueLambdaType(
+         //          [],
+         //          PrimitiveType.Number,
+         //          false,
+         //          true
+         //       ),
+         //       "length"
+         //    ),
+         //    new ParamType(
+         //       new RoundValueToValueLambdaType(
+         //          [new ParamType(PrimitiveType.Number)],
+         //          new GenericNamedType("T"),
+         //          false,
+         //          true
+         //       ),
+         //       "at"
+         //    ),
+         //    new ParamType(
+         //       new RoundValueToValueLambdaType(
+         //          [
+         //             new ParamType(
+         //                new AppliedGenericType(new NamedType("Array"), [
+         //                   new GenericNamedType("T"),
+         //                ])
+         //             ),
+         //          ],
+         //          new AppliedGenericType(new NamedType("Array"), [
+         //             new GenericNamedType("T"),
+         //          ]),
+         //          false,
+         //          true
+         //       ),
+         //       "and"
+         //    ),
+         // ]);
+         // const arrayLambdaType = new SquareTypeToTypeLambdaType(
+         //    [new GenericNamedType("T")],
+         //    arrayStruct
+         // );
+         // arrayStruct.name = "Array";
+         // arrayLambdaType.name = "Array";
+         // this.languageScope.declareType(new Symbol("Array", arrayLambdaType));
+         // this.languageScope.declare(
+         //    new Symbol(
+         //       "Array@of",
+         //       new SquareTypeToValueLambdaType(
+         //          [new GenericNamedType("T")],
+         //          new RoundValueToValueLambdaType(
+         //             [
+         //                new ParamType(
+         //                   new AppliedGenericType(new NamedType("Array"), [
+         //                      new GenericNamedType("T"),
+         //                   ])
+         //                ),
+         //             ],
+         //             new AppliedGenericType(new NamedType("Array"), [
+         //                new GenericNamedType("T"),
+         //             ]),
+         //             true,
+         //             true
+         //          ),
+         //          true
+         //       )
+         //    ),
+         //    true
+         // );
+         // this.languageScope.declare(
+         //    new Symbol("nothing", Nothing, new Identifier("nothing"))
+         // );
+      }
 
       this.languageScope.setIteration("DECLARATION");
       this.fileScope.setIteration("DECLARATION"); // Recursive

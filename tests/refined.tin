@@ -22,10 +22,10 @@ Monster@spawn = (name: String, pos: Pos3D) ->
 
 monster = Monster@spawn("Sumpter", Pos3D(0, 0, 0))
 
-instakill = (this: LivingEntity) ->
-	(this copy Entity(health = 0: Health)): DeadEntity
+# instakill = (this: LivingEntity) ->
+# 	(this copy Entity(health = 0: Health)): DeadEntity
 
-respawn = (this: DeadEntity) ->
-	(this copy Entity(health = 5: Health)): LivingEntity
+# respawn = (this: DeadEntity) ->
+# 	(this copy Entity(health = 5: Health)): LivingEntity
 
-print(monster.instakill())
+# print(monster.instakill())

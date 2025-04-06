@@ -23,12 +23,11 @@ import {
    BinaryExpression,
 } from "./Parser";
 import { Scope, TypePhaseContext } from "./Scope";
-import { RoundValueToValueLambda, TypeDef } from "./Parser";
+import { RoundValueToValueLambda, TypeDef, RefinedDef, Tuple } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
 import { UncheckedType, MutableType } from "./Types";
 import {
    AppliedGenericType,
-   BinaryOpType,
    GenericNamedType,
    LiteralType,
    MarkerType,
@@ -105,10 +104,12 @@ export class TypeChecker {
       this.typeCheck(node.value, scope);
       const leftType = this.context.inferencer.infer(node.lhs, scope);
       const rightType = this.context.inferencer.infer(node.value, scope);
+      let shadowedType = leftType;
       if (node.lhs instanceof Identifier) {
          let symbol = scope.lookup(node.lhs.value);
          if (symbol.shadowing) {
             symbol = symbol.shadowing;
+            shadowedType = symbol.typeSymbol;
             scope.remove(symbol.name);
          }
          if (!symbol.isMutable) {
@@ -145,25 +146,16 @@ export class TypeChecker {
       }
       if (!rightType.isAssignableTo(leftType, scope)) {
          if (node.lhs instanceof Identifier) {
-            const symbol = scope.lookup(node.lhs.value);
             if (
-               symbol.shadowing &&
-               rightType.isAssignableTo(symbol.shadowing?.typeSymbol, scope)
+               shadowedType !== leftType &&
+               rightType.isAssignableTo(shadowedType, scope)
             ) {
-               scope.remove(node.lhs.value);
                return;
             }
          }
 
-         let name = "";
-         if (node.lhs instanceof Identifier) {
-            name = node.lhs.value;
-         }
-         if (node.lhs instanceof Select) {
-            name = node.lhs.field;
-         }
          this.context.errors.add(
-            `Setting of variable ${name}`,
+            `Setting of variable ${node.lhs.show()}`,
             leftType,
             rightType,
             node.position
@@ -277,21 +269,21 @@ export class TypeChecker {
                const mutableSubFields = (
                   scope.resolveFully(finalType.returnType) as StructType
                ).getMutableFields();
-               if (mutableSubFields.length > 0) {
-                  this.context.errors.add(
-                     `Lambda field '${fd.name}' of '${
-                        node.name
-                     }' with invariable return type cannot hold a variable value. Mutable fields = [${mutableSubFields
-                        .map((f) => f.name)
-                        .join(", ")}]`,
-                     undefined,
-                     finalType,
-                     fd.position,
-                     "Either declare the variability by specifying the return type as '~" +
-                        finalType.returnType.toString() +
-                        "' or don't use a lambda returning a variable value in this field"
-                  );
-               }
+               // if (mutableSubFields.length > 0) {
+               //    this.context.errors.add(
+               //       `Lambda field '${fd.name}' of '${
+               //          node.name
+               //       }' with invariable return type cannot hold a variable value. Mutable fields = [${mutableSubFields
+               //          .map((f) => f.name)
+               //          .join(", ")}]`,
+               //       undefined,
+               //       finalType,
+               //       fd.position,
+               //       "Either declare the variability by specifying the return type as '~" +
+               //          finalType.returnType.toString() +
+               //          "' or don't use a lambda returning a variable value in this field"
+               //    );
+               // }
             }
          });
       } else if (node instanceof BinaryExpression) {
@@ -308,6 +300,28 @@ export class TypeChecker {
          this.typeCheck(node.owner, scope);
       } else if (node instanceof UnaryOperator) {
          this.typeCheck(node.expression, scope);
+      } else if (node instanceof RefinedDef) {
+         this.typeCheck(node.lambda, scope);
+      } else if (node instanceof Tuple) {
+         if (node.isTypeLevel && options.assignedName !== undefined) {
+            this.context.errors.add(
+               "Cmon man... just declare a custom struct instead of naming a tuple",
+               undefined,
+               undefined,
+               node.position
+            );
+         }
+         if (node.expressions.length > 3) {
+            this.context.errors.add(
+               "Tuples can only have 2 or 3 elements",
+               undefined,
+               undefined,
+               node.position
+            );
+         }
+         node.expressions.forEach((el) => this.typeCheck(el, scope));
+      } else if (node instanceof AppliedKeyword) {
+         this.typeCheck(node.param, scope);
       }
    }
 
@@ -480,24 +494,54 @@ export class TypeChecker {
                apply.callee.tag
          );
       }
+      const translator = this.context.translator;
+      this.typeCheckSquareParams(
+         calleeType.paramTypes,
+         apply.typeArgs.map((t) => translator.translate(t, scope)),
+         apply.position,
+         scope
+      );
+      // let i = 0;
+      // for (let paramType of calleeType.paramTypes) {
+      //    if (!paramType.extendedType) {
+      //       continue;
+      //    }
+      //    const gottenParamType = this.context.translator.translate(
+      //       apply.typeArgs[i],
+      //       scope
+      //    );
+      //    if (!gottenParamType.isAssignableTo(paramType.extendedType, scope)) {
+      //       this.context.errors.add(
+      //          `Parameter ${paramType.name} of Square Apply`,
+      //          paramType.extendedType,
+      //          gottenParamType,
+      //          apply.position
+      //       );
+      //    }
+      //    i++;
+      // }
+   }
+
+   typeCheckSquareParams(
+      expectedParams: GenericNamedType[],
+      appliedParams: Type[],
+      position: TokenPos | undefined,
+      scope: Scope
+   ) {
       let i = 0;
-      for (let paramType of calleeType.paramTypes) {
-         if (!paramType.extendedType) {
-            continue;
-         }
-         const gottenParamType = this.context.translator.translate(
-            apply.typeArgs[i],
-            scope
-         );
-         if (!gottenParamType.isAssignableTo(paramType.extendedType, scope)) {
+      for (let paramType of expectedParams) {
+         const gottenParamType = appliedParams[i++];
+         if (
+            paramType.extendedType &&
+            !gottenParamType.isAssignableTo(paramType.extendedType, scope)
+         ) {
             this.context.errors.add(
-               `Parameter ${paramType.name} of Square Apply`,
+               `Parameter Type ${paramType.name} of Apply`,
                paramType.extendedType,
                gottenParamType,
-               apply.position
+               position
             );
          }
-         i++;
       }
    }
 
@@ -521,9 +565,28 @@ export class TypeChecker {
          typeSymbol = constructor;
          isStructConstructor = true;
       }
+
+      if (
+         typeSymbol instanceof SquareTypeToValueLambdaType &&
+         typeSymbol.returnType instanceof RoundValueToValueLambdaType
+      ) {
+         if (!apply.autoFilledSquareParams) {
+            this.context.errors.add("Unchecked square apply");
+            return;
+         }
+         const translator = this.context.translator;
+         this.typeCheckSquareParams(
+            typeSymbol.paramTypes,
+            apply.autoFilledSquareParams,
+            apply.position,
+            scope
+         );
+         // typeSymbol = typeSymbol.returnType;
+      }
+
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
          const params = typeSymbol.params;
-         const hasThis = params.length > 0 && params[0].name === "this";
+         const hasThis = params.length > 0 && params[0].name === "self";
          apply.args.forEach((p, i) => {
             this.typeCheck(p[1], scope, {
                typeExpectedInPlace: params[i + (hasThis ? 1 : 0)]?.type,
@@ -725,7 +788,11 @@ export class TypeChecker {
          }
       } else if (node instanceof Identifier) {
          const symbol = scope.lookup(node.value);
-         if (symbol.isMutable && onlyCaptures) {
+         if (
+            symbol.isMutable &&
+            onlyCaptures &&
+            !scope.hasSymbol(node.value, scope.parent)
+         ) {
             return [["Variable value '" + node.value + "' present", node]];
          } else {
             return [];
@@ -750,7 +817,7 @@ export class TypeChecker {
          throw new Error("Was not Lambda");
       }
       let thisParam: ParamType | undefined = typeSymbol.params[0];
-      if (thisParam?.name !== "this") {
+      if (thisParam?.name !== "self") {
          thisParam = undefined;
       }
       let checkedThis = false;
@@ -799,11 +866,11 @@ export class TypeChecker {
       let fulfilledNamedParams = new Set<String>();
       let fulfilledNumericParams = new Set<Number>();
       let unfulfilledExpectedParams = [
-         ...expectedParams.filter((f) => f.name !== "this"),
+         ...expectedParams.filter((f) => f.name !== "self"),
       ];
       let paramOrder: [number, number][] = [];
       let hasThisParamIncrement =
-         expectedParams[0] && expectedParams[0].name === "this" ? 1 : 0;
+         expectedParams[0] && expectedParams[0].name === "self" ? 1 : 0;
 
       if (hasThisParamIncrement === 1 && !checkedThis) {
          const expectedThisType = expectedParams[0].type;

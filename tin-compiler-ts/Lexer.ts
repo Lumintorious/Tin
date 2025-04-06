@@ -94,15 +94,17 @@ export class Lexer {
          "...",
          "var",
          "copy",
+         "where",
          "```",
          "??",
+         "::",
+         "!:",
          "?:",
          "?.",
          "->",
          "~>",
          "=>",
          "&&",
-         "::",
          "~=",
          "==",
          "!=",
@@ -125,6 +127,7 @@ export class Lexer {
          "<",
          ">",
          "?",
+         "!",
       ];
       this.parens = ["(", "[", "{", "}", "]", ")"];
       this.indentStack = [0]; // To track indentation levels
@@ -136,6 +139,16 @@ export class Lexer {
       while ((token = this.nextToken()) !== null) {
          tokens.push(token);
       }
+      tokens.push(
+         new Token(
+            TokenTag.NEWLINE,
+            "\n",
+            new TokenPos(
+               new CodePoint(this.line, 1, this.position),
+               new CodePoint(this.line, this.column, this.position)
+            )
+         )
+      );
       return tokens.flatMap((t) => {
          if (t instanceof MultipleToken) {
             return t.tokens;
@@ -202,6 +215,16 @@ export class Lexer {
       if (char === "#") {
          this.consumeComment();
          char = this.peek();
+         if (this.peek() === undefined) {
+            return new Token(
+               TokenTag.NEWLINE,
+               "",
+               new TokenPos(
+                  new CodePoint(this.line, 1, this.position),
+                  new CodePoint(this.line, this.column, this.position)
+               )
+            );
+         }
       }
 
       if (this.column === 1) {
@@ -222,6 +245,10 @@ export class Lexer {
 
       if (this.input.slice(this.position).startsWith("copy")) {
          return this.tokenizeOperator("copy");
+      }
+
+      if (this.input.slice(this.position).startsWith("where")) {
+         return this.tokenizeOperator("where");
       }
 
       // Tokenize identifiers or keywords
@@ -276,7 +303,7 @@ export class Lexer {
    }
 
    consumeComment() {
-      while (this.peek() !== "\n") {
+      while (this.peek() !== undefined && this.peek() !== "\n") {
          this.position++;
          this.column++;
       }

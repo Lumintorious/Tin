@@ -17,6 +17,9 @@ import {
    SquareApply,
    SquareTypeToTypeLambda,
    Term,
+   Tuple,
+   VAR_RETURNING_FUNC_IN_INVAR_PLACE,
+   INVAR_RETURNING_FUNC_IN_VAR_PLACE,
 } from "./Parser";
 import {
    WhileLoop,
@@ -44,6 +47,8 @@ import {
    SquareTypeToValueLambdaType,
    MutableType,
    LiteralType,
+   RefinedType,
+   PrimitiveType,
 } from "./Types";
 import { OutputTranslator } from "./compiler";
 import { exec } from "node:child_process";
@@ -91,8 +96,7 @@ export class JavascriptTranslator implements OutputTranslator {
       let i = 0;
       for (const field of typeDef.fieldDefs) {
          const fieldType = type.fields[i];
-         const isPrimitive =
-            fieldType instanceof NamedType && fieldType.isPrimitive();
+         const isPrimitive = fieldType instanceof PrimitiveType;
          const isLambda =
             fieldType instanceof RoundValueToValueLambdaType ||
             fieldType instanceof SquareTypeToValueLambdaType;
@@ -125,8 +129,7 @@ export class JavascriptTranslator implements OutputTranslator {
          "(" +
          typeDef.fieldDefs.map((param, i) => {
             const fieldType = type.fields[i];
-            const isPrimitive =
-               fieldType instanceof NamedType && fieldType.isPrimitive();
+            const isPrimitive = fieldType instanceof PrimitiveType;
             const isLambda =
                fieldType instanceof RoundValueToValueLambdaType ||
                fieldType instanceof SquareTypeToValueLambdaType;
@@ -158,17 +161,32 @@ export class JavascriptTranslator implements OutputTranslator {
    ): string {
       let result = this.translateRaw(term, scope, args);
 
-      if (term instanceof Term && term.capturedName !== undefined) {
-         result = `{_:(${result}),_cn:"${term.capturedName}"}`;
-      } else if (term instanceof Term && term.invarTypeInVarPlace) {
-         result = `{_:(${result})}`;
-      } else if (term instanceof Term && term.varTypeInInvarPlace) {
-         result = "(" + result + ")" + this.accessMutable;
-      }
-      if (term instanceof Term && term.clojure) {
-         result = `_makeClojure({${term.clojure
-            .map((s) => s.name)
-            .join(",")}}, ${result})`;
+      if (term instanceof Term) {
+         if (term.is(INVAR_RETURNING_FUNC_IN_VAR_PLACE)) {
+            result = `(function(...args) {
+			   const _res = (${result}).call(this, ...args);
+			   return ${this.makeMutable("_res", true)};
+			})`;
+         } else if (term.is(VAR_RETURNING_FUNC_IN_INVAR_PLACE)) {
+            result = `(function(...args) { 
+				const _res = (${result}).call(this, ...args);
+				return _res${this.accessMutable};
+			})`;
+         }
+
+         if (term.capturedName !== undefined) {
+            result = `{_:(${result}),_cn:"${term.capturedName}"}`;
+         } else if (term.invarTypeInVarPlace) {
+            result = `{_:(${result})}`;
+         } else if (term.varTypeInInvarPlace) {
+            result = "(" + result + ")" + this.accessMutable;
+         }
+
+         if (term.clojure) {
+            result = `_makeClojure({${term.clojure
+               .map((s) => s.name)
+               .join(",")}}, ${result})`;
+         }
       }
       return result;
    }
@@ -205,7 +223,7 @@ export class JavascriptTranslator implements OutputTranslator {
          const forceReturn = args.forceReturn;
          let result = [
             ...term.statements.map((st) => this.translate(st, scope)),
-            (shouldReturn ? "throw " : shouldReturn ? " " : "") +
+            (shouldReturn ? (args.normalReturn ? "return " : "throw ") : "") +
                `${this.translate(last, scope)}` +
                (shouldReturn ? "" : ""),
          ].join(";\n");
@@ -263,7 +281,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // SquareTypeToValueLambda
       } else if (term instanceof SquareTypeToValueLambda) {
-         return `function(${term.parameterTypes
+         return `(function(${term.parameterTypes
             .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
             .join(", ")}) {try{\n${this.translate(
             term.block,
@@ -271,7 +289,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch(e) { if(e instanceof Error) {throw e} else { return e} } }`;
+         )}\n} catch(e) { if(e instanceof Error) {throw e} else { return e} } })`;
 
          // Change
       } else if (term instanceof Change) {
@@ -289,9 +307,10 @@ export class JavascriptTranslator implements OutputTranslator {
          // Assignment
       } else if (term instanceof Assignment) {
          if (
-            term.value instanceof Literal &&
-            term.value.value === "" &&
-            term.value.type === "Anything"
+            (term.value instanceof Literal &&
+               term.value.value === "" &&
+               term.value.type === "Anything") ||
+            (term.lhs instanceof Identifier && term.lhs.value === "Array")
          ) {
             return "";
          }
@@ -370,10 +389,26 @@ export class JavascriptTranslator implements OutputTranslator {
             scope
          )}, ${this.translate(term.type, scope)})`;
 
+         // Tuple
+      } else if (term instanceof Tuple) {
+         if (term.isTypeLevel) {
+            return `Tuple${term.expressions.length}(${term.expressions
+               .map((el) => this.translate(el, scope))
+               .join(",")})`;
+         }
+
+         return `Tuple${term.expressions.length}({}, {}, {})(${term.expressions
+            .map((el) => this.translate(el, scope))
+            .join(",")})`;
+
          // Identifier
       } else if (term instanceof Identifier) {
          const replacers: { [_: string]: string } = {
             // Type: "Type$",
+            this: "this_",
+            self: "this",
+            Error: "TinErr_",
+            Map: "Map_",
          };
          let value = term.value.replaceAll("@", "$");
          if (Object.keys(replacers).includes(value)) {
@@ -397,7 +432,7 @@ export class JavascriptTranslator implements OutputTranslator {
          const params = term.isFirstParamThis()
             ? term.params.slice(1, term.params.length)
             : term.params;
-         return `_F(Symbol("lambda"), function(${params
+         return `function(${params
             .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
             .join(", ")}) {try{\n${this.translate(
             term.block,
@@ -405,10 +440,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch (e) { if (e instanceof Error) { throw e } else { return e } }}, ${this.translateType(
-            term.inferredType,
-            scope
-         )})`;
+         )}\n} catch (e) { if (e instanceof Error) { throw e } else { return e } }}`;
 
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
@@ -432,46 +464,21 @@ export class JavascriptTranslator implements OutputTranslator {
             scope,
             {
                returnLast: !isTrueBranchIf,
+               normalReturn: true,
             }
          )}})()`;
          const isFalseBranchIf =
             term.falseBranch instanceof IfStatement ||
             (term.falseBranch instanceof Block &&
                term.falseBranch.statements[0] instanceof IfStatement);
-         let falseBranch = `(function(){${
-            isFalseBranchIf ? "return " : ""
-         }${this.translate(term.falseBranch, scope, {
-            returnLast: !isFalseBranchIf,
-         })}})()`;
-         // if (
-         //    term.trueBranch instanceof Block &&
-         //    term.trueBranch.statements.length > 1
-         // ) {
-         //    trueBranch = `((function(){${this.translate(
-         //       term.trueBranch,
-         //       scope,
-         //       {
-         //          returnLast: !term.trueBranch.skipReturn,
-         //       }
-         //    )}}).call(this))`;
-         // } else {
-         //    trueBranch = `(${this.translate(term.trueBranch, scope)})`;
-         // }
-         // let falseBranch = "";
-         // if (
-         //    term.falseBranch instanceof Block &&
-         //    term.falseBranch.statements.length > 1
-         // ) {
-         //    falseBranch = `((function(){${this.translate(
-         //       term.falseBranch,
-         //       scope,
-         //       {
-         //          returnLast: !term.falseBranch.skipReturn,
-         //       }
-         //    )}})())`;
-         // } else {
-         //    falseBranch = `(${this.translate(term.falseBranch, scope)})`;
-         // }
+         let falseBranch = `(function(){${this.translate(
+            term.falseBranch,
+            scope,
+            {
+               returnLast: !isFalseBranchIf,
+               normalReturn: true,
+            }
+         )}})()`;
          return `((${this.translate(
             term.condition,
             scope
@@ -519,23 +526,27 @@ export class JavascriptTranslator implements OutputTranslator {
          let closeWrapper = "";
          let callee = term.callee;
          if (term.callee instanceof Select) {
-            openWrapper =
-               "((() => { var _owner = " +
-               this.translate(term.callee.owner, scope) +
-               "; return ";
-            closeWrapper = "})())";
-            callee = new Select(
-               new Identifier("_owner"),
-               term.callee.field,
-               term.callee.ammortized
-            );
-            callee.capturedName = term.callee.capturedName;
-            callee.varTypeInInvarPlace = term.callee.varTypeInInvarPlace;
-            callee.invarTypeInVarPlace = term.callee.invarTypeInVarPlace;
             open =
                ".call(" + this.translate((callee as Select).owner, scope) + ",";
-            (callee as Select).ownerComponent = term.callee.ownerComponent;
-            (callee as Select).isTypeLevel = term.callee.isTypeLevel;
+            if (term.callee.owner instanceof Identifier) {
+            } else {
+               openWrapper =
+                  "((() => { var _owner = " +
+                  this.translate(term.callee.owner, scope) +
+                  "; return ";
+               closeWrapper = "})())";
+               callee = new Select(
+                  new Identifier("_owner"),
+                  term.callee.field,
+                  term.callee.ammortized
+               );
+               callee.capturedName = term.callee.capturedName;
+               callee.varTypeInInvarPlace = term.callee.varTypeInInvarPlace;
+               callee.invarTypeInVarPlace = term.callee.invarTypeInVarPlace;
+
+               (callee as Select).ownerComponent = term.callee.ownerComponent;
+               (callee as Select).isTypeLevel = term.callee.isTypeLevel;
+            }
          }
          if (
             term.isCallingAConstructor &&
@@ -550,10 +561,11 @@ export class JavascriptTranslator implements OutputTranslator {
             open = ".call(" + this.translate(term.bakedInThis, scope) + ", ";
          }
          return (
+            "(" +
             openWrapper +
             this.translate(callee, scope) +
             (term.autoFilledSquareParams
-               ? `.call(${term.autoFilledSquareParams
+               ? `.call('Type', ${term.autoFilledSquareParams
                     .map((type) => this.translateType(type, scope))
                     .join(",")})`
                : "") +
@@ -564,7 +576,8 @@ export class JavascriptTranslator implements OutputTranslator {
                })
                .join(", ") +
             close +
-            closeWrapper
+            closeWrapper +
+            ")"
          );
 
          // SquareApply
@@ -611,9 +624,17 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // RefinedDef
       } else if (term instanceof RefinedDef) {
-         return `{__is_child:${this.translate(term.lambda, scope)}}; ${
+         const termType = term.translatedType as RefinedType;
+         // console.log(termType);
+         return `(() => {
+				const _tpe = {__is_child: (_obj) => { return ${
+               termType.inputType.name
+            }.__is_child(_obj) && (${this.translate(
+            term.lambda,
+            scope
+         )}).call(_obj)}}; _tpe._s = Symbol("${
             term.translatedType?.name
-         }._s = Symbol("${term.translatedType?.name}");`;
+         }"); return _tpe})()`;
 
          // Optional
       } else if (term instanceof Optional) {
@@ -624,7 +645,7 @@ export class JavascriptTranslator implements OutputTranslator {
          }
          // TypeCheck
       } else if (term instanceof TypeCheck) {
-         return `${this.translate(
+         return `${term.negative ? "!" : ""}${this.translate(
             term.type,
             scope
          )}.__is_child(${this.translate(term.term, scope)}) `;
@@ -645,9 +666,14 @@ export class JavascriptTranslator implements OutputTranslator {
          if (term.operator === "var") {
             const v = term.invarTypeInVarPlace;
             return this.makeMutable(this.translate(term.expression, scope), !v);
-         } else {
-            return "(? " + term.tag + " " + term.operator + " ?)";
          }
+         if (term.operator === "!") {
+            return `_N(${this.translate(term.expression, scope)})`;
+         }
+         if (term.operator === "-") {
+            return `-(${this.translate(term.expression, scope)})`;
+         }
+         return "(? " + term.tag + " " + term.operator + " ?)";
       } else {
          return "(? " + term.tag + " ?)";
       }
@@ -655,6 +681,8 @@ export class JavascriptTranslator implements OutputTranslator {
 
    translateType(type: Type | ParamType | undefined, scope: Scope): string {
       if (type instanceof NamedType) {
+         return "" + type.name;
+      } else if (type instanceof PrimitiveType) {
          return "" + type.name;
       } else if (type instanceof StructType) {
          return `Type('${
@@ -666,7 +694,7 @@ export class JavascriptTranslator implements OutputTranslator {
 			])))`;
       } else if (type instanceof ParamType) {
          return `Parameter("${type.name ?? undefined}",
-					Type$of(${this.translateType(type.type, scope)}),
+					Type$get(${this.translateType(type.type, scope)}),
 					() => { return (${
                   type.defaultValue
                      ? this.translate(type.defaultValue, scope)
@@ -681,7 +709,7 @@ export class JavascriptTranslator implements OutputTranslator {
 			`;
       }
 
-      return "{}";
+      return `['${type?.tag}']`;
    }
 
    wrapType(tag: String, contents: String) {

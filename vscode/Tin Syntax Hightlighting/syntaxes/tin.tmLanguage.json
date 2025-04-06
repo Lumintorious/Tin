@@ -7,7 +7,7 @@
       },
       {
          "name": "keyword.control.tin",
-         "match": "\\b(if|var|else|while|copy|refined|return|external|data|set|import|this|unchecked|link|private)\\b"
+         "match": "\\b(not|or|and|if|where|var|else|while|copy|refined|return|external|data|set|import|this|self|unchecked|link|private)\\b"
       },
       {
          "name": "constant.tin",
@@ -70,6 +70,10 @@
       {
          "name": "variable.parameter.tin",
          "match": "\\b([a-z][a-zA-Z0-9_]*)\\b"
+      },
+      {
+         "name": "operator.tin.soft",
+         "match": "\\b@\\b"
       },
       {
          "name": "type.tin",

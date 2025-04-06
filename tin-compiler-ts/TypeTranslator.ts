@@ -14,6 +14,7 @@ import {
    Term,
    SquareTypeToValueLambda,
    Block,
+   Tuple,
 } from "./Parser";
 import {
    TypePhaseContext,
@@ -28,9 +29,10 @@ import {
    RefinedType,
    Nothing,
    PrimitiveType,
+   NotType,
 } from "./Types";
 import { Identifier, RefinedDef } from "./Parser";
-import { Any, MutableType } from "./Types";
+import { Any, MutableType, UnionType, IntersectionType } from "./Types";
 import {
    Type,
    NamedType,
@@ -42,7 +44,6 @@ import {
    AppliedGenericType,
    MarkerType,
    StructType,
-   BinaryOpType,
    OptionalType,
 } from "./Types";
 
@@ -128,8 +129,8 @@ export class TypeTranslator {
             if (!(node instanceof UnaryOperator)) {
                throw Error("Not right type");
             }
-            if (node.operator === "...") {
-               return new VarargsType(this.translate(node.expression, scope));
+            if (node.operator === "!") {
+               return new NotType(this.translate(node.expression, scope));
             } else if (node.operator === "var") {
                return new MutableType(this.translate(node.expression, scope));
             } else {
@@ -162,7 +163,7 @@ export class TypeTranslator {
                node.params.length > 0 &&
                node.params[0] instanceof Assignment &&
                node.params[0].lhs instanceof Identifier &&
-               node.params[0].lhs.value === "this"
+               node.params[0].lhs.value === "self"
             ) {
                type.isFirstParamThis = true;
             }
@@ -252,11 +253,26 @@ export class TypeTranslator {
             if (!(node instanceof BinaryExpression)) {
                return new Type();
             }
-            return new BinaryOpType(
-               this.translate(node.left, scope),
-               node.operator,
-               this.translate(node.right, scope)
+            const left = this.translate(node.left, scope);
+            if (node.operator === "where") {
+               const right = this.context.inferencer.infer;
+
+               return new RefinedType(left);
+            }
+
+            const right = this.translate(node.right, scope);
+            if (node.operator === "|") {
+               return new UnionType(left, right);
+            } else if (node.operator === "&") {
+               return new IntersectionType(left, right);
+            }
+            this.context.errors.add(
+               `Type operation '${node.operator}' not supported`,
+               undefined,
+               undefined,
+               node.position
             );
+            return Any;
          case "Optional":
             if (!(node instanceof Optional)) {
                return new Type();
@@ -266,6 +282,14 @@ export class TypeTranslator {
             if (node instanceof Group) {
                return this.translate(node.value, scope);
             }
+         case "Tuple":
+            if (node instanceof Tuple) {
+               node.isTypeLevel = true;
+               return new AppliedGenericType(
+                  new NamedType("Tuple" + node.expressions.length),
+                  node.expressions.map((el) => this.translate(el, scope))
+               );
+            }
          case "RefinedDef":
             if (node instanceof RefinedDef) {
                const lambdaType = this.context.inferencer.infer(
@@ -273,7 +297,7 @@ export class TypeTranslator {
                   scope
                );
                if (lambdaType instanceof RoundValueToValueLambdaType) {
-                  return new RefinedType(lambdaType);
+                  return new RefinedType(lambdaType.params[0].type);
                }
             }
          default:

@@ -13,12 +13,12 @@ Type@of: (obj: Anything) -> Type = external
 
 Field = data:
 	name: String
-	tpe: Type
+	type: Type
 	defaultValue: (() -> Anything)?
 
 Parameter = data:
 	name: String?
-	tpe: Type
+	type: Type
 	defaultValue: (() -> Anything)?
 
 Intersection = Type & data:
@@ -29,6 +29,10 @@ Union = Type & data:
 	left: Type
 	right: Type
 
+Array = [T] -> data:
+	at: (Number) -> T?
+	length: () -> T
+
 Struct = Type & data:
 	fields: Array[Field]
 
@@ -38,6 +42,9 @@ Lambda = Type & data:
 
 RefType = Type & data:
 	get: () -> Type
+
+Refinement = Type & data:
+	test: (any: Anything) -> Boolean
 
 external "
 export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\"Nothing\", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
@@ -53,6 +60,11 @@ Literal = Type & data:
 jsonify: (obj: Anything) -> String = external
 dejsonify: (json: String) -> Anything = external
 assert: (condition: Boolean, message: String?) -> Nothing = external
+print: (Anything) -> Nothing = external
+printRaw: (Anything) -> Nothing = external
+debug: (Anything) -> Nothing = external
+nothing: Nothing = external
+Array@of: [T] -> (Array[T]) -> Array[T] = external
 
 Intersection@of = (left: Type, right: Type) ->
 	check = (obj: Anything) ->
@@ -66,6 +78,24 @@ Intersection@of = (left: Type, right: Type) ->
 Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 One = 1
 
+Error = data:
+	message: String
+	object: Anything?
+
+ToString = data:
+	toString: () -> String
+
+Tuple2 = [A, B] => data:
+	left: A
+	right: B
+
+Tuple3 = [A, B, C] => data:
+	left: A
+	middle: B
+	right: C
+
+matches: (str: String, regex: String) -> Boolean = external
+
 # Union@values = [T] ->
 # 	go = (type: Type): Array[T] ->
 # 		if type :: Literal,
@@ -75,3 +105,17 @@ One = 1
 # 		else
 # 			Array@of[T]()
 # 	go(T)
+
+# external "
+	
+
+# console.log('>>>> JS TEST')
+# console.log(Nothing.__is_child(null))
+# console.log(Nothing.__is_child(undefined))
+# console.log(Nothing.__is_child(\{_: undefined\}))
+
+
+# console.log('<<<< JS TEST')
+# "
+
+x = 2

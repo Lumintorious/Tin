@@ -1,5 +1,12 @@
-import { Nothing, RefinedType, NamedType, PrimitiveType } from "./Types";
-import { Optional } from "./Parser";
+import {
+   Nothing,
+   RefinedType,
+   NamedType,
+   PrimitiveType,
+   IntersectionType,
+} from "./Types";
+import { IN_RETURN_BRANCH, Optional, Tuple } from "./Parser";
+import { UnionType } from "./Types";
 import {
    AppliedKeyword,
    Assignment,
@@ -33,7 +40,6 @@ import {
    Any,
    AnyType,
    AppliedGenericType,
-   BinaryOpType,
    GenericNamedType,
    LiteralType,
    MutableType,
@@ -74,7 +80,7 @@ export class TypeInferencer {
       if (type2.isAssignableTo(type1, scope)) {
          return type1;
       }
-      return new BinaryOpType(type1, "|", type2);
+      return new UnionType(type1, type2);
    }
 
    private buildCache = new Map<string, Type>();
@@ -102,13 +108,24 @@ export class TypeInferencer {
             if (inferredType instanceof OptionalType) {
                inferredType = inferredType.type;
             }
-            if (
-               inferredType instanceof BinaryOpType &&
-               inferredType.operator === "|"
-            ) {
+            if (inferredType instanceof UnionType) {
                if (inferredType.left.isAssignableTo(Nothing, scope)) {
                   inferredType = inferredType.right;
                } else if (inferredType.right.isAssignableTo(Nothing, scope)) {
+                  inferredType = inferredType.left;
+               } else if (
+                  inferredType.left.isAssignableTo(
+                     new NamedType("Error"),
+                     scope
+                  )
+               ) {
+                  inferredType = inferredType.right;
+               } else if (
+                  inferredType.right.isAssignableTo(
+                     new NamedType("Error"),
+                     scope
+                  )
+               ) {
                   inferredType = inferredType.left;
                }
             }
@@ -192,14 +209,45 @@ export class TypeInferencer {
             ) as any;
             break;
          case "UnaryOperator":
-            inferredType = new MutableType(
-               this.infer((node as UnaryOperator).expression, scope, {
+            const unary = node as UnaryOperator;
+            const expressionType: Type = this.infer(
+               (node as UnaryOperator).expression,
+               scope,
+               {
                   expectsBroadenedType: options.expectsBroadenedType,
-               })
+                  isTypeLevel: options.isTypeLevel,
+                  assignedName: options.assignedName,
+               }
             );
+            if (unary.operator == "var") {
+               inferredType = new MutableType(expressionType);
+               break;
+            } else {
+               if (expressionType instanceof TypeOfTypes) {
+                  return expressionType;
+               } else if (
+                  unary.operator === "-" &&
+                  expressionType.isAssignableTo(PrimitiveType.Number, scope)
+               ) {
+                  return PrimitiveType.Number;
+               } else if (
+                  unary.operator === "!" &&
+                  expressionType === PrimitiveType.Boolean
+               ) {
+                  return PrimitiveType.Boolean;
+               }
+            }
+            throw new Error("Unexpected operator " + unary.operator);
             break;
          case "RefinedDef":
             inferredType = new TypeOfTypes();
+            break;
+         case "Tuple":
+            const tuple = node as Tuple;
+            inferredType = new AppliedGenericType(
+               new NamedType("Tuple" + tuple.expressions.length),
+               tuple.expressions.map((el) => this.infer(el, scope))
+            );
             break;
          default:
             throw new Error(
@@ -340,6 +388,15 @@ export class TypeInferencer {
       return lastPart.charAt(0) === lastPart.charAt(0).toUpperCase();
    }
 
+   asMutable(type: Type, node: Term, toMutable: boolean) {
+      if (toMutable && !(type instanceof MutableType)) {
+         node.invarTypeInVarPlace = true;
+         return new MutableType(type);
+      } else {
+         return type;
+      }
+   }
+
    // func = [T, X] -> (thing: T, other: X) -> thing
    // func(12, "Something")
    // = Number
@@ -353,7 +410,7 @@ export class TypeInferencer {
             const selectOwnerType = this.infer(node.callee.owner, scope);
             if (
                symbol.typeSymbol instanceof RoundValueToValueLambdaType &&
-               symbol.typeSymbol.params[0]?.name === "this" &&
+               symbol.typeSymbol.params[0]?.name === "self" &&
                selectOwnerType.isAssignableTo(
                   symbol.typeSymbol.params[0].type,
                   scope
@@ -383,9 +440,18 @@ export class TypeInferencer {
          calleeType = constructor;
          isStructConstructor = true;
          node.isCallingAConstructor = true;
+      } else if (constructor instanceof SquareTypeToValueLambdaType) {
+         calleeType = constructor;
+         isStructConstructor = true;
+         node.isCallingAConstructor = true;
       }
+      let usesVariableParameters = false;
       for (const arg of node.args) {
-         this.infer(arg[1], scope);
+         // const argType = this.infer(arg[1], scope);
+         const effects = this.context.checker.findEffects(arg[1], true, scope);
+         if (effects.length > 0) {
+            usesVariableParameters = true;
+         }
       }
       if (calleeType instanceof RoundValueToValueLambdaType) {
          if (calleeType.returnType instanceof ThisType) {
@@ -398,12 +464,20 @@ export class TypeInferencer {
                return calleeType.returnType;
             }
          }
-         return calleeType.returnType;
+         return this.asMutable(
+            calleeType.returnType,
+            node,
+            usesVariableParameters
+         );
       } else if (
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
       ) {
-         this.context.builder.buildSquareArgsInRoundApply(node, scope);
+         this.context.builder.buildSquareArgsInRoundApply(
+            node,
+            calleeType,
+            scope
+         );
          const squareArgs = node.autoFilledSquareParams;
 
          const calledArgs = squareArgs;
@@ -418,13 +492,18 @@ export class TypeInferencer {
                params
             );
             if (result instanceof RoundValueToValueLambdaType) {
-               return result.returnType;
+               return this.asMutable(
+                  result.returnType,
+                  node,
+                  usesVariableParameters
+               );
             }
          }
          throw new Error(
             "Square lambda called with round parens, but types could not be automatically resolved."
          );
       }
+      // return Any;
       throw new Error(
          `Not calling a function. Object ${
             node.callee.tag
@@ -476,7 +555,7 @@ export class TypeInferencer {
       if (ownerType instanceof NamedType) {
          ownerType = scope.lookupType(ownerType.name).typeSymbol;
       }
-      if (ownerType instanceof BinaryOpType && ownerType.operator === "&") {
+      if (ownerType instanceof IntersectionType) {
          ownerType = ownerType.simplified();
       }
       let fields: Map<Type, ParamType[]>;
@@ -486,7 +565,7 @@ export class TypeInferencer {
          console.log(node.field);
          throw e;
       }
-      if (ownerType instanceof BinaryOpType && ownerType.operator === "|") {
+      if (ownerType instanceof UnionType) {
          node.unionOwnerComponents = [...fields.keys()].map(
             (t) => t.name as string
          );
@@ -563,17 +642,14 @@ export class TypeInferencer {
             throw new Error("Found anonymous struct " + type.toString());
          }
          return new Map([[type, type.fields]]);
-      } else if (type instanceof BinaryOpType && type.operator == "&") {
+      } else if (type instanceof IntersectionType) {
          return mergeMaps(
             this.getAllKnownFields(type.left, scope),
             this.getAllKnownFields(type.right, scope)
          );
-      } else if (type instanceof BinaryOpType && type.operator == "|") {
+      } else if (type instanceof UnionType) {
          const commonType = this.deduceCommonType(type.left, type.right, scope);
-         if (
-            commonType instanceof BinaryOpType &&
-            commonType.operator === "|"
-         ) {
+         if (commonType instanceof UnionType) {
             return new Map([]);
          } else {
             return this.getAllKnownFields(commonType, scope);
@@ -595,6 +671,9 @@ export class TypeInferencer {
             scope
          );
       } else if (type instanceof GenericNamedType) {
+         if (type.extendedType) {
+            return this.getAllKnownFields(type.extendedType, scope);
+         }
          return new Map([]);
       } else if (type instanceof RoundValueToValueLambdaType) {
          return new Map([]);
@@ -621,13 +700,22 @@ export class TypeInferencer {
       if (node instanceof AppliedKeyword && node.keyword === "return") {
          acc.push([node.param, this.infer(node.param, thisScope)]);
       } else if (node instanceof Optional) {
+         node.expression.modifyFrom(node, IN_RETURN_BRANCH);
          const innerType = this.infer(node.expression, thisScope);
-         if (innerType instanceof BinaryOpType && innerType.operator === "|") {
+         if (innerType instanceof UnionType) {
             if (
                innerType.left.isAssignableTo(Nothing, thisScope) ||
                innerType.right.isAssignableTo(Nothing, thisScope)
             ) {
                acc.push([node, Nothing]);
+            } else if (
+               innerType.left.isAssignableTo(
+                  new NamedType("Error"),
+                  thisScope
+               ) ||
+               innerType.right.isAssignableTo(new NamedType("Error"), thisScope)
+            ) {
+               acc.push([node, new NamedType("Error")]);
             }
          }
          if (innerType instanceof OptionalType) {
@@ -635,20 +723,23 @@ export class TypeInferencer {
          }
       } else if (node instanceof Block) {
          const innerScope = thisScope.innerScopeOf(node, true);
+         if (node.statements.length > 0) {
+            const returnStatement = node.statements[node.statements.length - 1];
+            returnStatement.modifyFrom(node, IN_RETURN_BRANCH);
+            if (node.is(IN_RETURN_BRANCH)) {
+               acc.push([
+                  returnStatement,
+                  this.infer(returnStatement, innerScope),
+               ]);
+            }
+         }
          for (let statement of node.statements) {
             this.findReturns(statement, innerScope, acc);
          }
-         if (node.statements.length > 0) {
-            acc.push([
-               node.statements[node.statements.length - 1],
-               this.infer(
-                  node.statements[node.statements.length - 1],
-                  innerScope
-               ),
-            ]);
-         }
       } else if (node instanceof IfStatement) {
          const ifScope = thisScope.innerScopeOf(node, true);
+         node.trueBranch.modifyFrom(node, IN_RETURN_BRANCH);
+         node.falseBranch?.modifyFrom(node, IN_RETURN_BRANCH);
          this.findReturns(
             node.trueBranch,
             node.trueBranch instanceof Block
@@ -676,6 +767,10 @@ export class TypeInferencer {
          this.findReturns(node.owner, thisScope, acc);
       } else if (node instanceof Assignment && node.value !== undefined) {
          this.findReturns(node.value, thisScope, acc);
+      } else if (node instanceof RoundApply) {
+         for (const arg of node.args) {
+            this.findReturns(arg[1], thisScope, acc);
+         }
       }
    }
 
@@ -693,6 +788,7 @@ export class TypeInferencer {
 
       try {
          const allFoundReturnsInside: [Term, Type][] = [];
+         node.modify(IN_RETURN_BRANCH);
          this.findReturns(node, scope, allFoundReturnsInside);
          const allFoundReturnTypesInside = allFoundReturnsInside.map(
             (r) => r[1]
@@ -709,11 +805,11 @@ export class TypeInferencer {
          if (allFoundReturnsInside.length === 1) {
             const last = node.statements[node.statements.length - 1];
             if (
-               (last instanceof Identifier && last.value === "this") ||
+               (last instanceof Identifier && last.value === "self") ||
                (last instanceof AppliedKeyword &&
                   last.keyword === "return" &&
                   last.param instanceof Identifier &&
-                  last.param.value === "this")
+                  last.param.value === "self")
             ) {
                return new ThisType();
             }
@@ -765,6 +861,26 @@ export class TypeInferencer {
       return new LiteralType(String(node.value), type);
    }
 
+   getTypeType(type: Type, scope: Scope): NamedType {
+      if (!scope.hasTypeSymbol("Struct")) {
+         return new NamedType("Type");
+      }
+      if (type instanceof NamedType) {
+         return this.getTypeType(scope.resolveNamedType(type), scope);
+      } else if (type instanceof StructType) {
+         return new NamedType("Struct");
+      } else if (type instanceof UnionType) {
+         return new NamedType("Union");
+      } else if (type instanceof IntersectionType) {
+         return new NamedType("Intersection");
+      }
+      if (type instanceof RefinedType) {
+         return new NamedType("Refinement");
+      }
+
+      return new NamedType("Type");
+   }
+
    inferIdentifier(
       node: Identifier,
       scope: Scope,
@@ -779,15 +895,25 @@ export class TypeInferencer {
          return symbol.typeSymbol;
       } catch (e) {
          if (node.isTypeIdentifier()) {
+            if (options.isTypeLevel) {
+               return new TypeOfTypes();
+            }
             node.isInValueContext = true;
-            return new NamedType("Type");
+            const type = this.context.translator.translate(node, scope);
+            return this.getTypeType(type, scope);
          }
-         throw new Error(
-            `Could not find symbol '${node.value}' - ` +
-               scope.toPath() +
-               " -- " +
-               scope.iteration
-         );
+         if (scope.iteration === "RESOLUTION") {
+            this.context.errors.add(
+               `Value '${node.value}' is not defined - ` +
+                  scope.toPath() +
+                  " -- " +
+                  scope.iteration,
+               undefined,
+               undefined,
+               node.position
+            );
+         }
+         return Any;
          // this.context.errors.add(
          //    `Could not find symbol '${node.value}'`,
          //    undefined,
@@ -808,6 +934,10 @@ export class TypeInferencer {
    };
 
    inferBinaryExpression(node: BinaryExpression, scope: Scope): Type {
+      if (node.operator === "where") {
+         return new TypeOfTypes();
+      }
+
       let leftType = this.infer(node.left, scope);
       let rightType = this.infer(node.right, scope);
       let hasVar = false;
@@ -877,14 +1007,14 @@ export class TypeInferencer {
       }
 
       if (node.operator === "&") {
-         return new BinaryOpType(leftType, "&", rightType).simplified();
+         return new IntersectionType(leftType, rightType).simplified();
       }
 
       if (node.operator === "|") {
          if (leftType instanceof OptionalType) {
             return this.deduceCommonType(leftType.type, rightType, scope);
          }
-         return new BinaryOpType(leftType, "|", rightType);
+         return new UnionType(leftType, rightType);
       }
 
       if (node.operator === "copy") {
@@ -893,12 +1023,14 @@ export class TypeInferencer {
 
       // Return a BinaryOpType if types are not directly inferrable
       this.context.errors.add(
-         "Operation " + node.operator + " not supported.",
+         "Operation " +
+            node.operator +
+            ` not supported between ${leftType.toString()} and ${rightType.toString()}`,
          undefined,
          undefined,
          node.position
       );
-      return make(new BinaryOpType(leftType, node.operator, rightType));
+      return Any;
    }
 
    // inferRoundTypeToTypeLambda(node: RoundTypeToTypeLambda, scope: Scope) {
@@ -940,86 +1072,57 @@ export class TypeInferencer {
       }
       const innerScope = scope.innerScopeOf(node, true);
       let paramsAsTypes: ParamType[] = [];
-      // Check for Varargs expected type
-      if (
-         node.params[0] &&
-         node.params[0] instanceof Assignment &&
-         node.params[0].type &&
-         node.params[0].type instanceof UnaryOperator &&
-         node.params[0].type.operator === "..."
-      ) {
-         const param = node.params[0];
-         const paramType = new AppliedGenericType(
-            innerScope.lookupType("Array").typeSymbol,
-            [
-               this.context.translator.translate(
-                  node.params[0].type.expression,
-                  innerScope
-               ),
-            ]
-         );
-         // paramType.resolved = innerScope.lookup("Array").returnType;
-         paramsAsTypes = [new ParamType(paramType)];
-         if (param instanceof Assignment && param.lhs instanceof Identifier) {
-            if (!innerScope.hasSymbol(param.lhs.value)) {
-               innerScope.declare(
-                  new Symbol(param.lhs.value, paramType, param)
-               );
-            }
-         }
-      } else {
-         const expected = options.typeExpectedInPlace;
-         if (expected !== undefined) {
-            if (expected instanceof RoundValueToValueLambdaType) {
-               const inferredParams = node.params.map((param, i) => {
-                  return this.context.translator.translateRoundTypeToTypeLambdaParameter(
-                     param,
-                     scope,
-                     { typeExpectedInPlace: expected.params[i].type }
-                  );
-               });
-               let i = 0;
-               if (inferredParams.length !== expected.params.length) {
-                  this.context.errors.add(
-                     `Expected parameter amount lambda parameter of call `,
-                     undefined,
-                     undefined,
-                     node.position
-                  );
-               } else {
-                  for (let param of inferredParams) {
-                     if (
-                        !param.type.isAssignableTo(
-                           expected.params[i].type,
-                           innerScope
-                        )
-                     ) {
-                        this.context.errors.add(
-                           `Expected parameter ${
-                              param.name || i
-                           } of lambda parameter of call`,
-                           expected.params[i].type,
-                           param.type
-                        );
-                     }
-                     i++;
-                  }
-               }
-               paramsAsTypes = expected.params;
-            } else {
-               throw new Error(
-                  "Expected lambda type, got " + expected + ", for " + node.tag
-               );
-            }
-         } else {
-            paramsAsTypes = node.params.map((param) => {
+      const expected = options.typeExpectedInPlace;
+      if (expected !== undefined) {
+         if (expected instanceof RoundValueToValueLambdaType) {
+            const inferredParams = node.params.map((param, i) => {
                return this.context.translator.translateRoundTypeToTypeLambdaParameter(
                   param,
                   scope,
-                  {}
+                  { typeExpectedInPlace: expected.params[i].type }
                );
             });
+            let i = 0;
+            if (inferredParams.length !== expected.params.length) {
+               this.context.errors.add(
+                  `Expected parameter amount lambda parameter of call `,
+                  undefined,
+                  undefined,
+                  node.position
+               );
+            } else {
+               for (let param of inferredParams) {
+                  if (
+                     !param.type.isAssignableTo(
+                        expected.params[i].type,
+                        innerScope
+                     )
+                  ) {
+                     this.context.errors.add(
+                        `Expected parameter ${
+                           param.name || i
+                        } of lambda parameter of call`,
+                        expected.params[i].type,
+                        param.type
+                     );
+                  }
+                  i++;
+               }
+            }
+            paramsAsTypes = expected.params;
+         } else {
+            throw new Error(
+               "Expected lambda type, got " + expected + ", for " + node.tag
+            );
          }
+      } else {
+         paramsAsTypes = node.params.map((param) => {
+            return this.context.translator.translateRoundTypeToTypeLambdaParameter(
+               param,
+               scope,
+               {}
+            );
+         });
       }
 
       if (

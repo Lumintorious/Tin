@@ -7,6 +7,7 @@ import path from "node:path";
 import { Scope, TypePhaseContext } from "./Scope";
 import { Type, ParamType } from "./Types";
 import { GoTranslator } from "./GoTranslator";
+import * as TypesExports from "./Types";
 
 export type CompilerItem = AstNode | Type | ParamType | undefined;
 
@@ -186,6 +187,39 @@ function objectToYAML(obj: object, omitFields: string[] = [], indentLevel = 0) {
    return yaml.join("\n");
 }
 
+const FORBIDDEN_SYMBOL_KEYS = [
+   "ast",
+   "parentComponent",
+   "parent",
+   "iteration",
+   "position",
+];
+
+function symbolsToJson(scope: Scope): string {
+   const symbols = Object.fromEntries(scope.symbols);
+   const typeSymbols = Object.fromEntries(scope.typeSymbols);
+   return JSON.stringify(
+      {
+         symbols,
+         typeSymbols,
+      },
+      (key, v) => {
+         const value = FORBIDDEN_SYMBOL_KEYS.includes(key) ? undefined : v;
+         if (
+            value &&
+            typeof value === "object" &&
+            !Array.isArray(value) &&
+            value.constructor.name !== "Object"
+         ) {
+            return { ...value, _kind: value.constructor.name };
+         } else {
+            return value;
+         }
+      },
+      4
+   );
+}
+
 function fullPath(pathStr: string) {
    return path.resolve(process.cwd(), isTesting ? "tests" : "src", pathStr);
 }
@@ -259,10 +293,16 @@ async function compile(
 
       // TYPE CHECKING
       const scopes = [] as any;
+      let languageScope: Scope | undefined = undefined;
       imports.forEach((i, k) =>
          scopes.push(i.typePhaseContext.fileScope.innerScopeOf(i.ast))
       );
-      const context = new TypePhaseContext(inputFile, ast, scopes);
+      const context = new TypePhaseContext(
+         inputFile,
+         ast,
+         scopes,
+         languageScope
+      );
       const uncheckedSymbols = context.fileScope.checkNoUncheckedTypesLeft();
       for (const uncheckedSymbol of uncheckedSymbols) {
          console.error(uncheckedSymbol[1].name + " @ " + uncheckedSymbol[0]);
@@ -277,6 +317,12 @@ async function compile(
             process.exit(-1);
          }
       }
+
+      const fileScope = context.fileScope;
+      await files.writeFile(
+         fromSrcToOut(inputFile + ".symbols.json"),
+         symbolsToJson(fileScope.innerScopeOf(ast))
+      );
 
       const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
          ? new GoTranslator()

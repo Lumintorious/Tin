@@ -349,7 +349,10 @@ export class GenericNamedType extends Type {
    }
 
    toString() {
-      return this.name;
+      return (
+         this.name +
+         (this.extendedType ? ": " + this.extendedType.toString() : "")
+      );
    }
 }
 
@@ -403,9 +406,10 @@ export class OptionalType extends Type {
    type: Type;
    constructor(type: Type) {
       super("OptionalType");
-      this.type = type;
-      if (!type) {
-         throw new Error("What?");
+      if (type instanceof OptionalType) {
+         this.type = type.type;
+      } else {
+         this.type = type;
       }
    }
 
@@ -451,6 +455,7 @@ export class RoundValueToValueLambdaType extends Type {
    isFirstParamThis: boolean = false;
    pure: boolean;
    capturesMutableValues: boolean;
+   isConstructor?: boolean;
    constructor(
       params: ParamType[],
       returnType: Type,
@@ -496,12 +501,12 @@ export class RoundValueToValueLambdaType extends Type {
          ? !this.capturesMutableValues
          : true;
 
-      // const varCheck = !(other.returnType instanceof MutableType)
-      //    ? !(this.returnType instanceof MutableType)
-      //    : true;
-      const varCheck =
-         !(other.returnType instanceof MutableType) ===
-         !(this.returnType instanceof MutableType);
+      const varCheck = !(other.returnType instanceof MutableType)
+         ? !(this.returnType instanceof MutableType)
+         : true;
+      //   const varCheck =
+      //      !(other.returnType instanceof MutableType) ===
+      //      !(this.returnType instanceof MutableType);
 
       return (
          paramCheck && returnCheck && purityCheck && captureCheck && varCheck
@@ -567,7 +572,7 @@ export class SquareTypeToTypeLambdaType extends Type {
       if (!(this.returnType instanceof StructType) || !this.name) {
          return;
       }
-      return new SquareTypeToValueLambdaType(
+      const constructor = new SquareTypeToValueLambdaType(
          this.paramTypes,
          new RoundValueToValueLambdaType(
             this.returnType.fields,
@@ -577,6 +582,10 @@ export class SquareTypeToTypeLambdaType extends Type {
          ),
          true
       );
+      (constructor.returnType as RoundValueToValueLambdaType).isConstructor =
+         true;
+
+      return constructor;
    }
 
    toString(): string {
@@ -655,9 +664,30 @@ export class AppliedGenericType extends Type {
 
    toString() {
       const paramsStr = this.parameterTypes.map((t) => t.toString()).join(", ");
+      if (this.callee instanceof NamedType) {
+         if (this.callee.name === "Tuple2" || this.callee.name === "Tuple3") {
+            return `(${paramsStr})`;
+         }
+      }
       return `${
          this.callee.name ?? `{${this.callee.toString()}}`
       }[${paramsStr}]`;
+   }
+}
+
+export class NotType extends Type {
+   type: Type;
+   constructor(type: Type) {
+      super("NotType");
+      this.type = type;
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return !this.type.isExtendedBy(other, scope);
+   }
+
+   toString(): string {
+      return "!(" + this.type.toString() + ")";
    }
 }
 
@@ -669,6 +699,51 @@ export class UnionType extends Type {
       this.left = left;
       this.right = right;
    }
+
+   getAllSeparateUnionedTypes(): Type[] {
+      return [
+         ...(this.left instanceof UnionType
+            ? this.left.getAllSeparateUnionedTypes()
+            : [this.left]),
+         ...(this.right instanceof UnionType
+            ? this.right.getAllSeparateUnionedTypes()
+            : [this.right]),
+      ];
+   }
+
+   static ofAll(types: Type[]) {
+      if (types.length === 0) {
+         return Nothing;
+      } else if (types.length === 1) {
+         return types[0];
+      } else {
+         let type = new UnionType(types[0], types[1]);
+         for (let i = 2; i < types.length; i++) {
+            type = new UnionType(type, types[i]);
+         }
+         return type;
+      }
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      if (other instanceof UnionType) {
+         return (
+            this.left.isAssignableTo(other.left, scope) ||
+            this.right.isAssignableTo(other.right, scope) ||
+            this.left.isAssignableTo(other.right, scope) ||
+            this.right.isAssignableTo(other.left, scope)
+         );
+      } else {
+         return (
+            this.left.isAssignableTo(other, scope) ||
+            this.right.isAssignableTo(other, scope)
+         );
+      }
+   }
+
+   toString(): string {
+      return `${this.left.toString()} | ${this.right.toString()}`;
+   }
 }
 
 export class IntersectionType extends Type {
@@ -678,6 +753,22 @@ export class IntersectionType extends Type {
       super("IntersectionType");
       this.left = left;
       this.right = right;
+   }
+
+   extends(other: Type, scope: Scope): boolean {
+      if (other instanceof IntersectionType) {
+         return (
+            this.left.isAssignableTo(other.left, scope) ||
+            this.right.isAssignableTo(other.right, scope) ||
+            this.left.isAssignableTo(other.right, scope) ||
+            this.right.isAssignableTo(other.left, scope)
+         );
+      } else {
+         return (
+            this.left.isAssignableTo(other, scope) ||
+            this.right.isAssignableTo(other, scope)
+         );
+      }
    }
 
    buildConstructor(): Type | undefined {
@@ -697,9 +788,10 @@ export class IntersectionType extends Type {
          allTypes.slice(0, allTypes.length - 1)
       );
       constructor.params = [
-         new ParamType(expectedType, "this"),
+         new ParamType(expectedType, "self"),
          ...constructor.params,
       ];
+      constructor.isConstructor = true;
       return constructor;
    }
 
@@ -752,229 +844,9 @@ export class IntersectionType extends Type {
       }
       return type || this;
    }
-}
 
-export class BinaryOpType extends Type {
-   left: Type;
-   operator: string;
-   right: Type;
-   constructor(left: Type, operator: string, right: Type, simplify = true) {
-      super("BinaryOpType");
-      this.left = left;
-      this.operator = operator;
-      this.right = right;
-      if (
-         simplify &&
-         (left instanceof BinaryOpType || right instanceof BinaryOpType)
-      ) {
-         const simplified = this.simplified();
-         if (simplified instanceof BinaryOpType) {
-            Object.assign(this, simplified);
-         }
-      }
-   }
-
-   buildConstructor(): Type | undefined {
-      if (this.operator !== "&") {
-         return;
-      }
-      const allTypes = [...this.getAllIntersectedTypes()];
-      const lastType = allTypes[allTypes.length - 1];
-      if (!(lastType instanceof StructType)) {
-         return;
-      }
-      lastType.name = this.name;
-      const constructor = lastType.buildConstructor();
-      if (!(constructor instanceof RoundValueToValueLambdaType)) {
-         return;
-      }
-      constructor.name = this.name;
-      (lastType.ast as TypeDef).name = this.name;
-      const expectedType = this.getAllTypesIntersected(
-         allTypes.slice(0, allTypes.length - 1)
-      );
-      constructor.params = [
-         new ParamType(expectedType, "this"),
-         ...constructor.params,
-      ];
-      return constructor;
-   }
-
-   getAllTypesIntersected(types: Type[]): Type {
-      types = [...types];
-      if (types.length === 0) {
-         throw new Error("Attempted to unite a list of 0 types.");
-      } else if (types.length === 1) {
-         return types[0];
-      } else {
-         const leftType = types[0];
-         types.shift();
-         return new BinaryOpType(
-            leftType,
-            "&",
-            this.getAllTypesIntersected(types)
-         );
-      }
-   }
-
-   getAllIntersectedTypes(): Set<Type> {
-      if (this.operator !== "&") {
-         return new Set();
-      }
-      let set = new Set<Type>();
-      if (this.left instanceof BinaryOpType && this.left.operator === "&") {
-         set = new Set([...set, ...this.left.getAllIntersectedTypes()]);
-      } else {
-         set.add(this.left);
-      }
-      if (this.right instanceof BinaryOpType && this.right.operator === "&") {
-         set = new Set([...set, ...this.right.getAllIntersectedTypes()]);
-      } else {
-         set.add(this.right);
-      }
-
-      return set;
-   }
-
-   simplified(): Type {
-      let types = this.getAllIntersectedTypes();
-      if (types.size === 1) {
-         return [...types][0];
-      } else if (types.size === 2) {
-         return new BinaryOpType([...types][0], this.operator, [...types][1]);
-      }
-      let type: Type | null = null;
-      for (let t of types) {
-         if (type === null) {
-            type = t;
-         } else {
-            type = new BinaryOpType(type, "&", t, false);
-         }
-      }
-      return type || this;
-   }
-
-   isAssignableTo(other: Type, scope: Scope): boolean {
-      if (super.isAssignableTo(other, scope)) {
-         return true;
-      }
-      if (
-         this.operator === "&" &&
-         other instanceof BinaryOpType &&
-         other.operator === "&"
-      ) {
-         return (
-            (this.left.isAssignableTo(other.left, scope) &&
-               this.right.isAssignableTo(other.right, scope)) ||
-            (this.right.isAssignableTo(other.left, scope) &&
-               this.left.isAssignableTo(other.right, scope))
-         );
-      } else if (this.operator === "&") {
-         return (
-            this.left.isAssignableTo(other, scope) ||
-            this.right.isAssignableTo(other, scope)
-         );
-      } else if (
-         this.operator === "|" &&
-         other instanceof BinaryOpType &&
-         other.operator === "|"
-      ) {
-         return (
-            (this.left.extends(other.left, scope) &&
-               this.right.extends(other.right, scope)) ||
-            (this.right.extends(other.left, scope) &&
-               this.left.extends(other.right, scope))
-         );
-      } else if (this.operator === "|") {
-         if (other instanceof OptionalType) {
-            if (
-               this.left.isAssignableTo(other.type, scope) &&
-               this.right.isAssignableTo(Nothing, scope)
-            ) {
-               return true;
-            } else if (
-               this.right.isAssignableTo(other.type, scope) &&
-               this.left.isAssignableTo(Nothing, scope)
-            ) {
-               return true;
-            }
-         }
-         return (
-            other.isExtendedBy(this, scope) ||
-            (this.left.isAssignableTo(other, scope) &&
-               this.right.isAssignableTo(other, scope))
-         );
-      } else {
-         return super.isAssignableTo(other, scope);
-      }
-   }
-
-   extends(other: Type, scope: Scope) {
-      if (this.operator === "&") {
-         return (
-            other.isAssignableTo(this.left, scope) &&
-            other.isAssignableTo(this.right, scope)
-         );
-      }
-      if (
-         this.operator === "|" &&
-         other instanceof BinaryOpType &&
-         other.operator === "|"
-      ) {
-         return (
-            (this.left.extends(other.left, scope) &&
-               this.right.extends(other.right, scope)) ||
-            (this.right.extends(other.left, scope) &&
-               this.left.extends(other.right, scope))
-         );
-      } else if (this.operator === "|") {
-         return (
-            other.isExtendedBy(this, scope) ||
-            (other.isAssignableTo(this.left, scope) &&
-               other.isAssignableTo(this.right, scope))
-         );
-      }
-      return false;
-   }
-
-   isExtendedBy(other: Type, scope: Scope) {
-      if (
-         this.operator === "|" &&
-         other instanceof BinaryOpType &&
-         other.operator === "|"
-      ) {
-         return (
-            this.left.isExtendedBy(other.left, scope) ||
-            this.right.isExtendedBy(other.right, scope) ||
-            this.right.isExtendedBy(other.left, scope) ||
-            this.left.isExtendedBy(other.right, scope)
-         );
-      } else if (this.operator === "|") {
-         if (other instanceof OptionalType) {
-            if (
-               this.left.isExtendedBy(other.type, scope) &&
-               this.right.isExtendedBy(Nothing, scope)
-            ) {
-               return true;
-            } else if (
-               this.right.isExtendedBy(other.type, scope) &&
-               this.left.isExtendedBy(Nothing, scope)
-            ) {
-               return true;
-            }
-         }
-         return (
-            other.isAssignableTo(this.left, scope) ||
-            other.isAssignableTo(this.right, scope)
-         );
-      }
-      return false;
-   }
-
-   toString() {
-      return `${this.left.toString()} ${
-         this.operator
-      } ${this.right.toString()}`;
+   toString(): string {
+      return `${this.left.toString()} & ${this.right.toString()}`;
    }
 }
 
@@ -1011,10 +883,7 @@ export class RefinedType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
-      return (
-         (other instanceof Type && this.name === other.name) ||
-         this.inputType.isExtendedBy(other, scope)
-      );
+      return other instanceof Type && this.name === other.name;
    }
 
    toString(): string {
@@ -1052,12 +921,15 @@ export class StructType extends Type {
       if (!this.name) {
          return;
       }
-      return new RoundValueToValueLambdaType(
+      const constructor = new RoundValueToValueLambdaType(
          this.fields,
          new NamedType(this.name),
          false,
          true
       );
+      constructor.isConstructor = true;
+
+      return constructor;
    }
 
    extends(other: Type, scope: Scope) {

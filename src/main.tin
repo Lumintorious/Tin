@@ -1,17 +1,9 @@
-User = data:
-	name: String
+# import Http
+import collections/Iterable
 
-Err = data:
-	message: String
+func = () ->
+	v: var Anything = var 0
 
-FalseyNum = refined (n: Number) -> n == 0
-FalseyStr = refined (s: String) -> s == ""
-FalseyBool = refined (b: Boolean) -> b
-Falsey = FalseyNum | FalseyStr | FalseyBool
+	return 0
 
-print(false :: Falsey)
-
-x = User.name
-
-print(User)
-print(x)
+func()
