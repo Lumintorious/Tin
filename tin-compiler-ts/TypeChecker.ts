@@ -17,13 +17,18 @@ import {
    IfStatement,
    RoundApply,
    Select,
-   Identifier,
    AstNode,
    Term,
    BinaryExpression,
 } from "./Parser";
 import { Scope, TypePhaseContext } from "./Scope";
-import { RoundValueToValueLambda, TypeDef, RefinedDef, Tuple } from "./Parser";
+import {
+   RoundValueToValueLambda,
+   TypeDef,
+   RefinedDef,
+   Tuple,
+   Identifier,
+} from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
 import { UncheckedType, MutableType } from "./Types";
 import {
@@ -389,20 +394,22 @@ export class TypeChecker {
 
       if (node.pure) {
          let effects = [
-            ...this.findEffects(node.block, false, innerScope),
+            ...this.findEffects(node.block, false, innerScope, innerScope),
             ...node.params.flatMap((p) =>
-               this.findEffects(p, false, scope.innerScopeOf(node))
+               this.findEffects(p, false, scope.innerScopeOf(node), innerScope)
             ),
          ];
-         for (const [error, term] of effects) {
-            this.context.errors.add(
-               error + " in a pure lambda body",
-               undefined,
-               undefined,
-               term.position,
-               `Either declare ${node.show()} as an effectful lambda '(...) ~> ...', or remove the effect.`
-            );
-         }
+
+         // PURE HANDLING
+         //  for (const [error, term] of effects) {
+         //     this.context.errors.add(
+         //        error + " in a pure lambda body",
+         //        undefined,
+         //        undefined,
+         //        term.position,
+         //        `Either declare ${node.show()} as an effectful lambda '(...) ~> ...', or remove the effect.`
+         //     );
+         //  }
       }
 
       if (
@@ -411,9 +418,9 @@ export class TypeChecker {
          !(type.returnType.name === "Nothing")
       ) {
          let effects = [
-            ...this.findEffects(node.block, true, innerScope),
+            ...this.findEffects(node.block, true, innerScope, innerScope),
             ...node.params.flatMap((p) =>
-               this.findEffects(p, true, scope.innerScopeOf(node))
+               this.findEffects(p, true, scope.innerScopeOf(node), innerScope)
             ),
          ];
          for (const [error, term] of effects) {
@@ -574,14 +581,20 @@ export class TypeChecker {
             this.context.errors.add("Unchecked square apply");
             return;
          }
-         const translator = this.context.translator;
+
          this.typeCheckSquareParams(
             typeSymbol.paramTypes,
             apply.autoFilledSquareParams,
             apply.position,
             scope
          );
-         // typeSymbol = typeSymbol.returnType;
+
+         const params: { [_: string]: Type } = {};
+         for (let i = 0; i < apply.autoFilledSquareParams.length; i++) {
+            params[typeSymbol.paramTypes[i].name] =
+               apply.autoFilledSquareParams[i];
+         }
+         typeSymbol = scope.resolveGenericTypes(typeSymbol.returnType, params);
       }
 
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
@@ -666,22 +679,39 @@ export class TypeChecker {
    findEffects(
       node: Statement,
       onlyCaptures: boolean,
-      scope: Scope
+      scope: Scope,
+      nearestFunctionScope: Scope
    ): [string, Term][] {
       if (node instanceof AppliedKeyword && node.keyword !== "unchecked") {
-         return this.findEffects(node.param, onlyCaptures, scope);
+         return this.findEffects(
+            node.param,
+            onlyCaptures,
+            scope,
+            nearestFunctionScope
+         );
       } else if (node instanceof Block) {
          return node.statements.flatMap((statement) =>
-            this.findEffects(statement, onlyCaptures, scope.innerScopeOf(node))
+            this.findEffects(
+               statement,
+               onlyCaptures,
+               scope.innerScopeOf(node),
+               nearestFunctionScope
+            )
          );
       } else if (node instanceof IfStatement) {
          const ifScope = scope.innerScopeOf(node);
          return [
-            ...this.findEffects(node.condition, onlyCaptures, ifScope),
+            ...this.findEffects(
+               node.condition,
+               onlyCaptures,
+               ifScope,
+               nearestFunctionScope
+            ),
             ...this.findEffects(
                node.trueBranch,
                onlyCaptures,
-               ifScope.innerScopeOf(node.trueBranch)
+               ifScope.innerScopeOf(node.trueBranch),
+               nearestFunctionScope
             ),
             ...(node.falseBranch
                ? this.findEffects(
@@ -689,40 +719,101 @@ export class TypeChecker {
                     onlyCaptures,
                     ifScope instanceof Block
                        ? ifScope.innerScopeOf(node.falseBranch)
-                       : ifScope
+                       : ifScope,
+                    nearestFunctionScope
                  )
                : []),
          ];
       } else if (node instanceof WhileLoop) {
          const ifScope = scope.innerScopeOf(node);
          return [
-            ...this.findEffects(node.condition, onlyCaptures, ifScope),
-            ...this.findEffects(node.action, onlyCaptures, ifScope),
+            ...this.findEffects(
+               node.condition,
+               onlyCaptures,
+               ifScope,
+               nearestFunctionScope
+            ),
+            ...this.findEffects(
+               node.action,
+               onlyCaptures,
+               ifScope,
+               nearestFunctionScope
+            ),
          ];
       } else if (node instanceof BinaryExpression) {
          return [
-            ...this.findEffects(node.left, onlyCaptures, scope),
-            ...this.findEffects(node.right, onlyCaptures, scope),
+            ...this.findEffects(
+               node.left,
+               onlyCaptures,
+               scope,
+               nearestFunctionScope
+            ),
+            ...this.findEffects(
+               node.right,
+               onlyCaptures,
+               scope,
+               nearestFunctionScope
+            ),
          ];
       } else if (node instanceof UnaryOperator) {
-         return [...this.findEffects(node.expression, onlyCaptures, scope)];
+         return [
+            ...this.findEffects(
+               node.expression,
+               onlyCaptures,
+               scope,
+               nearestFunctionScope
+            ),
+         ];
       } else if (node instanceof Assignment) {
          return [
             ...(node.isDeclaration
                ? []
-               : this.findEffects(node.lhs, onlyCaptures, scope)),
+               : this.findEffects(
+                    node.lhs,
+                    onlyCaptures,
+                    scope,
+                    nearestFunctionScope
+                 )),
             ...(node.value
-               ? this.findEffects(node.value, onlyCaptures, scope)
+               ? this.findEffects(
+                    node.value,
+                    onlyCaptures,
+                    scope,
+                    nearestFunctionScope
+                 )
                : []),
          ];
       } else if (node instanceof Change) {
-         const result = [...this.findEffects(node.value, onlyCaptures, scope)];
+         const result = [
+            ...this.findEffects(
+               node.value,
+               onlyCaptures,
+               scope,
+               nearestFunctionScope
+            ),
+         ];
+         if (node.lhs instanceof Identifier) {
+            const isSymbolFromHere = scope.hasSymbol(
+               node.lhs.value,
+               nearestFunctionScope
+            );
+            if (isSymbolFromHere) {
+               return result;
+            }
+         }
          if (!onlyCaptures) {
             result.push(["Setting variable '" + node.lhs.show() + "'", node]);
          }
          return result;
       } else if (node instanceof Select) {
-         const result = [...this.findEffects(node.owner, onlyCaptures, scope)];
+         const result = [
+            ...this.findEffects(
+               node.owner,
+               onlyCaptures,
+               scope,
+               nearestFunctionScope
+            ),
+         ];
          const field = this.context.inferencer.findField(
             this.context.inferencer.infer(node.owner, scope),
             node.field,
@@ -740,12 +831,24 @@ export class TypeChecker {
          }
          return result;
       } else if (node instanceof Cast) {
-         return [...this.findEffects(node.expression, onlyCaptures, scope)];
+         return [
+            ...this.findEffects(
+               node.expression,
+               onlyCaptures,
+               scope,
+               nearestFunctionScope
+            ),
+         ];
       } else if (node instanceof RoundApply) {
          const type = this.context.inferencer.infer(node.callee, scope);
          if (!onlyCaptures) {
             const results = node.args.flatMap((arg) =>
-               this.findEffects(arg[1], onlyCaptures, scope)
+               this.findEffects(
+                  arg[1],
+                  onlyCaptures,
+                  scope,
+                  nearestFunctionScope
+               )
             );
             if (type instanceof RoundValueToValueLambdaType && !type.pure) {
                results.push([
@@ -759,11 +862,28 @@ export class TypeChecker {
                   node,
                ]);
             }
+            if (
+               type instanceof SquareTypeToValueLambdaType &&
+               type.returnType instanceof RoundValueToValueLambdaType &&
+               !type.returnType.pure
+            ) {
+               results.push([
+                  "Calling square lambda with round parens '" +
+                     node.callee.show() +
+                     "'",
+                  node,
+               ]);
+            }
 
             return results;
          } else {
             const results = node.args.flatMap((arg) =>
-               this.findEffects(arg[1], onlyCaptures, scope)
+               this.findEffects(
+                  arg[1],
+                  onlyCaptures,
+                  scope,
+                  nearestFunctionScope
+               )
             );
             if (
                type instanceof RoundValueToValueLambdaType &&
@@ -798,7 +918,12 @@ export class TypeChecker {
             return [];
          }
       } else if (node instanceof Group) {
-         return this.findEffects(node.value, onlyCaptures, scope);
+         return this.findEffects(
+            node.value,
+            onlyCaptures,
+            scope,
+            nearestFunctionScope
+         );
       }
 
       return [];

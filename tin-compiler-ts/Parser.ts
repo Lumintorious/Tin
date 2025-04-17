@@ -53,7 +53,11 @@ export class AstNode {
    }
 
    show() {
-      return "Anonymous";
+      return this.tag.toLowerCase();
+   }
+
+   showCode() {
+      return "";
    }
 
    fromTo(start?: TokenPos, end?: TokenPos) {
@@ -110,6 +114,10 @@ export class Assignment extends AstNode {
    mutable(mutable: boolean) {
       this.isMutable = mutable;
       return this;
+   }
+
+   showCode(): string {
+      return `${this.lhs} = ${this.value}`;
    }
 }
 
@@ -170,7 +178,7 @@ export class IfStatement extends Term {
    }
 }
 
-export class WhileLoop extends Term {
+export class WhileLoop extends Statement {
    start?: Term;
    condition: Term;
    eachLoop?: Term;
@@ -226,7 +234,13 @@ export class RoundValueToValueLambda extends Term {
    }
 
    show(): string {
-      return this.name || "Anonymous";
+      return this.name ?? "anon";
+   }
+
+   showCode(): string {
+      return `(${this.params.map((p) => p.toString()).join(", ")}) -> \n ${
+         this.block
+      }`;
    }
 }
 
@@ -307,6 +321,7 @@ export class RoundApply extends Term {
    autoFilledSquareParams?: Type[];
    isCallingAConstructor: boolean = false;
    bakedInThis?: Term;
+   callsPure?: boolean = true;
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
@@ -318,6 +333,7 @@ export class SquareApply extends Term {
    callee: Term;
    typeArgs: Term[];
    isCallingAConstructor: boolean = false;
+   bakedInThis?: Term;
    constructor(callee: Term, typeArgs: Term[]) {
       super("SquareApply");
       this.callee = callee;
@@ -359,7 +375,7 @@ export class Identifier extends Term {
    }
 
    isTypeIdentifier() {
-      const parts = this.value.split("@");
+      const parts = this.value.split(/(@|\.)/g);
       const lastPart = parts[parts.length - 1];
 
       return lastPart.charAt(0) === lastPart.charAt(0).toUpperCase();
@@ -405,12 +421,30 @@ export class Select extends Term {
    field: string;
    ownerComponent?: string;
    unionOwnerComponents?: string[];
-   ammortized: boolean = false; // if its x?.blabla
+   ammortized: boolean = false; // if it's x?.blabla
+   isDeclaration: boolean = false; // if it's bla.bla = 5 (not set bla.bla = 5)
+   isBeingTreatedAsIdentifier: boolean = false;
    constructor(owner: Term, field: string, ammortized: boolean = false) {
       super("Select");
       this.owner = owner;
       this.field = field;
       this.ammortized = ammortized;
+   }
+
+   nameAsSelectOfIdentifiers(): string | undefined {
+      let term: Term = this.owner;
+      let path = this.field;
+      while (term instanceof Select) {
+         path = term.field + "." + path;
+         term = term.owner;
+      }
+      if (term instanceof Identifier) {
+         path = term.value + "." + path;
+      } else {
+         return undefined;
+      }
+
+      return path;
    }
 
    show() {
@@ -764,7 +798,7 @@ export class Parser {
          if ((operator === "=" || operator === "~=") && left.tag === "Select") {
             left = new Assignment(left, right, false)
                .mutable(operator === "~=")
-               .fromTo(left.position, this.peek().position);
+               .fromTo(left.position, this.peek()?.position);
             break;
          }
 
@@ -772,7 +806,8 @@ export class Parser {
             (operator === "=" || operator === "~=") &&
             left instanceof Cast &&
             left.tag === "Cast" &&
-            left.expression.tag === "Identifier"
+            (left.expression.tag === "Identifier" ||
+               left.expression.tag === "Select")
          ) {
             left = new Assignment(left.expression, right, true, left.type)
                .mutable(operator === "~=")
@@ -792,6 +827,8 @@ export class Parser {
                );
             break;
          }
+         console.log(operator);
+         console.log(right.tag);
          if (
             operator === "." &&
             left instanceof UnaryOperator &&
@@ -833,6 +870,20 @@ export class Parser {
             left = new RoundApply(select, right.args);
          } else if (
             operator === "." &&
+            right instanceof RoundApply &&
+            right.callee instanceof SquareApply &&
+            right.callee.callee instanceof Identifier
+         ) {
+            const select = new Select(left, right.callee.callee.value).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
+            left = new RoundApply(
+               new SquareApply(select, right.callee.typeArgs),
+               right.args
+            );
+         } else if (
+            operator === "." &&
             right instanceof SquareApply &&
             right.callee instanceof Identifier
          ) {
@@ -851,6 +902,16 @@ export class Parser {
                this.positionNow()
             );
             left = new SquareApply(select, right.typeArgs);
+         } else if (
+            operator === "." &&
+            right instanceof Cast &&
+            right.expression instanceof Identifier
+         ) {
+            left = new Select(left, right.expression.value).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
+            left = new Cast(left, right.type);
          } else if (operator === "::" && right) {
             const typeCheck = new TypeCheck(left, right);
             left = typeCheck;
@@ -991,7 +1052,7 @@ export class Parser {
          (!this.peek() ||
             (this.peek().value != "->" &&
                this.peek().value != "~>" &&
-               this.peek().value != "~~>" &&
+               this.peek().value != "?>" &&
                (this.peek().value != "=>" || !isSquare))) &&
          groupCatch.length > 0
       ) {
@@ -1018,8 +1079,8 @@ export class Parser {
          arrow = this.consume("OPERATOR", "->");
       } else if (this.peek().value === "~>") {
          arrow = this.consume("OPERATOR", "~>");
-      } else if (this.peek().value === "~~>") {
-         arrow = this.consume("OPERATOR", "~~>");
+      } else if (this.peek().value === "?>") {
+         arrow = this.consume("OPERATOR", "?>");
       } else {
          arrow = this.consume();
       }

@@ -21,7 +21,6 @@ import {
    ParamType,
 } from "./Types";
 import {
-   Select,
    SquareTypeToTypeLambda,
    SquareApply,
    Import,
@@ -37,6 +36,7 @@ import {
    Make,
 } from "./Parser";
 import { Symbol } from "./Scope";
+import { Select } from "./Parser";
 import {
    TypeOfTypes,
    AnyType,
@@ -105,10 +105,10 @@ export class TypeBuilder {
       } else if (node instanceof SquareTypeToValueLambda) {
          this.buildSquareTypeToValueLambda(node, scope);
       } else if (node instanceof SquareTypeToTypeLambda) {
-         const innerScope = scope.innerScopeOf(node, true);
          if (options.assignedName) {
             node.name = options.assignedName;
          }
+         const innerScope = scope.innerScopeOf(node, true);
          for (let param of node.parameterTypes) {
             if (
                param instanceof Assignment &&
@@ -285,7 +285,9 @@ export class TypeBuilder {
          condition instanceof TypeCheck &&
          condition.term instanceof Identifier
       ) {
-         const shadowSymbol = scope.lookup(condition.term.value);
+         const shadowSymbol = condition.term.isTypeIdentifier()
+            ? scope.lookupType(condition.term.value)
+            : scope.lookup(condition.term.value);
          let type = this.context.translator.translate(condition.type, scope);
          let checkedType = shadowSymbol.typeSymbol;
          let wasMutable = false;
@@ -505,7 +507,30 @@ export class TypeBuilder {
          } else {
             // Not Varargs
             let i = 0;
+            let hasThisIncrement = node.bakedInThis ? 1 : 0;
             const mappings = new Map<GenericNamedType, Type>();
+            if (
+               node.bakedInThis &&
+               expectedParams.filter((p) => p.name === "self").length > 0
+            ) {
+               let appliedType = this.context.inferencer.infer(
+                  node.bakedInThis,
+                  scope
+               );
+               if (appliedType instanceof LiteralType) {
+                  appliedType = appliedType.type;
+               }
+               const expectedType = expectedParams[0];
+               if (expectedType) {
+                  this.matchParamToGenericParam(
+                     expectedTypeParams,
+                     appliedType,
+                     expectedType.type,
+                     mappings
+                  );
+               }
+            }
+
             for (let [appliedName, appliedTerm] of appliedParams) {
                let appliedType = this.context.inferencer.infer(
                   appliedTerm,
@@ -516,7 +541,7 @@ export class TypeBuilder {
                }
                const expectedType = appliedName
                   ? expectedParams.find((p) => p.name === appliedName)
-                  : expectedParams[i];
+                  : expectedParams[i + hasThisIncrement];
 
                if (expectedType) {
                   this.matchParamToGenericParam(
@@ -550,6 +575,8 @@ export class TypeBuilder {
       let calleeType;
       let isStructConstructor = false;
       try {
+         this.context.inferencer.handleExtensionSearch(node, scope);
+
          calleeType = this.context.inferencer.infer(node.callee, scope, {
             typeExpectedAsOwner: node.args[0]?.[1]
                ? this.context.inferencer.infer(node.args[0][1], scope)
@@ -591,6 +618,9 @@ export class TypeBuilder {
          }
       }
       let paramTypes: ParamType[] = [];
+      if (!(calleeType as any).pure) {
+         node.callsPure = false;
+      }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
          // will be hanlded in TypeChecker
          this.buildSquareArgsInRoundApply(node, calleeType, scope);
@@ -660,6 +690,16 @@ export class TypeBuilder {
 
    buildSelect(node: Select, scope: Scope) {
       // if (scope.iteration === "DECLARATION") return;
+      const asName = node.nameAsSelectOfIdentifiers();
+      try {
+         if (asName !== undefined) {
+            const symbol = scope.lookup(asName);
+            if (symbol) {
+               node.isBeingTreatedAsIdentifier = true;
+               return;
+            }
+         }
+      } catch (e) {}
       this.context.inferencer.infer(node, scope); // To assign ownerComponent
       this.build(node.owner, scope);
       let parentType = this.context.inferencer.infer(node.owner, scope);
@@ -834,6 +874,9 @@ export class TypeBuilder {
       scope: Scope,
       options: RecursiveResolutionOptions = {}
    ) {
+      if (options.assignedName) {
+         node.name = options.assignedName;
+      }
       const innerScope = scope.innerScopeOf(node, true);
       node.params.forEach((p, i) => {
          if (p instanceof Assignment && p.lhs instanceof Identifier) {
@@ -855,9 +898,6 @@ export class TypeBuilder {
             }
          }
       });
-      if (options.assignedName) {
-         node.name = options.assignedName;
-      }
       this.build(node.block, innerScope);
       const inferredType = this.context.inferencer.inferRoundValueToValueLambda(
          node,
@@ -920,7 +960,11 @@ export class TypeBuilder {
       }
 
       const expectedMutable = expectedType instanceof MutableType;
-      if (capturedName !== undefined) {
+      if (
+         capturedName !== undefined &&
+         !(termType instanceof MutableType) &&
+         !expectedMutable
+      ) {
          term.capturedName = capturedName;
       } else if (expectedMutable && !(termType instanceof MutableType)) {
          term.invarTypeInVarPlace = true;
@@ -1075,8 +1119,7 @@ export class TypeBuilder {
       }
 
       this.build(node.value, scope, {
-         assignedName:
-            node.lhs instanceof Identifier ? node.lhs.value : undefined,
+         assignedName: node.lhs.show(),
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
       });
@@ -1085,7 +1128,7 @@ export class TypeBuilder {
             node.lhs instanceof Identifier ? node.lhs.value : undefined,
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
-         expectsBroadenedType: true,
+         expectsBroadenedType: !node.type,
       });
       let isMutable = rhsType instanceof MutableType;
       if (!node.type) {
@@ -1174,12 +1217,46 @@ export class TypeBuilder {
          }
          return;
       }
-      if (!(lhs instanceof Identifier)) {
+      if (!(lhs instanceof Identifier || lhs instanceof Select)) {
          throw new Error(
             "Could not declare new variable, maybe you tried to set a field without 'set'"
          );
       }
-      let symbol = new Symbol(lhs.value, rhsType, node);
+      let symbolName: string | undefined;
+      if (lhs instanceof Identifier) {
+         symbolName = lhs.value;
+      } else if (lhs instanceof Select) {
+         symbolName = lhs.nameAsSelectOfIdentifiers();
+         lhs.isDeclaration = true;
+         node.isDeclaration = true;
+         if (symbolName !== undefined) {
+         } else {
+            try {
+               const inferredOwnerType = this.context.inferencer.infer(
+                  lhs.owner,
+                  scope
+               );
+               const field = this.context.inferencer.findField(
+                  inferredOwnerType,
+                  lhs.field,
+                  scope
+               );
+               if (field) {
+                  throw new Error(
+                     `Could not declare ${symbolName}. It would shadow the name of a field on ${inferredOwnerType}`
+                  );
+               }
+            } finally {
+            }
+         }
+      }
+
+      if (!symbolName) {
+         throw new Error(
+            "Could not declare new variable, maybe you tried to set a field without 'set'"
+         );
+      }
+      let symbol = new Symbol(symbolName, rhsType, node);
 
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);

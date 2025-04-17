@@ -1,9 +1,14 @@
-# import Http
-import collections/Iterable
+import Http
 
-func = () ->
-	v: var Anything = var 0
+url = Url.make("https://dummyjson.com/products")
+req = Request.make("GET", url, headers = Array.of(("Content-Length", "1024")))
 
-	return 0
+x = Http.send(req)
+if x :: Response,
+	print(x.isOk())
+	print(x.body.length())
 
-func()
+Ok = 200
+
+if Ok :: Literal,
+	print(Ok.value)

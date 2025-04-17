@@ -301,7 +301,12 @@ export class TypeTranslator {
                }
             }
          default:
-            throw new Error("Could not translate " + node.tag);
+            throw new Error(
+               "Could not translate " +
+                  node.tag +
+                  ". At " +
+                  node.position?.start.line
+            );
       }
    }
 

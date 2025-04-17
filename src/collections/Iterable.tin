@@ -12,17 +12,17 @@ Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 
 external "
 	function _arrToMap(arr) \{
-		return new Map(arr[Array._s]._rawArray.map(tup => [tup[Tuple2._s].left._, tup[Tuple2._s].right._]))
+		return new Map(arr[Array._s]._rawArray.map(tup => [tup[Tuple2._s].left[0], tup[Tuple2._s].right[0]]))
 	\}
 
 	function _mapFromJsMap(K, V, jsMap) \{
-		return ((MapOps(K, V)(\{_: function(k)\{ return jsMap.get(k)\} \}, \{_: function(k, v)\{
+		return ((MapOps(K, V)([function(k)\{ return jsMap.get(k)\}], [function(k, v)\{
 			const newJsMap = new Map(jsMap);
 			newJsMap.set(k, v);
 			return _mapFromJsMap(K, V, newJsMap);
-		\}\}))._and(ToString(\{_: function() \{
+		\}]))._and(ToString([function() \{
 			return `Map($\{[...jsMap].map(([k, v]) => `($\{k\},$\{v\})`).toString()\})`
-		\}\})))._and(Iterable(Tuple2(K, V))(() => \{
+		\}])))._and(Iterable(Tuple2(K, V))([() => \{
 			const entryArray = [...jsMap]
 			let i = 0;
 			if (i < entryArray.length) \{
@@ -30,7 +30,7 @@ external "
 				return Tuple2(K, V)(entry[0], entry[1])
 			\}
 			return 1 + 2
-		\}))
+		\}]))
 	\}
 	export const Map$of = (K, V) => (arr) => \{
 		const jsMap = _arrToMap(arr)
@@ -41,25 +41,49 @@ external "
 
 Map@of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
 
-Iterable@forEach = [T] -> (iterable: Iterable[T], fn: (T) ~> Nothing) ~>
-	iterator = iterable.makeIterator()
-	current: var T? = iterator.next()
+Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) ~> Nothing) ~>
+	iterator = self.makeIterator()
+	current = var iterator.next()
+
 	while current !: Nothing,
-		fn(current: T)
+		fn(current)
 		set current = iterator.next()
 
-	nothing
-
-Iterable@fromArray = [T] -> (arr: Array[T]) ->
+Iterable.fromArray = [T] -> (arr: Array[T]) ->
 	Iterable[T](() ->
-		i = var (-1)
+		i = var -1
 		Iterator[T](() ~>
 			set i = i + 1
 			arr.at(i)
 		)
 	)
 
-it = Iterable@fromArray(1, 2, 3)
+Iterable.fold = [T, S] -> (iterable: Iterable[T], start: S, combine: (T, S) -> S) ->
+	sum = var start
+	iterable.forEach((e: T) ~>
+		set sum = combine(e, sum)
+		nothing
+	)
 
-# print(it)
-Iterable@forEach(it, print)
+	sum
+
+x = 2
+
+external "
+export const Array$fromIterator = (T) => (iter) => \{
+	const arr = [];
+	let i = iter[Iterator._s].next._()
+	while(i !== undefined && (typeof i === 'object' && i._ !== undefined)) \{
+		arr.push(i)
+		i = iter[Iterator._s].next._()
+	\}
+	return Array(T)(arr)
+
+\}
+
+"
+
+Array.fromIterator: [T] -> (Iterator[T]) -> Array[T] = external
+Array.fromIterable = [T] -> (iterable: Iterable[T]) ->
+	Array.fromIterator(iterable.makeIterator())
+

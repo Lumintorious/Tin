@@ -1,6 +1,6 @@
 # Order in this file is important
 external "
-export const Anything = _S(Symbol(\"Anything\"), () => undefined, lazy(() => Type(\"Anything\", (n) => true, (n) => true)));
+export const Anything = _S(Symbol(\"Anything\"), () => undefined, lazy(() => Type(\"Anything\", [(n) => true], [(n) => true])));
 "
 
 Type = data:
@@ -47,10 +47,10 @@ Refinement = Type & data:
 	test: (any: Anything) -> Boolean
 
 external "
-export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\"Nothing\", (n) => n === null || n === undefined, (n) => n === null || n === undefined)));
-export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(Type(\"Never\", (n) => n === undefined, (n) => n === undefined)));
-export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", (n) => typeof n === \"number\", (n) => typeof n === \"number\")));
-export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", (n) => typeof n === \"string\", (n) => typeof n === \"string\")));
+export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\"Nothing\", \{_:(n) => n === null || n === undefined\}, \{_:(n) => n === null || n === undefined})));
+export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(Type(\"Never\", \{_:(n) => n === undefined}, \{_:(n) => n === undefined})));
+export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", \{_:(n) => typeof n === \"number\"\}, \{_:(n) => typeof n === \"number\"})));
+export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})));
 "
 
 Literal = Type & data:
@@ -63,8 +63,10 @@ assert: (condition: Boolean, message: String?) -> Nothing = external
 print: (Anything) -> Nothing = external
 printRaw: (Anything) -> Nothing = external
 debug: (Anything) -> Nothing = external
+clojure: (Anything) -> Nothing = external
 nothing: Nothing = external
-Array@of: [T] -> (Array[T]) -> Array[T] = external
+Array.of: [T] -> (Array[T]) -> Array[T] = external
+Array.empty: [T] -> Array[T] = external
 
 Intersection@of = (left: Type, right: Type) ->
 	check = (obj: Anything) ->
@@ -94,7 +96,15 @@ Tuple3 = [A, B, C] => data:
 	middle: B
 	right: C
 
-matches: (str: String, regex: String) -> Boolean = external
+String.matches: (self: String, regex: String) -> Boolean = external
+String.length: (self: String) -> Number = external
+String.isBlank = (self: String) -> self.length() == 0
+
+external "
+export function String$length() \{
+	return this.length
+\}
+"
 
 # Union@values = [T] ->
 # 	go = (type: Type): Array[T] ->

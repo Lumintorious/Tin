@@ -1,15 +1,20 @@
+import collections/Iterable
+
 HttpMethod = "GET" | "POST" | "PUT" | "DELETE"
 UrlParams = Array[(String, String)]
 Headers = Array[(String, String)]
 
 UrlString = String where:
-	matches(self, "^(https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]\{2,\}(?:\/[a-zA-Z0-9\-\.]*)*\/?$")
+	self.matches("^(https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]\{2,\}(?:\/[a-zA-Z0-9\-\.]*)*\/?$")
 
 Port = Number where:
-	self > 0 && self < 65536
+	self >= 0 && self < 65536
 
 Byte = Number where:
-	self > 0 && self < 256
+	self >= 0 && self < 256
+
+Status = Number where:
+	self > 100 && self < 600
 
 ByteBuffer = Array[Byte]
 
@@ -19,17 +24,50 @@ Url = data:
 	params: UrlParams
 
 Request = data:
-	meyhod: HttpMethod
+	method: HttpMethod
 	url: Url
 	headers: Headers
 	body: ByteBuffer
 
-Url@make = (url: String, port: Number, params: UrlParams) ->
+Response = data:
+	status: Number
+	headers: Headers
+	body: String
+
+Url.make = (url: String, port: Number = 80, params: UrlParams = Array.empty[(String, String)]) ->
 	if url !: UrlString, return Error("Url was wrong")
 	if port !: Port, return Error("Port was wrong")
 	
 	Url(url, port, params)
 
-Request@make = (method: HttpMethod, urlTry: Url | Error, headers: Headers, body: ByteBuffer) ->
+Request.make = (method: HttpMethod, urlTry: Url | Error, headers: Headers = Array.empty[(String, String)], body: ByteBuffer = Array.empty[Byte]) ->
 	Request(method, urlTry?, headers, body)
 
+
+external "
+export async function Http$send(request) \{
+	const url = request[Request._s].url._
+	const params = \{\};
+	params.method = request[Request._s].method._
+	params.headers = \{\}
+	for(let i = 0; i < request[Request._s].headers._[Array._s].length._(); i++) \{
+		const elem = request[Request._s].headers._[Array._s].at._(i)
+		params.headers[elem[Tuple2._s].left._] = elem[Tuple2._s].right._
+	\}
+	
+	const responseRaw = await fetch(url[Url._s].baseUrl._, params);
+
+	const jsonRes = await responseRaw.text();
+	const headers = [];
+	for(const [k, v] of responseRaw.headers) \{
+		headers.push(Tuple2(String, String)(\{_:k\},\{_:v\}))
+	\}
+	const tinHeaders = Array(String)(headers)
+	const response = Response(\{_:responseRaw.status\},\{_:tinHeaders\}, \{_:jsonRes\})
+	return response;
+\}
+"
+
+Http.send: (request: Request | Error) ~> Response | Error = external
+
+Response.isOk = (self: Response) -> self.status == 200

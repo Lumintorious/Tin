@@ -491,18 +491,17 @@ export class RoundValueToValueLambdaType extends Type {
          });
 
       // Return type must be covariant
-      const returnCheck = this.returnType.isAssignableTo(
-         other.returnType,
-         scope
-      );
+      const returnCheck =
+         other.returnType === Nothing ||
+         this.returnType.isAssignableTo(other.returnType, scope);
 
       const purityCheck = other.pure ? this.pure : true;
       const captureCheck = !other.capturesMutableValues
          ? !this.capturesMutableValues
          : true;
 
-      const varCheck = !(other.returnType instanceof MutableType)
-         ? !(this.returnType instanceof MutableType)
+      const varCheck = !(this.returnType instanceof MutableType)
+         ? !(other.returnType instanceof MutableType)
          : true;
       //   const varCheck =
       //      !(other.returnType instanceof MutableType) ===
@@ -654,7 +653,23 @@ export class AppliedGenericType extends Type {
          this.callee.name !== undefined &&
          scope.lookupType(this.callee.name) !== undefined
       ) {
-         return true;
+         let areAllParamsEqual = true;
+         if (this.parameterTypes.length !== other.parameterTypes.length) {
+            areAllParamsEqual = false;
+         } else {
+            for (let i = 0; i < this.parameterTypes.length; i++) {
+               if (
+                  !other.parameterTypes[i].isAssignableTo(
+                     this.parameterTypes[i],
+                     scope
+                  )
+               ) {
+                  areAllParamsEqual = false;
+                  break;
+               }
+            }
+         }
+         return areAllParamsEqual;
       } else if (this.resolved) {
          return this.resolved.isAssignableTo(other, scope);
       } else {
@@ -735,8 +750,8 @@ export class UnionType extends Type {
          );
       } else {
          return (
-            this.left.isAssignableTo(other, scope) ||
-            this.right.isAssignableTo(other, scope)
+            other.isAssignableTo(this.left, scope) ||
+            other.isAssignableTo(this.right, scope)
          );
       }
    }

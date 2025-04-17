@@ -142,19 +142,18 @@ export class Scope {
       }
       if (!child && !canCreate) {
          throw new Error(
-            "Could not find child scope " +
-               this.toPath() +
-               " -- " +
-               astNode.tag +
-               "(" +
-               astNode.id +
-               ")"
+            "Could not find child scope " + this.toPath()
+            //    " -- " +
+            //    astNode.tag +
+            //    "(" +
+            //    astNode.id +
+            //    ")"
          );
       }
       if (child) {
          return child;
       } else {
-         const child = new Scope(`${astNode.tag}(n${astNode.id}, `, this);
+         const child = new Scope(astNode.show(), this);
          child.setIteration(this.iteration);
          this.childrenByAst.set(ast.id, child);
          return child;
@@ -169,7 +168,7 @@ export class Scope {
       let str = "";
       let now: Scope | undefined = this;
       while (now !== undefined) {
-         str = now.name + "s" + this.id + ")." + str;
+         str = now.name + "." + str;
          now = now.parent;
       }
       return str.substring(0, str.length - 1);
@@ -291,6 +290,40 @@ export class Scope {
       );
    }
 
+   getAllSymbols() {
+      const symbols = [...this.symbols];
+      if (this.parent) {
+         symbols.push(...this.parent.getAllSymbols());
+      }
+      return symbols;
+   }
+
+   lookupExtension(name: string, ownerType: Type, scopeName = ""): Symbol {
+      let foundSymbol: Symbol | undefined;
+      for (let [symName, sym] of this.getAllSymbols()) {
+         if (symName.includes(".")) {
+            const parts = symName.split(".");
+            symName = parts[parts.length - 1];
+            if (parts[0] !== ownerType.name) {
+               continue;
+            }
+         }
+         if (symName === name) {
+            foundSymbol = sym;
+            break;
+         }
+      }
+      if (foundSymbol !== undefined) {
+         return foundSymbol;
+      }
+      throw new Error(
+         `Symbol ${name} not found. ${[...this.symbols.keys()]}; Scope = ` +
+            this.name +
+            "." +
+            scopeName
+      );
+   }
+
    hasSymbol(name: string, stopAtScope?: Scope): boolean {
       return (
          this.symbols.has(name) ||
@@ -396,11 +429,6 @@ export class Scope {
       type: Type,
       parameters: { [genericName: string]: Type } = {}
    ): Type {
-      // for (let param in parameters) {
-      //    if (!parameters[param]) {
-      //       throw new Error("Undefined type at " + param);
-      //    }
-      // }
       switch (type.tag) {
          case "NamedType":
             if (type.name && Object.keys(parameters).includes(type.name)) {
@@ -497,7 +525,7 @@ export class Scope {
             return type;
          case "MutableType":
             return new MutableType(
-               this.resolveGenericTypes((type as MutableType).type)
+               this.resolveGenericTypes((type as MutableType).type, parameters)
             );
          case "PrimitiveType":
             return type;
@@ -560,8 +588,8 @@ export class TypePhaseContext {
    ) {
       this.fileName = fileName;
       const receivedLanguageScope = !!languageScope;
-      this.languageScope = languageScope ?? new Scope("Language(");
-      this.fileScope = new Scope("File(", this.languageScope);
+      this.languageScope = languageScope ?? new Scope("lang");
+      this.fileScope = new Scope("file", this.languageScope);
       this.builder = new TypeBuilder(this);
       this.inferencer = new TypeInferencer(this);
       this.translator = new TypeTranslator(this);

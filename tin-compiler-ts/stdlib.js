@@ -25,9 +25,9 @@ export class Return {
 }
 
 Object.prototype.__is_child = function (obj) {
-	const type = this._ ? this._ : this
+	const type = (typeof this === 'object' && "_" in this) ? this._ : this
 	if (type._c && type._c.__is_child) {
-		if ("_" in obj) {
+		if (typeof obj === 'object' && "_" in obj) {
 			return type._c.__is_child(obj._)
 		} else {
 			return type._c.__is_child(obj);
@@ -45,8 +45,8 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 			if (typeof key === "string" && key.startsWith("_")) continue;
 			if (result[key] === undefined) {
 				delete result[key]
-			} else if (result[key]._ === undefined) {
-				result[key] = { _: result[key] }
+			} else if (typeof result[key] === 'object' && !("_" in result[key])) {
+				result[key] = [result[key]]
 			}
 		}
 		Object.setPrototypeOf(result, proto)
@@ -273,7 +273,7 @@ export function _L(value) {
 		broaderType = String
 	}
 
-	const result = Type("" + value, check, check)._and(Literal(value, broaderType))
+	const result = Type({ _: "" + value }, { _: check }, { _: check })._and(Literal({ _: value }, { _: broaderType }))
 	result.__is_child = check
 	result._s = Symbol("Literal")
 
@@ -282,6 +282,17 @@ export function _L(value) {
 
 export const nothing = null;
 
+export function _var(obj, doVar) {
+	if (!doVar) {
+		return obj
+	} else {
+		if (typeof obj === 'object' && "_" in obj) {
+			return obj
+		} else {
+			return { _: obj }
+		}
+	}
+}
 
 export function arraySymbol() {
 	const cache = globalThis["_arraySymbol"];
@@ -295,14 +306,23 @@ export function arraySymbol() {
 export var Array = (function () {
 	const result = (T) => _S(arraySymbol(), (args) => args[__tin_varargs_marker] ? args : ({
 		_rawArray: args,
-		length() {
-			return args.length;
+		length: {
+			_: function () {
+				return args.length;
+			}
 		},
-		at(index) {
-			return args[index]
+		at: {
+			_: function (index) {
+				if (typeof index !== "number") {
+					throw new Error("Index was not number")
+				}
+				return args[index]
+			}
 		},
-		and(arr) {
-			return Array(T)([...args, ...arr[Array._s]._rawArray])
+		and: {
+			_: function (arr) {
+				return Array(T)([...args, ...arr[Array._s]._rawArray])
+			}
 		},
 		[__tin_varargs_marker]: true
 	}), {}, {})
@@ -310,18 +330,17 @@ export var Array = (function () {
 	return result;
 })()
 
-export const _v = (v) => { _: v }
-
 export const Array$of = (t) => (args) => args
+export const Array$empty = (t) => Array(t)([])
 Array._typeId = "Array"
 export const copy = (obj, replacers) => {
-	if (obj._ !== undefined) {
+	if (typeof (obj) === 'object' && "_" in obj) {
 		return { _: copy(obj._), _cn: obj._cn }
 	}
 
 	let newObj = { _type: obj._type };
 	let wasUnderscore = false;
-	if (obj._ !== undefined) {
+	if (typeof (obj) === 'object' && "_" in obj) {
 		obj = obj._
 		wasUnderscore = true;
 	}
@@ -340,7 +359,7 @@ export const copy = (obj, replacers) => {
 		for (let fieldKey of Reflect.ownKeys(oldComponent)) {
 			const field = oldComponent[fieldKey];
 			let newField;
-			if (field._) {
+			if (typeof (field) === 'object' && "_" in field) {
 				newField = { _: field._, _cn: field._cn }
 				newComponent[fieldKey] = newField
 				newFieldsByOldFields.set(field, newField)
@@ -360,22 +379,23 @@ export const copy = (obj, replacers) => {
 				if (key === clojureCapture) {
 					newObj._clojure[clojureKey] = newFieldsByOldFields.get(clojureCapture);
 				}
-				for (const captureComponentSym of Reflect.ownKeys(clojureCapture)) {
-					if (typeof captureComponentSym !== "symbol") {
-						continue;
+				if (typeof clojureCapture === 'object')
+					for (const captureComponentSym of Reflect.ownKeys(clojureCapture)) {
+						if (typeof captureComponentSym !== "symbol") {
+							continue;
+						}
+						const captureComponent = clojureCapture[captureComponentSym]
+						if (key === captureComponent) {
+							newObj._clojure[clojureKey] = { [captureComponentSym]: value };
+						}
 					}
-					const captureComponent = clojureCapture[captureComponentSym]
-					if (key === captureComponent) {
-						newObj._clojure[clojureKey] = { [captureComponentSym]: value };
-					}
-				}
 			}
 		}
 	}
 
 	_replaceComponentFields(newObj, replacers)
 	if (wasUnderscore) {
-		return { _: newObj }
+		return [newObj]
 	}
 	return newObj;
 }
@@ -404,17 +424,16 @@ export function _replaceComponentFields(obj, replacer) {
 						obj._clojure[replacerField._cn] = replacerField
 					}
 				}
-				if (objField._ !== undefined && !objField._cn) {
-					const oldObjField = objField
-					obj[componentKey][fieldKey] = replacerField;
-					for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
-						const clojureField = obj._clojure[clojureKey]
-						if (clojureField === oldObjField) {
-							obj._clojure[clojureKey] = replacerField
-							replacerField.HELLO = "HELLO"
-						}
+				// if (typeof (objField) === 'object' && ("_" in objField) && !(objField["_cn"] === undefined)) {
+				const oldObjField = objField
+				obj[componentKey][fieldKey] = replacerField;
+				for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
+					const clojureField = obj._clojure[clojureKey]
+					if (clojureField === oldObjField) {
+						obj._clojure[clojureKey] = replacerField
 					}
 				}
+				// }
 			}
 		}
 
@@ -425,7 +444,7 @@ export function _replaceComponentFields(obj, replacer) {
 
 export const _o = function (objParam) {
 	let obj = objParam;
-	if (obj._ !== undefined) {
+	if (typeof obj === 'object' && "_" in obj) {
 		obj = obj._
 	}
 	if (!obj._clojure) {
@@ -448,9 +467,9 @@ export const _o = function (objParam) {
 }
 
 export const _makeClojure = (clojure, objParam) => {
-	let obj = objParam._ ? objParam._ : objParam;
+	let obj = (typeof objParam === 'object' && ("_" in objParam)) ? objParam._ : objParam;
 	function setObj(newObj) {
-		if (objParam._) {
+		if (typeof objParam === 'object' && ("_" in objParam)) {
 			objParam._ = newObj;
 		} else {
 			objParam = newObj;
@@ -458,15 +477,15 @@ export const _makeClojure = (clojure, objParam) => {
 		obj = newObj;
 	}
 
-	// Wrap clojure objects in {_: x}
 	for (const key of Reflect.ownKeys(clojure)) {
-		if (typeof clojure[key] !== 'object' && !clojure[key]._) {
+		if (!(typeof (clojure[key]) === 'object') || !("_" in clojure[key])) {
 			clojure[key] = { _: clojure[key] }
 		}
 	}
 
 	if (typeof obj === "function") {
 		const old = obj;
+		old._clojure = clojure;
 		setObj(function (...args) {
 			const self = !this || this === globalThis ? { _clojure: clojure } : this;
 			return old.call(self, ...args)
@@ -478,40 +497,9 @@ export const _makeClojure = (clojure, objParam) => {
 	}
 
 	obj._clojure = clojure;
-	objParam._clojure = clojure;
+	// objParam._clojure = clojure;
 
 	return objParam;
-}
-
-export const _mcOld = (clojure, obj) => {
-	if (obj._ !== undefined) {
-		obj = obj._
-	}
-	for (const key of Reflect.ownKeys(clojure)) {
-		if (typeof clojure[key] !== 'object' && !clojure[key]._) {
-			clojure[key] = { _: clojure[key] }
-		}
-	}
-
-	if (typeof obj === "function") {
-		const old = obj;
-		obj = function (...args) {
-			const self = !this || this === globalThis ? { _clojure: clojure } : this;
-			return old.call(self, ...args)
-		};
-	}
-	if (typeof obj !== "object" && typeof obj !== "function") {
-		return obj;
-	}
-	if (obj._ !== undefined) {
-		if (typeof obj._ !== "object" && typeof obj !== "function") {
-			return obj;
-		}
-		obj._._clojure = clojure;
-	} else {
-		obj._clojure = clojure;
-	}
-	return obj;
 }
 
 export function _call(owner, fn, params) {
@@ -519,17 +507,20 @@ export function _call(owner, fn, params) {
 }
 
 export function _cast(obj, type) {
-	if (type._) {
+	if (typeof (type) === 'object' && "_" in type) {
 		type = type._
 	}
 	let objToTest = obj;
-	if (typeof obj === "object" && "_" in obj) {
+	if (typeof (obj) === 'object' && "_" in obj) {
 		objToTest = obj._;
 	}
 
 	if (type.__is_child !== undefined && type.__is_child(objToTest)) {
 		return obj
 	} else {
+		console.log(type._s)
+		console.log(objToTest)
+		console.log(type.__is_child(objToTest))
 		throw new Error(`'${makeStr(objToTest, true, true)}' was not of type ${(type?._d ?? type)?._s?.description}`)
 	}
 }
@@ -567,7 +558,7 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 	if (obj === null) return green('nothing');
 	if (typeof obj === 'undefined') return green('nothing');
-	if (obj._ !== undefined) {
+	if (typeof (obj) === 'object' && "_" in obj) {
 		obj = obj._
 	}
 
@@ -645,9 +636,11 @@ export function makeStr(obj, useToString, firstLayer = false) {
 
 	if (obj === null) return green('nothing');
 	if (typeof obj === 'undefined') return green('nothing');
-	if (obj._ !== undefined) {
+	if (typeof obj === 'object' && "_" in obj) {
 		obj = obj._
 	}
+	if (obj === null) return green('nothing');
+	if (typeof obj === 'undefined') return green('nothing');
 
 	if (typeof obj === 'boolean') return green(obj ? 'true' : 'false');
 	if (typeof obj === 'number') return green("" + obj);
@@ -682,8 +675,8 @@ export function makeStr(obj, useToString, firstLayer = false) {
 	return results.join(" & ")
 }
 
-export function matches(str, regex) {
-	return str.match(regex) !== null
+export function String$matches(regex) {
+	return this.match(regex) !== null
 }
 
 export const printRaw = (arg) => {
@@ -706,6 +699,10 @@ export const debug = (...args) => {
 				return arg;
 			}
 	}), { depth: null })
+}
+
+export function clojure(obj) {
+	debug(obj._clojure ?? obj._?.clojure)
 }
 
 export const jsonify = (obj) => {
