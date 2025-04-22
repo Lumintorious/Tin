@@ -1,9 +1,8 @@
-import { cp } from "fs";
-
 
 export const __tin_varargs_marker = Symbol();
 
 export const TIN_TYPE_CACHE = new Map()
+export const _JsArr = globalThis.Array;
 
 /** LEGEND
 	Type Constructors:
@@ -32,6 +31,8 @@ Object.prototype.__is_child = function (obj) {
 		} else {
 			return type._c.__is_child(obj);
 		}
+	} else if (Type._s in type) {
+		return type[Type._s].check._(obj)
 	}
 	throw new Error("Unhandled")
 }
@@ -153,11 +154,11 @@ export const _A = function (obj1, obj2, isReflection = false) {
 		let descriptor = {};
 		if (Intersection?._s) {
 			descriptor = Type(
-				"Hello",
+				"Intersection",
 				(obj) => {
 					return obj1Descriptor[Type._s].check._(obj) && obj2Descriptor[Type._s].check._(obj)
 				})._and(
-					Intersection(obj1Descriptor, obj2Descriptor)
+					Intersection({ _: obj1Descriptor }, { _: obj2Descriptor })
 				)
 		}
 
@@ -772,6 +773,29 @@ export const assert = (condition, message) => {
 	if (!condition) {
 		throw new Error(message ?? "Assertion failed")
 	}
+}
+
+export function Struct$accessDynamically(obj, field) {
+	const f = obj[this._s][field[Field._s].name._]
+	if (typeof f === 'object' && f._) {
+		return f._
+	} else {
+		return f
+	}
+}
+
+export function Struct$createDynamically(args) {
+	const constructor = this._c
+	if (!constructor) throw new Error("Called create on non-struct.")
+	const arr = args[Array._s]._rawArray;
+	const fieldArr = this[Struct._s].fields._[Array._s]._rawArray;
+	for (let i = 0; i < arr.length; i++) {
+		const fieldType = fieldArr[i][Field._s].type._;
+		if (!fieldType[Type._s].check._(arr[i])) {
+			throw new Error("Could not coerce " + makeStr(arr[i]) + " to " + fieldType._s.description)
+		}
+	}
+	return constructor.call(this, ...arr)
 }
 
 // COMPILED TIN

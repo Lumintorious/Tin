@@ -1,14 +1,36 @@
+import collections/Iterable
 import Http
 
-url = Url.make("https://dummyjson.com/products")
-req = Request.make("GET", url, headers = Array.of(("Content-Length", "1024")))
+User = data:
+	firstName: String
+	lastName: String
+	creationDate: Number
 
-x = Http.send(req)
-if x :: Response,
-	print(x.isOk())
-	print(x.body.length())
+Currency = "EUR" | "USD" | "RON"
 
-Ok = 200
+Money = data:
+	amount: Number
+	currency: Currency
 
-if Ok :: Literal,
-	print(Ok.value)
+Product = data:
+	name: String
+	price: Money
+
+ShoppingCart = data:
+	products: Array[Product]
+
+euros = (n: Number) -> Money(n, "EUR")
+
+cart = ShoppingCart(
+	Array.of(
+		Product("Camera", euros(200)),
+		Product("Laptop", euros(500))
+	)
+)
+
+arr = Array.of(1, 2, 3)
+
+sum = Iterable.fromArray(cart.products).fold(0, (t: Product, sum: Number) -> t.price.amount + sum)
+# stream = arr.stream().fold(0, (t, sum) -> t.price.amount + sum)
+
+print(sum)

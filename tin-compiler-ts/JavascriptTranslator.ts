@@ -220,6 +220,7 @@ export class JavascriptTranslator implements OutputTranslator {
          // Block
       } else if (term instanceof Block) {
          let last = term.statements.pop();
+         scope = scope.innerScopeOf(term);
          const isTerm = last instanceof Term;
          const shouldReturn =
             isTerm &&
@@ -297,6 +298,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // SquareTypeToValueLambda
       } else if (term instanceof SquareTypeToValueLambda) {
+         scope = scope.innerScopeOf(term);
          return `(function(${term.parameterTypes
             .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
             .join(", ")}) {try{\n${this.translate(
@@ -332,7 +334,7 @@ export class JavascriptTranslator implements OutputTranslator {
          }
          let keyword = term.isDeclaration ? "var " : "";
          const scopeDots = [...(scope.toPath().matchAll(/\./g) || [])].length;
-         const doExport = scopeDots < 2 && term.isDeclaration ? "export " : "";
+         const doExport = scopeDots < 3 && term.isDeclaration ? "export " : "";
          keyword = doExport + keyword;
          const lhs = this.translate(term.lhs, scope);
          const isMutable = term.type?.translatedType instanceof MutableType;
@@ -445,10 +447,11 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // RoundValueToValueLambda
       } else if (term instanceof RoundValueToValueLambda) {
+         scope = scope.innerScopeOf(term);
          const params = term.isFirstParamThis()
             ? term.params.slice(1, term.params.length)
             : term.params;
-         return `function(${params
+         return `${term.pure ? "" : "async "}function(${params
             .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
             .join(", ")}) {try{\n${this.translate(
             term.block,
@@ -460,6 +463,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
+         scope = scope.innerScopeOf(term);
          return `/* [] */(function(){ const _sym = Symbol("${
             term.name
          }"); return _Q(_sym, (${term.parameterTypes
@@ -475,29 +479,34 @@ export class JavascriptTranslator implements OutputTranslator {
             term.trueBranch instanceof IfStatement ||
             (term.trueBranch instanceof Block &&
                term.trueBranch.statements[0] instanceof IfStatement);
+         const innerScope = scope.innerScopeOf(term);
+         const trueScope = innerScope.innerScopeOf(term.trueBranch);
+         const falseScope = term.falseBranch
+            ? innerScope.innerScopeOf(term.falseBranch)
+            : innerScope;
          let trueBranch = `(function(){${this.translate(
             term.trueBranch,
-            scope,
+            trueScope,
             {
                returnLast: !isTrueBranchIf,
                normalReturn: true,
             }
-         )}})()`;
+         )}}).call(this)`;
          const isFalseBranchIf =
             term.falseBranch instanceof IfStatement ||
             (term.falseBranch instanceof Block &&
                term.falseBranch.statements[0] instanceof IfStatement);
          let falseBranch = `(function(){${this.translate(
             term.falseBranch,
-            scope,
+            falseScope,
             {
                returnLast: !isFalseBranchIf,
                normalReturn: true,
             }
-         )}})()`;
+         )}}).call(this)`;
          return `((${this.translate(
             term.condition,
-            scope
+            innerScope
          )}) ? ${trueBranch} : ${falseBranch}) `;
 
          // BinaryExpression
@@ -583,8 +592,13 @@ export class JavascriptTranslator implements OutputTranslator {
             open = ".call(" + this.translate(term.bakedInThis, scope) + ", ";
          }
          function wrapAwait(call: string) {
-            if (term instanceof RoundApply && !term.callsPure) {
-               return `(await ${call})`;
+            if (
+               term instanceof RoundApply &&
+               !term.callsPure &&
+               [...scope.toPath()].filter((c) => c === ".").length > 4
+            ) {
+               return `await ${call}`;
+               //    return `(async function() { const _awObj = ${call}; return _awObj && typeof _awObj.then === 'function' ? await _awObj : _awObj}).call(this)`;
             } else {
                return call;
             }
@@ -716,6 +730,9 @@ export class JavascriptTranslator implements OutputTranslator {
    translateType(type: Type | ParamType | undefined, scope: Scope): string {
       if (type instanceof NamedType) {
          return "" + type.name;
+      }
+      if (type instanceof MutableType) {
+         return this.translateType(type.type, scope);
       } else if (type instanceof PrimitiveType) {
          return "" + type.name;
       } else if (type instanceof StructType) {
@@ -723,12 +740,12 @@ export class JavascriptTranslator implements OutputTranslator {
             type.name
          }'}, {_:(obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(${
             type.name
-         }._s))})._and(Struct(Array(0)([
+         }._s))})._and(Struct({_:Array(0)([
 						${type.fields.map((f) => `${this.translateType(f, scope)}`)}
-			])))`;
+			])}))`;
       } else if (type instanceof ParamType) {
          return `Field({_:"${type.name ?? undefined}"},
-					Type$get(${this.translateType(type.type, scope)}),
+					{_:Type$get(${this.translateType(type.type, scope)})},
 					() => { return (${
                   type.defaultValue
                      ? this.translate(type.defaultValue, scope)

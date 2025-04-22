@@ -233,8 +233,15 @@ export class Lexer {
          if (indentToken) return indentToken;
       }
 
-      if (char === '"') return this.lexString();
-
+      if (char === '"' && this.peek() === '"' && this.peek(1) === '"') {
+         this.position++;
+         this.position++;
+         this.column++;
+         this.column++;
+         return this.lexString(true);
+      } else if (char === '"') {
+         return this.lexString();
+      }
       // Skip whitespaces but track line and column numbers
       if (/\s/.test(char)) {
          this.handleWhitespace();
@@ -373,7 +380,7 @@ export class Lexer {
       }
    }
 
-   lexString() {
+   lexString(tripleQuote: boolean = false) {
       const startChar = this.peek(); // Either ' or "
       let start = this.position;
       let startColumn = this.column;
@@ -389,7 +396,21 @@ export class Lexer {
          const char = this.peek();
 
          // Break on closing quote or escape sequence
-         if (char === startChar) {
+         if (
+            tripleQuote &&
+            char === '"' &&
+            this.peek() === '"' &&
+            this.peek(1) === '"'
+         ) {
+            this.position++;
+            this.column++;
+            this.position++;
+            this.column++;
+            this.position++;
+            this.column++;
+            break;
+         }
+         if (!tripleQuote && char === startChar) {
             this.position++;
             this.column++;
             break;
@@ -453,8 +474,10 @@ export class Lexer {
                stringLiteral += "\n";
             } else if (nextChar === "t") {
                stringLiteral += "\t";
-            } else if (nextChar === '"' || nextChar === "'") {
-               stringLiteral += nextChar; // Add the escaped quote
+            } else if (!tripleQuote && nextChar === '"') {
+               stringLiteral += '"'; // Add the escaped quote
+            } else if (tripleQuote && nextChar === '"') {
+               stringLiteral += '\\"'; // Add the escaped quote
             } else {
                stringLiteral += nextChar; // Add the character as is
             }
@@ -466,6 +489,10 @@ export class Lexer {
          stringLiteral += char;
          this.position++;
          this.column++;
+         if (char === "\n") {
+            this.column = 0;
+            this.line++;
+         }
       }
 
       parts.push(

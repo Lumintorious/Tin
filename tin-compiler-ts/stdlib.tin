@@ -36,6 +36,9 @@ Array = [T] -> data:
 Struct = Type & data:
 	fields: Array[Field]
 
+Struct.accessDynamically: (self: Struct, obj: Anything, field: Field) -> Anything | Nothing = external
+Struct.createDynamically: (self: Struct, fields: Array[Anything]) -> Anything | Nothing = external
+
 Lambda = Type & data:
 	params: Array[Parameter]
 	resultType: Type
@@ -128,4 +131,3 @@ export function String$length() \{
 # console.log('<<<< JS TEST')
 # "
 
-x = 2

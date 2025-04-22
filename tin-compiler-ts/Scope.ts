@@ -11,7 +11,12 @@ import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
-import { IntersectionType, PrimitiveType, UnionType } from "./Types";
+import {
+   IntersectionType,
+   PrimitiveType,
+   UnionType,
+   RefinedType,
+} from "./Types";
 import {
    Any,
    AppliedGenericType,
@@ -192,20 +197,23 @@ export class Scope {
          )}\x1b[37m: \x1b[33m${symbol.typeSymbol
             .toString()
             .padEnd(25, " ")} \x1b[30m# ${
-            this.toPath() + " - " + this.iteration
+            this.toPath() + " - " + this.iteration // + " - " + new Error().stack
          }\x1b[0m`
       );
       if (this.symbols.has(name)) {
          const existingSymbol = this.symbols.get(name);
          if (existingSymbol?.typeSymbol instanceof UncheckedType) {
             existingSymbol.rewriteFrom(symbol);
+            console.log("Rewritten");
             return;
          } else if (
             existingSymbol &&
             existingSymbol.iteration == this.iteration
          ) {
             if (!redeclare) {
-               throw new Error(`Symbol ${name} is already declared.`);
+               throw new Error(
+                  `Symbol ${name} is already declared in ` + this.toPath()
+               );
             }
          } else {
             symbol.iteration = this.iteration;
@@ -254,7 +262,7 @@ export class Scope {
             name.padStart(10, " ") +
             "\x1b[37m: \x1b[33m" +
             (typeSymbol.toString() + " .. " + typeSymbol.tag).padEnd(25, " ") +
-            " \x1b[30m# " +
+            " \x1b[30m#Type# " +
             this.toPath() +
             "\x1b[0m"
       );
@@ -277,10 +285,7 @@ export class Scope {
       if (this.symbols.has(name)) {
          return this.symbols.get(name) as Symbol;
       } else if (this.parent) {
-         return this.parent.lookup(
-            name,
-            this.name + "s" + this.id + ")." + scopeName
-         );
+         return this.parent.lookup(name, this.name + "." + scopeName);
       }
       throw new Error(
          `Symbol ${name} not found. ${[...this.symbols.keys()]}; Scope = ` +
@@ -300,11 +305,13 @@ export class Scope {
 
    lookupExtension(name: string, ownerType: Type, scopeName = ""): Symbol {
       let foundSymbol: Symbol | undefined;
+      let trueOwnerType =
+         ownerType instanceof MutableType ? ownerType.type : ownerType;
       for (let [symName, sym] of this.getAllSymbols()) {
          if (symName.includes(".")) {
             const parts = symName.split(".");
             symName = parts[parts.length - 1];
-            if (parts[0] !== ownerType.name) {
+            if (parts[0] !== trueOwnerType.name) {
                continue;
             }
          }
@@ -535,6 +542,13 @@ export class Scope {
             return type;
          case "Any":
             return type;
+         case "RefinedType":
+            return new RefinedType(
+               this.resolveGenericTypes(
+                  (type as RefinedType).inputType,
+                  parameters
+               )
+            );
          default:
             throw new Error(
                "Can't handle type " +

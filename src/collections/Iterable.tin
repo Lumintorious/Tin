@@ -1,5 +1,5 @@
 Iterator = [T] -> data:
-	next: () ~> var T?
+	next: () -> var T?
 
 Iterable = [T] -> data:
 	makeIterator: () -> Iterator[T]
@@ -12,25 +12,27 @@ Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 
 external "
 	function _arrToMap(arr) \{
-		return new Map(arr[Array._s]._rawArray.map(tup => [tup[Tuple2._s].left[0], tup[Tuple2._s].right[0]]))
+		return new Map(arr[Array._s]._rawArray.map(tup => [tup[Tuple2._s].left._, tup[Tuple2._s].right._]))
 	\}
 
 	function _mapFromJsMap(K, V, jsMap) \{
-		return ((MapOps(K, V)([function(k)\{ return jsMap.get(k)\}], [function(k, v)\{
+		return ((MapOps(K, V)(\{_:function(k)\{ return jsMap.get(k)\}\}, \{_:function(k, v)\{
 			const newJsMap = new Map(jsMap);
 			newJsMap.set(k, v);
 			return _mapFromJsMap(K, V, newJsMap);
-		\}]))._and(ToString([function() \{
-			return `Map($\{[...jsMap].map(([k, v]) => `($\{k\},$\{v\})`).toString()\})`
-		\}])))._and(Iterable(Tuple2(K, V))([() => \{
+		\}\}))._and(ToString(\{_:function() \{
+			return `Map($\{[...jsMap].map(([k, v]) => `($\{makeStr(k)\},$\{makeStr(v)\})`).toString()\})`
+		\}\})))._and(Iterable(Tuple2(K, V))(\{_:() => \{
 			const entryArray = [...jsMap]
 			let i = 0;
-			if (i < entryArray.length) \{
+
+			return Iterator(Tuple2(K, V))(\{_:() => \{
 				const entry = entryArray[i]
-				return Tuple2(K, V)(entry[0], entry[1])
-			\}
-			return 1 + 2
-		\}]))
+				i++;
+				if (entry === undefined) return undefined;
+				return Tuple2(K, V)(\{_:entry[0]\}, \{_:entry[1]\})
+			\}\})
+		\}\}))
 	\}
 	export const Map$of = (K, V) => (arr) => \{
 		const jsMap = _arrToMap(arr)
@@ -41,10 +43,10 @@ external "
 
 Map@of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
 
-Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) ~> Nothing) ~>
+Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) -> Nothing) ->
 	iterator = self.makeIterator()
 	current = var iterator.next()
-
+	
 	while current !: Nothing,
 		fn(current)
 		set current = iterator.next()
@@ -52,22 +54,20 @@ Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) ~> Nothing) ~>
 Iterable.fromArray = [T] -> (arr: Array[T]) ->
 	Iterable[T](() ->
 		i = var -1
-		Iterator[T](() ~>
+		Iterator[T](() ->
 			set i = i + 1
 			arr.at(i)
 		)
 	)
 
-Iterable.fold = [T, S] -> (iterable: Iterable[T], start: S, combine: (T, S) -> S) ->
+Iterable.fold = [T, S] -> (self: Iterable[T], start: S, combine: (T, S) -> S) ->
 	sum = var start
-	iterable.forEach((e: T) ~>
+	self.forEach((e: T) ->
 		set sum = combine(e, sum)
 		nothing
 	)
 
 	sum
-
-x = 2
 
 external "
 export const Array$fromIterator = (T) => (iter) => \{
@@ -87,3 +87,55 @@ Array.fromIterator: [T] -> (Iterator[T]) -> Array[T] = external
 Array.fromIterable = [T] -> (iterable: Iterable[T]) ->
 	Array.fromIterator(iterable.makeIterator())
 
+Array.stream = [T] -> (self: Array[T]) -> Iterable.fromArray(self)
+
+Json = Number | String | Array[Json] | Map[String, Json]
+
+Json.fromString: (string: String) -> Json | Error = external
+Json.toString: (json: Json) -> String = external
+
+external "
+export function Json$fromString(str) \{
+	return JSON.parse(str, (key, value) => \{
+		if (_JsArr.isArray(value)) return Array(Json)(value)
+		if (typeof value === 'object') return _mapFromJsMap(String, Json, new Map(Object.entries(value)))
+
+		return value;
+	\})	
+\}
+
+export function Json$toString(js) \{
+	function toJsRaw(obj) \{
+		if (obj === undefined) return obj
+		if (obj === null) return obj
+		if (typeof obj === 'number') return obj
+		if (typeof obj === 'string') return obj
+		if (typeof obj === 'boolean') return obj
+
+	\}
+
+	function isMap(m) \{
+		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === MapOps._s).length > 0 && Object.getOwnPropertySymbols(m).filter(o => o === Iterable._s).length > 0;
+	\}
+	function isArray(m) \{
+		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === Array._s).length > 0;
+	\}
+
+	return JSON.stringify(js, (key, value) => \{
+		if (isMap(value)) \{
+			let obj = \{\}
+			const iter = value[Iterable._s].makeIterator._()
+			let i = iter[Iterator._s].next._();
+			while (i !== undefined) \{
+				obj[i[Tuple2._s].left._] = i[Tuple2._s].right._
+				i = iter[Iterator._s].next._()
+			\}
+			return obj
+		\}
+		if (isArray(value)) \{
+			return value[Array._s]._rawArray
+		\}
+		return value;
+	\})	
+\}
+"

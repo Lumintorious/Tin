@@ -1,4 +1,4 @@
-import { group } from "console";
+const JsSymbol = Symbol;
 import { Token, TokenPos, CodePoint } from "./Lexer";
 import { Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
@@ -309,8 +309,31 @@ export class Literal extends Term {
    }
 }
 
+export class GenericTypeMap {
+   private map: Map<string, Type> = new Map();
+   private order: [string, Type][] = [];
+
+   set(key: string, value: Type) {
+      this.map.set(key, value);
+      this.order.push([key, value]);
+   }
+
+   get(key: string) {
+      return this.map.get(key);
+   }
+
+   at(i: number) {
+      return this.order[i];
+   }
+}
+
+export interface PotentialTypeArgs {
+   getTypeArgs(): GenericTypeMap | undefined;
+   initTypeArgs(map: GenericTypeMap): void;
+}
+
 // callee(args, args, args)
-export class RoundApply extends Term {
+export class RoundApply extends Term implements PotentialTypeArgs {
    callee: Term;
    args: [string, Term][];
    takesVarargs?: boolean;
@@ -322,10 +345,19 @@ export class RoundApply extends Term {
    isCallingAConstructor: boolean = false;
    bakedInThis?: Term;
    callsPure?: boolean = true;
+   autoFilledSquareTypeParams?: GenericTypeMap;
    constructor(callee: Term, args: [string, Term][]) {
       super("RoundApply");
       this.callee = callee;
       this.args = args;
+   }
+
+   getTypeArgs(): GenericTypeMap | undefined {
+      return this.autoFilledSquareTypeParams;
+   }
+
+   initTypeArgs(map: GenericTypeMap): void {
+      this.autoFilledSquareTypeParams = map;
    }
 }
 
@@ -827,8 +859,6 @@ export class Parser {
                );
             break;
          }
-         console.log(operator);
-         console.log(right.tag);
          if (
             operator === "." &&
             left instanceof UnaryOperator &&

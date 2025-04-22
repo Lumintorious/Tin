@@ -22,15 +22,10 @@ import {
    BinaryExpression,
 } from "./Parser";
 import { Scope, TypePhaseContext } from "./Scope";
-import {
-   RoundValueToValueLambda,
-   TypeDef,
-   RefinedDef,
-   Tuple,
-   Identifier,
-} from "./Parser";
+import { RoundValueToValueLambda, TypeDef, RefinedDef, Tuple } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
 import { UncheckedType, MutableType } from "./Types";
+import { Identifier, TypeCheck } from "./Parser";
 import {
    AppliedGenericType,
    GenericNamedType,
@@ -117,7 +112,7 @@ export class TypeChecker {
             shadowedType = symbol.typeSymbol;
             scope.remove(symbol.name);
          }
-         if (!symbol.isMutable) {
+         if (!symbol.isMutable && !(symbol.typeSymbol instanceof MutableType)) {
             this.context.errors.add(
                `Setting an immutable value '${node.lhs.value}'`,
                undefined,
@@ -303,6 +298,9 @@ export class TypeChecker {
          });
       } else if (node instanceof Select) {
          this.typeCheck(node.owner, scope);
+      } else if (node instanceof TypeCheck) {
+         this.typeCheck(node.term, scope);
+         this.typeCheck(node.type, scope);
       } else if (node instanceof UnaryOperator) {
          this.typeCheck(node.expression, scope);
       } else if (node instanceof RefinedDef) {
@@ -482,26 +480,40 @@ export class TypeChecker {
    }
 
    typeCheckSquareApply(apply: SquareApply, scope: Scope) {
-      try {
-         const testCalleeIsType = scope.resolveFully(
-            this.context.translator.translate(apply.callee, scope)
-         );
-         if (testCalleeIsType instanceof SquareTypeToTypeLambdaType) {
-            return;
+      const translator = this.context.translator;
+      if (
+         apply.callee instanceof Identifier &&
+         apply.callee.isTypeIdentifier()
+      ) {
+         try {
+            const testCalleeIsType = scope.resolveFully(
+               this.context.translator.translate(apply.callee, scope)
+            );
+            if (testCalleeIsType instanceof SquareTypeToTypeLambdaType) {
+               this.typeCheckSquareParams(
+                  testCalleeIsType.paramTypes,
+                  apply.typeArgs.map((t) => translator.translate(t, scope)),
+                  apply.position,
+                  scope
+               );
+               return;
+            }
+         } catch (e) {
+            // It's ok, it wasn't a type lambda
+            console.error(e);
          }
-      } catch (e) {
-         // It's ok, it wasn't a type lambda
       }
       const calleeType = scope.resolveNamedType(
          this.context.inferencer.infer(apply.callee, scope)
       );
       if (!(calleeType instanceof SquareTypeToValueLambdaType)) {
          throw new Error(
-            "Cannot call non-square lambda with square parameters, was " +
-               apply.callee.tag
+            "Cannot call non-square lambda with square parameters at " +
+               apply.callee.show() +
+               ", was " +
+               calleeType.toString()
          );
       }
-      const translator = this.context.translator;
       this.typeCheckSquareParams(
          calleeType.paramTypes,
          apply.typeArgs.map((t) => translator.translate(t, scope)),
@@ -590,7 +602,7 @@ export class TypeChecker {
          );
 
          const params: { [_: string]: Type } = {};
-         for (let i = 0; i < apply.autoFilledSquareParams.length; i++) {
+         for (let i = 0; i < typeSymbol.paramTypes.length; i++) {
             params[typeSymbol.paramTypes[i].name] =
                apply.autoFilledSquareParams[i];
          }
@@ -907,14 +919,20 @@ export class TypeChecker {
             return results;
          }
       } else if (node instanceof Identifier) {
-         const symbol = scope.lookup(node.value);
-         if (
-            symbol.isMutable &&
-            onlyCaptures &&
-            !scope.hasSymbol(node.value, scope.parent)
-         ) {
-            return [["Variable value '" + node.value + "' present", node]];
-         } else {
+         try {
+            const symbol = node.isTypeIdentifier()
+               ? scope.lookupType(node.value)
+               : scope.lookup(node.value);
+            if (
+               symbol.isMutable &&
+               onlyCaptures &&
+               !scope.hasSymbol(node.value, scope.parent)
+            ) {
+               return [["Variable value '" + node.value + "' present", node]];
+            } else {
+               return [];
+            }
+         } catch (e) {
             return [];
          }
       } else if (node instanceof Group) {
@@ -966,7 +984,8 @@ export class TypeChecker {
                !options.firstPartOfIntersection.isAssignableTo(
                   thisParam.type,
                   scope
-               )
+               ) &&
+               !term.bakedInThis
             ) {
                this.context.errors.add(
                   "Previous part of intersection (&), parameter 'this' of '" +

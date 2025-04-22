@@ -15,6 +15,7 @@ import {
    SquareTypeToValueLambda,
    Block,
    Tuple,
+   Select,
 } from "./Parser";
 import {
    TypePhaseContext,
@@ -300,10 +301,19 @@ export class TypeTranslator {
                   return new RefinedType(lambdaType.params[0].type);
                }
             }
+         case "Select":
+            if (node instanceof Select) {
+               const asName = node.nameAsSelectOfIdentifiers();
+               if (asName !== undefined) {
+                  return scope.lookupType(asName).typeSymbol;
+               }
+            }
          default:
             throw new Error(
                "Could not translate " +
                   node.tag +
+                  " " +
+                  node.show() +
                   ". At " +
                   node.position?.start.line
             );
