@@ -1,6 +1,6 @@
 import { TokenPos } from "./Lexer";
-import { AstNode, Term, TypeDef } from "./Parser";
-import { Scope } from "./Scope";
+import { AstNode, Term, TypeDef, PotentialTypeArgs } from "./Parser";
+import { GenericTypeMap, Scope } from "./Scope";
 
 export class Type {
    tag: string;
@@ -594,7 +594,7 @@ export class SquareTypeToTypeLambdaType extends Type {
    }
 }
 
-export class AppliedGenericType extends Type {
+export class AppliedGenericType extends Type implements PotentialTypeArgs {
    callee: Type;
    parameterTypes: Type[];
    resolved?: Type;
@@ -676,6 +676,22 @@ export class AppliedGenericType extends Type {
          return false;
       }
    }
+
+   getTypeArgs(): GenericTypeMap | undefined {
+      if (!(this.callee instanceof SquareTypeToTypeLambdaType)) {
+         return undefined;
+      }
+      const calledArgs = this.parameterTypes;
+      const expectedArgs = this.callee.paramTypes;
+      const map = new GenericTypeMap();
+      for (let i = 0; i < calledArgs.length; i++) {
+         map.set(expectedArgs[i].name, calledArgs[i]);
+      }
+
+      return map;
+   }
+
+   initTypeArgs(map: GenericTypeMap): void {}
 
    toString() {
       const paramsStr = this.parameterTypes.map((t) => t.toString()).join(", ");

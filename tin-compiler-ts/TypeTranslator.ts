@@ -31,6 +31,7 @@ import {
    Nothing,
    PrimitiveType,
    NotType,
+   Never,
 } from "./Types";
 import { Identifier, RefinedDef } from "./Parser";
 import { Any, MutableType, UnionType, IntersectionType } from "./Types";
@@ -75,6 +76,9 @@ export class TypeTranslator {
             }
             if ((node as Identifier).value === "Nothing") {
                return Nothing;
+            }
+            if ((node as Identifier).value === "Never") {
+               return Never;
             }
             if ((node as Identifier).value === "Boolean") {
                return PrimitiveType.Boolean;
@@ -314,6 +318,8 @@ export class TypeTranslator {
                   node.tag +
                   " " +
                   node.show() +
+                  " " +
+                  node.position +
                   ". At " +
                   node.position?.start.line
             );

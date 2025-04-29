@@ -4,9 +4,11 @@ import {
    NamedType,
    PrimitiveType,
    IntersectionType,
+   Never,
 } from "./Types";
 import { IN_RETURN_BRANCH, Optional, Tuple } from "./Parser";
 import { UnionType } from "./Types";
+import { GenericTypeMap } from "./Scope";
 import {
    AppliedKeyword,
    Assignment,
@@ -67,6 +69,12 @@ export class TypeInferencer {
       }
       if (type2 === Nothing) {
          return new OptionalType(type1);
+      }
+      if (type1 === Never) {
+         return type2;
+      }
+      if (type2 === Never) {
+         return type1;
       }
       if (type1 instanceof AnyType) {
          return type2;
@@ -270,14 +278,17 @@ export class TypeInferencer {
    }
 
    inferIfStatemnet(node: IfStatement, scope: Scope): Type {
-      const innerScope = scope.innerScopeOf(node);
+      const innerScope = scope.innerScopeOf(node, true);
       const trueBranchType = this.infer(
          node.trueBranch,
          innerScope.innerScopeOf(node.trueBranch, true)
       );
+      const falseBranch = node.falseBranch
+         ? innerScope.innerScopeOf(node.falseBranch, true)
+         : innerScope;
       let falseBranchType: Type = Nothing;
       if (node.falseBranch !== undefined) {
-         falseBranchType = this.infer(node.falseBranch, innerScope);
+         falseBranchType = this.infer(node.falseBranch, falseBranch);
       }
       return this.deduceCommonType(trueBranchType, falseBranchType, scope);
    }
@@ -369,11 +380,11 @@ export class TypeInferencer {
             this.context.translator.translate(t, scope)
          );
          const expectedArgs = calleeType.paramTypes;
-         const params: { [_: string]: Type } = {};
+         const map = new GenericTypeMap();
          for (let i = 0; i < calledArgs.length; i++) {
-            params[expectedArgs[i]?.name] = calledArgs[i];
+            map.set(expectedArgs[i]?.name, calledArgs[i]);
          }
-         return scope.resolveGenericTypes(calleeType.returnType, params);
+         return scope.resolveGenericTypes(calleeType.returnType, map);
       }
 
       throw new Error(
@@ -406,7 +417,8 @@ export class TypeInferencer {
       if (node.callee instanceof Select) {
          try {
             const selectOwnerType = scope.resolveGenericTypes(
-               this.infer(node.callee.owner, scope)
+               this.infer(node.callee.owner, scope),
+               new GenericTypeMap() // ??
             );
             const symbol = scope.lookupExtension(
                node.callee.field,
@@ -431,40 +443,38 @@ export class TypeInferencer {
                   RoundValueToValueLambdaType &&
                symbol.typeSymbol.returnType.params[0]?.name === "self"
             ) {
-               const mappedParams: Map<GenericNamedType, Type> = new Map();
+               const mappedParams = new GenericTypeMap();
 
                const ownerType = this.infer(node.callee.owner, scope);
                const expectedOwnerType =
                   symbol.typeSymbol.returnType.params[0].type;
-               this.context.builder.matchParamToGenericParam(
-                  symbol.typeSymbol.paramTypes,
-                  ownerType,
-                  expectedOwnerType,
-                  mappedParams
+               mappedParams.absorb(
+                  this.context.builder.matchParamToGenericParam(
+                     symbol.typeSymbol.paramTypes,
+                     ownerType,
+                     expectedOwnerType
+                  )
                );
                for (
                   let i = 0;
                   i < symbol.typeSymbol.returnType.params.length;
                   i++
                ) {
-                  this.context.builder.matchParamToGenericParam(
-                     symbol.typeSymbol.paramTypes,
-                     selectOwnerType,
-                     symbol.typeSymbol.returnType.params[i].type,
-                     mappedParams
+                  mappedParams.absorb(
+                     this.context.builder.matchParamToGenericParam(
+                        symbol.typeSymbol.paramTypes,
+                        selectOwnerType,
+                        symbol.typeSymbol.returnType.params[i].type
+                     )
                   );
-               }
-               const params: { [_: string]: Type } = {};
-               for (let [k, v] of mappedParams.entries()) {
-                  params[k.name] = v;
                }
                const resolvedOwnerType = scope.resolveGenericTypes(
                   selectOwnerType,
-                  params
+                  mappedParams
                );
                const resolvedExpectedType = scope.resolveGenericTypes(
                   symbol.typeSymbol.returnType.params[0].type,
-                  params
+                  mappedParams
                );
                if (
                   resolvedOwnerType.isAssignableTo(resolvedExpectedType, scope)
@@ -478,9 +488,7 @@ export class TypeInferencer {
                   this.context.builder.build(node, scope);
                }
             }
-         } catch (e) {
-            // console.log(e.stack);
-         }
+         } catch (e) {}
       } else if (
          node.callee instanceof SquareApply &&
          node.callee.callee instanceof Select
@@ -488,7 +496,8 @@ export class TypeInferencer {
          try {
             // object.func[Obj, B](b)
             const selectOwnerType = scope.resolveGenericTypes(
-               this.infer(node.callee.callee.owner, scope)
+               this.infer(node.callee.callee.owner, scope),
+               new GenericTypeMap()
             );
             const symbol = scope.lookupExtension(
                node.callee.callee.field,
@@ -500,22 +509,19 @@ export class TypeInferencer {
                   RoundValueToValueLambdaType &&
                symbol.typeSymbol.returnType.params[0]?.name === "self"
             ) {
-               const mappedParams: Map<GenericNamedType, Type> = new Map();
-               this.context.builder.matchParamToGenericParam(
-                  symbol.typeSymbol.paramTypes,
-                  selectOwnerType,
-                  symbol.typeSymbol.returnType.params[0].type,
-                  mappedParams
+               const mappedParams = new GenericTypeMap();
+               mappedParams.absorb(
+                  this.context.builder.matchParamToGenericParam(
+                     symbol.typeSymbol.paramTypes,
+                     selectOwnerType,
+                     symbol.typeSymbol.returnType.params[0].type
+                  )
                );
-               const params: { [_: string]: Type } = {};
-               for (let [k, v] of mappedParams.entries()) {
-                  params[k.name] = v;
-               }
                if (
                   selectOwnerType.isAssignableTo(
                      scope.resolveGenericTypes(
                         symbol.typeSymbol.returnType.params[0].type,
-                        params
+                        mappedParams
                      ),
                      scope
                   )
@@ -595,17 +601,12 @@ export class TypeInferencer {
             calleeType,
             scope
          );
-         const squareArgs = node.autoFilledSquareParams;
-         const calledArgs = squareArgs;
-         if (calledArgs) {
+         const squareArgs = node.getTypeArgs();
+         if (squareArgs) {
             const expectedArgs = calleeType.paramTypes;
-            const params: { [_: string]: Type } = {};
-            for (let i = 0; i < calledArgs.length; i++) {
-               params[expectedArgs[i].name] = calledArgs[i];
-            }
             const result = scope.resolveGenericTypes(
                calleeType.returnType,
-               params
+               squareArgs
             );
             if (result instanceof RoundValueToValueLambdaType) {
                return this.asMutable(
@@ -710,7 +711,9 @@ export class TypeInferencer {
             `Field '${node.field}' could not be found on '` +
                ownerType.toString() +
                "', fields found: [" +
-               [...fields.values()].map(([k, v]) => `${k.name}`).flat() +
+               [...fields.values()]
+                  .map((arr) => `${arr.map((p) => p.name)}`)
+                  .flat() +
                "]"
          );
       }

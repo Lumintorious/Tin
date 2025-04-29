@@ -32,13 +32,16 @@ const OUT_PATH = path.resolve(
 if (!process.argv.includes("--verbose")) {
    const log = console.log;
    console.log = (message) => {
-      if (!String(message).startsWith("#")) {
+      if (typeof message !== "string" || !String(message).startsWith("#")) {
          log(message);
       }
    };
 } else {
    const log = console.log;
    console.log = (message) => {
+      if (message && typeof message === "object" && "toString" in message) {
+         message = message.toString();
+      }
       if (String(message).startsWith("#")) {
          log(message.substring(1).trim());
       } else {

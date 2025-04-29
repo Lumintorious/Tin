@@ -1,6 +1,6 @@
 const JsSymbol = Symbol;
 import { Token, TokenPos, CodePoint } from "./Lexer";
-import { Symbol } from "./Scope";
+import { GenericTypeMap, Symbol } from "./Scope";
 import { RoundValueToValueLambdaType, Type } from "./Types";
 const applyableKeywords = [
    "return",
@@ -309,24 +309,6 @@ export class Literal extends Term {
    }
 }
 
-export class GenericTypeMap {
-   private map: Map<string, Type> = new Map();
-   private order: [string, Type][] = [];
-
-   set(key: string, value: Type) {
-      this.map.set(key, value);
-      this.order.push([key, value]);
-   }
-
-   get(key: string) {
-      return this.map.get(key);
-   }
-
-   at(i: number) {
-      return this.order[i];
-   }
-}
-
 export interface PotentialTypeArgs {
    getTypeArgs(): GenericTypeMap | undefined;
    initTypeArgs(map: GenericTypeMap): void;
@@ -341,7 +323,6 @@ export class RoundApply extends Term implements PotentialTypeArgs {
    paramOrder: [number, number][] = [];
    isFirstParamThis: boolean = false;
    isAnObjectCopy: boolean = false;
-   autoFilledSquareParams?: Type[];
    isCallingAConstructor: boolean = false;
    bakedInThis?: Term;
    callsPure?: boolean = true;
@@ -546,14 +527,14 @@ const PRECEDENCE: { [_: string]: number } = {
    ">": 20, // Greater than
    "<=": 20, // Less than or equal to
    ">=": 20, // Greater than or equal to
+   "&": 13,
+   "|": 12,
    "!=": 18, // Inequality
    "==": 18, // Equality
    "::": 18, // Type Check
    "!:": 18, // Type Check
    "&&": 15, // Logical AND
    "||": 14, // Logical OR
-   "&": 13,
-   "|": 12,
    ":": 5,
    // (right-associative)
    copy: 1,
@@ -634,8 +615,10 @@ export class Parser {
       return this.parseExpression();
    }
 
-   parseApply(callee: Term, isSquare?: boolean) {
-      const start = this.consume("PARENS", isSquare ? "[" : "("); // Consume '('
+   parseApply(callee: Term, isSquare?: boolean, isCurly?: boolean) {
+      const lParens = isSquare ? "[" : isCurly ? "{" : "(";
+      const rParens = isSquare ? "]" : isCurly ? "}" : ")";
+      const start = this.consume("PARENS", lParens); // Consume '('
       const args: [string, Term][] = [];
 
       // Parse arguments (expressions)
@@ -643,7 +626,7 @@ export class Parser {
          if (
             this.peek() &&
             this.peek().tag === "PARENS" &&
-            this.peek().value === (isSquare ? "]" : ")")
+            this.peek().value === rParens
          ) {
             break;
          }
@@ -670,7 +653,7 @@ export class Parser {
          }
       }
 
-      const end = this.consume("PARENS", isSquare ? "]" : ")");
+      const end = this.consume("PARENS", rParens);
 
       let result: Term = isSquare
          ? new SquareApply(
@@ -744,6 +727,14 @@ export class Parser {
          this.peek().value === "("
       ) {
          left = this.parseApply(left);
+      }
+
+      while (
+         this.peek() &&
+         this.peek().tag === "PARENS" &&
+         this.peek().value === "{"
+      ) {
+         left = this.parseApply(left, false, true);
       }
 
       if (this.is(":")) {
@@ -1321,7 +1312,7 @@ export class Parser {
    parsePrimaryRaw(): Term {
       const token = this.consume();
 
-      if (token.value === "data") {
+      if (token.value === "struct") {
          this.current--;
          return parseNewType(this);
       }
@@ -1492,24 +1483,12 @@ export class FieldDef extends AstNode {
 }
 
 export function parseNewType(parser: Parser): Term {
-   let token: Token = parser.consume("KEYWORD");
-   if (token.value !== "data") {
-      throw new Error(
-         `Expected 'data', but got '${token.value}' at line ${token.position.start.line}, column ${token.position.start.column}`
-      );
-   }
    const object = parseObject(parser);
 
    return new TypeDef(object.fieldDefs);
 }
 
 export function parseNewData(parser: Parser): Term {
-   let token: Token = parser.consume("KEYWORD");
-   if (token.value !== "data") {
-      throw new Error(
-         `Expected 'data', but got '${token.value}' at line ${token.position.start.line}, column ${token.position.start.column}`
-      );
-   }
    const object = parseObject(parser);
 
    return new DataDef(object.fieldDefs);
@@ -1517,20 +1496,20 @@ export function parseNewData(parser: Parser): Term {
 
 export function parseObject(parser: Parser): DataDef {
    const start = parser.positionNow();
-   if (parser.peek().value != ":") {
-      return new DataDef([]).fromTo(start, parser.positionNow());
-   }
-   let token = parser.consume("OPERATOR", ":");
-
+   //    if (parser.peek().value != ":") {
+   //       return new DataDef([]).fromTo(start, parser.positionNow());
+   //    }
    // Expect INDENT (start of type block)
-   parser.consume("NEWLINE");
-   parser.consume("INDENT");
+   parser.consume("KEYWORD", "struct");
+   parser.consume("OPERATOR", ":");
+   parser.omit("NEWLINE");
+   parser.omit("INDENT");
 
    let fieldDefs: FieldDef[] = [];
 
    // Parse fields inside the type block
    while (true) {
-      token = parser.peek();
+      let token = parser.peek();
       if (token === undefined) {
          break;
       }
@@ -1581,14 +1560,8 @@ export function parseObject(parser: Parser): DataDef {
          );
       }
       parser.omit("NEWLINE");
-      // } else {
-      //    throw new Error(
-      //       `Unexpected token: ${token.tag} at line ${token.position.start.line}, column ${token.position.start.column}`
-      //    );
-      // }
    }
 
-   // parser.consume("PARENS", "}");
    const end = parser.positionNow();
    return new DataDef(fieldDefs).fromTo(start, end);
 }

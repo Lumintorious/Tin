@@ -43,6 +43,18 @@ external "
 
 Map@of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
 
+Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
+	Iterator[X]((): var X? ->
+		prev = self.next()
+		if prev !: Nothing,
+			fn(prev)
+		else
+			nothing
+	)
+
+Iterable.into = [T, F] -> (self: Iterable[T], factory: (Iterable[T]) -> F[T]) ->
+	factory(self)
+
 Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) -> Nothing) ->
 	iterator = self.makeIterator()
 	current = var iterator.next()
@@ -60,7 +72,7 @@ Iterable.fromArray = [T] -> (arr: Array[T]) ->
 		)
 	)
 
-Iterable.fold = [T, S] -> (self: Iterable[T], start: S, combine: (T, S) -> S) ->
+Iterable.fold = [T, S] -> (self: Iterable[T], start: S, combine: (T, S) -> S): S ->
 	sum = var start
 	self.forEach((e: T) ->
 		set sum = combine(e, sum)
@@ -84,7 +96,7 @@ export const Array$fromIterator = (T) => (iter) => \{
 "
 
 Array.fromIterator: [T] -> (Iterator[T]) -> Array[T] = external
-Array.fromIterable = [T] -> (iterable: Iterable[T]) ->
+Array.fromIterable = [T] -> (iterable: Iterable[T]): Array[T] ->
 	Array.fromIterator(iterable.makeIterator())
 
 Array.stream = [T] -> (self: Array[T]) -> Iterable.fromArray(self)

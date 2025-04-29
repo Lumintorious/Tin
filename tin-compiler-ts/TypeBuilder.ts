@@ -35,8 +35,8 @@ import {
    RefinedDef,
    Make,
 } from "./Parser";
-import { Symbol } from "./Scope";
-import { Select, GenericTypeMap } from "./Parser";
+import { Symbol, GenericTypeMap } from "./Scope";
+import { Select, Tuple } from "./Parser";
 import {
    TypeOfTypes,
    AnyType,
@@ -138,9 +138,11 @@ export class TypeBuilder {
          this.buildWhileLoop(node, scope);
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node, true);
-         const trueScope = innerScope.innerScopeOf(node.trueBranch, true);
+         const trueScope = innerScope
+            .innerScopeOf(node.trueBranch, true)
+            .named("true");
          const falseScope = node.falseBranch
-            ? innerScope.innerScopeOf(node.falseBranch, true)
+            ? innerScope.innerScopeOf(node.falseBranch, true).named("false")
             : new Scope("Throwaway");
          if (
             node.condition instanceof BinaryExpression &&
@@ -200,7 +202,7 @@ export class TypeBuilder {
          this.build(node.condition, innerScope);
          this.build(node.trueBranch, trueScope);
          if (node.falseBranch) {
-            this.build(node.falseBranch, innerScope);
+            this.build(node.falseBranch, falseScope);
          }
       } else if (node instanceof Select) {
          this.buildSelect(node, scope);
@@ -274,6 +276,8 @@ export class TypeBuilder {
             );
          }
          this.build(node.expression, scope);
+      } else if (node instanceof Tuple) {
+         node.expressions.forEach((e) => this.build(e, scope));
       } else {
       }
    }
@@ -330,10 +334,10 @@ export class TypeBuilder {
             (condition.negative ? trueSymbols : falseSymbols).push(newSymbol);
             scope.declare(newSymbol, true);
          }
-         //  const newType = new IntersectionType(
-         //     shadowSymbol.typeSymbol,
-         //     type
-         //  ).simplified();
+         const newType = new IntersectionType(
+            shadowSymbol.typeSymbol,
+            type
+         ).simplified();
          if (
             shadowSymbol.typeSymbol instanceof MutableType &&
             !(type instanceof MutableType)
@@ -343,7 +347,7 @@ export class TypeBuilder {
          const newSymbol = new Symbol(shadowSymbol.name, new UncheckedType());
          newSymbol.rewriteFrom(shadowSymbol);
          newSymbol.shadowing = shadowSymbol;
-         newSymbol.typeSymbol = type;
+         newSymbol.typeSymbol = newType;
          (condition.negative ? falseSymbols : trueSymbols).push(newSymbol);
          scope.declare(newSymbol, true);
       } else if (
@@ -413,9 +417,8 @@ export class TypeBuilder {
    matchParamToGenericParam(
       expectedTypeParams: Type[],
       gottenType: Type,
-      expectedType: Type,
-      mappedParams: Map<GenericNamedType, Type>
-   ) {
+      expectedType: Type
+   ): GenericTypeMap {
       // f = [A, B] -> (a: A, b: B) -> a
       // f(1, "Str")
       const matchedGenericParam = expectedTypeParams.find(
@@ -427,43 +430,71 @@ export class TypeBuilder {
          matchedGenericParam !== undefined
       ) {
          if (!(matchedGenericParam instanceof GenericNamedType)) {
-            return;
+            return GenericTypeMap.empty();
          }
          if (gottenType instanceof LiteralType) {
             gottenType = gottenType.type;
          }
-         mappedParams.set(matchedGenericParam, gottenType);
+         return GenericTypeMap.with(matchedGenericParam.name, gottenType);
       } else if (
          expectedType instanceof AppliedGenericType &&
          gottenType instanceof AppliedGenericType
       ) {
-         for (let i = 0; i < expectedType.parameterTypes.length; i++) {
+         const map = new GenericTypeMap();
+         map.absorb(
             this.matchParamToGenericParam(
                expectedTypeParams,
-               gottenType.parameterTypes[i],
-               expectedType.parameterTypes[i],
-               mappedParams
+               gottenType.callee,
+               expectedType.callee
+            )
+         );
+         for (let i = 0; i < expectedType.parameterTypes.length; i++) {
+            map.absorb(
+               this.matchParamToGenericParam(
+                  expectedTypeParams,
+                  gottenType.parameterTypes[i],
+                  expectedType.parameterTypes[i]
+               )
             );
          }
+         return map;
       } else if (
          expectedType instanceof RoundValueToValueLambdaType &&
          gottenType instanceof RoundValueToValueLambdaType
       ) {
+         const map = new GenericTypeMap();
          for (let i = 0; i < expectedType.params.length; i++) {
-            this.matchParamToGenericParam(
-               expectedTypeParams,
-               gottenType.params[i].type,
-               expectedType.params[i].type,
-               mappedParams
+            map.absorb(
+               this.matchParamToGenericParam(
+                  expectedTypeParams,
+                  gottenType.params[i].type,
+                  expectedType.params[i].type
+               )
             );
          }
-         this.matchParamToGenericParam(
-            expectedTypeParams,
-            gottenType.returnType,
-            expectedType.returnType,
-            mappedParams
+         map.absorb(
+            this.matchParamToGenericParam(
+               expectedTypeParams,
+               gottenType.returnType,
+               expectedType.returnType
+            )
          );
+         return map;
+      } else if (
+         expectedType instanceof SquareTypeToValueLambdaType &&
+         gottenType instanceof SquareTypeToValueLambdaType
+      ) {
+         const map = new GenericTypeMap();
+         map.absorb(
+            this.matchParamToGenericParam(
+               expectedTypeParams,
+               gottenType.returnType,
+               expectedType.returnType
+            )
+         );
+         return map;
       }
+      return GenericTypeMap.empty();
    }
 
    expectsVarargs(expectedParams: ParamType[]) {
@@ -499,7 +530,6 @@ export class TypeBuilder {
          if (node.bakedInThis) {
             selfType = this.context.inferencer.infer(node.bakedInThis, scope);
          }
-         node.autoFilledSquareParams = [];
          const genericTypeArgs = new GenericTypeMap();
          node.initTypeArgs(genericTypeArgs);
          const expectedTypeParams = calleeType.paramTypes;
@@ -520,8 +550,30 @@ export class TypeBuilder {
                firstParamType.callee.name === "Array"
             )
          ) {
+            node.takesVarargs = true;
+            if (node.bakedInThis) {
+               const selfType = this.context.inferencer.infer(
+                  node.bakedInThis,
+                  scope
+               );
+               if (selfType instanceof AppliedGenericType) {
+                  for (let i = 0; i < selfType.parameterTypes.length; i++) {
+                     genericTypeArgs.absorb(
+                        this.matchParamToGenericParam(
+                           calleeType.paramTypes,
+                           selfType.parameterTypes[i],
+                           (
+                              calleeType.returnType.params[0]
+                                 .type as AppliedGenericType
+                           ).parameterTypes[0]
+                        )
+                     );
+                  }
+               }
+               node.takesVarargs = false;
+            }
+
             if (appliedParams.length === 0) {
-               node.takesVarargs = true;
                return;
             }
             let firstAppliedParamType = this.context.inferencer.infer(
@@ -537,47 +589,36 @@ export class TypeBuilder {
                firstAppliedParamType.callee instanceof NamedType &&
                firstAppliedParamType.callee.name === "Array"
             ) {
+               node.takesVarargs = false;
                if (
                   expectedParams[0].type.parameterTypes[0] instanceof
                      GenericNamedType &&
                   firstAppliedParamType.parameterTypes[0] instanceof NamedType
                ) {
-                  node.autoFilledSquareParams = [
-                     firstAppliedParamType.parameterTypes[0],
-                  ];
                   genericTypeArgs.set(
                      expectedParams[0].type.parameterTypes[0].name,
                      firstAppliedParamType.parameterTypes[0]
                   );
-               } else if (
-                  expectedParams[0].type.parameterTypes[0] instanceof
-                     NamedType &&
-                  firstAppliedParamType.parameterTypes[0] instanceof NamedType
-               ) {
                }
                // Varargs
             } else {
-               const mappedParams = new Map<GenericNamedType, Type>();
-               this.matchParamToGenericParam(
-                  calleeType.paramTypes,
-                  firstAppliedParamType,
-                  (calleeType.returnType.params[0].type as AppliedGenericType)
-                     .parameterTypes[0],
-                  mappedParams
+               genericTypeArgs.absorb(
+                  this.matchParamToGenericParam(
+                     calleeType.paramTypes,
+                     firstAppliedParamType,
+                     (
+                        calleeType.returnType.params[0]
+                           .type as AppliedGenericType
+                     ).parameterTypes[0]
+                  )
                );
-
-               node.autoFilledSquareParams = [];
-               for (const [k, v] of mappedParams.entries()) {
-                  node.autoFilledSquareParams.push(v);
-                  genericTypeArgs.set(k.name, v);
-               }
                node.takesVarargs = true;
             }
          } else {
             // Not Varargs
             let i = 0;
             let hasThisIncrement = node.bakedInThis ? 1 : 0;
-            const mappings = new Map<GenericNamedType, Type>();
+            const mappings = new GenericTypeMap();
             if (
                node.bakedInThis &&
                expectedParams.filter((p) => p.name === "self").length > 0
@@ -591,11 +632,12 @@ export class TypeBuilder {
                }
                const expectedType = expectedParams[0];
                if (expectedType) {
-                  this.matchParamToGenericParam(
-                     expectedTypeParams,
-                     appliedType,
-                     expectedType.type,
-                     mappings
+                  mappings.absorb(
+                     this.matchParamToGenericParam(
+                        expectedTypeParams,
+                        appliedType,
+                        expectedType.type
+                     )
                   );
                }
             }
@@ -613,28 +655,18 @@ export class TypeBuilder {
                   : expectedParams[i + hasThisIncrement];
 
                if (expectedType) {
-                  this.matchParamToGenericParam(
-                     expectedTypeParams,
-                     appliedType,
-                     expectedType.type,
-                     mappings
+                  mappings.absorb(
+                     this.matchParamToGenericParam(
+                        expectedTypeParams,
+                        appliedType,
+                        expectedType.type
+                     )
                   );
                }
 
                i++;
             }
-
-            expectedTypeParams.forEach((p, i) => {
-               if (p instanceof GenericNamedType) {
-                  const mapping = mappings.get(p);
-                  if (mapping) {
-                     console.log(
-                        "MAPPED " + p.name + " to " + mapping.toString()
-                     );
-                     node.autoFilledSquareParams?.push(mapping);
-                  }
-               }
-            });
+            node.initTypeArgs(mappings);
          }
       }
    }
@@ -700,17 +732,13 @@ export class TypeBuilder {
          if (
             calleeType instanceof SquareTypeToValueLambdaType &&
             calleeType.returnType instanceof RoundValueToValueLambdaType &&
-            node.autoFilledSquareParams
+            node.getTypeArgs()
          ) {
-            const calledArgs = node.autoFilledSquareParams;
-            const params: { [_: string]: Type } = {};
-            for (let i = 0; i < calleeType.paramTypes.length; i++) {
-               params[calleeType.paramTypes[i].name] = calledArgs[i];
-            }
+            const mappedParams = node.getTypeArgs();
             paramTypes = calleeType.returnType.params.map(
                (p) =>
                   new ParamType(
-                     scope.resolveGenericTypes(p.type, params),
+                     scope.resolveGenericTypes(p.type, mappedParams as any),
                      p.name,
                      p.defaultValue
                   )
@@ -722,6 +750,9 @@ export class TypeBuilder {
       const thisOffset = paramTypes[0]?.name === "self" ? 1 : 0;
       node.args.forEach((statement, i) => {
          const expectedType = paramTypes[i + thisOffset]?.type;
+         this.build(statement[1], scope, {
+            typeExpectedInPlace: expectedType,
+         });
          const gottenType = this.context.inferencer.infer(statement[1], scope, {
             typeExpectedInPlace: expectedType,
          });
@@ -738,9 +769,6 @@ export class TypeBuilder {
                captureName
             );
          }
-         this.build(statement[1], scope, {
-            typeExpectedInPlace: expectedType,
-         });
       });
       this.build(node.callee, scope);
    }
@@ -822,7 +850,8 @@ export class TypeBuilder {
             node.falseBranch instanceof Block
                ? innerScope.innerScopeOf(node.falseBranch)
                : innerScope;
-         const ifStatement = new IfStatement(
+         const ifStatement = node;
+         new IfStatement(
             node.condition,
             this.convertToTailrec(
                node.trueBranch,
@@ -850,7 +879,7 @@ export class TypeBuilder {
          ) {
             ifStatement.falseBranch = new Block([ifStatement.falseBranch]);
          }
-         return ifStatement;
+         //  this.build(ifStatement, innerScope);
       } else if (node instanceof WhileLoop && node.eachLoop) {
       } else if (node instanceof BinaryExpression) {
       } else if (node instanceof UnaryOperator) {

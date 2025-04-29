@@ -21,7 +21,7 @@ import {
    Term,
    BinaryExpression,
 } from "./Parser";
-import { Scope, TypePhaseContext } from "./Scope";
+import { Scope, TypePhaseContext, GenericTypeMap } from "./Scope";
 import { RoundValueToValueLambda, TypeDef, RefinedDef, Tuple } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
 import { UncheckedType, MutableType } from "./Types";
@@ -72,27 +72,29 @@ export class TypeChecker {
       }
       if (callee && callee instanceof RoundValueToValueLambdaType) {
          const actualParams = type.parameterTypes;
-         const expectedParams = callee.params;
-         let params: { [_: string]: Type } = {};
-         expectedParams.forEach((p, i) => {
-            if (p.type.name) {
-               params[p.type.name] = actualParams[i];
-            }
-         });
-         const resolved = scope.resolveGenericTypes(callee.returnType, params);
+         const expectedParams = callee.params.map((p) => p.type);
+         const mappedParams = GenericTypeMap.fromPairs(
+            expectedParams,
+            actualParams
+         );
+         const resolved = scope.resolveGenericTypes(
+            callee.returnType,
+            mappedParams
+         );
          type.resolved = resolved;
          return type.resolved;
       }
       if (callee && callee instanceof SquareTypeToTypeLambdaType) {
          const actualParams = type.parameterTypes;
          const expectedParams = callee.paramTypes;
-         let params: { [_: string]: Type } = {};
-         expectedParams.forEach((p, i) => {
-            if (p.name) {
-               params[p.name] = actualParams[i];
-            }
-         });
-         const resolved = scope.resolveGenericTypes(callee.returnType, params);
+         const mappedParams = GenericTypeMap.fromPairs(
+            expectedParams,
+            actualParams
+         );
+         const resolved = scope.resolveGenericTypes(
+            callee.returnType,
+            mappedParams
+         );
          type.resolved = resolved;
          return type.resolved;
       }
@@ -171,12 +173,18 @@ export class TypeChecker {
       if (node instanceof Block) {
          const innerScope = scope.innerScopeOf(node);
          node.statements.forEach((c) => this.typeCheck(c, innerScope));
-      } else if (node instanceof Assignment && node.value) {
+      } else if (node instanceof Assignment) {
          const options: RecursiveResolutionOptions = {};
          if (node.lhs instanceof Identifier) {
             options.assignedName = node.lhs.value;
          }
-         this.typeCheck(node.value, scope, options);
+         this.typeCheck(node.lhs, scope);
+         //  if (node.type) {
+         //     this.typeCheck(node.type, scope, { isTypeLevel: true });
+         //  }
+         if (node.value) {
+            this.typeCheck(node.value, scope, options);
+         }
       } else if (node instanceof Change) {
          this.typeCheckChange(node as Change, scope);
       } else if (node instanceof RoundApply) {
@@ -192,10 +200,13 @@ export class TypeChecker {
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node);
          const trueScope = innerScope.innerScopeOf(node.trueBranch);
+         const falseScope = node.falseBranch
+            ? innerScope.innerScopeOf(node.falseBranch)
+            : innerScope;
          this.typeCheck(node.condition, innerScope);
          this.typeCheck(node.trueBranch, trueScope);
          if (node.falseBranch) {
-            this.typeCheck(node.falseBranch, innerScope);
+            this.typeCheck(node.falseBranch, falseScope);
          }
       } else if (node instanceof WhileLoop) {
          const innerScope = scope.innerScopeOf(node);
@@ -325,6 +336,7 @@ export class TypeChecker {
          node.expressions.forEach((el) => this.typeCheck(el, scope));
       } else if (node instanceof AppliedKeyword) {
          this.typeCheck(node.param, scope);
+      } else {
       }
    }
 
@@ -433,7 +445,7 @@ export class TypeChecker {
                "You must mark the return type of the lambda with ~<Type>, or not use a variable value"
             );
          }
-         const returnType = scope.resolveNamedType(type.returnType);
+         //  const returnType = scope.resolveNamedType(type.returnType);
          // if (returnType.isMutable()) {
          //    this.context.errors.add(
          //       "Return type of lambda '" +
@@ -481,6 +493,9 @@ export class TypeChecker {
 
    typeCheckSquareApply(apply: SquareApply, scope: Scope) {
       const translator = this.context.translator;
+      const appliedParamTypes = apply.typeArgs.map((t) =>
+         translator.translate(t, scope)
+      );
       if (
          apply.callee instanceof Identifier &&
          apply.callee.isTypeIdentifier()
@@ -490,9 +505,13 @@ export class TypeChecker {
                this.context.translator.translate(apply.callee, scope)
             );
             if (testCalleeIsType instanceof SquareTypeToTypeLambdaType) {
+               const typeMap = GenericTypeMap.fromPairs(
+                  testCalleeIsType.paramTypes,
+                  appliedParamTypes
+               );
                this.typeCheckSquareParams(
                   testCalleeIsType.paramTypes,
-                  apply.typeArgs.map((t) => translator.translate(t, scope)),
+                  typeMap,
                   apply.position,
                   scope
                );
@@ -514,9 +533,14 @@ export class TypeChecker {
                calleeType.toString()
          );
       }
+      const typeMap = GenericTypeMap.fromPairs(
+         calleeType.paramTypes,
+         appliedParamTypes
+      );
+
       this.typeCheckSquareParams(
          calleeType.paramTypes,
-         apply.typeArgs.map((t) => translator.translate(t, scope)),
+         typeMap,
          apply.position,
          scope
       );
@@ -543,13 +567,13 @@ export class TypeChecker {
 
    typeCheckSquareParams(
       expectedParams: GenericNamedType[],
-      appliedParams: Type[],
+      appliedParams: GenericTypeMap,
       position: TokenPos | undefined,
       scope: Scope
    ) {
       let i = 0;
       for (let paramType of expectedParams) {
-         const gottenParamType = appliedParams[i++];
+         const [name, gottenParamType] = appliedParams.at(i);
          if (
             paramType.extendedType &&
             !gottenParamType.isAssignableTo(paramType.extendedType, scope)
@@ -589,24 +613,23 @@ export class TypeChecker {
          typeSymbol instanceof SquareTypeToValueLambdaType &&
          typeSymbol.returnType instanceof RoundValueToValueLambdaType
       ) {
-         if (!apply.autoFilledSquareParams) {
+         const applyArgs = apply.getTypeArgs();
+         if (!applyArgs) {
             this.context.errors.add("Unchecked square apply");
             return;
          }
 
          this.typeCheckSquareParams(
             typeSymbol.paramTypes,
-            apply.autoFilledSquareParams,
+            applyArgs,
             apply.position,
             scope
          );
 
-         const params: { [_: string]: Type } = {};
-         for (let i = 0; i < typeSymbol.paramTypes.length; i++) {
-            params[typeSymbol.paramTypes[i].name] =
-               apply.autoFilledSquareParams[i];
-         }
-         typeSymbol = scope.resolveGenericTypes(typeSymbol.returnType, params);
+         typeSymbol = scope.resolveGenericTypes(
+            typeSymbol.returnType,
+            applyArgs
+         );
       }
 
       if (typeSymbol instanceof RoundValueToValueLambdaType) {
@@ -729,7 +752,7 @@ export class TypeChecker {
                ? this.findEffects(
                     node.falseBranch,
                     onlyCaptures,
-                    ifScope instanceof Block
+                    node.falseBranch
                        ? ifScope.innerScopeOf(node.falseBranch)
                        : ifScope,
                     nearestFunctionScope

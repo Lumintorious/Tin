@@ -1,4 +1,3 @@
-
 export const __tin_varargs_marker = Symbol();
 
 export const TIN_TYPE_CACHE = new Map()
@@ -25,6 +24,7 @@ export class Return {
 
 Object.prototype.__is_child = function (obj) {
 	const type = (typeof this === 'object' && "_" in this) ? this._ : this
+	console.log(type)
 	if (type._c && type._c.__is_child) {
 		if (typeof obj === 'object' && "_" in obj) {
 			return type._c.__is_child(obj._)
@@ -35,6 +35,10 @@ Object.prototype.__is_child = function (obj) {
 		return type[Type._s].check._(obj)
 	}
 	throw new Error("Unhandled")
+}
+
+Object.prototype.toString = function () {
+	return makeStr(this, true, true)
 }
 
 export function _S(symbol, constructorRaw, descriptor, proto) {
@@ -143,7 +147,16 @@ Object.prototype._findComponentField = function (arrComponentSymbols, fieldName)
 	throw new Error("Could not find field " + fieldName)
 }
 
+const _INTERSECTION_MAP = new Map();
+
+function _getCachedIntersection(a, b) {
+	if (!_INTERSECTION_MAP.has(a)) _INTERSECTION_MAP.set(a, new WeakMap());
+	const inner = _INTERSECTION_MAP.get(a);
+	return inner.get(b);
+}
+
 export const _A = function (obj1, obj2, isReflection = false) {
+	// If they are types
 	if (obj1?._s && obj2?._s) {
 		const obj1Descriptor = obj1?._d ? obj1?._d : obj1
 		const obj2Descriptor = obj2?._d ? obj2?._d : obj2
@@ -151,14 +164,23 @@ export const _A = function (obj1, obj2, isReflection = false) {
 			return obj1;
 		}
 
+		if (obj1Descriptor._s && obj2Descriptor._s) {
+			const cachedIntersection = _getCachedIntersection(obj1Descriptor._s, obj2Descriptor._s);
+			if (cachedIntersection) {
+				return cachedIntersection;
+			}
+		}
+
 		let descriptor = {};
 		if (Intersection?._s) {
 			descriptor = Type(
-				"Intersection",
-				(obj) => {
-					return obj1Descriptor[Type._s].check._(obj) && obj2Descriptor[Type._s].check._(obj)
+				{ _: obj1Descriptor._s.description + " & " + obj2Descriptor._s.description },
+				{
+					_: (obj) => {
+						return obj1Descriptor[Type._s].check._(obj) && obj2Descriptor[Type._s].check._(obj)
+					}
 				})._and(
-					Intersection({ _: obj1Descriptor }, { _: obj2Descriptor })
+					lazy(() => Intersection({ _: obj1Descriptor }, { _: obj2Descriptor }))
 				)
 		}
 
@@ -172,6 +194,7 @@ export const _A = function (obj1, obj2, isReflection = false) {
 		const symbol = obj2._s;
 		TIN_TYPE_CACHE.set(symbol, intersection)
 		intersection._s = symbol;
+		intersection._d._s = symbol;
 		// globalThis[symbol] = intersection;
 		intersection._typeId = symbol.description;
 		intersection.toString = () => {
@@ -183,6 +206,12 @@ export const _A = function (obj1, obj2, isReflection = false) {
 			return obj1.__is_child(obj) && obj2.__is_child(obj)
 		}
 
+		const inner1IntersectionMap = new WeakMap();
+		const inner2IntersectionMap = new WeakMap();
+		inner1IntersectionMap.set(obj2._s, intersection)
+		inner2IntersectionMap.set(obj1._s, intersection)
+		_INTERSECTION_MAP.set(obj1._s, inner1IntersectionMap)
+		_INTERSECTION_MAP.set(obj2._s, inner2IntersectionMap)
 		return intersection
 	}
 
@@ -195,9 +224,15 @@ export const _A = function (obj1, obj2, isReflection = false) {
 	const commonModules = [];
 	for (let key of Reflect.ownKeys(obj1)) {
 		if (Reflect.ownKeys(obj2).includes(key)) {
-			commonModules.push(key)
+			if (typeof key === 'symbol') {
+				commonModules.push(key)
+			}
 		}
 	}
+	if (commonModules.length > 0) {
+		throw new Error("Cannot merge objects with common modules: " + commonModules.map(s => s.description).join(", "))
+	}
+
 	const newObj = { ...obj1 };
 	const obj1Keys = Reflect.ownKeys(obj1)
 	const obj2Keys = Reflect.ownKeys(obj2)
@@ -333,6 +368,7 @@ export var Array = (function () {
 
 export const Array$of = (t) => (args) => args
 export const Array$empty = (t) => Array(t)([])
+export const Array$and = function (t) { return (function (arr) { return this[Array._s].and._(arr) }) }
 Array._typeId = "Array"
 export const copy = (obj, replacers) => {
 	if (typeof (obj) === 'object' && "_" in obj) {
@@ -679,6 +715,31 @@ export function makeStr(obj, useToString, firstLayer = false) {
 export function String$matches(regex) {
 	return this.match(regex) !== null
 }
+
+export function panic(message) {
+	const err = TinErr_({ _: message }, { _: undefined })._and(StackInfo({ _: Array(String)([]) }));
+	setTimeout(() => { }, 0);
+	throw err
+}
+
+export function _addStack(tinErr, line) {
+	if (tinErr[StackInfo._s]) {
+		tinErr[StackInfo._s].stack._[Array._s]._rawArray.push(line)
+	}
+	return tinErr
+}
+
+// process.on('uncaughtException', (err) => {
+// 	if (TinErr_._s in err) {
+// 		console.log("Panic! " + err[TinErr_._s].message._)
+// 	}
+// 	if (StackInfo && StackInfo._s in err) {
+// 		for (let i = 0; i < err[StackInfo._s].stack._[Array._s].length._(); i++) {
+// 			console.log("  at " + err[StackInfo._s].stack._[Array._s].at._(i))
+// 		}
+// 	}
+
+// })
 
 export const printRaw = (arg) => {
 	console.log(makeStr(arg, false, true))

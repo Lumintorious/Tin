@@ -1,4 +1,4 @@
-import { TokenPos } from "./Lexer";
+import { CodePoint, TokenPos } from "./Lexer";
 import {
    Assignment,
    AstNode,
@@ -97,12 +97,21 @@ export class Scope {
    static currentKey = 0;
    static currentId = 0;
    id: number = Scope.currentId++;
+   position: TokenPos = new TokenPos(
+      new CodePoint(0, 0, 0),
+      new CodePoint(0, 0, 0)
+   );
    constructor(name: string, parent?: Scope) {
       this.name = name;
       this.parent = parent;
       if (parent) {
          this.iteration = parent.iteration;
       }
+   }
+
+   named(name: string) {
+      this.name = name;
+      return this;
    }
 
    checkNoUncheckedTypesLeft() {
@@ -147,7 +156,7 @@ export class Scope {
       }
       if (!child && !canCreate) {
          throw new Error(
-            "Could not find child scope " + this.toPath()
+            "Could not find child scope " + this.getTree() + " - " + astNode.tag
             //    " -- " +
             //    astNode.tag +
             //    "(" +
@@ -160,6 +169,9 @@ export class Scope {
       } else {
          const child = new Scope(astNode.show(), this);
          child.setIteration(this.iteration);
+         if (astNode.position) {
+            child.position = astNode.position;
+         }
          this.childrenByAst.set(ast.id, child);
          return child;
       }
@@ -174,6 +186,16 @@ export class Scope {
       let now: Scope | undefined = this;
       while (now !== undefined) {
          str = now.name + "." + str;
+         now = now.parent;
+      }
+      return str.substring(0, str.length - 1);
+   }
+
+   getTree() {
+      let str = "";
+      let now: Scope | undefined = this;
+      while (now !== undefined) {
+         str = now.name + `(${JSON.stringify(now.position)})` + "\n" + str;
          now = now.parent;
       }
       return str.substring(0, str.length - 1);
@@ -204,7 +226,6 @@ export class Scope {
          const existingSymbol = this.symbols.get(name);
          if (existingSymbol?.typeSymbol instanceof UncheckedType) {
             existingSymbol.rewriteFrom(symbol);
-            console.log("Rewritten");
             return;
          } else if (
             existingSymbol &&
@@ -411,7 +432,10 @@ export class Scope {
       if (typeCallee instanceof UncheckedType) {
          return new UncheckedType();
       }
-      if (!(typeCallee instanceof SquareTypeToTypeLambdaType)) {
+      if (
+         !(typeCallee instanceof SquareTypeToTypeLambdaType) &&
+         !(typeCallee instanceof SquareTypeToValueLambdaType)
+      ) {
          throw new Error(
             "Attempted to apply generic parameters to non type lambda. Was " +
                typeCallee.toString()
@@ -419,11 +443,11 @@ export class Scope {
       }
       const calledArgs = type.parameterTypes;
       const expectedArgs = typeCallee.paramTypes;
-      const params: { [_: string]: Type } = {};
-      for (let i = 0; i < calledArgs.length; i++) {
-         params[expectedArgs[i].name] = calledArgs[i];
-      }
-      type.resolved = this.resolveGenericTypes(typeCallee.returnType, params);
+      const mappedParams = GenericTypeMap.fromPairs(expectedArgs, calledArgs);
+      type.resolved = this.resolveGenericTypes(
+         typeCallee.returnType,
+         mappedParams
+      );
       if (typeCallee.returnType.name && !type.resolved.name) {
          type.resolved.name = typeCallee.returnType.name;
       } else if (typeCallee.name && !type.resolved.name) {
@@ -432,14 +456,22 @@ export class Scope {
       return type.resolved;
    }
 
-   resolveGenericTypes(
-      type: Type,
-      parameters: { [genericName: string]: Type } = {}
-   ): Type {
+   resolveFully(type: Type): Type {
+      if (type instanceof NamedType) {
+         return this.resolveFully(this.resolveNamedType(type));
+      } else if (type instanceof AppliedGenericType) {
+         return this.resolveFully(this.resolveAppliedGenericTypes(type));
+      } else {
+         return type;
+      }
+   }
+
+   resolveGenericTypes(type: Type, paramMap: GenericTypeMap): Type {
       switch (type.tag) {
          case "NamedType":
-            if (type.name && Object.keys(parameters).includes(type.name)) {
-               const param = parameters[type.name];
+            const typeName = type.name ? paramMap.get(type.name) : undefined;
+            if (typeName) {
+               const param = typeName;
                if (param instanceof Identifier) {
                   return new NamedType(param.value);
                } else {
@@ -449,21 +481,21 @@ export class Scope {
                return type;
             }
          case "GenericNamedType":
-            if (type.name && Object.keys(parameters).includes(type.name)) {
-               const param = parameters[type.name];
-               if (param instanceof Identifier) {
-                  return new NamedType(param.value);
+            const typeNameG = type.name ? paramMap.get(type.name) : undefined;
+            if (typeNameG) {
+               if (typeNameG instanceof Identifier) {
+                  return new NamedType(typeNameG.value);
                } else {
-                  return param;
+                  return typeNameG;
                }
             } else {
                return type;
             }
          case "AppliedGenericType":
             if (type instanceof AppliedGenericType) {
-               const callee = this.resolveGenericTypes(type.callee, parameters);
+               const callee = this.resolveGenericTypes(type.callee, paramMap);
                const params = type.parameterTypes.map((p) =>
-                  this.resolveGenericTypes(p, parameters)
+                  this.resolveGenericTypes(p, paramMap)
                );
                return new AppliedGenericType(callee, params);
             }
@@ -472,14 +504,14 @@ export class Scope {
             const lambdaType = type as RoundValueToValueLambdaType;
             const resolvedParams = lambdaType.params.map((pt) => {
                return new ParamType(
-                  this.resolveGenericTypes(pt.type, parameters),
+                  this.resolveGenericTypes(pt.type, paramMap),
                   pt.name,
                   pt.defaultValue
                );
             });
             const returnType = this.resolveGenericTypes(
                lambdaType.returnType,
-               parameters
+               paramMap
             );
             const result = new RoundValueToValueLambdaType(
                resolvedParams,
@@ -497,7 +529,7 @@ export class Scope {
             }
             const mappedFields = type.fields.map((f) => {
                return new ParamType(
-                  this.resolveGenericTypes(f.type, parameters),
+                  this.resolveGenericTypes(f.type, paramMap),
                   f.name,
                   f.defaultValue
                );
@@ -507,7 +539,7 @@ export class Scope {
             const optionalType = type as OptionalType;
             const newInnerType = this.resolveGenericTypes(
                optionalType.type,
-               parameters
+               paramMap
             );
             return new OptionalType(newInnerType);
          case "LiteralType":
@@ -515,14 +547,14 @@ export class Scope {
          case "UnionType":
             const uType = type as UnionType;
             return new UnionType(
-               this.resolveGenericTypes(uType.left, parameters),
-               this.resolveGenericTypes(uType.right, parameters)
+               this.resolveGenericTypes(uType.left, paramMap),
+               this.resolveGenericTypes(uType.right, paramMap)
             );
          case "IntersectionType":
             const iType = type as IntersectionType;
             return new IntersectionType(
-               this.resolveGenericTypes(iType.left, parameters),
-               this.resolveGenericTypes(iType.right, parameters)
+               this.resolveGenericTypes(iType.left, paramMap),
+               this.resolveGenericTypes(iType.right, paramMap)
             );
          case "Anything":
             return Any;
@@ -532,7 +564,7 @@ export class Scope {
             return type;
          case "MutableType":
             return new MutableType(
-               this.resolveGenericTypes((type as MutableType).type, parameters)
+               this.resolveGenericTypes((type as MutableType).type, paramMap)
             );
          case "PrimitiveType":
             return type;
@@ -546,26 +578,71 @@ export class Scope {
             return new RefinedType(
                this.resolveGenericTypes(
                   (type as RefinedType).inputType,
-                  parameters
+                  paramMap
                )
             );
+         case "SquareTypeToValueLambdaType":
+            return type;
          default:
             throw new Error(
                "Can't handle type " +
                   type.toString() +
+                  " - " +
+                  type.tag +
                   " when resolving generic named types."
             );
       }
    }
+}
 
-   resolveFully(type: Type): Type {
-      if (type instanceof NamedType) {
-         return this.resolveFully(this.resolveNamedType(type));
-      } else if (type instanceof AppliedGenericType) {
-         return this.resolveFully(this.resolveAppliedGenericTypes(type));
-      } else {
-         return type;
+export class GenericTypeMap {
+   static empty() {
+      return new GenericTypeMap();
+   }
+
+   static with(key: string, value: Type) {
+      const result = new GenericTypeMap();
+      result.set(key, value);
+      return result;
+   }
+
+   static fromPairs(expectedTypes: Type[], gottenTypes: Type[]) {
+      const map = new GenericTypeMap();
+      for (
+         let i = 0;
+         i < Math.min(expectedTypes.length, gottenTypes.length);
+         i++
+      ) {
+         if (expectedTypes[i].name) {
+            map.set(expectedTypes[i].name as any, gottenTypes[i]);
+         }
       }
+      return map;
+   }
+
+   map: Map<string, Type> = new Map();
+   order: [string, Type][] = [];
+
+   set(key: string, value: Type) {
+      this.map.set(key, value);
+      this.order.push([key, value]);
+   }
+
+   get(key: string) {
+      return this.map.get(key);
+   }
+
+   at(i: number) {
+      return this.order[i];
+   }
+
+   absorb(map: GenericTypeMap) {
+      this.map = new Map([...this.map, ...map.map]);
+      this.order = [...this.order, ...map.order];
+   }
+
+   toString() {
+      return [...this.map.entries()].map(([k, v]) => `${k}: ${v}`);
    }
 }
 
@@ -615,105 +692,6 @@ export class TypePhaseContext {
          this.fileScope.absorbAllFrom(s);
       });
       if (!receivedLanguageScope) {
-         // this.languageScope.declare(
-         //    new Symbol(
-         //       "print",
-         //       new RoundValueToValueLambdaType(
-         //          [new ParamType(Any)],
-         //          Nothing,
-         //          false,
-         //          true
-         //       ),
-         //       new RoundValueToValueLambda([], new Block([]))
-         //    )
-         // );
-         // this.languageScope.declare(
-         //    new Symbol(
-         //       "debug",
-         //       new RoundValueToValueLambdaType(
-         //          [new ParamType(Any)],
-         //          Nothing,
-         //          false,
-         //          true
-         //       ),
-         //       new RoundValueToValueLambda([], new Block([]))
-         //    )
-         // );
-         // const innerArrayScope = new Scope("inner-array", this.languageScope);
-         // innerArrayScope.declareType(
-         //    new Symbol("T", new GenericNamedType("T"))
-         // );
-         // const arrayStruct = new StructType("Array", [
-         //    new ParamType(
-         //       new RoundValueToValueLambdaType(
-         //          [],
-         //          PrimitiveType.Number,
-         //          false,
-         //          true
-         //       ),
-         //       "length"
-         //    ),
-         //    new ParamType(
-         //       new RoundValueToValueLambdaType(
-         //          [new ParamType(PrimitiveType.Number)],
-         //          new GenericNamedType("T"),
-         //          false,
-         //          true
-         //       ),
-         //       "at"
-         //    ),
-         //    new ParamType(
-         //       new RoundValueToValueLambdaType(
-         //          [
-         //             new ParamType(
-         //                new AppliedGenericType(new NamedType("Array"), [
-         //                   new GenericNamedType("T"),
-         //                ])
-         //             ),
-         //          ],
-         //          new AppliedGenericType(new NamedType("Array"), [
-         //             new GenericNamedType("T"),
-         //          ]),
-         //          false,
-         //          true
-         //       ),
-         //       "and"
-         //    ),
-         // ]);
-         // const arrayLambdaType = new SquareTypeToTypeLambdaType(
-         //    [new GenericNamedType("T")],
-         //    arrayStruct
-         // );
-         // arrayStruct.name = "Array";
-         // arrayLambdaType.name = "Array";
-         // this.languageScope.declareType(new Symbol("Array", arrayLambdaType));
-         // this.languageScope.declare(
-         //    new Symbol(
-         //       "Array@of",
-         //       new SquareTypeToValueLambdaType(
-         //          [new GenericNamedType("T")],
-         //          new RoundValueToValueLambdaType(
-         //             [
-         //                new ParamType(
-         //                   new AppliedGenericType(new NamedType("Array"), [
-         //                      new GenericNamedType("T"),
-         //                   ])
-         //                ),
-         //             ],
-         //             new AppliedGenericType(new NamedType("Array"), [
-         //                new GenericNamedType("T"),
-         //             ]),
-         //             true,
-         //             true
-         //          ),
-         //          true
-         //       )
-         //    ),
-         //    true
-         // );
-         // this.languageScope.declare(
-         //    new Symbol("nothing", Nothing, new Identifier("nothing"))
-         // );
       }
 
       this.languageScope.setIteration("DECLARATION");

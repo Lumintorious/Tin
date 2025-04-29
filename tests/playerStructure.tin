@@ -1,0 +1,83 @@
+
+Runs = data:
+	run: () -> Nothing
+
+Jumps = data:
+	jump: () -> Nothing
+
+Pogo = Runs & Jumps
+
+SmallDoll = data:
+	surprise: String
+
+MediumDoll = data:
+	doll: SmallDoll
+
+BigDoll = data:
+	doll: MediumDoll
+
+HugeDoll = data:
+	name: String
+	doll: BigDoll
+
+hugeDoll = HugeDoll { "Red Doll", BigDoll(MediumDoll(SmallDoll("Surprise"))) }
+
+Player = data:
+	name: String
+	health: Number
+	shield: Number
+	items: Array[Item]
+
+LivingPlayer = Player where:
+	self.health > 0
+
+Item = data:
+	name: String
+	cost: Number
+
+OnHitEnchant = [T] => data:
+	onHit: (owner: Player, object: T, target: Player, damage: Number) -> (Player, T, Player)
+
+OnHitEnchant.giveCoins = [T] -> OnHitEnchant[T]((owner: Player, object: T, target: Player, damage: Number) ->
+	newItems = owner.items.and(Array.of(Item("Coin", 1)))
+	(owner copy Player(items = newItems), object, target)
+)
+
+Enchantable = data:
+	enchants: Array[Anything]
+
+weapon = Item(name = "Sword", cost = 100) & Enchantable(Array.of(
+	OnHitEnchant.giveCoins[Item]
+))
+player1 = Player("Yerdan", 100, 50, Array.of(weapon)): LivingPlayer
+player2 = Player("Limbo", 100, 50, Array.empty[Item])
+
+FightState = [T] => data:
+	player: Player
+	tool: T
+	target: Player
+
+# OnHitEnchant.multiplyDamage = [T] -> OnHitEnchant[T]((owner: Player, object: T, target: Player, damage: Number) ->
+# 	if target.health > 0,
+# 		return (owner, object, target.copy(Player(health = target.health - damage * 2)))
+# 	else
+# 		44
+# )
+
+OnHitEnchant.runAllF = [T: Enchantable] -> (iState: FightState[T], damage: Number) ->
+	iState.tool.enchants.stream().fold[Anything, FightState[T]](iState, (enchant: Anything, state: FightState[T]) ->
+		tool = state.tool
+		if enchant :: OnHitEnchant[T] && tool :: T,
+			enchant.onHit(state.player, tool, state.target, damage)
+		else
+			state
+	)
+
+LivingPlayer.dealDamage = (self: LivingPlayer, target: Player, damage: Number) ->
+	newHP = target.health - damage
+	item = self.items.at(0)
+	if item :: (Item & Enchantable),
+		newState = OnHitEnchant.runAllF(FightState(self, item, target), damage)
+		print("New state: {newState}")
+
+player1.dealDamage(player2, 20)

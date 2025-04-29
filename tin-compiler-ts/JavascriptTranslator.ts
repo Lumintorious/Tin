@@ -49,6 +49,7 @@ import {
    LiteralType,
    RefinedType,
    PrimitiveType,
+   IntersectionType,
 } from "./Types";
 import { OutputTranslator } from "./compiler";
 import { exec } from "node:child_process";
@@ -307,7 +308,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch(e) { if(e instanceof Error) {throw e} else { return e} } })`;
+         )}\n} catch(e) { if(e instanceof Error || typeof e === 'object' && TinErr_._s in e ) {throw e} else { return e} } })`;
 
          // Change
       } else if (term instanceof Change) {
@@ -424,7 +425,7 @@ export class JavascriptTranslator implements OutputTranslator {
          const replacers: { [_: string]: string } = {
             // Type: "Type$",
             this: "this_",
-            self: "this",
+            // self: "this",
             Error: "TinErr_",
             Map: "Map_",
          };
@@ -447,19 +448,24 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // RoundValueToValueLambda
       } else if (term instanceof RoundValueToValueLambda) {
-         scope = scope.innerScopeOf(term);
+         scope = scope.innerScopeOf(term, true);
          const params = term.isFirstParamThis()
             ? term.params.slice(1, term.params.length)
             : term.params;
+         const includeThisMapping = term.isFirstParamThis()
+            ? "const self = this;"
+            : "";
          return `${term.pure ? "" : "async "}function(${params
-            .map((p) => this.translate(p, scope.innerScopeOf(term, true)))
-            .join(", ")}) {try{\n${this.translate(
+            .map((p) => this.translate(p, scope))
+            .join(", ")}) {${includeThisMapping};try{\n${this.translate(
             term.block,
-            scope.innerScopeOf(term, true),
+            scope,
             {
                returnLast: true,
             }
-         )}\n} catch (e) { if (e instanceof Error) { throw e } else { return e } }}`;
+         )}\n} catch (e) { if (e instanceof Error || typeof e === 'object' && TinErr_._s in e ) { _addStack(e, '${
+            scope.name + ":" + scope.position.start
+         }'); throw e } else { return e } }}`;
 
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
@@ -481,9 +487,10 @@ export class JavascriptTranslator implements OutputTranslator {
                term.trueBranch.statements[0] instanceof IfStatement);
          const innerScope = scope.innerScopeOf(term);
          const trueScope = innerScope.innerScopeOf(term.trueBranch);
-         const falseScope = term.falseBranch
-            ? innerScope.innerScopeOf(term.falseBranch)
-            : innerScope;
+         const falseScope =
+            term.falseBranch !== undefined
+               ? innerScope.innerScopeOf(term.falseBranch)
+               : innerScope;
          let trueBranch = `(function(){${this.translate(
             term.trueBranch,
             trueScope,
@@ -544,7 +551,7 @@ export class JavascriptTranslator implements OutputTranslator {
                params[i] = undefined;
             }
          }
-         const takesVarargs = term.takesVarargs;
+         const takesVarargs = term.takesVarargs && !term.bakedInThis;
          let open = takesVarargs ? "(Array(0)([" : "(";
          const close = takesVarargs ? "]))" : ")";
          let openWrapper = "";
@@ -608,9 +615,9 @@ export class JavascriptTranslator implements OutputTranslator {
             "(" +
                openWrapper +
                this.translate(callee, scope) +
-               (term.autoFilledSquareParams
-                  ? `.call('Type', ${term.autoFilledSquareParams
-                       .map((type) => this.translateType(type, scope))
+               (term.autoFilledSquareTypeParams
+                  ? `.call('Type', ${term.autoFilledSquareTypeParams.order
+                       .map(([name, type]) => this.translateType(type, scope))
                        .join(",")})`
                   : "") +
                open +
@@ -752,6 +759,11 @@ export class JavascriptTranslator implements OutputTranslator {
                      : undefined
                })})
 		`;
+      } else if (type instanceof IntersectionType) {
+         return `${this.translateType(
+            type.left,
+            scope
+         )}._and(${this.translateType(type.right, scope)})`;
       }
       //   else if (type instanceof RoundValueToValueLambdaType) {
       //      return `

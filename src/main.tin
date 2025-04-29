@@ -1,36 +1,10 @@
-import collections/Iterable
-import Http
+# import collections/Iterable
+# import Http
 
-User = data:
-	firstName: String
-	lastName: String
-	creationDate: Number
-
-Currency = "EUR" | "USD" | "RON"
-
-Money = data:
-	amount: Number
-	currency: Currency
-
-Product = data:
+Cat = struct:
 	name: String
-	price: Money
+	age: Number
 
-ShoppingCart = data:
-	products: Array[Product]
+cat = Cat { name = "Tom", age = 5 }
 
-euros = (n: Number) -> Money(n, "EUR")
-
-cart = ShoppingCart(
-	Array.of(
-		Product("Camera", euros(200)),
-		Product("Laptop", euros(500))
-	)
-)
-
-arr = Array.of(1, 2, 3)
-
-sum = Iterable.fromArray(cart.products).fold(0, (t: Product, sum: Number) -> t.price.amount + sum)
-# stream = arr.stream().fold(0, (t, sum) -> t.price.amount + sum)
-
-print(sum)
+print(cat)

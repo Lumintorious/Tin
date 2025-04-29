@@ -34,7 +34,8 @@
          }
       ]
    },
-   "activationEvents": [
-      "onLanguage:tin"
-   ]
+   "activationEvents": [],
+   "devDependencies": {
+      "@types/vscode": "^1.50.0"
+   }
 }

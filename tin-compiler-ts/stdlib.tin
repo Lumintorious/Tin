@@ -3,7 +3,7 @@ external "
 export const Anything = _S(Symbol(\"Anything\"), () => undefined, lazy(() => Type(\"Anything\", [(n) => true], [(n) => true])));
 "
 
-Type = data:
+Type = struct:
 	name: String 
 	check = (obj: Anything) -> false: Boolean
 	checkIntegrity = (obj: Anything) -> false: Boolean
@@ -11,42 +11,42 @@ Type = data:
 
 Type@of: (obj: Anything) -> Type = external
 
-Field = data:
+Field = struct:
 	name: String
 	type: Type
 	defaultValue: (() -> Anything)?
 
-Parameter = data:
+Parameter = struct:
 	name: String?
 	type: Type
 	defaultValue: (() -> Anything)?
 
-Intersection = Type & data:
+Intersection = Type & struct:
 	left: Type
 	right: Type
 
-Union = Type & data:
+Union = Type & struct:
 	left: Type
 	right: Type
 
-Array = [T] -> data:
+Array = [T] -> struct:
 	at: (Number) -> T?
 	length: () -> T
 
-Struct = Type & data:
+Struct = Type & struct:
 	fields: Array[Field]
 
 Struct.accessDynamically: (self: Struct, obj: Anything, field: Field) -> Anything | Nothing = external
 Struct.createDynamically: (self: Struct, fields: Array[Anything]) -> Anything | Nothing = external
 
-Lambda = Type & data:
+Lambda = Type & struct:
 	params: Array[Parameter]
 	resultType: Type
 
-RefType = Type & data:
+RefType = Type & struct:
 	get: () -> Type
 
-Refinement = Type & data:
+Refinement = Type & struct:
 	test: (any: Anything) -> Boolean
 
 external "
@@ -56,7 +56,7 @@ export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Numbe
 export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})));
 "
 
-Literal = Type & data:
+Literal = Type & struct:
 	value: String | Number | Boolean | Nothing
 	type: Type
 
@@ -68,8 +68,10 @@ printRaw: (Anything) -> Nothing = external
 debug: (Anything) -> Nothing = external
 clojure: (Anything) -> Nothing = external
 nothing: Nothing = external
+panic: (message: String) -> Never = external
 Array.of: [T] -> (Array[T]) -> Array[T] = external
 Array.empty: [T] -> Array[T] = external
+Array.and: [T] -> (self: Array[T], other: Array[T]) -> Array[T] = external
 
 Intersection@of = (left: Type, right: Type) ->
 	check = (obj: Anything) ->
@@ -83,18 +85,21 @@ Intersection@of = (left: Type, right: Type) ->
 Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 One = 1
 
-Error = data:
+Error = struct:
 	message: String
 	object: Anything?
 
-ToString = data:
+StackInfo = struct:
+	stack: Array[String]
+
+ToString = struct:
 	toString: () -> String
 
-Tuple2 = [A, B] => data:
+Tuple2 = [A, B] => struct:
 	left: A
 	right: B
 
-Tuple3 = [A, B, C] => data:
+Tuple3 = [A, B, C] => struct:
 	left: A
 	middle: B
 	right: C
