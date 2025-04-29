@@ -706,7 +706,7 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		if (typeof componentKey !== 'symbol') continue;
 		const component = obj[componentKey]
 		const componentName = (componentKey.description === "Tuple2" || componentKey.description === "Tuple3") ? "" : componentKey.description
-		results.push(yellow(componentName) + white("(") + Reflect.ownKeys(component).map(k => makeStr(component[k])).join(white(", ")) + white(")"))
+		results.push(yellow(componentName) + white(" { ") + Reflect.ownKeys(component).map(k => makeStr(component[k])).join(white(", ")) + white(" } "))
 	}
 
 	return results.join(" & ")

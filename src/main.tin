@@ -8,3 +8,4 @@ Cat = struct:
 cat = Cat { name = "Tom", age = 5 }
 
 print(cat)
+

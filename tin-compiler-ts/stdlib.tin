@@ -1,6 +1,6 @@
 # Order in this file is important
 external "
-export const Anything = _S(Symbol(\"Anything\"), () => undefined, lazy(() => Type(\"Anything\", [(n) => true], [(n) => true])));
+export const Anything = _S(Symbol(\"Anything\"), () => undefined, lazy(() => Type(\{_:\"Anything\"\}, \{_:(n) => true\}, \{_:(n) => true\})));
 "
 
 Type = struct:
