@@ -20,10 +20,9 @@ import {
    Identifier,
    IfStatement,
    Literal,
-   RoundApply,
+   Call,
    RoundValueToValueLambda,
    Select,
-   SquareApply,
    SquareTypeToTypeLambda,
    SquareTypeToValueLambda,
    Statement,
@@ -173,11 +172,14 @@ export class TypeInferencer {
          case "Block":
             inferredType = this.inferBlock(node as Block, scope, options);
             break;
-         case "RoundApply":
-            inferredType = this.inferRoundApply(node as RoundApply, scope);
-            break;
-         case "SquareApply":
-            inferredType = this.inferSquareApply(node as SquareApply, scope);
+         case "Call":
+            if ((node as Call).kind === "SQUARE") {
+               inferredType = this.inferSquareApply(node as Call, scope);
+            } else if ((node as Call).kind === "ROUND") {
+               inferredType = this.inferRoundApply(node as Call, scope);
+            } else {
+               inferredType = this.inferCurlyCall(node as Call, scope);
+            }
             break;
          case "Select":
             inferredType = this.inferSelect(node as Select, scope);
@@ -338,7 +340,7 @@ export class TypeInferencer {
       );
    }
 
-   inferSquareApply(node: SquareApply, scope: Scope): Type {
+   inferSquareApply(node: Call, scope: Scope): Type {
       let calleeType;
       //   this.handleSquareExtensionSearch(node, scope);
       try {
@@ -376,7 +378,7 @@ export class TypeInferencer {
             }
          }
       } else if (calleeType instanceof SquareTypeToValueLambdaType) {
-         const calledArgs = node.typeArgs.map((t) =>
+         const calledArgs = node.args.map(([n, t]) =>
             this.context.translator.translate(t, scope)
          );
          const expectedArgs = calleeType.paramTypes;
@@ -412,7 +414,7 @@ export class TypeInferencer {
       //   }
    }
 
-   handleExtensionSearch(node: RoundApply, scope: Scope) {
+   handleExtensionSearch(node: Call, scope: Scope) {
       // Handle extension method search
       if (node.callee instanceof Select) {
          try {
@@ -490,7 +492,7 @@ export class TypeInferencer {
             }
          } catch (e) {}
       } else if (
-         node.callee instanceof SquareApply &&
+         node.callee instanceof Call &&
          node.callee.callee instanceof Select
       ) {
          try {
@@ -537,10 +539,23 @@ export class TypeInferencer {
       }
    }
 
+   inferCurlyCall(node: Call, scope: Scope): Type {
+      const calleeType = this.infer(node.callee, scope);
+      const fields = this.getAllKnownFields(calleeType, scope);
+      if (
+         (fields.size === 0 && node.args.length > 0) ||
+         (node.callee instanceof Identifier && node.callee.isTypeIdentifier())
+      ) {
+         return this.inferRoundApply(node, scope);
+      } else {
+         return calleeType;
+      }
+   }
+
    // func = [T, X] -> (thing: T, other: X) -> thing
    // func(12, "Something")
    // = Number
-   inferRoundApply(node: RoundApply, scope: Scope): Type {
+   inferRoundApply(node: Call, scope: Scope): Type {
       let calleeType;
 
       this.handleExtensionSearch(node, scope);
@@ -907,7 +922,7 @@ export class TypeInferencer {
          this.findReturns(node.owner, thisScope, acc);
       } else if (node instanceof Assignment && node.value !== undefined) {
          this.findReturns(node.value, thisScope, acc);
-      } else if (node instanceof RoundApply) {
+      } else if (node instanceof Call) {
          for (const arg of node.args) {
             this.findReturns(arg[1], thisScope, acc);
          }

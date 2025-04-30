@@ -1,11 +1,9 @@
-# import collections/Iterable
-# import Http
+import collections/Iterable
+import Http
 
-Cat = struct:
-	name: String
-	age: Number
+Box = struct:
+	items: Array[String]
 
-cat = Cat { name = "Tom", age = 5 }
+box = Box("Hello World", "People")
 
-print(cat)
-
+print(box.items.at(0))

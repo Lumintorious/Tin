@@ -314,8 +314,11 @@ export interface PotentialTypeArgs {
    initTypeArgs(map: GenericTypeMap): void;
 }
 
+type ParensKind = "ROUND" | "SQUARE" | "CURLY";
+
 // callee(args, args, args)
-export class RoundApply extends Term implements PotentialTypeArgs {
+export class Call extends Term implements PotentialTypeArgs {
+   kind: ParensKind;
    callee: Term;
    args: [string, Term][];
    takesVarargs?: boolean;
@@ -327,10 +330,21 @@ export class RoundApply extends Term implements PotentialTypeArgs {
    bakedInThis?: Term;
    callsPure?: boolean = true;
    autoFilledSquareTypeParams?: GenericTypeMap;
-   constructor(callee: Term, args: [string, Term][]) {
-      super("RoundApply");
+   constructor(kind: ParensKind, callee: Term, args: [string, Term][]) {
+      super("Call");
+      this.kind = kind;
       this.callee = callee;
       this.args = args;
+   }
+
+   setCallee(callee: Term) {
+      this.callee = callee;
+      return this;
+   }
+
+   setArgs(args: [string, Term][]) {
+      this.args = args;
+      return this;
    }
 
    getTypeArgs(): GenericTypeMap | undefined {
@@ -339,18 +353,6 @@ export class RoundApply extends Term implements PotentialTypeArgs {
 
    initTypeArgs(map: GenericTypeMap): void {
       this.autoFilledSquareTypeParams = map;
-   }
-}
-
-export class SquareApply extends Term {
-   callee: Term;
-   typeArgs: Term[];
-   isCallingAConstructor: boolean = false;
-   bakedInThis?: Term;
-   constructor(callee: Term, typeArgs: Term[]) {
-      super("SquareApply");
-      this.callee = callee;
-      this.typeArgs = typeArgs;
    }
 }
 
@@ -618,6 +620,7 @@ export class Parser {
    parseApply(callee: Term, isSquare?: boolean, isCurly?: boolean) {
       const lParens = isSquare ? "[" : isCurly ? "{" : "(";
       const rParens = isSquare ? "]" : isCurly ? "}" : ")";
+      const parensKind = isSquare ? "SQUARE" : isCurly ? "CURLY" : "ROUND";
       const start = this.consume("PARENS", lParens); // Consume '('
       const args: [string, Term][] = [];
 
@@ -655,12 +658,7 @@ export class Parser {
 
       const end = this.consume("PARENS", rParens);
 
-      let result: Term = isSquare
-         ? new SquareApply(
-              callee,
-              args.map(([name, type]) => type)
-           )
-         : new RoundApply(callee, args);
+      let result: Term = new Call(parensKind, callee, args);
       if (callee instanceof UnaryOperator) {
          result = new UnaryOperator(callee.operator, result);
          (result as any).expression.callee = callee.expression;
@@ -870,60 +868,34 @@ export class Parser {
                this.positionNow()
             );
          } else if (
-            operator === "?." &&
-            right instanceof RoundApply &&
+            (operator === "." || operator === "?.") &&
+            right instanceof Call &&
             right.callee instanceof Identifier
          ) {
-            const select = new Select(left, right.callee.value, true).fromTo(
-               whileLoopStart,
-               this.positionNow()
-            );
-            left = new RoundApply(select, right.args);
-         } else if (
-            operator === "." &&
-            right instanceof RoundApply &&
-            right.callee instanceof Identifier
-         ) {
-            const select = new Select(left, right.callee.value).fromTo(
-               whileLoopStart,
-               this.positionNow()
-            );
-            left = new RoundApply(select, right.args);
-         } else if (
-            operator === "." &&
-            right instanceof RoundApply &&
-            right.callee instanceof SquareApply &&
-            right.callee.callee instanceof Identifier
-         ) {
-            const select = new Select(left, right.callee.callee.value).fromTo(
-               whileLoopStart,
-               this.positionNow()
-            );
-            left = new RoundApply(
-               new SquareApply(select, right.callee.typeArgs),
-               right.args
-            );
-         } else if (
-            operator === "." &&
-            right instanceof SquareApply &&
-            right.callee instanceof Identifier
-         ) {
-            const select = new Select(left, right.callee.value).fromTo(
-               whileLoopStart,
-               this.positionNow()
-            );
-            left = new SquareApply(select, right.typeArgs);
-         } else if (
-            operator === "?." &&
-            right instanceof SquareApply &&
-            right.callee instanceof Identifier
-         ) {
-            const select = new Select(left, right.callee.value, true).fromTo(
-               whileLoopStart,
-               this.positionNow()
-            );
-            left = new SquareApply(select, right.typeArgs);
-         } else if (
+            const select = new Select(
+               left,
+               right.callee.value,
+               operator === "?."
+            ).fromTo(whileLoopStart, this.positionNow());
+            left = right.setCallee(select);
+         }
+         //   else if (
+         //     operator === "." &&
+         //     right instanceof Call &&
+         //     right.callee instanceof Call &&
+         //     right.callee.callee instanceof Identifier
+         //  ) {
+         //     const select = new Select(left, right.callee.callee.value).fromTo(
+         //        whileLoopStart,
+         //        this.positionNow()
+         //     );
+         // 	right.setCallee()
+         //     left = new Call(
+         //        new SquareApply(select, right.callee.typeArgs),
+         //        right.args
+         //     );
+         //  }
+         else if (
             operator === "." &&
             right instanceof Cast &&
             right.expression instanceof Identifier

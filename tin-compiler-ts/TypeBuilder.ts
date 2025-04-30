@@ -2,7 +2,7 @@ import {
    AstNode,
    Assignment,
    Block,
-   RoundApply,
+   Call,
    RoundValueToValueLambda,
    SquareTypeToValueLambda,
    WhileLoop,
@@ -22,7 +22,6 @@ import {
 } from "./Types";
 import {
    SquareTypeToTypeLambda,
-   SquareApply,
    Import,
    INVAR_RETURNING_FUNC_IN_VAR_PLACE,
 } from "./Parser";
@@ -89,7 +88,7 @@ export class TypeBuilder {
          node.statements.forEach((statement) =>
             this.build(statement, innerBlockScope)
          );
-      } else if (node instanceof RoundApply) {
+      } else if (node instanceof Call && node.kind !== "SQUARE") {
          this.buildRoundApply(node, scope, options);
       } else if (node instanceof AppliedKeyword) {
          this.build(node.param, scope);
@@ -215,7 +214,7 @@ export class TypeBuilder {
       } else if (node instanceof Change) {
          this.build(node.lhs, scope);
          this.build(node.value, scope);
-      } else if (node instanceof SquareApply) {
+      } else if (node instanceof Call && node.kind === "SQUARE") {
          this.build(node.callee, scope);
          let calleeType: Type;
          try {
@@ -234,7 +233,7 @@ export class TypeBuilder {
                isStructConstructor = true;
                node.isCallingAConstructor = true;
             }
-            node.typeArgs.forEach((t) =>
+            node.args.forEach(([n, t]) =>
                this.build(t, scope, { isTypeLevel: options.isTypeLevel })
             );
          } catch (e) {
@@ -517,11 +516,7 @@ export class TypeBuilder {
       );
    }
 
-   buildSquareArgsInRoundApply(
-      node: RoundApply,
-      calleeType: Type,
-      scope: Scope
-   ) {
+   buildSquareArgsInRoundApply(node: Call, calleeType: Type, scope: Scope) {
       if (
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
@@ -672,7 +667,7 @@ export class TypeBuilder {
    }
 
    buildRoundApply(
-      node: RoundApply,
+      node: Call,
       scope: Scope,
       options: RecursiveResolutionOptions
    ) {
@@ -884,7 +879,7 @@ export class TypeBuilder {
       } else if (node instanceof BinaryExpression) {
       } else if (node instanceof UnaryOperator) {
       } else if (
-         node instanceof RoundApply &&
+         node instanceof Call &&
          node.callee instanceof Identifier &&
          node.callee.value === lambdaName
       ) {
@@ -930,7 +925,7 @@ export class TypeBuilder {
       }
       for (const [term, type] of returns) {
          if (
-            !(term instanceof RoundApply) ||
+            !(term instanceof Call) ||
             !(term.callee instanceof Identifier) ||
             term.callee.value != options.assignedName
          ) {
@@ -1098,7 +1093,7 @@ export class TypeBuilder {
             ...this.termDependencies(term.left, boundaryScope, scope),
             ...this.termDependencies(term.right, boundaryScope, scope),
          ];
-      } else if (term instanceof RoundApply) {
+      } else if (term instanceof Call) {
          return [
             ...this.termDependencies(term.callee, boundaryScope, scope),
             ...term.args.flatMap((arg) =>
@@ -1148,7 +1143,7 @@ export class TypeBuilder {
       } else if (term instanceof BinaryExpression) {
          this.assignClojure(clojure, term.left, hitLambda, scope);
          this.assignClojure(clojure, term.right, hitLambda, scope);
-      } else if (term instanceof RoundApply) {
+      } else if (term instanceof Call) {
          this.assignClojure(clojure, term.callee, hitLambda, scope);
          term.args.forEach((arg) =>
             this.assignClojure(clojure, arg[1], hitLambda, scope)

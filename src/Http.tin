@@ -18,18 +18,18 @@ Status = Number where:
 
 ByteBuffer = Array[Byte]
 
-Url = data:
+Url = struct:
 	baseUrl: UrlString
 	port: Port
 	params: UrlParams
 
-Request = data:
+Request = struct:
 	method: HttpMethod
 	url: Url
 	headers: Headers
 	body: ByteBuffer
 
-Response = data:
+Response = struct:
 	status: Number
 	headers: Headers
 	body: String

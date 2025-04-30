@@ -5,9 +5,8 @@ import {
    UnaryOperator,
    RoundValueToValueLambda,
    SquareTypeToTypeLambda,
-   SquareApply,
    TypeDef,
-   RoundApply,
+   Call,
    BinaryExpression,
    Optional,
    Group,
@@ -210,13 +209,13 @@ export class TypeTranslator {
             );
          case "Block":
             return this.translate((node as Block).statements[0], scope);
-         case "SquareApply":
-            if (!(node instanceof SquareApply)) {
+         case "Call":
+            if (!(node instanceof Call) || node.kind !== "SQUARE") {
                return new Type();
             }
             return new AppliedGenericType(
                this.translate(node.callee, scope),
-               node.typeArgs.map((arg) => this.translate(arg, scope))
+               node.args.map(([name, arg]) => this.translate(arg, scope))
             );
          case "TypeDef":
             if (!(node instanceof TypeDef)) {
@@ -246,8 +245,8 @@ export class TypeTranslator {
                );
             });
             return new StructType(node.name, fieldTypes);
-         case "RoundApply":
-            if (!(node instanceof RoundApply)) {
+         case "Call":
+            if (!(node instanceof Call)) {
                return new Type();
             }
             throw new Error(

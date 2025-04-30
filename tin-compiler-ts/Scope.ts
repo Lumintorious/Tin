@@ -1,37 +1,25 @@
 import { CodePoint, TokenPos } from "./Lexer";
-import {
-   Assignment,
-   AstNode,
-   Block,
-   Identifier,
-   RoundValueToValueLambda,
-   Term,
-} from "./Parser";
+import { Assignment, AstNode, Identifier, Term } from "./Parser";
 import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
 import {
-   IntersectionType,
-   PrimitiveType,
-   UnionType,
-   RefinedType,
-} from "./Types";
-import {
    Any,
    AppliedGenericType,
-   GenericNamedType,
+   IntersectionType,
    MutableType,
    NamedType,
-   Nothing,
    OptionalType,
    ParamType,
+   RefinedType,
    RoundValueToValueLambdaType,
    SquareTypeToTypeLambdaType,
    SquareTypeToValueLambdaType,
    StructType,
    Type,
    UncheckedType,
+   UnionType,
 } from "./Types";
 
 export class Symbol {

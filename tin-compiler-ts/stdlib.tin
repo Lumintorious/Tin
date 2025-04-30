@@ -72,8 +72,9 @@ panic: (message: String) -> Never = external
 Array.of: [T] -> (Array[T]) -> Array[T] = external
 Array.empty: [T] -> Array[T] = external
 Array.and: [T] -> (self: Array[T], other: Array[T]) -> Array[T] = external
+toString: (obj: Anything) -> String = external
 
-Intersection@of = (left: Type, right: Type) ->
+Intersection.of = (left: Type, right: Type) ->
 	check = (obj: Anything) ->
 		left.check(obj) && right.check(obj)
 

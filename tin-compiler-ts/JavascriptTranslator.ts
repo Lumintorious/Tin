@@ -12,9 +12,8 @@ import {
    RoundValueToValueLambda,
    IfStatement,
    BinaryExpression,
-   RoundApply,
+   Call,
    FieldDef,
-   SquareApply,
    SquareTypeToTypeLambda,
    Term,
    Tuple,
@@ -367,13 +366,6 @@ export class JavascriptTranslator implements OutputTranslator {
             term.value instanceof SquareTypeToTypeLambda &&
             term.value.returnType instanceof TypeDef
          ) {
-            const surrogateFunc = new SquareTypeToValueLambda(
-               term.value.parameterTypes,
-               new Block([
-                  new SquareApply(term.lhs, term.value.parameterTypes),
-               ]),
-               true
-            );
             declareConstructor = "";
             // `; var ${constructorName} = ${this.translate(
             //    surrogateFunc,
@@ -535,9 +527,16 @@ export class JavascriptTranslator implements OutputTranslator {
          // BinaryExpression
       } else if (term instanceof BinaryExpression) {
          return this.translateBinaryExpression(term, scope);
-
-         // RoundApply
-      } else if (term instanceof RoundApply) {
+         // Call
+      } else if (
+         term instanceof Call &&
+         term.kind === "CURLY" &&
+         !term.isCallingAConstructor
+      ) {
+         return `_copy(${this.translate(term.callee, scope)}, {${term.args.map(
+            ([n, t]) => `${n}: ${this.translate(t, scope)},`
+         )}})`;
+      } else if (term instanceof Call) {
          let params: ([string, Term] | undefined)[] = [];
          if (term.paramOrder.length === 0) {
             params = term.args;
@@ -600,7 +599,7 @@ export class JavascriptTranslator implements OutputTranslator {
          }
          function wrapAwait(call: string) {
             if (
-               term instanceof RoundApply &&
+               term instanceof Call &&
                !term.callsPure &&
                [...scope.toPath()].filter((c) => c === ".").length > 4
             ) {
@@ -632,11 +631,11 @@ export class JavascriptTranslator implements OutputTranslator {
          );
 
          // SquareApply
-      } else if (term instanceof SquareApply) {
+      } else if (term instanceof Call && term.kind === "SQUARE") {
          return (
             this.translate(term.callee, scope) +
             ".call('Type', " +
-            term.typeArgs.map((arg) => this.translate(arg, scope)).join(", ") +
+            term.args.map((arg) => this.translate(arg[1], scope)).join(", ") +
             ")"
          );
 
@@ -803,7 +802,7 @@ export class JavascriptTranslator implements OutputTranslator {
             (term.left.isTypeLevel && term.right.isTypeLevel)
          ) {
             return this.translate(
-               new RoundApply(new Identifier("_U"), [
+               new Call("ROUND", new Identifier("_U"), [
                   ["", term.left],
                   ["", term.right],
                ]),

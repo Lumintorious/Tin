@@ -51,7 +51,7 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 			if (result[key] === undefined) {
 				delete result[key]
 			} else if (typeof result[key] === 'object' && !("_" in result[key])) {
-				result[key] = [result[key]]
+				result[key] = { _: result[key] }
 			}
 		}
 		Object.setPrototypeOf(result, proto)
@@ -479,6 +479,51 @@ export function _replaceComponentFields(obj, replacer) {
 	return obj;
 }
 
+export function _copy(obj, fieldReplacers) {
+	const copied = copy(obj)
+	_replaceComponentFields2(copied, fieldReplacers)
+	return copied;
+}
+
+export function _replaceComponentFields2(obj, replacer) {
+	if (typeof obj !== "object") {
+		return obj;
+	}
+	if (typeof replacer !== 'object' || replacer === null) {
+		return obj;
+	}
+	for (const componentKey of Reflect.ownKeys(obj)) {
+		if (typeof componentKey !== 'symbol') {
+			continue;
+		}
+		for (const fieldKey of Reflect.ownKeys(obj[componentKey])) {
+			const replacerField = replacer[fieldKey]
+			const objField = obj?.[componentKey]?.[fieldKey]
+			if (objField !== undefined && replacerField !== undefined) {
+				obj[componentKey][fieldKey] = { _: replacerField }
+				if (objField._cn && !replacerField._cn) {
+					replacerField._cn = objField._cn
+
+					if (replacerField._cn && obj._clojure[replacerField._cn]) {
+						obj._clojure[replacerField._cn] = replacerField
+					}
+				}
+				const oldObjField = objField
+				obj[componentKey][fieldKey] = replacerField;
+				for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
+					const clojureField = obj._clojure[clojureKey]
+					if (clojureField === oldObjField) {
+						obj._clojure[clojureKey] = replacerField
+					}
+				}
+			}
+		}
+
+	}
+
+	return obj;
+}
+
 export const _o = function (objParam) {
 	let obj = objParam;
 	if (typeof obj === 'object' && "_" in obj) {
@@ -689,12 +734,12 @@ export function makeStr(obj, useToString, firstLayer = false) {
 	}
 
 	if (Reflect.ownKeys(obj).includes(Array._s)) {
-		let result = yellow("Array") + white('(');
+		let result = yellow("Array") + white(' { ');
 		for (let i = 0; i < obj[Array._s].length._(); i++) {
 			result += makeStr(obj[Array._s].at._(i)) + (i === obj[Array._s].length._() - 1 ? "" : white(", "))
 		}
 
-		return result + white(")")
+		return result + white(" }")
 	}
 
 	if (useToString && obj[ToString._s]?.toString?._) {

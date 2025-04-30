@@ -1,10 +1,10 @@
-Iterator = [T] -> data:
+Iterator = [T] -> struct:
 	next: () -> var T?
 
-Iterable = [T] -> data:
+Iterable = [T] -> struct:
 	makeIterator: () -> Iterator[T]
 
-MapOps = [K, V] -> data:
+MapOps = [K, V] -> struct:
 	get: (K) -> V?
 	with: (K, V) -> Map[K, V]
 
@@ -151,3 +151,36 @@ export function Json$toString(js) \{
 	\})	
 \}
 "
+
+Iterable.toString = [T] -> (self: Iterable[T], label: String = " "): String ->
+	iterator = self.makeIterator()
+	current = var iterator.next()
+	str = var "{label} \{"
+	
+	while current !: Nothing,
+		set str = str + toString(current)
+		set current = iterator.next()
+		if current !: Nothing,
+			set str = str + ", "
+
+	str + " }"
+
+Range = struct:
+	start: Number
+	end: Number
+	step: Number
+
+Range.from = (start: Number, end: Number, step: Number = 1) ->
+	range = Range { start, end, step }
+	iterable = Iterable[Number] { () ->
+		link i = var start
+		Iterator[Number] { () ->
+			if i <= end,
+				set i = i + step
+				i - step
+			else
+				nothing
+		}
+	}
+	range & iterable
+	 

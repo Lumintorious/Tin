@@ -1,7 +1,6 @@
 import { TokenPos } from "./Lexer";
 import {
    SquareTypeToValueLambda,
-   SquareApply,
    WhileLoop,
    Statement,
    AppliedKeyword,
@@ -15,7 +14,7 @@ import {
    Block,
    Assignment,
    IfStatement,
-   RoundApply,
+   Call,
    Select,
    AstNode,
    Term,
@@ -187,9 +186,9 @@ export class TypeChecker {
          }
       } else if (node instanceof Change) {
          this.typeCheckChange(node as Change, scope);
-      } else if (node instanceof RoundApply) {
+      } else if (node instanceof Call && node.kind !== "SQUARE") {
          this.typeCheckApply(node, scope, options);
-      } else if (node instanceof SquareApply) {
+      } else if (node instanceof Call) {
          this.typeCheckSquareApply(node, scope);
       } else if (node instanceof RoundValueToValueLambda) {
          this.typeCheckRoundValueToValueLambda(node, scope, options);
@@ -491,9 +490,9 @@ export class TypeChecker {
       this.typeCheck(node.block, innerScope);
    }
 
-   typeCheckSquareApply(apply: SquareApply, scope: Scope) {
+   typeCheckSquareApply(apply: Call, scope: Scope) {
       const translator = this.context.translator;
-      const appliedParamTypes = apply.typeArgs.map((t) =>
+      const appliedParamTypes = apply.args.map(([n, t]) =>
          translator.translate(t, scope)
       );
       if (
@@ -589,7 +588,7 @@ export class TypeChecker {
    }
 
    typeCheckApply(
-      apply: RoundApply,
+      apply: Call,
       scope: Scope,
       options: RecursiveResolutionOptions
    ) {
@@ -874,7 +873,7 @@ export class TypeChecker {
                nearestFunctionScope
             ),
          ];
-      } else if (node instanceof RoundApply) {
+      } else if (node instanceof Call) {
          const type = this.context.inferencer.infer(node.callee, scope);
          if (!onlyCaptures) {
             const results = node.args.flatMap((arg) =>
@@ -971,7 +970,7 @@ export class TypeChecker {
    }
 
    typeCheckLambdaCall(
-      term: RoundApply,
+      term: Call,
       typeSymbol: Type,
       applyArgs: [string, Term][], // Positional arguments, with possible names
       expectedParams: ParamType[], // Expected parameter definitions

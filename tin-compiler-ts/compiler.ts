@@ -6,7 +6,6 @@ import files from "node:fs/promises";
 import path from "node:path";
 import { Scope, TypePhaseContext } from "./Scope";
 import { Type, ParamType } from "./Types";
-import { GoTranslator } from "./GoTranslator";
 import * as TypesExports from "./Types";
 
 export type CompilerItem = AstNode | Type | ParamType | undefined;
@@ -328,7 +327,7 @@ async function compile(
       );
 
       const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
-         ? new GoTranslator()
+         ? new JavascriptTranslator(importsCache.size === 0)
          : new JavascriptTranslator(importsCache.size === 0);
 
       // TRANSLATION
