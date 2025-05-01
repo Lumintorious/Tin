@@ -1,9 +1,8 @@
-import collections/Iterable
-import Http
+Box = [T] => struct:
+	contents: T
 
-Box = struct:
-	items: Array[String]
+box = Box(24) & Box("Hello")
 
-box = Box("Hello World", "People")
 
-print(box.items.at(0))
+print(box)
+print(box:Box[String].contents)	

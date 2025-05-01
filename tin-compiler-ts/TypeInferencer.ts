@@ -654,15 +654,23 @@ export class TypeInferencer {
             for (const symbol of symbols) {
                if (symbol.name === fieldName) {
                   if (firstFind) {
-                     if (type.toString() !== firstFind[0].toString()) {
-                        throw new Error(
-                           "Attempted to access field " +
-                              node.field +
-                              ", but type has multiple fields of that name. Try casting the object first. Clash at " +
-                              type.toString() +
-                              " and " +
-                              firstFind[0].toString()
-                        );
+                     if (
+                        type instanceof StructType &&
+                        firstFind[0] instanceof StructType
+                     ) {
+                        if (
+                           type.nameAndAppliedSquareParams() !==
+                           firstFind[0].nameAndAppliedSquareParams()
+                        ) {
+                           throw new Error(
+                              "Attempted to access field " +
+                                 node.field +
+                                 ", but type has multiple fields of that name. Try casting the object first. Clash at " +
+                                 type.nameAndAppliedSquareParams() +
+                                 " and " +
+                                 firstFind[0].nameAndAppliedSquareParams()
+                           );
+                        }
                      }
                   }
                   firstFind = [type, symbol];
@@ -735,6 +743,11 @@ export class TypeInferencer {
 
       found[1].parentComponent = found[0];
       node.ownerComponent = found[0].name;
+      if (found[0] instanceof StructType) {
+         node.ownerComponentAppliedSquareTypes = (
+            found[0].squareParamsApplied?.map((t) => t.name) ?? []
+         ).filter((t) => t !== undefined) as string[];
+      }
       let result = found[1].type;
       //   if (isOwnerMutable && !(found[1].type instanceof MutableType)) {
       //      node.invarTypeInVarPlace = true;
@@ -746,7 +759,7 @@ export class TypeInferencer {
    }
 
    findField(type: Type, field: string, scope: Scope): ParamType | undefined {
-      function findField(
+      function findField_(
          fieldName: string,
          fields: Map<Type, ParamType[]>
       ): [Type, ParamType] | undefined {
@@ -772,7 +785,7 @@ export class TypeInferencer {
          }
          return firstFind;
       }
-      return findField(field, this.getAllKnownFields(type, scope))?.[1];
+      return findField_(field, this.getAllKnownFields(type, scope))?.[1];
    }
 
    getAllKnownFields(type: Type, scope: Scope): Map<Type, ParamType[]> {
@@ -1348,26 +1361,26 @@ export class TypeInferencer {
             !(lambdaType instanceof MutableType)
          ) {
             this.context.builder.build(node, scope);
-            let effects = [
-               ...this.context.checker.findEffects(
-                  node.block,
-                  true,
-                  innerScope,
-                  scope
-               ),
-               ...node.params.flatMap((p) =>
-                  this.context.checker.findEffects(p, true, innerScope, scope)
-               ),
-            ];
-            if (effects.length > 0) {
-               // lambdaType.capturesMutableValues = true;
-               lambdaType.returnType = new MutableType(lambdaType.returnType);
-               if (node.block instanceof Block) {
-                  this.inferBlock(node.block, innerScope, {
-                     typeExpectedInPlace: lambdaType.returnType,
-                  });
-               }
-            }
+            // let effects = [
+            //    ...this.context.checker.findEffects(
+            //       node.block,
+            //       true,
+            //       innerScope,
+            //       scope
+            //    ),
+            //    ...node.params.flatMap((p) =>
+            //       this.context.checker.findEffects(p, true, innerScope, scope)
+            //    ),
+            // ];
+            // if (effects.length > 0) {
+            //    // lambdaType.capturesMutableValues = true;
+            //    lambdaType.returnType = new MutableType(lambdaType.returnType);
+            //    if (node.block instanceof Block) {
+            //       this.inferBlock(node.block, innerScope, {
+            //          typeExpectedInPlace: lambdaType.returnType,
+            //       });
+            //    }
+            // }
          }
 
          return lambdaType;

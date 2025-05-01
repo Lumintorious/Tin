@@ -567,6 +567,32 @@ export class SquareTypeToTypeLambdaType extends Type {
       this.returnType = returnType;
    }
 
+   extends(other: Type, scope: Scope): boolean {
+      if (!(other instanceof SquareTypeToTypeLambdaType)) return false;
+      if (other.paramTypes.length !== this.paramTypes.length) return false;
+      // Check if parameter types are contravariant
+      const paramCheck =
+         this.paramTypes.length === other.paramTypes.length &&
+         this.paramTypes.every((param, index) => {
+            return other.paramTypes[index].isAssignableTo(param, scope);
+         });
+
+      // Return type must be covariant
+      const returnCheck = this.returnType.isAssignableTo(
+         other.returnType,
+         scope
+      );
+
+      return paramCheck && returnCheck;
+   }
+
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return (
+         other instanceof SquareTypeToTypeLambdaType &&
+         other.extends(this, scope)
+      );
+   }
+
    buildConstructor(): Type | undefined {
       if (!(this.returnType instanceof StructType) || !this.name) {
          return;
@@ -924,6 +950,7 @@ export class RefinedType extends Type {
 
 export class StructType extends Type {
    fields: ParamType[];
+   squareParamsApplied?: Type[];
    constructor(name: string | undefined, fields: ParamType[]) {
       super("StructType");
       this.fields = fields; // Array of { name, type } objects
@@ -987,6 +1014,15 @@ export class StructType extends Type {
             field.type.isAssignableTo(otherField.type, scope)
          );
       });
+   }
+
+   nameAndAppliedSquareParams(): string {
+      return (
+         this.name +
+         "[" +
+         (this.squareParamsApplied ?? []).map((t) => t.name) +
+         "]"
+      );
    }
 
    toString() {

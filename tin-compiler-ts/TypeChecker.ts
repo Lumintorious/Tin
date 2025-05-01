@@ -432,18 +432,18 @@ export class TypeChecker {
                this.findEffects(p, true, scope.innerScopeOf(node), innerScope)
             ),
          ];
-         for (const [error, term] of effects) {
-            this.context.errors.add(
-               error +
-                  " in lambda '" +
-                  node.show() +
-                  "' that supposedly returns an invariable value.",
-               undefined,
-               undefined,
-               term.position,
-               "You must mark the return type of the lambda with ~<Type>, or not use a variable value"
-            );
-         }
+         //  for (const [error, term] of effects) {
+         //     this.context.errors.add(
+         //        error +
+         //           " in lambda '" +
+         //           node.show() +
+         //           "' that supposedly returns an invariable value.",
+         //        undefined,
+         //        undefined,
+         //        term.position,
+         //        "You must mark the return type of the lambda with ~<Type>, or not use a variable value"
+         //     );
+         //  }
          //  const returnType = scope.resolveNamedType(type.returnType);
          // if (returnType.isMutable()) {
          //    this.context.errors.add(
@@ -573,6 +573,7 @@ export class TypeChecker {
       let i = 0;
       for (let paramType of expectedParams) {
          const [name, gottenParamType] = appliedParams.at(i);
+         i++;
          if (
             paramType.extendedType &&
             !gottenParamType.isAssignableTo(paramType.extendedType, scope)

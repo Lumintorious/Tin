@@ -268,7 +268,14 @@ export class JavascriptTranslator implements OutputTranslator {
                ?.replaceAll(".", "$")}`;
             ownerName = "";
          } else if (term.ownerComponent) {
-            selectionBase = `[${term.ownerComponent}._s]${operator}${term.field}`;
+            const symbolSplice = term.ownerComponentAppliedSquareTypes
+               ? `_Q_share(${
+                    term.ownerComponent
+                 }._s, [${term.ownerComponentAppliedSquareTypes
+                    .map((s) => s + "._s")
+                    .join(",")}] )`
+               : `${term.ownerComponent}._s`;
+            selectionBase = `[${symbolSplice}]${operator}${term.field}`;
          } else if (term.unionOwnerComponents) {
             selectionBase = `._findComponentField([${term.unionOwnerComponents
                .filter((c) => c)
@@ -462,14 +469,18 @@ export class JavascriptTranslator implements OutputTranslator {
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
          scope = scope.innerScopeOf(term);
-         return `/* [] */(function(){ const _sym = Symbol("${
+         return `/* [] */(function(){ const _sqSym = Symbol("${
             term.name
-         }"); return _Q(_sym, (${term.parameterTypes
+         }"); return _Q(_sqSym, (${term.parameterTypes
             .map((t) => this.translate(t, scope.innerScopeOf(term, true)))
-            .join(", ")}) => ${this.translate(
+            .join(", ")}) => {  const _sqSym_args = [${term.parameterTypes
+            .map(
+               (t) => this.translate(t, scope.innerScopeOf(term, true)) + "._s"
+            )
+            .join(",")}]; return ${this.translate(
             term.returnType,
             scope.innerScopeOf(term, true)
-         )}); })()`;
+         )}}); })()`;
 
          // IfStatement
       } else if (term instanceof IfStatement) {
@@ -582,6 +593,8 @@ export class JavascriptTranslator implements OutputTranslator {
                callee.invarTypeInVarPlace = term.callee.invarTypeInVarPlace;
 
                (callee as Select).ownerComponent = term.callee.ownerComponent;
+               (callee as Select).ownerComponentAppliedSquareTypes =
+                  term.callee.ownerComponentAppliedSquareTypes;
                (callee as Select).isTypeLevel = term.callee.isTypeLevel;
             }
          }
@@ -641,7 +654,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // TypeDef
       } else if (term instanceof TypeDef) {
-         return `_S(typeof _sym !== "undefined" ? _sym : Symbol("${
+         return `_S(typeof _sqSym !== "undefined" ? _Q_share(_sqSym, _sqSym_args) : Symbol("${
             term.name
          }"), ${this.createConstructor(
             term,

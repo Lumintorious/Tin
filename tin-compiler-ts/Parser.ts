@@ -436,6 +436,7 @@ export class Select extends Term {
    field: string;
    ownerComponent?: string;
    unionOwnerComponents?: string[];
+   ownerComponentAppliedSquareTypes?: string[];
    ammortized: boolean = false; // if it's x?.blabla
    isDeclaration: boolean = false; // if it's bla.bla = 5 (not set bla.bla = 5)
    isBeingTreatedAsIdentifier: boolean = false;
@@ -1367,7 +1368,10 @@ export class Parser {
    }
 
    omit(expectedTag: string) {
-      if (this.peek() && this.peek().tag === expectedTag) {
+      if (
+         this.peek() &&
+         (this.peek().tag === expectedTag || this.peek().value === expectedTag)
+      ) {
          this.current++;
       }
    }
@@ -1473,7 +1477,7 @@ export function parseObject(parser: Parser): DataDef {
    //    }
    // Expect INDENT (start of type block)
    parser.consume("KEYWORD", "struct");
-   parser.consume("OPERATOR", ":");
+   parser.omit(":");
    parser.omit("NEWLINE");
    parser.omit("INDENT");
 

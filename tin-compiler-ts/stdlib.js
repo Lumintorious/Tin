@@ -83,8 +83,24 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 	return constructor;
 }
 
+const _Q_map = new Map()
+
+export function _Q_share(calleeSym, argSyms) {
+	const key = calleeSym.description + "[" + argSyms.map(s => typeof s === 'object' && "_s" in s ? s._s.description : s.description).join(",") + "]"
+	if (_Q_map.has(key)) {
+		return _Q_map.get(key)
+	} else {
+		const result = Symbol(key)
+		_Q_map.set(key, result)
+		return result
+	}
+}
+
 export function _Q(symbol, func, descriptor) {
 	func._s = symbol;
+	func.__is_child = (obj) => {
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol);
+	}
 	return func;
 }
 
@@ -625,6 +641,10 @@ function white(str) {
 	return `\x1b[37m${str}\x1b[0m`
 }
 
+function red(str) {
+	return `\x1b[31m${str}\x1b[0m`
+}
+
 function orange(str) {
 	return `\x1b[33m${str}\x1b[0m`
 }
@@ -746,15 +766,40 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		return obj[ToString._s]?.toString?._.call(obj)
 	}
 
+	function colorSymbolName(symName) {
+		const operators = [",", "[", "]"]
+		let i = 0;
+		let result = "";
+		while (i < symName.length) {
+			let block = "";
+			let wasFirstLoop = false;
+			while (operators.includes(symName[i])) {
+				block += symName[i];
+				i++;
+				wasFirstLoop = true;
+			}
+			if (wasFirstLoop) {
+				result += white(block)
+			} else {
+				while (i < symName.length && !operators.includes(symName[i])) {
+					block += symName[i]
+					i++;
+				}
+				result += orange(block)
+			}
+		}
+		return result;
+	}
+
 	const results = [];
 	for (const componentKey of Reflect.ownKeys(obj)) {
 		if (typeof componentKey !== 'symbol') continue;
 		const component = obj[componentKey]
 		const componentName = (componentKey.description === "Tuple2" || componentKey.description === "Tuple3") ? "" : componentKey.description
-		results.push(yellow(componentName) + white(" { ") + Reflect.ownKeys(component).map(k => makeStr(component[k])).join(white(", ")) + white(" } "))
+		results.push(colorSymbolName(componentName) + white(" { ") + Reflect.ownKeys(component).map(k => `${red(k)} ${white("=")} ${makeStr(component[k])}`).join(white(", ")) + white(" }"))
 	}
 
-	return results.join(" & ")
+	return results.join(white(" & "))
 }
 
 export function String$matches(regex) {

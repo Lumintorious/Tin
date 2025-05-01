@@ -1,12 +1,27 @@
-Iterator = [T] -> struct:
-	next: () -> var T?
+Iterator = [T] => struct:
+	next: () -> T?
 
-Iterable = [T] -> struct:
+Iterable = [T] => struct:
 	makeIterator: () -> Iterator[T]
+
+Accessible = [T] => struct:
+	at: (index: Number) -> T?
+
+VarAccessible = [T] => struct:
+	at: (index: Number) -> T?
+	place: (index: Number, value: T) -> Nothing
+
+Growable = [K, V] => struct:
+	add: (value: V) -> K
+	remove: (value: V) -> K?
+	removeAt: (key: K) -> V?
 
 MapOps = [K, V] -> struct:
 	get: (K) -> V?
 	with: (K, V) -> Map[K, V]
+
+Mergeable = [T, F: Mergeable] => struct:
+	merge: (F[T]) -> F[T]
 
 Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 
@@ -44,7 +59,7 @@ external "
 Map@of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
 
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
-	Iterator[X]((): var X? ->
+	Iterator[X]((): X? ->
 		prev = self.next()
 		if prev !: Nothing,
 			fn(prev)
@@ -152,8 +167,8 @@ export function Json$toString(js) \{
 \}
 "
 
-Iterable.toString = [T] -> (self: Iterable[T], label: String = " "): String ->
-	iterator = self.makeIterator()
+Iterable.toString = [T] -> (iter: Iterable[T], label: String = " "): String ->
+	iterator = iter.makeIterator()
 	current = var iterator.next()
 	str = var "{label} \{"
 	
@@ -164,6 +179,8 @@ Iterable.toString = [T] -> (self: Iterable[T], label: String = " "): String ->
 			set str = str + ", "
 
 	str + " }"
+
+Iterable.makeToString = [T] -> (iter: Iterable[T], label: String = " ") -> () -> Iterable.toString(iter, label)
 
 Range = struct:
 	start: Number
@@ -182,5 +199,5 @@ Range.from = (start: Number, end: Number, step: Number = 1) ->
 				nothing
 		}
 	}
-	range & iterable
+	range & iterable & Iterable.makeToString(iterable, "Range")
 	 

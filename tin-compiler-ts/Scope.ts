@@ -4,9 +4,11 @@ import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
+import { type } from "os";
 import {
    Any,
    AppliedGenericType,
+   GenericNamedType,
    IntersectionType,
    MutableType,
    NamedType,
@@ -416,9 +418,13 @@ export class Scope {
       if (!(type instanceof AppliedGenericType)) {
          return type;
       }
-      const typeCallee = this.resolveNamedType(type.callee);
+      let typeCallee = this.resolveNamedType(type.callee);
       if (typeCallee instanceof UncheckedType) {
          return new UncheckedType();
+      }
+      if (typeCallee instanceof GenericNamedType && typeCallee.extendedType) {
+         typeCallee = this.resolveNamedType(typeCallee.extendedType);
+         typeCallee = this.resolveAppliedGenericTypes(typeCallee);
       }
       if (
          !(typeCallee instanceof SquareTypeToTypeLambdaType) &&
@@ -426,7 +432,9 @@ export class Scope {
       ) {
          throw new Error(
             "Attempted to apply generic parameters to non type lambda. Was " +
-               typeCallee.toString()
+               typeCallee.toString() +
+               " - " +
+               typeCallee.tag
          );
       }
       const calledArgs = type.parameterTypes;
@@ -522,7 +530,9 @@ export class Scope {
                   f.defaultValue
                );
             });
-            return new StructType(type.name, mappedFields);
+            const structResult = new StructType(type.name, mappedFields);
+            structResult.squareParamsApplied = paramMap.order.map((p) => p[1]);
+            return structResult;
          case "OptionalType":
             const optionalType = type as OptionalType;
             const newInnerType = this.resolveGenericTypes(
