@@ -12,8 +12,16 @@ import {
    Change,
    Term,
    Cast,
+   ARTIFICIAL,
+   IN_RETURN_BRANCH,
+   BAKED_TYPE,
 } from "./Parser";
-import { Scope, TypePhaseContext, RecursiveResolutionOptions } from "./Scope";
+import {
+   Scope,
+   TypePhaseContext,
+   RecursiveResolutionOptions,
+   walkTerms,
+} from "./Scope";
 import {
    StructType,
    SquareTypeToTypeLambdaType,
@@ -35,7 +43,7 @@ import {
    Make,
 } from "./Parser";
 import { Symbol, GenericTypeMap } from "./Scope";
-import { Select, Tuple } from "./Parser";
+import { Select, Tuple, Identifier } from "./Parser";
 import {
    TypeOfTypes,
    AnyType,
@@ -56,11 +64,7 @@ import {
    Type,
    AppliedGenericType,
 } from "./Types";
-import {
-   UnaryOperator,
-   Identifier,
-   VAR_RETURNING_FUNC_IN_INVAR_PLACE,
-} from "./Parser";
+import { UnaryOperator, VAR_RETURNING_FUNC_IN_INVAR_PLACE } from "./Parser";
 
 export class TypeBuilder {
    context: TypePhaseContext;
@@ -274,6 +278,16 @@ export class TypeBuilder {
                node.position
             );
          }
+         const deps: Identifier[] = [];
+         walkTerms(node.expression, scope, (node, scope) => {
+            if (node instanceof Identifier && !node.isTypeIdentifier()) {
+               const symbol = scope.lookup(node.value);
+               if (symbol.typeSymbol instanceof MutableType) {
+                  deps.push(node);
+               }
+            }
+         });
+         node.varDependencies = deps;
          this.build(node.expression, scope);
       } else if (node instanceof Tuple) {
          node.expressions.forEach((e) => this.build(e, scope));
@@ -492,6 +506,15 @@ export class TypeBuilder {
             )
          );
          return map;
+      } else if (
+         expectedType instanceof MutableType &&
+         gottenType instanceof MutableType
+      ) {
+         return this.matchParamToGenericParam(
+            expectedTypeParams,
+            gottenType.type,
+            expectedType.type
+         );
       }
       return GenericTypeMap.empty();
    }
@@ -828,6 +851,7 @@ export class TypeBuilder {
          );
       } else if (node instanceof Block) {
          const innerScope = scope.innerScopeOf(node);
+         const prevType = this.context.inferencer.infer(node, scope);
          const statements = node.statements.map((s) =>
             this.convertToTailrec(
                s,
@@ -837,7 +861,9 @@ export class TypeBuilder {
                options
             )
          );
-         return new Block(statements);
+         return new Block(statements)
+            .modify(IN_RETURN_BRANCH)
+            .modify(BAKED_TYPE.as(prevType));
       } else if (node instanceof IfStatement) {
          const innerScope = scope.innerScopeOf(node);
          const trueScope = innerScope.innerScopeOf(node.trueBranch);
@@ -846,7 +872,7 @@ export class TypeBuilder {
                ? innerScope.innerScopeOf(node.falseBranch)
                : innerScope;
          const ifStatement = node;
-         new IfStatement(
+         const result = new IfStatement(
             node.condition,
             this.convertToTailrec(
                node.trueBranch,
@@ -854,7 +880,7 @@ export class TypeBuilder {
                lambdaName,
                lambdaParamsInOrder,
                options
-            ),
+            ).modify(IN_RETURN_BRANCH),
             node.falseBranch
                ? this.convertToTailrec(
                     node.falseBranch,
@@ -862,19 +888,21 @@ export class TypeBuilder {
                     lambdaName,
                     lambdaParamsInOrder,
                     options
-                 )
+                 ).modify(IN_RETURN_BRANCH)
                : undefined
          );
-         if (!(ifStatement.trueBranch instanceof Block)) {
-            ifStatement.trueBranch = new Block([ifStatement.trueBranch]);
+         if (!(result.trueBranch instanceof Block)) {
+            result.trueBranch = new Block([result.trueBranch]).modify(
+               IN_RETURN_BRANCH
+            );
          }
-         if (
-            ifStatement.falseBranch &&
-            !(ifStatement.falseBranch instanceof Block)
-         ) {
-            ifStatement.falseBranch = new Block([ifStatement.falseBranch]);
+         if (result.falseBranch && !(result.falseBranch instanceof Block)) {
+            result.falseBranch = new Block([result.falseBranch]).modify(
+               IN_RETURN_BRANCH
+            );
          }
-         //  this.build(ifStatement, innerScope);
+         this.build(ifStatement, innerScope);
+         return result;
       } else if (node instanceof WhileLoop && node.eachLoop) {
       } else if (node instanceof BinaryExpression) {
       } else if (node instanceof UnaryOperator) {
@@ -902,12 +930,13 @@ export class TypeBuilder {
                   new Change(
                      new Identifier(paramType.name),
                      new Identifier(paramType.name + "_")
-                  )
+                  ).modify(ARTIFICIAL)
                );
             }
          }
          return new AppliedKeyword("unchecked", new Block(statements, true));
       }
+      console.log(node);
       return node;
    }
 
@@ -938,7 +967,6 @@ export class TypeBuilder {
       if (!shouldConvert || !options.assignedName) {
          return node;
       }
-
       const block = this.convertToTailrec(
          node.block,
          innerScope,
@@ -961,6 +989,10 @@ export class TypeBuilder {
          ),
       ]);
       this.build(newInnerBlock, innerScope);
+      //   const prevId = node.block.id;
+      const prevType = this.context.inferencer.infer(node.block, innerScope);
+      //   newInnerBlock.id = prevId;
+      newInnerBlock.modify(BAKED_TYPE.as(prevType));
       node.block = newInnerBlock;
 
       return node;
@@ -1361,6 +1393,9 @@ export class TypeBuilder {
          symbol = symbol.located(node.position, node.position);
          symbol.isPrivate = node.private === true;
          symbol.isLink = node.isLink === true;
+         if (scope.iteration === "DECLARATION" && scope.hasSymbol(symbolName)) {
+            throw new Error(`Value ${symbolName} already exists`);
+         }
          scope.declare(symbol.mutable(isMutable), false);
          node.symbol = symbol;
          // }

@@ -7,6 +7,8 @@ import {
    UnaryOperator,
    Cast,
    Group,
+   ARTIFICIAL,
+   BAKED_TYPE,
 } from "./Parser";
 import {
    SquareTypeToTypeLambda,
@@ -103,6 +105,9 @@ export class TypeChecker {
    typeCheckChange(node: Change, scope: Scope) {
       this.typeCheck(node.lhs, scope);
       this.typeCheck(node.value, scope);
+      if (node.is(ARTIFICIAL)) {
+         return;
+      }
       const leftType = this.context.inferencer.infer(node.lhs, scope);
       const rightType = this.context.inferencer.infer(node.value, scope);
       let shadowedType = leftType;
@@ -345,7 +350,9 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       const innerScope = scope.innerScopeOf(node);
-      const returnType = this.context.inferencer.infer(node.block, innerScope);
+      const returnType =
+         node.block.at(BAKED_TYPE) ??
+         this.context.inferencer.infer(node.block, innerScope);
 
       if (node.specifiedType) {
          const explicitType = this.context.translator.translate(

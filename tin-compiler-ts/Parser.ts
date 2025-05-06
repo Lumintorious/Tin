@@ -12,8 +12,18 @@ const applyableKeywords = [
 ];
 
 class Modifier<T = undefined> {
+   constructor() {}
+
+   as(value: T): ModValue<T> {
+      return new ModValue<T>(this, value);
+   }
+}
+
+class ModValue<T> {
+   readonly modifier: Modifier<T>;
    readonly value: T;
-   constructor(value: T = undefined as any) {
+   constructor(modifier: Modifier<T>, value: T) {
+      this.modifier = modifier;
       this.value = value;
    }
 }
@@ -21,6 +31,8 @@ class Modifier<T = undefined> {
 export const IN_RETURN_BRANCH = new Modifier();
 export const VAR_RETURNING_FUNC_IN_INVAR_PLACE = new Modifier();
 export const INVAR_RETURNING_FUNC_IN_VAR_PLACE = new Modifier();
+export const ARTIFICIAL = new Modifier();
+export const BAKED_TYPE = new Modifier<Type>();
 
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
@@ -30,7 +42,7 @@ export class AstNode {
    isTypeLevel?: boolean;
    isInValueContext?: boolean;
    id: number = AstNode.currentNumber++;
-   modifiers = new Set<Modifier>();
+   private modifiers = new Map<Modifier<unknown>, unknown>();
    constructor(tag: string) {
       this.tag = tag;
       AstNode.toCheckForPosition.push(this);
@@ -40,15 +52,26 @@ export class AstNode {
       return this.modifiers.has(modifier);
    }
 
-   modify(modifier: Modifier) {
-      this.modifiers.add(modifier);
+   at<T>(modifier: Modifier<T>): T | undefined {
+      return this.modifiers.get(modifier) as any;
    }
 
-   modifyFrom(other: AstNode, modifier: Modifier) {
-      if (other.modifiers.has(modifier)) {
-         this.modifiers.add(modifier);
+   modify<T = undefined>(modValue: ModValue<T> | Modifier<undefined>) {
+      if (modValue instanceof Modifier) {
+         this.modifiers.set(modValue, modValue.as(undefined as any));
       } else {
-         this.modifiers.delete(modifier);
+         this.modifiers.set(modValue.modifier, modValue.value);
+      }
+      return this;
+   }
+
+   modifyFrom<T>(other: AstNode, modValue: ModValue<T> | Modifier<undefined>) {
+      const modif = modValue instanceof Modifier ? modValue : modValue.modifier;
+      const value = modValue instanceof ModValue ? modValue.value : undefined;
+      if (other.modifiers.has(modif)) {
+         this.modifiers.set(modif, modif);
+      } else {
+         this.modifiers.delete(modif);
       }
    }
 
@@ -368,6 +391,7 @@ export class Group extends Term {
 export class UnaryOperator extends Term {
    operator: string;
    expression: Term;
+   varDependencies?: Identifier[];
    constructor(operator: string, expression: Term) {
       super("UnaryOperator");
       this.operator = operator;
@@ -879,24 +903,22 @@ export class Parser {
                operator === "?."
             ).fromTo(whileLoopStart, this.positionNow());
             left = right.setCallee(select);
-         }
-         //   else if (
-         //     operator === "." &&
-         //     right instanceof Call &&
-         //     right.callee instanceof Call &&
-         //     right.callee.callee instanceof Identifier
-         //  ) {
-         //     const select = new Select(left, right.callee.callee.value).fromTo(
-         //        whileLoopStart,
-         //        this.positionNow()
-         //     );
-         // 	right.setCallee()
-         //     left = new Call(
-         //        new SquareApply(select, right.callee.typeArgs),
-         //        right.args
-         //     );
-         //  }
-         else if (
+         } else if (
+            operator === "." &&
+            right instanceof Call &&
+            right.callee instanceof Call &&
+            right.callee.callee instanceof Identifier
+         ) {
+            const select = new Select(left, right.callee.callee.value).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
+            left = right.setCallee(right.callee.setCallee(select));
+            //   left = new Call(
+            //      new SquareApply(select, right.callee.typeArgs),
+            //      right.args
+            //   );
+         } else if (
             operator === "." &&
             right instanceof Cast &&
             right.expression instanceof Identifier

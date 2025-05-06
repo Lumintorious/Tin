@@ -16,6 +16,13 @@ export const _JsArr = globalThis.Array;
 		._d = Descriptor of Constructor
 		._s = Type Symbol, on Constructors, Descriptors 
 */
+export function _ss(obj) {
+	console.log(obj)
+	if (obj._s) {
+		return obj
+	}
+}
+
 export class Return {
 	constructor(value) {
 		this.value = value;
@@ -86,7 +93,10 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 const _Q_map = new Map()
 
 export function _Q_share(calleeSym, argSyms) {
-	const key = calleeSym.description + "[" + argSyms.map(s => typeof s === 'object' && "_s" in s ? s._s.description : s.description).join(",") + "]"
+	if (argSyms === undefined || argSyms.length === 0) {
+		return calleeSym
+	}
+	const key = calleeSym.description + "[" + argSyms.map(s => typeof s === 'object' && "_s" in s ? s._s.description : s.description).join(", ") + "]"
 	if (_Q_map.has(key)) {
 		return _Q_map.get(key)
 	} else {
@@ -314,6 +324,8 @@ export const _U = function (obj1, obj2) {
 	return result
 }
 
+const _L_cache = new Map()
+
 export function _L(value) {
 	function check(obj) {
 		return obj === value;
@@ -321,29 +333,57 @@ export function _L(value) {
 	let broaderType = Nothing;
 	if (typeof value === "number") {
 		broaderType = Number;
-	} else if (typeof value === "strin") {
+	} else if (typeof value === "string") {
 		broaderType = String
 	}
 
 	const result = Type({ _: "" + value }, { _: check }, { _: check })._and(Literal({ _: value }, { _: broaderType }))
 	result.__is_child = check
-	result._s = Symbol("Literal")
+	result._s = _L_cache.get(value) ?? Symbol("" + value)
+	if (!_L_cache.has(value)) {
+		_L_cache.set(value, result._s)
+	}
 
 	return result
 }
 
 export const nothing = null;
 
-export function _var(obj, doVar) {
+export function _var(deps, fn, doVar) {
+	const obj = fn();
+	const subscribers = [];
 	if (!doVar) {
 		return obj
 	} else {
-		if (typeof obj === 'object' && "_" in obj) {
-			return obj
-		} else {
-			return { _: obj }
+		function set(newValue) {
+			this._ = newValue;
+			for (let i = 0; i < subscribers.length; i++) {
+				this.subscribers[i].notify();
+			}
 		}
+
+		function notify() {
+			this.set(fn())
+		}
+
+		let result = {};
+		if (typeof obj === 'object' && "_" in obj) {
+			result = { _: obj._, subscribers, fn, set, notify }
+		} else {
+			result = { _: obj, subscribers, fn, set, notify }
+		}
+		deps.forEach(d => d.subscribers.push(result))
+
+		return result;
 	}
+}
+
+export const delay = (ms, fn) => {
+	setTimeout(fn, ms);
+}
+
+export const listen = (T) => (v, fn) => {
+	v.subscribers.push({ notify() { fn(v._) } })
 }
 
 export function arraySymbol() {
@@ -785,7 +825,7 @@ export function makeStr(obj, useToString, firstLayer = false) {
 					block += symName[i]
 					i++;
 				}
-				result += orange(block)
+				result += yellow(block)
 			}
 		}
 		return result;
@@ -793,10 +833,10 @@ export function makeStr(obj, useToString, firstLayer = false) {
 
 	const results = [];
 	for (const componentKey of Reflect.ownKeys(obj)) {
-		if (typeof componentKey !== 'symbol') continue;
+		if (typeof componentKey === 'string') continue;
 		const component = obj[componentKey]
-		const componentName = (componentKey.description === "Tuple2" || componentKey.description === "Tuple3") ? "" : componentKey.description
-		results.push(colorSymbolName(componentName) + white(" { ") + Reflect.ownKeys(component).map(k => `${red(k)} ${white("=")} ${makeStr(component[k])}`).join(white(", ")) + white(" }"))
+		const componentName = (componentKey.description.startsWith("Tuple2") || componentKey.description.startsWith("Tuple3")) ? "" : componentKey.description + " "
+		results.push(colorSymbolName(componentName) + white("{ ") + Reflect.ownKeys(component).map(k => `${red(k)} ${white("=")} ${makeStr(component[k])}`).join(white(", ")) + white(" }"))
 	}
 
 	return results.join(white(" & "))
@@ -902,7 +942,9 @@ export function lazy(make) {
 		get(target, prop) {
 			if (!value) {
 				result()
-				Object.assign(value, temp)
+				if (value !== undefined) {
+					Object.assign(value, temp)
+				}
 			}
 			if (prop === "_d" && value) {
 				return value;

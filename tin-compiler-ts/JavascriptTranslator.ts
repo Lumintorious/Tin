@@ -19,6 +19,8 @@ import {
    Tuple,
    VAR_RETURNING_FUNC_IN_INVAR_PLACE,
    INVAR_RETURNING_FUNC_IN_VAR_PLACE,
+   IN_RETURN_BRANCH,
+   ARTIFICIAL,
 } from "./Parser";
 import {
    WhileLoop,
@@ -62,7 +64,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
    run(path: string, isTest?: boolean): void {
       exec(
-         `cd "tin-out${isTest ? "-tests" : ""}"` + " && bun " + path,
+         `cd "tin-out${isTest ? "-tests" : ""}"` + " && bun run " + path,
          (_, out, err) => {
             console.log(out);
             if (err) {
@@ -75,7 +77,7 @@ export class JavascriptTranslator implements OutputTranslator {
    accessMutable = "._";
    makeMutable(value: string, condition: boolean) {
       if (condition) {
-         return `{_:${value}}`;
+         return `_var([], () => ${value}, true)`;
       } else {
          return value;
       }
@@ -183,7 +185,7 @@ export class JavascriptTranslator implements OutputTranslator {
             term.invarTypeInVarPlace &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
          ) {
-            result = `{_:${result}}`;
+            result = `_var([], () => ${result}, true)`;
          } else if (term.varTypeInInvarPlace) {
             result = "(" + result + ")" + this.accessMutable;
          }
@@ -325,9 +327,15 @@ export class JavascriptTranslator implements OutputTranslator {
                ? ")" + this.accessMutable
                : "";
          const isNotSelect = !(term.lhs instanceof Select);
-         return `(${this.translate(term.lhs, scope)})${
-            isNotSelect ? this.accessMutable : ""
-         } = ${start}${this.translate(term.value, scope)}${ifTermValueMutable}`;
+         const isArtificial = term.at(ARTIFICIAL);
+         const lhs = this.translate(term.lhs, scope);
+         const rhs = this.translate(term.value, scope);
+         const rhsIfMutable = `${start}${rhs}${ifTermValueMutable}`;
+         if (isArtificial) {
+            return `${lhs} = ${rhs}`;
+         } else {
+            return `${lhs}.set(${rhsIfMutable})`;
+         }
 
          // Assignment
       } else if (term instanceof Assignment) {
@@ -345,9 +353,8 @@ export class JavascriptTranslator implements OutputTranslator {
          keyword = doExport + keyword;
          const lhs = this.translate(term.lhs, scope);
          const isMutable = term.type?.translatedType instanceof MutableType;
-         const value = term.value
-            ? " = " +
-              this.makeMutable(this.translate(term.value, scope), isMutable)
+         let value = term.value
+            ? this.makeMutable(this.translate(term.value, scope), isMutable)
             : "";
          let type = "";
          if (!term.isTypeLevel) {
@@ -364,22 +371,12 @@ export class JavascriptTranslator implements OutputTranslator {
             } catch (e) {
                //
             }
+         } else if (term.value) {
+            value = `(${value})`;
          }
-         const constructorName = getConstructorName(lhs);
-         let declareConstructor = "";
-         if (term.value instanceof TypeDef) {
-            declareConstructor = ""; //`; var ${constructorName} = ${lhs};`;
-         } else if (
-            term.value instanceof SquareTypeToTypeLambda &&
-            term.value.returnType instanceof TypeDef
-         ) {
-            declareConstructor = "";
-            // `; var ${constructorName} = ${this.translate(
-            //    surrogateFunc,
-            //    scope
-            // )};`;
-         }
-         return keyword + lhs + type + value + declareConstructor;
+         const operator = term.value ? " = " : " ";
+
+         return keyword + lhs + operator + type + value;
 
          // Literal
       } else if (term instanceof Literal) {
@@ -415,7 +412,11 @@ export class JavascriptTranslator implements OutputTranslator {
                .join(",")})`;
          }
 
-         return `Tuple${term.expressions.length}({}, {}, {})(${term.expressions
+         return `Tuple${term.expressions.length}(${term.expressions
+            .map(
+               (el) => `Type$get(${this.translateType(el.inferredType, scope)})`
+            )
+            .join(",")})(${term.expressions
             .map((el) => `{_:${this.translate(el, scope)}}`)
             .join(",")})`;
 
@@ -475,7 +476,10 @@ export class JavascriptTranslator implements OutputTranslator {
             .map((t) => this.translate(t, scope.innerScopeOf(term, true)))
             .join(", ")}) => {  const _sqSym_args = [${term.parameterTypes
             .map(
-               (t) => this.translate(t, scope.innerScopeOf(term, true)) + "._s"
+               (t) =>
+                  "(" +
+                  this.translate(t, scope.innerScopeOf(term, true)) +
+                  ")._s"
             )
             .join(",")}]; return ${this.translate(
             term.returnType,
@@ -499,7 +503,7 @@ export class JavascriptTranslator implements OutputTranslator {
             trueScope,
             {
                returnLast: !isTrueBranchIf,
-               normalReturn: true,
+               normalReturn: !term.falseBranch?.is(IN_RETURN_BRANCH),
             }
          )}}).call(this)`;
          const isFalseBranchIf =
@@ -511,7 +515,7 @@ export class JavascriptTranslator implements OutputTranslator {
             falseScope,
             {
                returnLast: !isFalseBranchIf,
-               normalReturn: true,
+               normalReturn: !term.falseBranch?.is(IN_RETURN_BRANCH),
             }
          )}}).call(this)`;
          return `((${this.translate(
@@ -616,7 +620,7 @@ export class JavascriptTranslator implements OutputTranslator {
                !term.callsPure &&
                [...scope.toPath()].filter((c) => c === ".").length > 4
             ) {
-               return `await ${call}`;
+               return `${call}`;
                //    return `(async function() { const _awObj = ${call}; return _awObj && typeof _awObj.then === 'function' ? await _awObj : _awObj}).call(this)`;
             } else {
                return call;
@@ -730,7 +734,9 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof UnaryOperator) {
          if (term.operator === "var") {
             const v = term.invarTypeInVarPlace;
-            return `_var(${this.translate(term.expression, scope)},${
+            return `_var([${(term.varDependencies ?? []).map((t) =>
+               this.translateRaw(t, scope)
+            )}],() => (${this.translate(term.expression, scope)}),${
                v ? "false" : "true"
             })`;
          }
@@ -776,6 +782,8 @@ export class JavascriptTranslator implements OutputTranslator {
             type.left,
             scope
          )}._and(${this.translateType(type.right, scope)})`;
+      } else if (type instanceof LiteralType) {
+         return this.translateType(type.type, scope);
       }
       //   else if (type instanceof RoundValueToValueLambdaType) {
       //      return `
@@ -861,6 +869,7 @@ export class JavascriptTranslator implements OutputTranslator {
             "*",
             "**",
             "/",
+            "%",
             "&&",
             "||",
             "->",

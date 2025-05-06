@@ -1,10 +1,19 @@
 import { CodePoint, TokenPos } from "./Lexer";
-import { Assignment, AstNode, Identifier, Term } from "./Parser";
+import {
+   Assignment,
+   AstNode,
+   BinaryExpression,
+   Call,
+   Identifier,
+   Select,
+   Term,
+} from "./Parser";
 import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
 import { type } from "os";
+import { LiteralType } from "./Types";
 import {
    Any,
    AppliedGenericType,
@@ -531,7 +540,10 @@ export class Scope {
                );
             });
             const structResult = new StructType(type.name, mappedFields);
-            structResult.squareParamsApplied = paramMap.order.map((p) => p[1]);
+            console.log(structResult.toString());
+            structResult.squareParamsApplied = paramMap.order.map((p) =>
+               p[1] instanceof LiteralType ? p[1].type : p[1]
+            );
             return structResult;
          case "OptionalType":
             const optionalType = type as OptionalType;
@@ -641,6 +653,23 @@ export class GenericTypeMap {
 
    toString() {
       return [...this.map.entries()].map(([k, v]) => `${k}: ${v}`);
+   }
+}
+
+export function walkTerms(
+   root: AstNode,
+   scope: Scope,
+   fn: (node: AstNode, scope: Scope) => void
+) {
+   fn(root, scope);
+   if (root instanceof BinaryExpression) {
+      walkTerms(root.left, scope, fn);
+      walkTerms(root.right, scope, fn);
+   } else if (root instanceof Call) {
+      walkTerms(root.callee, scope, fn);
+      root.args.forEach((arg) => walkTerms(arg[1], scope, fn));
+   } else if (root instanceof Select) {
+      walkTerms(root.owner, scope, fn);
    }
 }
 

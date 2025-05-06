@@ -6,7 +6,7 @@ import {
    IntersectionType,
    Never,
 } from "./Types";
-import { IN_RETURN_BRANCH, Optional, Tuple } from "./Parser";
+import { BAKED_TYPE, IN_RETURN_BRANCH, Optional, Tuple } from "./Parser";
 import { UnionType } from "./Types";
 import { GenericTypeMap } from "./Scope";
 import {
@@ -91,9 +91,17 @@ export class TypeInferencer {
    }
 
    private buildCache = new Map<string, Type>();
-   infer(node: Term, scope: Scope, options: RecursiveResolutionOptions = {}) {
+   infer(
+      node: Term,
+      scope: Scope,
+      options: RecursiveResolutionOptions = {}
+   ): Type {
       const cachedString = `${node.id}.${scope.id}.${scope.iteration}`;
       const cachedType = this.buildCache.get(cachedString);
+      //   const bakedType = node.at(BAKED_TYPE);
+      //   if (bakedType !== undefined) {
+      //      return bakedType;
+      //   }
       if (cachedType) {
          return cachedType;
       }
@@ -569,14 +577,16 @@ export class TypeInferencer {
       }
       let constructor = calleeType.buildConstructor();
       let isStructConstructor = false;
-      if (constructor instanceof RoundValueToValueLambdaType) {
-         calleeType = constructor;
-         isStructConstructor = true;
-         node.isCallingAConstructor = true;
-      } else if (constructor instanceof SquareTypeToValueLambdaType) {
-         calleeType = constructor;
-         isStructConstructor = true;
-         node.isCallingAConstructor = true;
+      if (node.kind === "CURLY") {
+         if (constructor instanceof RoundValueToValueLambdaType) {
+            calleeType = constructor;
+            isStructConstructor = true;
+            node.isCallingAConstructor = true;
+         } else if (constructor instanceof SquareTypeToValueLambdaType) {
+            calleeType = constructor;
+            isStructConstructor = true;
+            node.isCallingAConstructor = true;
+         }
       }
       let usesVariableParameters = false;
       for (const arg of node.args) {
@@ -639,7 +649,11 @@ export class TypeInferencer {
       throw new Error(
          `Not calling a function. Object ${node.callee.show()} is of type ${calleeType.toString()} - ${
             node.position?.start.line
-         } at ${scope.iteration}`
+         } at ${scope.iteration}.` +
+            constructor !==
+         undefined
+            ? "You want to call constructors with {}"
+            : ""
       );
    }
 
@@ -1208,34 +1222,6 @@ export class TypeInferencer {
       );
       return Any;
    }
-
-   // inferRoundTypeToTypeLambda(node: RoundTypeToTypeLambda, scope: Scope) {
-   //    const paramScope = scope.innerScopeOf(node);
-   //    node.parameterTypes.forEach((p) => {
-   //       if (p instanceof Assignment && p.lhs instanceof Identifier) {
-   //          paramScope.declareType(
-   //             new Symbol(
-   //                p.lhs.value,
-   //                new GenericNamedType(
-   //                   p.lhs.value,
-   //                   p.value ? this.infer(p.value, scope) : undefined
-   //                )
-   //             )
-   //          );
-   //       }
-   //    });
-   //    const type = new TypeRoundValueToValueLambda(
-   //       node.parameterTypes.map((p) => {
-   //          if (p instanceof Assignment && p.lhs instanceof Identifier) {
-   //             return this.context.translator.translate(p.lhs, paramScope);
-   //          } else {
-   //             throw new Error("Params weren't assignment types");
-   //          }
-   //       }),
-   //       this.infer(node.returnType, paramScope)
-   //    );
-   //    return type;
-   // }
 
    // (i: Number) -> i + 2
    inferRoundValueToValueLambda(

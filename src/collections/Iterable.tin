@@ -26,8 +26,9 @@ Mergeable = [T, F: Mergeable] => struct:
 Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 
 external "
-	function _arrToMap(arr) \{
-		return new Map(arr[Array._s]._rawArray.map(tup => [tup[Tuple2._s].left._, tup[Tuple2._s].right._]))
+	function _arrToMap(K, V, arr) \{
+		const symbol = _Q_share(Tuple2._s, [K._s, V._s])
+		return new Map(arr[Array._s]._rawArray.map(tup => \{ return [tup[symbol].left._, tup[symbol].right._]\}))
 	\}
 
 	function _mapFromJsMap(K, V, jsMap) \{
@@ -50,13 +51,13 @@ external "
 		\}\}))
 	\}
 	export const Map$of = (K, V) => (arr) => \{
-		const jsMap = _arrToMap(arr)
+		const jsMap = _arrToMap(K, V, arr)
 		const map = _mapFromJsMap(K, V, jsMap)
 		return map;
 	\}
 "
 
-Map@of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
+Map.of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
 
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 	Iterator[X]((): X? ->
@@ -116,10 +117,10 @@ Array.fromIterable = [T] -> (iterable: Iterable[T]): Array[T] ->
 
 Array.stream = [T] -> (self: Array[T]) -> Iterable.fromArray(self)
 
-Json = Number | String | Array[Json] | Map[String, Json]
+# Json = Number | String | Array[Json] | Map[String, Json]
 
-Json.fromString: (string: String) -> Json | Error = external
-Json.toString: (json: Json) -> String = external
+# Json.fromString: (string: String) -> Json | Error = external
+# Json.toString: (json: Json) -> String = external
 
 external "
 export function Json$fromString(str) \{

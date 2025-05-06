@@ -81,8 +81,8 @@
       },
       {
          "name": "string.quoted.double.tin",
-         "begin": "\"",
-         "end": "\"",
+         "begin": "(?<!\\\\)\"",
+         "end": "(?<!\\\\)\"",
          "beginCaptures": {
             "0": { "name": "punctuation.definition.string.begin.tin" }
          },
@@ -117,7 +117,7 @@
             },
             {
                "name": "string.content.tin",
-               "match": "[^\"{}]+"
+               "match": "(?:[^\\\\{}\"\\n]|\\\\[^{}\\n])*"
             }
          ]
       },

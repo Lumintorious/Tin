@@ -1,8 +1,25 @@
-Box = [T] => struct:
-	contents: T
+# loop = (n: Number, sum = 0, i = 0) ->
+# 	if i % 100000 == 0,
+# 		print(i)
+# 	if i < n,
+# 		loop(n, sum + i, i + 1)
+# 	else
+# 		sum
 
-box = Box(24) & Box("Hello")
+# print(loop(500000000))
+contenders = Array.of(
+  "Michael Phelps",
+  "Liu Xiang",
+  "Yao Ming",
+  "Allyson Felix",
+  "Shawn Johnson",
+  "Roman Sebrle",
+  "Guo Jingjing",
+  "Tyson Gay",
+  "Asafa Powell",
+  "Usain Bolt"
+)
 
+varr = Varray.of(5, 0)
 
-print(box)
-print(box:Box[String].contents)	
+print(varr.length())
