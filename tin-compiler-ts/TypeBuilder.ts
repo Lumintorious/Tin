@@ -15,6 +15,7 @@ import {
    ARTIFICIAL,
    IN_RETURN_BRANCH,
    BAKED_TYPE,
+   LINK_VAL,
 } from "./Parser";
 import {
    Scope,
@@ -524,7 +525,7 @@ export class TypeBuilder {
          expectedParams.length === 1 &&
          expectedParams[0].type instanceof AppliedGenericType &&
          expectedParams[0].type.callee instanceof NamedType &&
-         expectedParams[0].type.callee.name === "Array"
+         expectedParams[0].type.callee.name === "Seq"
       );
    }
 
@@ -535,7 +536,7 @@ export class TypeBuilder {
             : this.context.inferencer.infer(calledParams[0][1], scope);
       return (
          firstParamType instanceof AppliedGenericType &&
-         firstParamType.callee.name === "Array"
+         firstParamType.callee.name === "Seq"
       );
    }
 
@@ -562,10 +563,10 @@ export class TypeBuilder {
             expectedParams.length === 1 &&
             expectedParams[0].type instanceof AppliedGenericType &&
             expectedParams[0].type.callee instanceof NamedType &&
-            expectedParams[0].type.callee.name === "Array" &&
+            expectedParams[0].type.callee.name === "Seq" &&
             !(
                firstParamType instanceof AppliedGenericType &&
-               firstParamType.callee.name === "Array"
+               firstParamType.callee.name === "Seq"
             )
          ) {
             node.takesVarargs = true;
@@ -605,7 +606,7 @@ export class TypeBuilder {
             if (
                firstAppliedParamType instanceof AppliedGenericType &&
                firstAppliedParamType.callee instanceof NamedType &&
-               firstAppliedParamType.callee.name === "Array"
+               firstAppliedParamType.callee.name === "Seq"
             ) {
                node.takesVarargs = false;
                if (
@@ -1226,9 +1227,9 @@ export class TypeBuilder {
          node.isParameter
       ) {
          scope.declare(
-            new Symbol(lhs.value, options.typeExpectedInPlace).mutable(
-               node.isMutable
-            )
+            new Symbol(lhs.value, options.typeExpectedInPlace)
+               .mutable(node.isMutable)
+               .located(node.position)
          );
       }
 
@@ -1239,7 +1240,8 @@ export class TypeBuilder {
                node.lhs.value,
                this.context.translator.translate(node.type, scope),
                node
-            );
+            ).located(node.position);
+            symbol.isLink = node.is(LINK_VAL);
             scope.declare(
                symbol.mutable(
                   node.isMutable || symbol.typeSymbol instanceof MutableType
@@ -1343,7 +1345,11 @@ export class TypeBuilder {
                symbolToDeclare.returnType.name = node.lhs.value;
             }
             // if (!scope.hasTypeSymbol(node.lhs.value)) {
-            scope.declareType(new Symbol(node.lhs.value, symbolToDeclare));
+            scope.declareType(
+               new Symbol(node.lhs.value, symbolToDeclare).located(
+                  node.position
+               )
+            );
             // }
          }
          return;
@@ -1388,11 +1394,11 @@ export class TypeBuilder {
          );
       }
       let symbol = new Symbol(symbolName, rhsType, node);
+      symbol.isLink = node.is(LINK_VAL);
 
       if (node.isDeclaration || node.isParameter) {
          symbol = symbol.located(node.position, node.position);
          symbol.isPrivate = node.private === true;
-         symbol.isLink = node.isLink === true;
          if (scope.iteration === "DECLARATION" && scope.hasSymbol(symbolName)) {
             throw new Error(`Value ${symbolName} already exists`);
          }

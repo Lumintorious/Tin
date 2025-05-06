@@ -389,13 +389,13 @@ export const listen = (T) => (v, fn) => {
 export function arraySymbol() {
 	const cache = globalThis["_arraySymbol"];
 	if (!cache) {
-		globalThis["_arraySymbol"] = Symbol("Array");
+		globalThis["_arraySymbol"] = Symbol("Seq");
 		return globalThis["_arraySymbol"]
 	}
 	return cache;
 }
 
-export var Array = (function () {
+export var Seq = (function () {
 	const result = (T) => _S(arraySymbol(), (args) => args[__tin_varargs_marker] ? args : ({
 		_rawArray: args,
 		length: {
@@ -413,7 +413,7 @@ export var Array = (function () {
 		},
 		and: {
 			_: function (arr) {
-				return Array(T)([...args, ...arr[Array._s]._rawArray])
+				return Seq(T)([...args, ...arr[Array._s]._rawArray])
 			}
 		},
 		[__tin_varargs_marker]: true
@@ -425,10 +425,10 @@ export var Array = (function () {
 export const Array$of = (t) => (args) => args
 export const Array$empty = (t) => Array(t)([])
 export const Array$and = function (t) { return (function (arr) { return this[Array._s].and._(arr) }) }
-Array._typeId = "Array"
+Seq._typeId = "Seq"
 export const copy = (obj, replacers) => {
 	if (typeof (obj) === 'object' && "_" in obj) {
-		return { _: copy(obj._), _cn: obj._cn }
+		return { _: copy(obj._), _cn: obj._cn, _cl: obj._cl }
 	}
 
 	let newObj = { _type: obj._type };
@@ -453,7 +453,7 @@ export const copy = (obj, replacers) => {
 			const field = oldComponent[fieldKey];
 			let newField;
 			if (typeof (field) === 'object' && "_" in field) {
-				newField = { _: field._, _cn: field._cn }
+				newField = { _: field._, _cn: field._cn, _cl: field._cl }
 				newComponent[fieldKey] = newField
 				newFieldsByOldFields.set(field, newField)
 			}
@@ -562,6 +562,13 @@ export function _replaceComponentFields2(obj, replacer) {
 
 					if (replacerField._cn && obj._clojure[replacerField._cn]) {
 						obj._clojure[replacerField._cn] = replacerField
+					}
+				}
+				if (objField._cl && !replacerField._cl) {
+					replacerField._cl = objField._cl
+
+					if (replacerField._cl && obj._clojure[replacerField._cl]) {
+						obj._clojure[replacerField._cl] = replacerField
 					}
 				}
 				const oldObjField = objField
@@ -713,10 +720,10 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 		return blue('λ')
 	}
 
-	if (Reflect.ownKeys(obj).includes(Array._s)) {
-		let result = yellow("Array") + white('(') + (indent > 0 ? "\n" : "");
-		for (let i = 0; i < obj[Array._s].length._(); i++) {
-			result += (typeof obj[Array._s].at._(i) === "object" ? padd() : padd(1)) + makeString(obj[Array._s].at._(i), sprawl, indent, currentIndent) + (i === obj[Array._s].length._() - 1 ? "" : white(", ")) + (indent > 0 ? "\n" : "")
+	if (Reflect.ownKeys(obj).includes(Seq._s)) {
+		let result = yellow("Seq") + white('(') + (indent > 0 ? "\n" : "");
+		for (let i = 0; i < obj[Seq._s].length._(); i++) {
+			result += (typeof obj[Seq._s].at._(i) === "object" ? padd() : padd(1)) + makeString(obj[Seq._s].at._(i), sprawl, indent, currentIndent) + (i === obj[Seq._s].length._() - 1 ? "" : white(", ")) + (indent > 0 ? "\n" : "")
 		}
 
 		currentIndent -= indent;
@@ -793,10 +800,10 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		return blue('λ')
 	}
 
-	if (Reflect.ownKeys(obj).includes(Array._s)) {
-		let result = yellow("Array") + white(' { ');
-		for (let i = 0; i < obj[Array._s].length._(); i++) {
-			result += makeStr(obj[Array._s].at._(i)) + (i === obj[Array._s].length._() - 1 ? "" : white(", "))
+	if (Reflect.ownKeys(obj).includes(Seq._s)) {
+		let result = yellow("Seq") + white(' { ');
+		for (let i = 0; i < obj[Seq._s].length._(); i++) {
+			result += makeStr(obj[Seq._s].at._(i)) + (i === obj[Seq._s].length._() - 1 ? "" : white(", "))
 		}
 
 		return result + white(" }")

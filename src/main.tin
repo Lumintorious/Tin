@@ -1,25 +1,15 @@
-# loop = (n: Number, sum = 0, i = 0) ->
-# 	if i % 100000 == 0,
-# 		print(i)
-# 	if i < n,
-# 		loop(n, sum + i, i + 1)
-# 	else
-# 		sum
+Person = struct:
+	name: String
 
-# print(loop(500000000))
-contenders = Array.of(
-  "Michael Phelps",
-  "Liu Xiang",
-  "Yao Ming",
-  "Allyson Felix",
-  "Shawn Johnson",
-  "Roman Sebrle",
-  "Guo Jingjing",
-  "Tyson Gay",
-  "Asafa Powell",
-  "Usain Bolt"
-)
+Contestant = struct:
+	num: Number
+	introduce: () -> String
 
-varr = Varray.of(5, 0)
+Contestant.new = (link name: String) ->
+	Person { name } & Contestant { 0, () -> "Hi, I'm {name}!" }
 
-print(varr.length())
+dude = Contestant.new("Dude")
+dude2 = dude { name = "Bloke" }
+
+print(dude.introduce())
+print(dude2.introduce())

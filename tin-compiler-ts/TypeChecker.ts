@@ -651,7 +651,7 @@ export class TypeChecker {
          if (
             params[0] &&
             params[0].type instanceof AppliedGenericType &&
-            params[0].type.callee.name === "Array"
+            params[0].type.callee.name === "Seq"
          ) {
             const expectedType = scope.resolveNamedType(
                params[0].type.parameterTypes[0]

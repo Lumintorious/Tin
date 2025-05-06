@@ -29,23 +29,23 @@ Union = Type & struct:
 	left: Type
 	right: Type
 
-Array = [T] -> struct:
+Seq = [T] -> struct:
 	at: (Number) -> T?
 	length: () -> Number
 
 VSeq = [T] -> struct:
 	at: (Number) -> T?
-	put: (Number) -> Nothing | Error
+	put: (Number, T) -> Nothing | Error
 	length: () -> Number
 
 Struct = Type & struct:
-	fields: Array[Field]
+	fields: Seq[Field]
 
 Struct.accessDynamically: (self: Struct, obj: Anything, field: Field) -> Anything | Nothing = external
-Struct.createDynamically: (self: Struct, fields: Array[Anything]) -> Anything | Nothing = external
+Struct.createDynamically: (self: Struct, fields: Seq[Anything]) -> Anything | Nothing = external
 
 Lambda = Type & struct:
-	params: Array[Parameter]
+	params: Seq[Parameter]
 	resultType: Type
 
 RefType = Type & struct:
@@ -75,9 +75,9 @@ debug: (Anything) -> Nothing = external
 clojure: (Anything) -> Nothing = external
 nothing: Nothing = external
 panic: (message: String) -> Never = external
-Array.of: [T] -> (Array[T]) -> Array[T] = external
-Array.empty: [T] -> Array[T] = external
-Array.and: [T] -> (self: Array[T], other: Array[T]) -> Array[T] = external
+Array.of: [T] -> (Seq[T]) -> Seq[T] = external
+Array.empty: [T] -> Seq[T] = external
+Array.and: [T] -> (self: Seq[T], other: Seq[T]) -> Seq[T] = external
 toString: (obj: Anything) -> String = external
 listen: [T] -> (v: var T, onChange: (T) -> Nothing) -> Nothing = external
 id = [T] -> (t: T) -> t
@@ -101,7 +101,7 @@ Error = struct:
 	object: Anything?
 
 StackInfo = struct:
-	stack: Array[String]
+	stack: Seq[String]
 
 ToString = struct:
 	toString: () -> String
@@ -126,13 +126,13 @@ export function String$length() \{
 "
 
 # Union@values = [T] ->
-# 	go = (type: Type): Array[T] ->
+# 	go = (type: Type): Seq[T] ->
 # 		if type :: Literal,
-# 			Array@of[T]((type.value): T)
+# 			Seq@of[T]((type.value): T)
 # 		else if type :: Union,
 # 			go(type.left).and(go(type.right))
 # 		else
-# 			Array@of[T]()
+# 			Seq@of[T]()
 # 	go(T)
 
 # external "

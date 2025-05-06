@@ -59,6 +59,8 @@ export class Symbol {
    located(start?: TokenPos, end?: TokenPos) {
       if (start && end) {
          this.position = new TokenPos(start.start, end.end);
+      } else if (start) {
+         this.position = start;
       }
       return this;
    }
@@ -218,7 +220,7 @@ export class Scope {
          )}\x1b[37m: \x1b[33m${symbol.typeSymbol
             .toString()
             .padEnd(25, " ")} \x1b[30m# ${
-            this.toPath() + " - " + this.iteration // + " - " + new Error().stack
+            this.toPath() + " - " + this.iteration + " - " + symbol.isLink // + " - " + new Error().stack
          }\x1b[0m`
       );
       if (this.symbols.has(name)) {

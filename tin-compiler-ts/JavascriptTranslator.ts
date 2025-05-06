@@ -38,7 +38,7 @@ import {
    UnaryOperator,
    RefinedDef,
 } from "./Parser";
-import { Scope } from "./Scope";
+import { Scope, Symbol } from "./Scope";
 import {
    Type,
    NamedType,
@@ -58,8 +58,10 @@ import { exec } from "node:child_process";
 export class JavascriptTranslator implements OutputTranslator {
    extension = "mjs";
    isStdLib: boolean = false;
-   constructor(isStdLib: boolean = false) {
+   fileName: string;
+   constructor(fileName: string, isStdLib: boolean = false) {
       this.isStdLib = isStdLib;
+      this.fileName = fileName;
    }
 
    run(path: string, isTest?: boolean): void {
@@ -156,6 +158,29 @@ export class JavascriptTranslator implements OutputTranslator {
       );
    }
 
+   baseX =
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@#$%^&*()_+{}|;:.>/?";
+
+   encodeBase62(num: number) {
+      let str = "";
+      do {
+         str = this.baseX[num % this.baseX.length] + str;
+         num = Math.floor(num / this.baseX.length);
+      } while (num > 0);
+      return str;
+   }
+
+   makeClojureIdent(sym: Symbol) {
+      const str = `${this.fileName}:${sym.position?.start.line}:${sym.position?.start.column}`;
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+         hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+      }
+      return this.encodeBase62(hash);
+   }
+
+   hashLocation(file: string, line: number, col: number) {}
+
    translate(
       term: AstNode | Type | undefined,
       scope: Scope,
@@ -175,12 +200,16 @@ export class JavascriptTranslator implements OutputTranslator {
 				return _res${this.accessMutable};
 			})`;
          }
-
          if (
             term.capturedName !== undefined &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
          ) {
-            result = `{_:(${result}),_cn:("${term.capturedName}")}`;
+            let clojureName = "";
+            if (term instanceof Identifier) {
+               const symbol = scope.lookup(term.value);
+               clojureName = this.makeClojureIdent(symbol);
+            }
+            result = `{_:(${result}),_cl:('${clojureName}')}`;
          } else if (
             term.invarTypeInVarPlace &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
@@ -192,7 +221,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          if (term.clojure) {
             result = `_makeClojure({${term.clojure
-               .map((s) => s.name)
+               .map((s) => `"${this.makeClojureIdent(s)}":${s.name}`)
                .join(",")}}, ${result})`;
          }
       }
@@ -343,7 +372,7 @@ export class JavascriptTranslator implements OutputTranslator {
             (term.value instanceof Literal &&
                term.value.value === "" &&
                term.value.type === "Anything") ||
-            (term.lhs instanceof Identifier && term.lhs.value === "Array")
+            (term.lhs instanceof Identifier && term.lhs.value === "Seq")
          ) {
             return "";
          }
@@ -433,15 +462,16 @@ export class JavascriptTranslator implements OutputTranslator {
          if (Object.keys(replacers).includes(value)) {
             value = replacers[value];
          }
-         if (term.isTypeIdentifier() && term.isInValueContext) {
-            value = `Type$get(${value})`;
-         }
          if (term.isFromSelfClojure) {
-            value = `this._clojure.${value}`;
+            const symbol = scope.lookup(term.value);
+            value = `this._clojure["${this.makeClojureIdent(symbol)}"]`;
             // Otherwise accessMutable is added in the wrapper translate() (non-raw)
             if (!term.varTypeInInvarPlace) {
                value += this.accessMutable;
             }
+         }
+         if (term.isTypeIdentifier() && term.isInValueContext) {
+            value = `Type$get(${value})`;
          }
 
          return value;
@@ -549,7 +579,7 @@ export class JavascriptTranslator implements OutputTranslator {
          !term.isCallingAConstructor
       ) {
          return `_copy(${this.translate(term.callee, scope)}, {${term.args.map(
-            ([n, t]) => `${n}: ${this.translate(t, scope)},`
+            ([n, t]) => `${n}: {_:${this.translate(t, scope)}},`
          )}})`;
       } else if (term instanceof Call) {
          let params: ([string, Term] | undefined)[] = [];
@@ -566,7 +596,7 @@ export class JavascriptTranslator implements OutputTranslator {
             }
          }
          const takesVarargs = term.takesVarargs && !term.bakedInThis;
-         let open = takesVarargs ? "(Array(0)([" : "(";
+         let open = takesVarargs ? "(Seq(0)([" : "(";
          const close = takesVarargs ? "]))" : ")";
          let openWrapper = "";
          let closeWrapper = "";
@@ -579,7 +609,7 @@ export class JavascriptTranslator implements OutputTranslator {
                ".call(" +
                this.translate((callee as Select).owner, scope) +
                "," +
-               (takesVarargs ? "Array(0)([" : "");
+               (takesVarargs ? "Seq(0)([" : "");
             if (term.callee.owner instanceof Identifier) {
             } else {
                openWrapper =
@@ -618,9 +648,9 @@ export class JavascriptTranslator implements OutputTranslator {
             if (
                term instanceof Call &&
                !term.callsPure &&
-               [...scope.toPath()].filter((c) => c === ".").length > 4
+               [...scope.toPath()].filter((c) => c === ".").length > 1
             ) {
-               return `${call}`;
+               return `await ${call}`;
                //    return `(async function() { const _awObj = ${call}; return _awObj && typeof _awObj.then === 'function' ? await _awObj : _awObj}).call(this)`;
             } else {
                return call;
@@ -765,7 +795,7 @@ export class JavascriptTranslator implements OutputTranslator {
             type.name
          }'}, {_:(obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(${
             type.name
-         }._s))})._and(Struct({_:Array(0)([
+         }._s))})._and(Struct({_:Seq(0)([
 						${type.fields.map((f) => `${this.translateType(f, scope)}`)}
 			])}))`;
       } else if (type instanceof ParamType) {

@@ -327,8 +327,14 @@ async function compile(
       );
 
       const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
-         ? new JavascriptTranslator(importsCache.size === 0)
-         : new JavascriptTranslator(importsCache.size === 0);
+         ? new JavascriptTranslator(inputFile, importsCache.size === 0)
+         : new JavascriptTranslator(
+              inputFile
+                 .slice(SRC_PATH.length)
+                 .replaceAll("/", "$")
+                 .replaceAll("\\", "$"),
+              importsCache.size === 0
+           );
 
       // TRANSLATION
       const translatedString = OUTPUT_TRANSLATOR.translate(

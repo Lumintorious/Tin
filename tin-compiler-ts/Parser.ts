@@ -69,10 +69,11 @@ export class AstNode {
       const modif = modValue instanceof Modifier ? modValue : modValue.modifier;
       const value = modValue instanceof ModValue ? modValue.value : undefined;
       if (other.modifiers.has(modif)) {
-         this.modifiers.set(modif, modif);
+         this.modifiers.set(modif, value);
       } else {
          this.modifiers.delete(modif);
       }
+      return this;
    }
 
    show() {
@@ -109,6 +110,8 @@ export class Import extends Statement {
    }
 }
 
+export const LINK_VAL = new Modifier();
+
 export class Assignment extends AstNode {
    lhs: Term;
    value?: Term;
@@ -118,7 +121,6 @@ export class Assignment extends AstNode {
    isMutable: boolean = false;
    isParameter: boolean = false;
    isTypeLevel?: boolean;
-   isLink?: boolean;
    private?: boolean;
    constructor(lhs: Term, value?: Term, isDeclaration = true, type?: Term) {
       super("Assignment"); // tag of the AST node
@@ -720,11 +722,19 @@ export class Parser {
       const startPos = this.peek().position;
       let left: Term; // Parse the left-hand side (like a literal or identifier)
 
-      if (this.peek() && this.peek().value === "!") {
+      if (
+         this.peek() &&
+         this.peek().tag === "OPERATOR" &&
+         this.peek().value === "!"
+      ) {
          this.consume("OPERATOR", "!");
          left = this.parsePrimary();
          left = new UnaryOperator("!", left);
-      } else if (this.peek() && this.peek().value === "-") {
+      } else if (
+         this.peek() &&
+         this.peek().tag === "OPERATOR" &&
+         this.peek().value === "-"
+      ) {
          this.consume("OPERATOR", "-");
          left = this.parsePrimary();
          left = new UnaryOperator("-", left);
@@ -927,7 +937,10 @@ export class Parser {
                whileLoopStart,
                this.positionNow()
             );
-            left = new Cast(left, right.type);
+            left = new Cast(left, right.type).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
          } else if (operator === "::" && right) {
             const typeCheck = new TypeCheck(left, right);
             left = typeCheck;
@@ -987,12 +1000,9 @@ export class Parser {
    // If an Identifier or Cast, turn into Assignment with missing value or type
    resolveAsAssignment(param: Term): Term {
       if (param instanceof Cast) {
-         param = new Assignment(
-            param.expression,
-            undefined,
-            true,
-            param.type
-         ).fromTo(param.position, this.peek().position);
+         param = new Assignment(param.expression, undefined, true, param.type)
+            .fromTo(param.position, this.peek().position)
+            .modifyFrom(param, LINK_VAL);
       }
       if (param instanceof Identifier) {
          param = new Assignment(param, undefined, true, undefined).fromTo(
@@ -1086,7 +1096,10 @@ export class Parser {
             );
          }
          if (specifiedType) {
-            result = new Cast(result, specifiedType);
+            result = new Cast(result, specifiedType).fromTo(
+               lambdaStart,
+               this.positionNow()
+            );
          }
          return result;
       }
@@ -1219,11 +1232,10 @@ export class Parser {
          return new Change(expression.lhs, expression.value);
       } else if (expression instanceof Assignment && keyword.value === "link") {
          expression.private = true;
-         expression.isLink = true;
+         expression.modify(LINK_VAL);
          return expression;
-      } else if (expression instanceof Assignment && keyword.value === "link") {
-         expression.private = true;
-         expression.isLink = true;
+      } else if (expression instanceof Cast && keyword.value === "link") {
+         expression.modify(LINK_VAL);
          return expression;
       } else if (
          expression instanceof Assignment &&
