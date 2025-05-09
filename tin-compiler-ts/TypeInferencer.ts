@@ -182,11 +182,19 @@ export class TypeInferencer {
             break;
          case "Call":
             if ((node as Call).kind === "SQUARE") {
-               inferredType = this.inferSquareApply(node as Call, scope);
+               inferredType = this.inferSquareApply(
+                  node as Call,
+                  scope,
+                  options
+               );
             } else if ((node as Call).kind === "ROUND") {
-               inferredType = this.inferRoundApply(node as Call, scope);
+               inferredType = this.inferRoundApply(
+                  node as Call,
+                  scope,
+                  options
+               );
             } else {
-               inferredType = this.inferCurlyCall(node as Call, scope);
+               inferredType = this.inferCurlyCall(node as Call, scope, options);
             }
             break;
          case "Select":
@@ -348,7 +356,11 @@ export class TypeInferencer {
       );
    }
 
-   inferSquareApply(node: Call, scope: Scope): Type {
+   inferSquareApply(
+      node: Call,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ): Type {
       let calleeType;
       //   this.handleSquareExtensionSearch(node, scope);
       try {
@@ -367,6 +379,9 @@ export class TypeInferencer {
          throw e;
       }
       // For future, check if calleeType is Type, only then go into Generic[Type] building
+      if (options.isTypeLevel) {
+         return new TypeOfTypes();
+      }
       if (
          calleeType === PrimitiveType.Type ||
          calleeType instanceof SquareTypeToTypeLambdaType
@@ -547,14 +562,18 @@ export class TypeInferencer {
       }
    }
 
-   inferCurlyCall(node: Call, scope: Scope): Type {
+   inferCurlyCall(
+      node: Call,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ): Type {
       const calleeType = this.infer(node.callee, scope);
       const fields = this.getAllKnownFields(calleeType, scope);
       if (
          (fields.size === 0 && node.args.length > 0) ||
          (node.callee instanceof Identifier && node.callee.isTypeIdentifier())
       ) {
-         return this.inferRoundApply(node, scope);
+         return this.inferRoundApply(node, scope, options);
       } else {
          return calleeType;
       }
@@ -563,7 +582,11 @@ export class TypeInferencer {
    // func = [T, X] -> (thing: T, other: X) -> thing
    // func(12, "Something")
    // = Number
-   inferRoundApply(node: Call, scope: Scope): Type {
+   inferRoundApply(
+      node: Call,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ): Type {
       let calleeType;
 
       this.handleExtensionSearch(node, scope);
@@ -601,6 +624,11 @@ export class TypeInferencer {
             usesVariableParameters = true;
          }
       }
+      calleeType = scope.resolveNamedType(calleeType);
+      if (calleeType instanceof OptionalType && node.ammortized) {
+         calleeType = scope.resolveNamedType(calleeType.type);
+      }
+
       if (calleeType instanceof RoundValueToValueLambdaType) {
          if (calleeType.returnType instanceof ThisType) {
             if (node.callee instanceof Select) {
@@ -612,11 +640,11 @@ export class TypeInferencer {
                return calleeType.returnType;
             }
          }
-         return this.asMutable(
-            calleeType.returnType,
-            node,
-            usesVariableParameters
-         );
+         let result = calleeType.returnType;
+         if (node.ammortized && !(result instanceof OptionalType)) {
+            result = new OptionalType(result);
+         }
+         return this.asMutable(result, node, usesVariableParameters);
       } else if (
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
@@ -624,7 +652,8 @@ export class TypeInferencer {
          this.context.builder.buildSquareArgsInRoundApply(
             node,
             calleeType,
-            scope
+            scope,
+            options
          );
          const squareArgs = node.getTypeArgs();
          if (squareArgs) {
@@ -634,11 +663,11 @@ export class TypeInferencer {
                squareArgs
             );
             if (result instanceof RoundValueToValueLambdaType) {
-               return this.asMutable(
-                  result.returnType,
-                  node,
-                  usesVariableParameters
-               );
+               let returnType = result.returnType;
+               if (node.ammortized) {
+                  returnType = new OptionalType(returnType);
+               }
+               return this.asMutable(returnType, node, usesVariableParameters);
             }
          }
          throw new Error(
@@ -650,10 +679,9 @@ export class TypeInferencer {
          `Not calling a function. Object ${node.callee.show()} is of type ${calleeType.toString()} - ${
             node.position?.start.line
          } at ${scope.iteration}.` +
-            constructor !==
-         undefined
-            ? "You want to call constructors with {}"
-            : ""
+            (constructor !== undefined
+               ? "You want to call constructors with {}"
+               : "")
       );
    }
 
@@ -759,8 +787,8 @@ export class TypeInferencer {
       node.ownerComponent = found[0].name;
       if (found[0] instanceof StructType) {
          node.ownerComponentAppliedSquareTypes = (
-            found[0].squareParamsApplied?.map((t) => t.name) ?? []
-         ).filter((t) => t !== undefined) as string[];
+            found[0].squareParamsApplied ?? []
+         ).filter((t) => t !== undefined);
       }
       let result = found[1].type;
       //   if (isOwnerMutable && !(found[1].type instanceof MutableType)) {
@@ -966,6 +994,12 @@ export class TypeInferencer {
 
       if (node.statements.length === 0) {
          return new Type();
+      }
+
+      if (options.isTypeLevel) {
+         return this.infer(node.statements[0], scope.innerScopeOf(node), {
+            isTypeLevel: options.isTypeLevel,
+         });
       }
 
       try {
@@ -1325,6 +1359,7 @@ export class TypeInferencer {
             );
          }
          let returnType = this.infer(node.block, innerScope, {
+            isTypeLevel: options.isTypeLevel,
             typeExpectedInPlace: specifiedType,
          });
 

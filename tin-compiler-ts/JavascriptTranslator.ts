@@ -51,6 +51,9 @@ import {
    RefinedType,
    PrimitiveType,
    IntersectionType,
+   AppliedGenericType,
+   AnyType,
+   OptionalType,
 } from "./Types";
 import { OutputTranslator } from "./compiler";
 import { exec } from "node:child_process";
@@ -138,11 +141,11 @@ export class JavascriptTranslator implements OutputTranslator {
                fieldType instanceof RoundValueToValueLambdaType ||
                fieldType instanceof SquareTypeToValueLambdaType;
             return `_p${i}${
-               param.defaultValue &&
+               fieldType.type instanceof OptionalType &&
                !isReflectionType &&
                !isPrimitive &&
                !isLambda
-                  ? " = " + this.translate(param.defaultValue, scope)
+                  ? " = _var([], () => undefined, true)"
                   : ""
             }`;
          }) +
@@ -209,7 +212,7 @@ export class JavascriptTranslator implements OutputTranslator {
                const symbol = scope.lookup(term.value);
                clojureName = this.makeClojureIdent(symbol);
             }
-            result = `{_:(${result}),_cl:('${clojureName}')}`;
+            result = `_var([], () => ${result},false, '${clojureName}')`;
          } else if (
             term.invarTypeInVarPlace &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
@@ -221,7 +224,18 @@ export class JavascriptTranslator implements OutputTranslator {
 
          if (term.clojure) {
             result = `_makeClojure({${term.clojure
-               .map((s) => `"${this.makeClojureIdent(s)}":${s.name}`)
+               .filter(
+                  (s) =>
+                     (s.isUsedInClojures && s.isSentToConstructors) ||
+                     s.typeSymbol instanceof MutableType
+               )
+               .map(
+                  (s) =>
+                     `"${this.makeClojureIdent(s)}":${s.name.replaceAll(
+                        "@",
+                        "$"
+                     )}`
+               )
                .join(",")}}, ${result})`;
          }
       }
@@ -303,7 +317,9 @@ export class JavascriptTranslator implements OutputTranslator {
                ? `_Q_share(${
                     term.ownerComponent
                  }._s, [${term.ownerComponentAppliedSquareTypes
-                    .map((s) => s + "._s")
+                    .map(
+                       (s) => `lazy(() => ${this.translateType(s, scope)}._s)`
+                    )
                     .join(",")}] )`
                : `${term.ownerComponent}._s`;
             selectionBase = `[${symbolSplice}]${operator}${term.field}`;
@@ -345,7 +361,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch(e) { if(e instanceof Error || typeof e === 'object' && TinErr_._s in e ) {throw e} else { return e} } })`;
+         )}\n} catch(e) { if(e instanceof Error || e && typeof e === 'object' && TinErr_._s in e ) {throw e} else { return e} } })`;
 
          // Change
       } else if (term instanceof Change) {
@@ -357,12 +373,15 @@ export class JavascriptTranslator implements OutputTranslator {
                : "";
          const isNotSelect = !(term.lhs instanceof Select);
          const isArtificial = term.at(ARTIFICIAL);
-         const lhs = this.translate(term.lhs, scope);
+         let lhs = this.translate(term.lhs, scope);
          const rhs = this.translate(term.value, scope);
          const rhsIfMutable = `${start}${rhs}${ifTermValueMutable}`;
          if (isArtificial) {
             return `${lhs} = ${rhs}`;
          } else {
+            if (lhs.endsWith(this.accessMutable)) {
+               lhs = lhs.substring(0, lhs.length - 2);
+            }
             return `${lhs}.set(${rhsIfMutable})`;
          }
 
@@ -380,7 +399,7 @@ export class JavascriptTranslator implements OutputTranslator {
          const scopeDots = [...(scope.toPath().matchAll(/\./g) || [])].length;
          const doExport = scopeDots < 3 && term.isDeclaration ? "export " : "";
          keyword = doExport + keyword;
-         const lhs = this.translate(term.lhs, scope);
+         const lhs = this.translate(term.lhs, scope, { isLhs: true });
          const isMutable = term.type?.translatedType instanceof MutableType;
          let value = term.value
             ? this.makeMutable(this.translate(term.value, scope), isMutable)
@@ -462,11 +481,16 @@ export class JavascriptTranslator implements OutputTranslator {
          if (Object.keys(replacers).includes(value)) {
             value = replacers[value];
          }
-         if (term.isFromSelfClojure) {
+         if (term.isFromSelfClojure && !args.isLhs) {
             const symbol = scope.lookup(term.value);
-            value = `this._clojure["${this.makeClojureIdent(symbol)}"]`;
-            // Otherwise accessMutable is added in the wrapper translate() (non-raw)
-            if (!term.varTypeInInvarPlace) {
+            if (
+               (symbol.isUsedInClojures && symbol.isSentToConstructors) ||
+               symbol.typeSymbol instanceof MutableType
+            ) {
+               value = `this._clojure["${this.makeClojureIdent(symbol)}"]`;
+            }
+            if (!term.varTypeInInvarPlace && !symbol.isUsedInClojures) {
+               // Otherwise accessMutable is added in the wrapper translate() (non-raw)
                value += this.accessMutable;
             }
          }
@@ -493,7 +517,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch (e) { if (e instanceof Error || typeof e === 'object' && TinErr_._s in e ) { _addStack(e, '${
+         )}\n} catch (e) { if (e instanceof Error || e && typeof e === 'object' && TinErr_._s in e ) { _addStack(e, '${
             scope.name + ":" + scope.position.start
          }'); throw e } else { return e } }}`;
 
@@ -507,9 +531,9 @@ export class JavascriptTranslator implements OutputTranslator {
             .join(", ")}) => {  const _sqSym_args = [${term.parameterTypes
             .map(
                (t) =>
-                  "(" +
+                  "lazy(() => (" +
                   this.translate(t, scope.innerScopeOf(term, true)) +
-                  ")._s"
+                  ")._s)"
             )
             .join(",")}]; return ${this.translate(
             term.returnType,
@@ -579,7 +603,11 @@ export class JavascriptTranslator implements OutputTranslator {
          !term.isCallingAConstructor
       ) {
          return `_copy(${this.translate(term.callee, scope)}, {${term.args.map(
-            ([n, t]) => `${n}: {_:${this.translate(t, scope)}},`
+            ([n, t]) =>
+               `${n.replaceAll(".", "$$")}: _var([], () => ${this.translate(
+                  t,
+                  scope
+               )}, true)`
          )}})`;
       } else if (term instanceof Call) {
          let params: ([string, Term] | undefined)[] = [];
@@ -596,7 +624,11 @@ export class JavascriptTranslator implements OutputTranslator {
             }
          }
          const takesVarargs = term.takesVarargs && !term.bakedInThis;
-         let open = takesVarargs ? "(Seq(0)([" : "(";
+         let varargType =
+            term.args.length > 0
+               ? this.translateType(term.args[0][1].inferredType, scope)
+               : "";
+         let open = takesVarargs ? `(Seq(${varargType})([` : "(";
          const close = takesVarargs ? "]))" : ")";
          let openWrapper = "";
          let closeWrapper = "";
@@ -609,7 +641,7 @@ export class JavascriptTranslator implements OutputTranslator {
                ".call(" +
                this.translate((callee as Select).owner, scope) +
                "," +
-               (takesVarargs ? "Seq(0)([" : "");
+               (takesVarargs ? `Seq(${varargType})([` : "");
             if (term.callee.owner instanceof Identifier) {
             } else {
                openWrapper =
@@ -656,6 +688,11 @@ export class JavascriptTranslator implements OutputTranslator {
                return call;
             }
          }
+         let ammortization = term.ammortized
+            ? open.startsWith(".")
+               ? "?"
+               : "?."
+            : "";
 
          return wrapAwait(
             "(" +
@@ -666,6 +703,7 @@ export class JavascriptTranslator implements OutputTranslator {
                        .map(([name, type]) => this.translateType(type, scope))
                        .join(",")})`
                   : "") +
+               ammortization +
                open +
                params
                   .map((arg) => {
@@ -785,9 +823,10 @@ export class JavascriptTranslator implements OutputTranslator {
    translateType(type: Type | ParamType | undefined, scope: Scope): string {
       if (type instanceof NamedType) {
          return "" + type.name;
-      }
-      if (type instanceof MutableType) {
+      } else if (type instanceof MutableType) {
          return this.translateType(type.type, scope);
+      } else if (type instanceof AnyType) {
+         return "Anything";
       } else if (type instanceof PrimitiveType) {
          return "" + type.name;
       } else if (type instanceof StructType) {
@@ -795,7 +834,7 @@ export class JavascriptTranslator implements OutputTranslator {
             type.name
          }'}, {_:(obj => typeof obj === 'object' && Reflect.ownKeys(obj).includes(${
             type.name
-         }._s))})._and(Struct({_:Seq(0)([
+         }._s))})._and(Struct({_:Seq(Type)([
 						${type.fields.map((f) => `${this.translateType(f, scope)}`)}
 			])}))`;
       } else if (type instanceof ParamType) {
@@ -814,6 +853,13 @@ export class JavascriptTranslator implements OutputTranslator {
          )}._and(${this.translateType(type.right, scope)})`;
       } else if (type instanceof LiteralType) {
          return this.translateType(type.type, scope);
+      } else if (type instanceof AppliedGenericType) {
+         return `lazy(() => ${this.translateType(
+            type.callee,
+            scope
+         )}(${type.parameterTypes.map(
+            (p) => `(${this.translateType(p, scope)})`
+         )}))`;
       }
       //   else if (type instanceof RoundValueToValueLambdaType) {
       //      return `
@@ -852,13 +898,10 @@ export class JavascriptTranslator implements OutputTranslator {
             term.isTypeLevel ||
             (term.left.isTypeLevel && term.right.isTypeLevel)
          ) {
-            return this.translate(
-               new Call("ROUND", new Identifier("_U"), [
-                  ["", term.left],
-                  ["", term.right],
-               ]),
+            return `lazy(() => _U(${this.translate(
+               term.left,
                scope
-            );
+            )}, ${this.translate(term.right, scope)}))`;
          } else {
             return `(${this.translate(term.left, scope)} ?? ${this.translate(
                term.right,

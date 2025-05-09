@@ -27,8 +27,17 @@ Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 
 external "
 	function _arrToMap(K, V, arr) \{
-		const symbol = _Q_share(Tuple2._s, [K._s, V._s])
-		return new Map(arr[Array._s]._rawArray.map(tup => \{ return [tup[symbol].left._, tup[symbol].right._]\}))
+		//const symbol = _Q_share(Tuple2._s, [K._s, V._s])
+		return new Map(arr[Seq._s]._rawArray.map(tup => \{
+			let symbol;
+			for(const sym of Reflect.ownKeys(tup)) \{
+				if (typeof sym === 'symbol' && sym.description.startsWith(\"Tuple\")) \{
+					symbol = sym;
+					break;
+				\}
+			}
+			return [tup[symbol].left._, tup[symbol].right._]
+		\}))
 	\}
 
 	function _mapFromJsMap(K, V, jsMap) \{
@@ -57,7 +66,7 @@ external "
 	\}
 "
 
-Map.of: [K, V] -> (kvs: Array[(K, V)]) -> Map[K, V] = external
+Map.of: [K, V] -> (kvs: Seq[(K, V)]) -> Map[K, V] = external
 
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 	Iterator[X]((): X? ->
@@ -79,7 +88,7 @@ Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) -> Nothing) ->
 		fn(current)
 		set current = iterator.next()
 
-Iterable.fromArray = [T] -> (arr: Array[T]) ->
+Iterable.fromArray = [T] -> (arr: Seq[T]) ->
 	Iterable[T](() ->
 		i = var -1
 		Iterator[T](() ->
@@ -98,26 +107,26 @@ Iterable.fold = [T, S] -> (self: Iterable[T], start: S, combine: (T, S) -> S): S
 	sum
 
 external "
-export const Array$fromIterator = (T) => (iter) => \{
+export const Seq$fromIterator = (T) => (iter) => \{
 	const arr = [];
 	let i = iter[Iterator._s].next._()
 	while(i !== undefined && (typeof i === 'object' && i._ !== undefined)) \{
 		arr.push(i)
 		i = iter[Iterator._s].next._()
 	\}
-	return Array(T)(arr)
+	return Seq(T)(arr)
 
 \}
 
 "
 
-Array.fromIterator: [T] -> (Iterator[T]) -> Array[T] = external
-Array.fromIterable = [T] -> (iterable: Iterable[T]): Array[T] ->
-	Array.fromIterator(iterable.makeIterator())
+Seq.fromIterator: [T] -> (Iterator[T]) -> Seq[T] = external
+Seq.fromIterable = [T] -> (iterable: Iterable[T]): Seq[T] ->
+	Seq.fromIterator(iterable.makeIterator())
 
-Array.stream = [T] -> (self: Array[T]) -> Iterable.fromArray(self)
+Seq.stream = [T] -> (self: Seq[T]) -> Iterable.fromArray(self)
 
-# Json = Number | String | Array[Json] | Map[String, Json]
+# Json = Number | String | Seq[Json] | Map[String, Json]
 
 # Json.fromString: (string: String) -> Json | Error = external
 # Json.toString: (json: Json) -> String = external
@@ -125,7 +134,7 @@ Array.stream = [T] -> (self: Array[T]) -> Iterable.fromArray(self)
 external "
 export function Json$fromString(str) \{
 	return JSON.parse(str, (key, value) => \{
-		if (_JsArr.isArray(value)) return Array(Json)(value)
+		if (_JsArr.isArray(value)) return Seq(Json)(value)
 		if (typeof value === 'object') return _mapFromJsMap(String, Json, new Map(Object.entries(value)))
 
 		return value;
@@ -146,7 +155,7 @@ export function Json$toString(js) \{
 		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === MapOps._s).length > 0 && Object.getOwnPropertySymbols(m).filter(o => o === Iterable._s).length > 0;
 	\}
 	function isArray(m) \{
-		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === Array._s).length > 0;
+		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === Seq._s).length > 0;
 	\}
 
 	return JSON.stringify(js, (key, value) => \{
@@ -161,7 +170,7 @@ export function Json$toString(js) \{
 			return obj
 		\}
 		if (isArray(value)) \{
-			return value[Array._s]._rawArray
+			return value[Seq._s]._rawArray
 		\}
 		return value;
 	\})	
@@ -181,14 +190,14 @@ Iterable.toString = [T] -> (iter: Iterable[T], label: String = " "): String ->
 
 	str + " }"
 
-Iterable.makeToString = [T] -> (iter: Iterable[T], label: String = " ") -> () -> Iterable.toString(iter, label)
+Iterable.makeToString = [T] -> (iter: Iterable[T], label: String = " ") -> ToString { () -> Iterable.toString(iter, label) }
 
 Range = struct:
 	start: Number
 	end: Number
 	step: Number
 
-Range.from = (start: Number, end: Number, step: Number = 1) ->
+Range.new = (start: Number, end: Number, step: Number = 1) ->
 	range = Range { start, end, step }
 	iterable = Iterable[Number] { () ->
 		link i = var start
@@ -201,4 +210,7 @@ Range.from = (start: Number, end: Number, step: Number = 1) ->
 		}
 	}
 	range & iterable & Iterable.makeToString(iterable, "Range")
+
+Range.from = (start: Number) -> Range.new(start, 9999999999999)
+Range.to = (self: Range, to: Number) -> Range.new(self.start, to, self.step)
 	 

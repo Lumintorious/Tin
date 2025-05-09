@@ -12,7 +12,6 @@ import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, TypeErrorList } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
-import { type } from "os";
 import { LiteralType } from "./Types";
 import {
    Any,
@@ -44,6 +43,8 @@ export class Symbol {
    shadowing?: Symbol;
    isMutable: boolean = false;
    isLink: boolean = false;
+   isUsedInClojures: boolean = false;
+   isSentToConstructors: boolean = false;
    isPrivate: boolean = false;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
       this.name = name;
@@ -333,10 +334,11 @@ export class Scope {
          if (symName.includes(".")) {
             const parts = symName.split(".");
             symName = parts[parts.length - 1];
-            if (parts[0] !== trueOwnerType.name) {
-               continue;
-            }
+            // if (parts[0] !== trueOwnerType.name) {
+            //    continue;
+            // }
          }
+         //  console.log(`'${symName}' vs '${name}' => ${symName === name}`);
          if (symName === name) {
             foundSymbol = sym;
             break;
@@ -425,7 +427,7 @@ export class Scope {
       }
    }
 
-   resolveAppliedGenericTypes(type: Type) {
+   resolveAppliedGenericTypes(type: Type): Type {
       if (!(type instanceof AppliedGenericType)) {
          return type;
       }
@@ -436,6 +438,8 @@ export class Scope {
       if (typeCallee instanceof GenericNamedType && typeCallee.extendedType) {
          typeCallee = this.resolveNamedType(typeCallee.extendedType);
          typeCallee = this.resolveAppliedGenericTypes(typeCallee);
+      } else if (typeCallee instanceof GenericNamedType) {
+         return type;
       }
       if (
          !(typeCallee instanceof SquareTypeToTypeLambdaType) &&
@@ -530,6 +534,15 @@ export class Scope {
             result.isFirstParamThis = lambdaType.isFirstParamThis;
             result.isForwardReferenceable = lambdaType.isForwardReferenceable;
             return result;
+
+         case "SquareTypeToValueLambdaType":
+            const lambdaTypeSq = type as SquareTypeToValueLambdaType;
+            return new SquareTypeToValueLambdaType(
+               lambdaTypeSq.paramTypes,
+               this.resolveGenericTypes(lambdaTypeSq.returnType, paramMap),
+               lambdaTypeSq.pure,
+               lambdaTypeSq.capturesMutableValues
+            );
          case "StructType":
             if (!(type instanceof StructType)) {
                throw new Error("What the hell??");
@@ -542,7 +555,6 @@ export class Scope {
                );
             });
             const structResult = new StructType(type.name, mappedFields);
-            console.log(structResult.toString());
             structResult.squareParamsApplied = paramMap.order.map((p) =>
                p[1] instanceof LiteralType ? p[1].type : p[1]
             );

@@ -96,7 +96,9 @@ export function _Q_share(calleeSym, argSyms) {
 	if (argSyms === undefined || argSyms.length === 0) {
 		return calleeSym
 	}
-	const key = calleeSym.description + "[" + argSyms.map(s => typeof s === 'object' && "_s" in s ? s._s.description : s.description).join(", ") + "]"
+	const key = calleeSym.description + "[" + argSyms.map(s => {
+		return typeof s === 'object' && "_s" in s ? s._s.description : s.description
+	}).join(", ") + "]"
 	if (_Q_map.has(key)) {
 		return _Q_map.get(key)
 	} else {
@@ -349,32 +351,45 @@ export function _L(value) {
 
 export const nothing = null;
 
-export function _var(deps, fn, doVar) {
+function set(newValue) {
+	this._ = newValue;
+	for (let i = 0; i < this.subscribers.length; i++) {
+		this.subscribers[i].notify();
+	}
+}
+
+function notify() {
+	this.set(fn())
+}
+
+export function _var(deps, fn, doVar, clojureName) {
 	const obj = fn();
 	const subscribers = [];
+	let result = {};
 	if (!doVar) {
-		return obj
-	} else {
-		function set(newValue) {
-			this._ = newValue;
-			for (let i = 0; i < subscribers.length; i++) {
-				this.subscribers[i].notify();
-			}
-		}
-
-		function notify() {
-			this.set(fn())
-		}
-
-		let result = {};
-		if (typeof obj === 'object' && "_" in obj) {
-			result = { _: obj._, subscribers, fn, set, notify }
+		if (obj && typeof obj === 'object' && "_" in obj) {
+			result = { _: obj._, _cl: clojureName }
 		} else {
-			result = { _: obj, subscribers, fn, set, notify }
+			result = { _: obj, _cl: clojureName }
+		}
+	} else {
+		if (obj && typeof obj === 'object' && "_" in obj) {
+			result = { _: obj._, subscribers, fn, set, notify, _cl: clojureName }
+		} else {
+			result = { _: obj, subscribers, fn, set, notify, _cl: clojureName }
 		}
 		deps.forEach(d => d.subscribers.push(result))
+	}
+	return result;
+}
 
-		return result;
+function _copyUnderline(v) {
+	if ("set" in v) {
+		return {
+			_: v._, subscribers: [], fn: v.fn, set, notify, _cl: v._cl
+		}
+	} else {
+		return { _: v._, _cl: v._cl }
 	}
 }
 
@@ -396,39 +411,44 @@ export function arraySymbol() {
 }
 
 export var Seq = (function () {
-	const result = (T) => _S(arraySymbol(), (args) => args[__tin_varargs_marker] ? args : ({
-		_rawArray: args,
-		length: {
-			_: function () {
-				return args.length;
-			}
-		},
-		at: {
-			_: function (index) {
-				if (typeof index !== "number") {
-					throw new Error("Index was not number")
+	const _sqSym = Symbol("Seq")
+	const result = _Q(_sqSym, (T) => {
+		const _sqSym_args = [T._s]
+		return _S(_Q_share(_sqSym, _sqSym_args), (args) => args[__tin_varargs_marker] ? args : ({
+			_rawArray: args,
+			length: {
+				_: function () {
+					return args.length;
 				}
-				return args[index]
-			}
-		},
-		and: {
-			_: function (arr) {
-				return Seq(T)([...args, ...arr[Array._s]._rawArray])
-			}
-		},
-		[__tin_varargs_marker]: true
-	}), {}, {})
-	result._s = arraySymbol()
+			},
+			at: {
+				_: function (index) {
+					if (typeof index !== "number") {
+						throw new Error("Index was not number")
+					}
+					return args[index]
+				}
+			},
+			and: {
+				_: function (arr) {
+					return Seq(T)([...args, ...arr[Array._s]._rawArray])
+				}
+			},
+			[__tin_varargs_marker]: true
+		}), {}, {})
+	})
 	return result;
 })()
 
 export const Array$of = (t) => (args) => args
-export const Array$empty = (t) => Array(t)([])
+export const Array$empty = (t) => Seq(t)([])
 export const Array$and = function (t) { return (function (arr) { return this[Array._s].and._(arr) }) }
 Seq._typeId = "Seq"
+
+
 export const copy = (obj, replacers) => {
 	if (typeof (obj) === 'object' && "_" in obj) {
-		return { _: copy(obj._), _cn: obj._cn, _cl: obj._cl }
+		return _copyUnderline(obj)//{ _: copy(obj._), _cn: obj._cn, _cl: obj._cl }
 	}
 
 	let newObj = { _type: obj._type };
@@ -453,7 +473,8 @@ export const copy = (obj, replacers) => {
 			const field = oldComponent[fieldKey];
 			let newField;
 			if (typeof (field) === 'object' && "_" in field) {
-				newField = { _: field._, _cn: field._cn, _cl: field._cl }
+				newField = _copyUnderline(field)
+				// newField = { _: field._, _cn: field._cn, _cl: field._cl }
 				newComponent[fieldKey] = newField
 				newFieldsByOldFields.set(field, newField)
 			}
@@ -486,59 +507,72 @@ export const copy = (obj, replacers) => {
 		}
 	}
 
-	_replaceComponentFields(newObj, replacers)
+	// _replaceComponentFields(newObj, replacers)
 	if (wasUnderscore) {
 		return [newObj]
 	}
 	return newObj;
 }
 
-export function _replaceComponentFields(obj, replacer) {
-	if (typeof obj !== "object") {
-		return obj;
-	}
-	if (typeof replacer !== 'object' || replacer === null) {
-		return obj;
-	}
-	for (const componentKey of Reflect.ownKeys(replacer)) {
-		if (typeof componentKey !== 'symbol') {
-			continue;
-		}
-		const replacerComponent = replacer[componentKey];
-		for (const fieldKey of Reflect.ownKeys(replacerComponent)) {
-			const replacerField = replacerComponent[fieldKey]
-			const objField = obj?.[componentKey]?.[fieldKey]
-			if (objField !== undefined && replacerField !== undefined) {
-				obj[componentKey][fieldKey] = replacerField
-				if (objField._cn && !replacerField._cn) {
-					replacerField._cn = objField._cn
+// export function _replaceComponentFields(obj, replacer) {
+// 	if (typeof obj !== "object") {
+// 		return obj;
+// 	}
+// 	if (typeof replacer !== 'object' || replacer === null) {
+// 		return obj;
+// 	}
+// 	for (const componentKey of Reflect.ownKeys(replacer)) {
+// 		if (typeof componentKey !== 'symbol') {
+// 			continue;
+// 		}
+// 		const replacerComponent = replacer[componentKey];
+// 		for (const fieldKey of Reflect.ownKeys(replacerComponent)) {
+// 			const replacerField = replacerComponent[fieldKey]
+// 			const objField = obj?.[componentKey]?.[fieldKey]
+// 			if (objField !== undefined && replacerField !== undefined) {
+// 				obj[componentKey][fieldKey] = replacerField
+// 				if (objField._cn && !replacerField._cn) {
+// 					replacerField._cn = objField._cn
 
-					if (replacerField._cn && obj._clojure[replacerField._cn]) {
-						obj._clojure[replacerField._cn] = replacerField
-					}
-				}
-				// if (typeof (objField) === 'object' && ("_" in objField) && !(objField["_cn"] === undefined)) {
-				const oldObjField = objField
-				obj[componentKey][fieldKey] = replacerField;
-				for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
-					const clojureField = obj._clojure[clojureKey]
-					if (clojureField === oldObjField) {
-						obj._clojure[clojureKey] = replacerField
-					}
-				}
-				// }
-			}
-		}
+// 					if (replacerField._cn && obj._clojure[replacerField._cn]) {
+// 						obj._clojure[replacerField._cn] = replacerField
+// 					}
+// 				}
+// 				// if (typeof (objField) === 'object' && ("_" in objField) && !(objField["_cn"] === undefined)) {
+// 				const oldObjField = objField
+// 				obj[componentKey][fieldKey] = replacerField;
+// 				for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
+// 					const clojureField = obj._clojure[clojureKey]
+// 					if (clojureField === oldObjField) {
+// 						obj._clojure[clojureKey] = replacerField
+// 					}
+// 				}
+// 				// }
+// 			}
+// 		}
 
-	}
+// 	}
 
-	return obj;
-}
+// 	return obj;
+// }
 
 export function _copy(obj, fieldReplacers) {
 	const copied = copy(obj)
-	_replaceComponentFields2(copied, fieldReplacers)
+	_replaceComponentFields2(copied, _expand(fieldReplacers))
 	return copied;
+}
+
+function _expand(obj, sep = "$") {
+	const result = {};
+	for (const [key, value] of Object.entries(obj)) {
+		const parts = key.split(sep);
+		let curr = result;
+		for (let i = 0; i < parts.length - 1; i++) {
+			curr = curr[parts[i]] ??= {};
+		}
+		curr[parts.at(-1)] = value;
+	}
+	return result;
 }
 
 export function _replaceComponentFields2(obj, replacer) {
@@ -548,15 +582,23 @@ export function _replaceComponentFields2(obj, replacer) {
 	if (typeof replacer !== 'object' || replacer === null) {
 		return obj;
 	}
+
 	for (const componentKey of Reflect.ownKeys(obj)) {
 		if (typeof componentKey !== 'symbol') {
 			continue;
 		}
 		for (const fieldKey of Reflect.ownKeys(obj[componentKey])) {
-			const replacerField = replacer[fieldKey]
+			let replacerField = replacer[fieldKey]
 			const objField = obj?.[componentKey]?.[fieldKey]
 			if (objField !== undefined && replacerField !== undefined) {
-				obj[componentKey][fieldKey] = { _: replacerField }
+				replacerField = replacerField._ ?? replacerField;
+				if (typeof replacerField === 'object' && !("_type" in replacerField)) {
+					const copied = copy(objField._)
+					replacerField = _replaceComponentFields2(copied, replacerField)
+				} else {
+					replacerField = _var([], () => replacerField, true)
+				}
+				obj[componentKey][fieldKey] = _var([], () => replacerField, true)
 				if (objField._cn && !replacerField._cn) {
 					replacerField._cn = objField._cn
 
@@ -901,7 +943,10 @@ export const debug = (...args) => {
 }
 
 export function clojure(obj) {
-	debug(obj._clojure ?? obj._?.clojure)
+	Object.entries(obj._clojure).forEach(([k, v]) => {
+		debug(k)
+		debug(v)
+	})
 }
 
 export const jsonify = (obj) => {

@@ -1,15 +1,21 @@
-Person = struct:
+# import collections/Iterable
+
+Address = struct:
+	street: String
+	number: Number
+
+Pet = struct:
 	name: String
 
-Contestant = struct:
-	num: Number
-	introduce: () -> String
+Person = struct:
+	name: String
+	address: Address
+	pet: Pet?
 
-Contestant.new = (link name: String) ->
-	Person { name } & Contestant { 0, () -> "Hi, I'm {name}!" }
+AnimalLover = Person where:
+	self.pet !: Nothing
 
-dude = Contestant.new("Dude")
-dude2 = dude { name = "Bloke" }
+person = Person { "Razvan", Address { "Iancu Avramescu", 10 } }
 
-print(dude.introduce())
-print(dude2.introduce())
+p2 = person { address.street = "Hi", pet = Pet { "Zapacel" } }
+print(p2 :: AnimalLover)

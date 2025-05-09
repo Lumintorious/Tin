@@ -130,7 +130,7 @@ export class Lexer {
          "?",
          "!",
       ];
-      this.parens = ["(", "[", "{", "}", "]", ")"];
+      this.parens = ["?(", "(", "[", "{", "}", "]", ")"];
       this.indentStack = [0]; // To track indentation levels
    }
 
@@ -260,18 +260,18 @@ export class Lexer {
       }
 
       // Tokenize identifiers or keywords
-      if (/[a-zA-Z_]/.test(char)) return this.tokenizeIdentifierOrKeyword();
+      if (/[a-zA-Z@]/.test(char)) return this.tokenizeIdentifierOrKeyword();
+
+      for (let p of this.parens) {
+         if (this.input.slice(this.position).startsWith(p)) {
+            return this.tokenizeParens(p);
+         }
+      }
 
       // Tokenize operators
       for (let op of this.operators) {
          if (this.input.slice(this.position).startsWith(op)) {
             return this.tokenizeOperator(op);
-         }
-      }
-
-      for (let p of this.parens) {
-         if (this.input.slice(this.position).startsWith(p)) {
-            return this.tokenizeParens(p);
          }
       }
 

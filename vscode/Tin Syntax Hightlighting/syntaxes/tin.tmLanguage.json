@@ -14,7 +14,7 @@
          "match": "\\b(true|false|nothing|this)\\b"
       },
       {
-         "match": "\\b\\.*([a-z][a-zA-Z0-9_]*)\\b[ ]*(=|:)[ ]*(\\(|\\[)",
+         "match": "\\.*([\\@a-z][a-zA-Z0-9_]*)[ ]*(=|:)[ ]*(\\(|\\[)",
          "name": "function.declaration.tin",
          "captures": {
             "1": {
@@ -29,7 +29,7 @@
          }
       },
       {
-         "match": "\\b([a-z][a-zA-Z0-9_]*)\\b(\\(|\\[)",
+         "match": "([\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
          "name": "function.call.tin",
          "captures": {
             "1": {
@@ -41,7 +41,7 @@
          }
       },
       {
-         "match": "(\\.)\\b([a-z][a-zA-Z0-9_]*)\\b(\\(|\\[)",
+         "match": "(\\.)([\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
          "name": "field.tin",
          "captures": {
             "1": {
@@ -56,7 +56,7 @@
          }
       },
       {
-         "match": "(\\.)\\b([a-z][a-zA-Z0-9_]*)",
+         "match": "(\\.)([\\@a-z][a-zA-Z0-9_]*)",
          "name": "field.tin",
          "captures": {
             "1": {
@@ -69,15 +69,11 @@
       },
       {
          "name": "variable.parameter.tin",
-         "match": "\\b([a-z][a-zA-Z0-9_]*)\\b"
-      },
-      {
-         "name": "operator.tin.soft",
-         "match": "\\b@\\b"
+         "match": "([\\@a-z][a-zA-Z0-9_]*)"
       },
       {
          "name": "type.tin",
-         "match": "\\b([A-Z][a-zA-Z0-9]*)\\b"
+         "match": "([A-Z][a-zA-Z0-9]*)"
       },
       {
          "name": "string.quoted.double.tin",
@@ -107,7 +103,7 @@
                "patterns": [
                   {
                      "name": "variable.other.tin",
-                     "match": "[a-zA-Z_][a-zA-Z0-9_]*"
+                     "match": "[\\@a-zA-Z_][a-zA-Z0-9_]*"
                   }
                ]
             },

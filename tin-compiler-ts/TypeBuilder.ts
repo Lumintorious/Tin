@@ -91,7 +91,9 @@ export class TypeBuilder {
       } else if (node instanceof Block) {
          const innerBlockScope = scope.innerScopeOf(node, true);
          node.statements.forEach((statement) =>
-            this.build(statement, innerBlockScope)
+            this.build(statement, innerBlockScope, {
+               isTypeLevel: options.isTypeLevel,
+            })
          );
       } else if (node instanceof Call && node.kind !== "SQUARE") {
          this.buildRoundApply(node, scope, options);
@@ -107,7 +109,7 @@ export class TypeBuilder {
       } else if (node instanceof RoundValueToValueLambda) {
          this.buildRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
-         this.buildSquareTypeToValueLambda(node, scope);
+         this.buildSquareTypeToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToTypeLambda) {
          if (options.assignedName) {
             node.name = options.assignedName;
@@ -397,6 +399,15 @@ export class TypeBuilder {
       }
       const leftType = this.context.inferencer.infer(node.left, scope);
       this.build(node.left, scope, { isTypeLevel: options.isTypeLevel });
+      if (
+         node.operator === "&" &&
+         node.left instanceof Identifier &&
+         !options.isTypeLevel &&
+         !node.left.isTypeIdentifier()
+      ) {
+         const symbol = scope.lookup(node.left.value);
+         symbol.isSentToConstructors = true;
+      }
       if (node.operator === "where") {
          scope = scope.innerScopeOf(node, true);
          scope.declare(
@@ -516,6 +527,38 @@ export class TypeBuilder {
             gottenType.type,
             expectedType.type
          );
+      } else if (
+         expectedType instanceof IntersectionType &&
+         gottenType instanceof IntersectionType
+      ) {
+         const map = new GenericTypeMap();
+         map.absorb(
+            this.matchParamToGenericParam(
+               expectedTypeParams,
+               gottenType.left,
+               expectedType.right
+            )
+         );
+         map.absorb(
+            this.matchParamToGenericParam(
+               expectedTypeParams,
+               gottenType.left,
+               expectedType.right
+            )
+         );
+         return map;
+      } else if (gottenType instanceof IntersectionType) {
+         const map = new GenericTypeMap();
+         for (const innerType of gottenType.getAllIntersectedTypes()) {
+            map.absorb(
+               this.matchParamToGenericParam(
+                  expectedTypeParams,
+                  innerType,
+                  expectedType
+               )
+            );
+         }
+         return map;
       }
       return GenericTypeMap.empty();
    }
@@ -540,7 +583,12 @@ export class TypeBuilder {
       );
    }
 
-   buildSquareArgsInRoundApply(node: Call, calleeType: Type, scope: Scope) {
+   buildSquareArgsInRoundApply(
+      node: Call,
+      calleeType: Type,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       if (
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
@@ -554,6 +602,8 @@ export class TypeBuilder {
          const expectedTypeParams = calleeType.paramTypes;
          const expectedParams = calleeType.returnType.params;
          const appliedParams = node.args;
+         //  const expectedFromLocation = options.typeExpectedInPlace;
+         //  const expectFirstParam = undefined;
          const firstParamType =
             node.args.length === 0
                ? undefined
@@ -747,7 +797,7 @@ export class TypeBuilder {
       }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
          // will be hanlded in TypeChecker
-         this.buildSquareArgsInRoundApply(node, calleeType, scope);
+         this.buildSquareArgsInRoundApply(node, calleeType, scope, options);
          if (
             calleeType instanceof SquareTypeToValueLambdaType &&
             calleeType.returnType instanceof RoundValueToValueLambdaType &&
@@ -776,7 +826,7 @@ export class TypeBuilder {
             typeExpectedInPlace: expectedType,
          });
          let captureName = undefined;
-         if (isStructConstructor && !(expectedType instanceof MutableType)) {
+         if (isStructConstructor) {
             captureName =
                statement[1] instanceof Identifier ? statement[1].value : "";
          }
@@ -787,6 +837,10 @@ export class TypeBuilder {
                gottenType,
                captureName
             );
+         }
+         if (captureName) {
+            const symbol = scope.lookup(captureName);
+            symbol.isSentToConstructors = true;
          }
       });
       this.build(node.callee, scope);
@@ -804,7 +858,10 @@ export class TypeBuilder {
             this.build(param.defaultValue, innerScope);
          }
          if (param.type)
-            this.build(param.type, innerScope, { assignedName: "ISTYPE" });
+            this.build(param.type, innerScope, {
+               assignedName: "ISTYPE",
+               isTypeLevel: true,
+            });
       }
    }
 
@@ -937,7 +994,6 @@ export class TypeBuilder {
          }
          return new AppliedKeyword("unchecked", new Block(statements, true));
       }
-      console.log(node);
       return node;
    }
 
@@ -1058,7 +1114,11 @@ export class TypeBuilder {
       }
    }
 
-   buildSquareTypeToValueLambda(node: SquareTypeToValueLambda, scope: Scope) {
+   buildSquareTypeToValueLambda(
+      node: SquareTypeToValueLambda,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       const innerScope = scope.innerScopeOf(node, true);
       node.parameterTypes.forEach((p) => {
          const type = this.context.translator.translate(p, innerScope);
@@ -1068,7 +1128,7 @@ export class TypeBuilder {
             }
          }
       });
-      this.build(node.block, innerScope);
+      this.build(node.block, innerScope, { isTypeLevel: options.isTypeLevel });
    }
 
    buildVarTransformations(
@@ -1094,12 +1154,14 @@ export class TypeBuilder {
 
       const expectedMutable = expectedType instanceof MutableType;
       if (
-         capturedName !== undefined &&
-         !(termType instanceof MutableType) &&
-         !expectedMutable
+         capturedName !== undefined
+         //   &&
+         //  !(termType instanceof MutableType) &&
+         //  !expectedMutable
       ) {
          term.capturedName = capturedName;
-      } else if (expectedMutable && !(termType instanceof MutableType)) {
+      }
+      if (expectedMutable && !(termType instanceof MutableType)) {
          term.invarTypeInVarPlace = true;
       } else if (!expectedMutable && termType instanceof MutableType) {
          term.varTypeInInvarPlace = true;
@@ -1114,12 +1176,13 @@ export class TypeBuilder {
             !scope.hasSymbol(term.value, boundaryScope)
          ) {
             const symbol = scope.lookup(term.value);
-            if (symbol.isLink) {
-               term.isFromSelfClojure = true;
-               return [symbol];
-            } else {
-               return [];
-            }
+            symbol.isUsedInClojures = true;
+            // if (symbol.isLink) {
+            term.isFromSelfClojure = true;
+            return [symbol];
+            // } else {
+            //    return [];
+            // }
          }
       } else if (term instanceof BinaryExpression) {
          return [

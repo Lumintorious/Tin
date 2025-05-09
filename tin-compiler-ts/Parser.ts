@@ -355,11 +355,17 @@ export class Call extends Term implements PotentialTypeArgs {
    bakedInThis?: Term;
    callsPure?: boolean = true;
    autoFilledSquareTypeParams?: GenericTypeMap;
+   ammortized?: boolean;
    constructor(kind: ParensKind, callee: Term, args: [string, Term][]) {
       super("Call");
       this.kind = kind;
       this.callee = callee;
       this.args = args;
+   }
+
+   setAmmortized(ammortized: boolean) {
+      this.ammortized = ammortized;
+      return this;
    }
 
    setCallee(callee: Term) {
@@ -462,7 +468,7 @@ export class Select extends Term {
    field: string;
    ownerComponent?: string;
    unionOwnerComponents?: string[];
-   ownerComponentAppliedSquareTypes?: string[];
+   ownerComponentAppliedSquareTypes?: Type[];
    ammortized: boolean = false; // if it's x?.blabla
    isDeclaration: boolean = false; // if it's bla.bla = 5 (not set bla.bla = 5)
    isBeingTreatedAsIdentifier: boolean = false;
@@ -644,7 +650,12 @@ export class Parser {
       return this.parseExpression();
    }
 
-   parseApply(callee: Term, isSquare?: boolean, isCurly?: boolean) {
+   parseApply(
+      callee: Term,
+      isSquare?: boolean,
+      isCurly?: boolean,
+      isAmmortized: boolean = false
+   ) {
       const lParens = isSquare ? "[" : isCurly ? "{" : "(";
       const rParens = isSquare ? "]" : isCurly ? "}" : ")";
       const parensKind = isSquare ? "SQUARE" : isCurly ? "CURLY" : "ROUND";
@@ -668,7 +679,18 @@ export class Parser {
             paramName = this.consume().value;
             this.consume("OPERATOR", "=");
          }
-         const paramValue = this.parseExpression();
+         let paramValue = this.parseExpression();
+         if (
+            paramName.length === 0 &&
+            paramValue instanceof Assignment &&
+            paramValue.lhs instanceof Select
+         ) {
+            const fieldName = paramValue.lhs.nameAsSelectOfIdentifiers();
+            if (fieldName && paramValue.value) {
+               paramName = fieldName;
+               paramValue = paramValue.value;
+            }
+         }
          args.push([paramName, paramValue]);
          // If there's a comma, consume it and continue parsing more arguments
          this.omit("NEWLINE");
@@ -685,7 +707,9 @@ export class Parser {
 
       const end = this.consume("PARENS", rParens);
 
-      let result: Term = new Call(parensKind, callee, args);
+      let result: Term = new Call(parensKind, callee, args).setAmmortized(
+         isAmmortized
+      );
       if (callee instanceof UnaryOperator) {
          result = new UnaryOperator(callee.operator, result);
          (result as any).expression.callee = callee.expression;
@@ -752,6 +776,14 @@ export class Parser {
          this.peek().value === "["
       ) {
          left = this.parseApply(left, true);
+      }
+
+      while (
+         this.peek() &&
+         this.peek().tag === "PARENS" &&
+         this.peek().value === "?("
+      ) {
+         left = this.parseApply(left, false, false, true);
       }
 
       while (

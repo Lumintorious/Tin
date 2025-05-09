@@ -339,14 +339,15 @@ export class TypeTranslator {
             node.type = node.lhs;
             return new ParamType(this.translate(node, scope));
          }
-         if (!node.type && !node.value && !options?.typeExpectedInPlace) {
-            throw new Error(
-               "Cannot deduce type from typeless, valueless parameter."
-            );
-         }
          let explicitType;
          if (node.type) {
             explicitType = this.translate(node.type, scope);
+         }
+         if (!node.type && !node.value && !options?.typeExpectedInPlace) {
+            explicitType = Any;
+            // throw new Error(
+            //    "Cannot deduce type from typeless, valueless parameter."
+            // );
          }
          let inferredType;
          if (node.value) {

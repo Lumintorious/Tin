@@ -1,6 +1,6 @@
 import { TokenPos } from "./Lexer";
 import { AstNode, Term, TypeDef, PotentialTypeArgs } from "./Parser";
-import { GenericTypeMap, Scope } from "./Scope";
+import { GenericTypeMap, Scope, Symbol } from "./Scope";
 
 export class Type {
    tag: string;
@@ -417,10 +417,15 @@ export class OptionalType extends Type {
       return this.type.isAssignableTo(other.type, scope);
    }
 
+   extends(other: Type, scope: Scope): boolean {
+      return false;
+   }
+
    isExtendedBy(other: Type, scope: Scope) {
       if (other instanceof OptionalType && this.isSame(other, scope)) {
          return true;
       }
+
       return other.isAssignableTo(this.type, scope) || other === Nothing;
    }
 
@@ -547,6 +552,43 @@ export class SquareTypeToValueLambdaType extends Type {
       this.capturesMutableValues = capturesMutableValues;
    }
 
+   extends(other: Type, scope: Scope): boolean {
+      if (!(other instanceof SquareTypeToValueLambdaType)) return false;
+      if (other.paramTypes.length !== this.paramTypes.length) return false;
+      // Check if parameter types are contravariant
+      const paramCheck =
+         this.paramTypes.length === other.paramTypes.length &&
+         this.paramTypes.every((param, index) => {
+            return other.paramTypes[index].name === param.name;
+         });
+
+      const syntheticScope = new Scope("syntheticSquareLambdaChecker", scope);
+      for (const param of this.paramTypes) {
+         syntheticScope.declareType(new Symbol(param.name, param));
+      }
+      // Return type must be covariant
+      const returnCheck = this.returnType.isAssignableTo(
+         other.returnType,
+         syntheticScope
+      );
+
+      const purityCheck = other.pure ? this.pure : true;
+      const captureCheck = !other.capturesMutableValues
+         ? !this.capturesMutableValues
+         : true;
+
+      const varCheck = !(this.returnType instanceof MutableType)
+         ? !(other.returnType instanceof MutableType)
+         : true;
+      //   const varCheck =
+      //      !(other.returnType instanceof MutableType) ===
+      //      !(this.returnType instanceof MutableType);
+
+      return (
+         paramCheck && returnCheck && purityCheck && captureCheck && varCheck
+      );
+   }
+
    isMutable(): boolean {
       return this.capturesMutableValues || this.returnType.isMutable();
    }
@@ -637,10 +679,11 @@ export class AppliedGenericType extends Type implements PotentialTypeArgs {
       if (!this.resolved) {
          this.resolved = scope.resolveAppliedGenericTypes(this);
       }
-      if (this.resolved) {
+      if (this.resolved && this.resolved !== this) {
          return this.resolved.extends(other, scope);
       } else if (other instanceof AppliedGenericType) {
          if (
+            this.resolved !== this &&
             scope
                .resolveAppliedGenericTypes(this)
                .extends(scope.resolveAppliedGenericTypes(other), scope)
@@ -697,7 +740,7 @@ export class AppliedGenericType extends Type implements PotentialTypeArgs {
          }
          return areAllParamsEqual;
       } else if (this.resolved) {
-         return this.resolved.isAssignableTo(other, scope);
+         return other.extends(this.resolved, scope);
       } else {
          return false;
       }
