@@ -740,7 +740,7 @@ export class TypeInferencer {
             node.isDeclaration = true;
             return type;
          } catch (e) {
-            console.error(e.message);
+            // console.error(e.message);
             //
          }
       }

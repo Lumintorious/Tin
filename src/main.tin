@@ -1,38 +1,47 @@
 import collections/Iterable
 
-Address = struct:
-	street: String
-	number: Number
 
-Pet = struct:
-	name: String
+Map.by = [K, V] -> (getKey: (v: V) -> K) -> (seq: Seq[V]) ->
+	mapd = Iterable.fromArray(seq).makeIterator()
+	print(K)
+	print(V)
+	mapd
 
-Gender = "MALE" | "FEMALE"
+r = Map.by((s: String) -> 1)("Hi")
 
-GenderInfo = struct:
-	name: Gender
-	hasPenis: Boolean
-	canGiveBirth: Boolean
+# Address = struct:
+# 	street: String
+# 	number: Number
 
-Gender.info = (g: Gender) ->
-	if g == "MALE", GenderInfo { "MALE", true, false }
-	else GenderInfo { "FEMALE", false, true }
+# Pet = struct:
+# 	name: String
+
+# Gender = "MALE" | "FEMALE"
+
+# GenderInfo = struct:
+# 	name: Gender
+# 	hasPenis: Boolean
+# 	canGiveBirth: Boolean
+
+# Gender.info = (g: Gender) ->
+# 	if g == "MALE", GenderInfo { "MALE", true, false }
+# 	else GenderInfo { "FEMALE", false, true }
 
 # Gender.info = Enum((g: GenderInfo) -> g.name)(
 # 	GenderInfo { "MALE", true, false },
 # 	GenderInfo { "FEMALE", false, true }
 # )
 
-print(Gender.info("MALE"))
+# print(Gender.info("MALE"))
 
-Person = struct:
-	name: String
-	gender: Gender
+# Person = struct:
+# 	name: String
+# 	gender: Gender
 
-Parent = struct:
-	children: Seq[Person]
+# Parent = struct:
+# 	children: Seq[Person]
 
-print(Map.of((1, 2)).get(1))
-next = Iterable.fromArray(1, 2, 3).makeIterator().next()
-print(next)
-# Iterable { () -> external }
+# print(Map.of((1, 2)).get(1))
+# next = Iterable.fromArray(1, 2, 3).makeIterator().next()
+# print(next)
+# # Iterable { () -> external }

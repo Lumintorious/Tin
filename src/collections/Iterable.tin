@@ -77,8 +77,6 @@ external "
 "
 
 Map.of: [K, V] -> (kvs: Seq[(K, V)]) -> Map[K, V] = external
-# Map.by = [K, V] -> (getKey: (v: V) -> K) -> (seq: Seq[V]) ->
-# 	mapd = Iterable.fromArray(seq).makeIterator()
 
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 	Iterator[X]((): X? ->
