@@ -93,18 +93,24 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 const _Q_map = new Map()
 
 export function _Q_share(calleeSym, argSyms) {
-	if (argSyms === undefined || argSyms.length === 0) {
-		return calleeSym
-	}
-	const key = calleeSym.description + "[" + argSyms.map(s => {
-		return typeof s === 'object' && "_s" in s ? s._s.description : s.description
-	}).join(", ") + "]"
-	if (_Q_map.has(key)) {
-		return _Q_map.get(key)
-	} else {
-		const result = Symbol(key)
-		_Q_map.set(key, result)
-		return result
+	try {
+		if (argSyms === undefined || argSyms.length === 0) {
+			return calleeSym
+		}
+		const key = calleeSym.description + "[" + argSyms.map(s => {
+			return typeof s === 'object' && "_s" in s ? s._s.description : s.description
+		}).join(", ") + "]"
+		if (_Q_map.has(key)) {
+			return _Q_map.get(key)
+		} else {
+			const result = Symbol(key)
+			_Q_map.set(key, result)
+			return result
+		}
+	} catch (e) {
+		console.error(calleeSym)
+		console.error(argSyms)
+		throw e;
 	}
 }
 
@@ -414,6 +420,7 @@ export var Seq = (function () {
 	const _sqSym = Symbol("Seq")
 	const result = _Q(_sqSym, (T) => {
 		const _sqSym_args = [T._s]
+		// console.log(Object.ownKeys(T))
 		return _S(_Q_share(_sqSym, _sqSym_args), (args) => args[__tin_varargs_marker] ? args : ({
 			_rawArray: args,
 			length: {
@@ -885,7 +892,7 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		if (typeof componentKey === 'string') continue;
 		const component = obj[componentKey]
 		const componentName = (componentKey.description.startsWith("Tuple2") || componentKey.description.startsWith("Tuple3")) ? "" : componentKey.description + " "
-		results.push(colorSymbolName(componentName) + white("{ ") + Reflect.ownKeys(component).map(k => `${red(k)} ${white("=")} ${makeStr(component[k])}`).join(white(", ")) + white(" }"))
+		results.push(colorSymbolName(componentName) + white("{ ") + Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_")).map(k => `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ${makeStr(component[k])}`).join(white(", ")) + white(" }"))
 	}
 
 	return results.join(white(" & "))

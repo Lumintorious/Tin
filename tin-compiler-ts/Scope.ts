@@ -47,6 +47,9 @@ export class Symbol {
    isSentToConstructors: boolean = false;
    isPrivate: boolean = false;
    constructor(name: string, typeSymbol: Type, ast?: Term) {
+      if (name === undefined) {
+         throw new Error("");
+      }
       this.name = name;
       this.typeSymbol = typeSymbol;
       this.ast = ast;

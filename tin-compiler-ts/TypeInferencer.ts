@@ -6,7 +6,13 @@ import {
    IntersectionType,
    Never,
 } from "./Types";
-import { BAKED_TYPE, IN_RETURN_BRANCH, Optional, Tuple } from "./Parser";
+import {
+   BAKED_TYPE,
+   IN_RETURN_BRANCH,
+   Optional,
+   RefinedDef,
+   Tuple,
+} from "./Parser";
 import { UnionType } from "./Types";
 import { GenericTypeMap } from "./Scope";
 import {
@@ -198,7 +204,7 @@ export class TypeInferencer {
             }
             break;
          case "Select":
-            inferredType = this.inferSelect(node as Select, scope);
+            inferredType = this.inferSelect(node as Select, scope, options);
             break;
          case "TypeDef":
             inferredType = this.inferTypeDef(node as TypeDef, scope);
@@ -449,6 +455,7 @@ export class TypeInferencer {
                node.callee.field,
                selectOwnerType
             );
+
             if (
                symbol.typeSymbol instanceof RoundValueToValueLambdaType &&
                symbol.typeSymbol.params[0]?.name === "self" &&
@@ -686,7 +693,11 @@ export class TypeInferencer {
    }
 
    // Questionable
-   inferSelect(node: Select, scope: Scope): Type {
+   inferSelect(
+      node: Select,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ): Type {
       function findField(
          fieldName: string,
          fields: Map<Type, ParamType[]>
@@ -729,6 +740,7 @@ export class TypeInferencer {
             node.isDeclaration = true;
             return type;
          } catch (e) {
+            console.error(e.message);
             //
          }
       }
@@ -736,6 +748,9 @@ export class TypeInferencer {
       let isOwnerMutable = false;
       let ownerType: Type;
       ownerType = this.infer(node.owner, scope);
+      //   console.log(node.owner.show());
+      //   console.log(ownerType.toString());
+      //   console.log([...scope.symbols.keys()]);
       // }
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
@@ -772,15 +787,26 @@ export class TypeInferencer {
       }
       const found = findField(node.field, fields);
       if (!found) {
+         this.context.errors.add(
+            `Field '${node.field}' could not be found on '` +
+               ownerType.toString() +
+               "'",
+            options.typeExpectedInPlace,
+            undefined,
+            node.position,
+            "Found: " +
+               [...fields.values()]
+                  .map((arr) => `${arr.map((p) => p.name)}`)
+                  .flat()
+                  .join(", ") +
+               ""
+         );
          throw new Error(
             `Field '${node.field}' could not be found on '` +
                ownerType.toString() +
-               "', fields found: [" +
-               [...fields.values()]
-                  .map((arr) => `${arr.map((p) => p.name)}`)
-                  .flat() +
-               "]"
+               "'"
          );
+         //  return Never;
       }
 
       found[1].parentComponent = found[0];
@@ -892,7 +918,53 @@ export class TypeInferencer {
       } else if (type instanceof MutableType) {
          return this.getAllKnownFields(type.type, scope);
       } else if (type instanceof RefinedType) {
-         return this.getAllKnownFields(type.inputType, scope);
+         let result = this.getAllKnownFields(type.inputType, scope);
+         if (
+            type.ast instanceof RefinedDef &&
+            type.ast.lambda.block.statements.length === 1
+         ) {
+            const trueSymbols: (Symbol | [Type, ParamType])[] = [];
+            const falseSymbols: (Symbol | [Type, ParamType])[] = [];
+
+            const innerScope = scope.innerScopeOf(type.ast.lambda);
+            this.context.builder.deduceCheckedTypes(
+               type.ast.lambda.block.statements[0],
+               trueSymbols,
+               falseSymbols,
+               innerScope
+            );
+            for (const obj of result.entries()) {
+               if (!(obj instanceof Symbol)) {
+                  const singleType = obj[0];
+                  obj[1] = [...obj[1]];
+                  result.set(singleType, obj[1]);
+                  const params = obj[1];
+                  for (const param of params) {
+                     for (const refined of trueSymbols) {
+                        if (!(refined instanceof Symbol)) {
+                           const singleTypeRefined = refined[0];
+                           const refinedParam = refined[1];
+                           if (
+                              singleTypeRefined.isAssignableTo(
+                                 singleType,
+                                 innerScope
+                              ) &&
+                              param.name === refinedParam.name
+                           ) {
+                              const index = params.indexOf(param);
+                              refinedParam.parentComponent =
+                                 param.parentComponent;
+                              refinedParam.mutable = param.mutable;
+                              params[index] = refinedParam;
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+         //  console.dir(result);
+         return result;
       } else if (type instanceof PrimitiveType) {
          return new Map();
       } else {

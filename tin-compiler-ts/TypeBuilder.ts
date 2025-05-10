@@ -169,8 +169,8 @@ export class TypeBuilder {
                trueScope.declare(symbol);
             }
          }
-         const trueSymbols: Symbol[] = [];
-         const falseSymbols: Symbol[] = [];
+         const trueSymbols: (Symbol | [Type, ParamType])[] = [];
+         const falseSymbols: (Symbol | [Type, ParamType])[] = [];
 
          this.deduceCheckedTypes(
             node.condition,
@@ -180,10 +180,14 @@ export class TypeBuilder {
          );
 
          for (const symbol of trueSymbols) {
-            trueScope.declare(symbol, true);
+            if (symbol instanceof Symbol) {
+               trueScope.declare(symbol, true);
+            }
          }
          for (const symbol of falseSymbols) {
-            falseScope.declare(symbol, true);
+            if (symbol instanceof Symbol) {
+               falseScope.declare(symbol, true);
+            }
          }
 
          const hasNoFalseBranch =
@@ -201,7 +205,9 @@ export class TypeBuilder {
                   node.trueBranch.statements[0].keyword === "return"))
          ) {
             for (const symbol of falseSymbols) {
-               scope.declare(symbol, true);
+               if (symbol instanceof Symbol) {
+                  scope.declare(symbol, true);
+               }
             }
          }
 
@@ -300,19 +306,50 @@ export class TypeBuilder {
 
    deduceCheckedTypes(
       condition: Term,
-      trueSymbols: Symbol[],
-      falseSymbols: Symbol[],
+      trueSymbols: (Symbol | [Type, ParamType])[],
+      falseSymbols: (Symbol | [Type, ParamType])[],
       scope: Scope
    ) {
+      const inferencer = this.context.inferencer;
+      function register(
+         term: Identifier | Select,
+         type: Type,
+         inverted: boolean
+      ) {
+         if (term instanceof Identifier) {
+            const shadowSymbol = term.isTypeIdentifier()
+               ? scope.lookupType(term.value)
+               : scope.lookup(term.value);
+
+            const newSymbol = new Symbol(
+               shadowSymbol.name,
+               new UncheckedType()
+            );
+            newSymbol.rewriteFrom(shadowSymbol);
+            newSymbol.shadowing = shadowSymbol;
+            newSymbol.typeSymbol = type;
+            (inverted ? falseSymbols : trueSymbols).push(newSymbol);
+            scope.declare(newSymbol, true);
+         } else if (term instanceof Select) {
+            const ownerType = inferencer.infer(term.owner, scope);
+            const field = inferencer.findField(ownerType, term.field, scope);
+            if (field) {
+               (inverted ? falseSymbols : trueSymbols).push([
+                  ownerType,
+                  new ParamType(type, field.name),
+               ]);
+            }
+         }
+      }
+
       if (
          condition instanceof TypeCheck &&
-         condition.term instanceof Identifier
+         (condition.term instanceof Identifier ||
+            (condition.term instanceof Select &&
+               condition.term.nameAsSelectOfIdentifiers()))
       ) {
-         const shadowSymbol = condition.term.isTypeIdentifier()
-            ? scope.lookupType(condition.term.value)
-            : scope.lookup(condition.term.value);
          let type = this.context.translator.translate(condition.type, scope);
-         let checkedType = shadowSymbol.typeSymbol;
+         let checkedType = this.context.inferencer.infer(condition.term, scope);
          let wasMutable = false;
          if (checkedType instanceof MutableType) {
             checkedType = checkedType.type;
@@ -325,47 +362,23 @@ export class TypeBuilder {
             if (wasMutable) {
                negativeType = new MutableType(negativeType);
             }
-            const newSymbol = new Symbol(
-               shadowSymbol.name,
-               new UncheckedType()
-            );
-            newSymbol.rewriteFrom(shadowSymbol);
-            newSymbol.shadowing = shadowSymbol;
-            newSymbol.typeSymbol = negativeType;
-            (condition.negative ? trueSymbols : falseSymbols).push(newSymbol);
-            scope.declare(newSymbol, true);
+            register(condition.term, negativeType, !condition.negative);
          }
          if (checkedType instanceof OptionalType) {
             let negativeType = checkedType.type;
             if (wasMutable) {
                negativeType = new MutableType(negativeType);
             }
-            const newSymbol = new Symbol(
-               shadowSymbol.name,
-               new UncheckedType()
-            );
-            newSymbol.rewriteFrom(shadowSymbol);
-            newSymbol.shadowing = shadowSymbol;
-            newSymbol.typeSymbol = negativeType;
-            (condition.negative ? trueSymbols : falseSymbols).push(newSymbol);
-            scope.declare(newSymbol, true);
+            register(condition.term, negativeType, !condition.negative);
          }
-         const newType = new IntersectionType(
-            shadowSymbol.typeSymbol,
-            type
-         ).simplified();
+         const newType = new IntersectionType(checkedType, type).simplified();
          if (
-            shadowSymbol.typeSymbol instanceof MutableType &&
+            checkedType instanceof MutableType &&
             !(type instanceof MutableType)
          ) {
             type = new MutableType(type);
          }
-         const newSymbol = new Symbol(shadowSymbol.name, new UncheckedType());
-         newSymbol.rewriteFrom(shadowSymbol);
-         newSymbol.shadowing = shadowSymbol;
-         newSymbol.typeSymbol = newType;
-         (condition.negative ? falseSymbols : trueSymbols).push(newSymbol);
-         scope.declare(newSymbol, true);
+         register(condition.term, newType, condition.negative);
       } else if (
          condition instanceof BinaryExpression &&
          condition.operator === "&&"
@@ -408,22 +421,21 @@ export class TypeBuilder {
          const symbol = scope.lookup(node.left.value);
          symbol.isSentToConstructors = true;
       }
-      if (node.operator === "where") {
-         scope = scope.innerScopeOf(node, true);
-         scope.declare(
-            new Symbol(
-               "self",
-               this.context.translator.translate(node.left, scope)
-            )
-         );
-         this.build(node.right, scope);
-      } else {
-         this.build(node.right, scope, {
-            isTypeLevel: options.isTypeLevel,
-            firstPartOfIntersection:
-               node.operator === "&" ? leftType : undefined,
-         });
-      }
+      //   if (node.operator === "where") {
+      //      scope = scope.innerScopeOf(node, true);
+      //      scope.declare(
+      //         new Symbol(
+      //            "self",
+      //            this.context.translator.translate(node.left, scope)
+      //         )
+      //      );
+      //      this.build(node.right, scope);
+      //   } else {
+      this.build(node.right, scope, {
+         isTypeLevel: options.isTypeLevel,
+         firstPartOfIntersection: node.operator === "&" ? leftType : undefined,
+      });
+      //   }
       if (options.isTypeLevel) {
          return;
       }
@@ -1332,11 +1344,11 @@ export class TypeBuilder {
          if (rhsType instanceof LiteralType) {
             rhsType = rhsType.type;
          }
-         scope.mapAst(
-            node,
-            "TYPE",
-            new Symbol(undefined as any, rhsType ? rhsType : new Type())
-         );
+         //  scope.mapAst(
+         //     node,
+         //     "TYPE",
+         //     new Symbol(undefined as any, rhsType ? rhsType : new Type())
+         //  );
       } else {
          let nodeTypeRaw = this.context.translator.translate(node.type, scope);
          let nodeType = scope.resolveNamedType(nodeTypeRaw);

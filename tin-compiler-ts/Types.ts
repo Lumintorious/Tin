@@ -451,6 +451,10 @@ export class ParamType {
       this.defaultValue = defaultValue;
       this.mutable = mutable;
    }
+
+   toString() {
+      return `${this.name ? this.name + ": " : ""}${this.type}`;
+   }
 }
 
 // Type of a RoundValueToValueLambda: (Int) -> String

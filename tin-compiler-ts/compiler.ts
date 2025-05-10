@@ -19,7 +19,7 @@ export interface OutputTranslator {
    translate(term: CompilerItem, scope: Scope, options: any): string;
 }
 
-Error.stackTraceLimit = 25;
+Error.stackTraceLimit = 10;
 const isTesting = process.argv.includes("--test");
 const isCompilingToGo = process.argv.includes("--targetLanguage:go");
 const SRC_PATH = path.resolve(process.cwd(), isTesting ? "tests" : "src");

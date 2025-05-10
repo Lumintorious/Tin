@@ -1,4 +1,4 @@
-# import collections/Iterable
+import collections/Iterable
 
 Address = struct:
 	street: String
@@ -7,15 +7,32 @@ Address = struct:
 Pet = struct:
 	name: String
 
+Gender = "MALE" | "FEMALE"
+
+GenderInfo = struct:
+	name: Gender
+	hasPenis: Boolean
+	canGiveBirth: Boolean
+
+Gender.info = (g: Gender) ->
+	if g == "MALE", GenderInfo { "MALE", true, false }
+	else GenderInfo { "FEMALE", false, true }
+
+# Gender.info = Enum((g: GenderInfo) -> g.name)(
+# 	GenderInfo { "MALE", true, false },
+# 	GenderInfo { "FEMALE", false, true }
+# )
+
+print(Gender.info("MALE"))
+
 Person = struct:
 	name: String
-	address: Address
-	pet: Pet?
+	gender: Gender
 
-AnimalLover = Person where:
-	self.pet !: Nothing
+Parent = struct:
+	children: Seq[Person]
 
-person = Person { "Razvan", Address { "Iancu Avramescu", 10 } }
-
-p2 = person { address.street = "Hi", pet = Pet { "Zapacel" } }
-print(p2 :: AnimalLover)
+print(Map.of((1, 2)).get(1))
+next = Iterable.fromArray(1, 2, 3).makeIterator().next()
+print(next)
+# Iterable { () -> external }

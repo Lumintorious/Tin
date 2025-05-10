@@ -317,9 +317,7 @@ export class JavascriptTranslator implements OutputTranslator {
                ? `_Q_share(${
                     term.ownerComponent
                  }._s, [${term.ownerComponentAppliedSquareTypes
-                    .map(
-                       (s) => `lazy(() => ${this.translateType(s, scope)}._s)`
-                    )
+                    .map((s) => `${this.translateType(s, scope)}._s`)
                     .join(",")}] )`
                : `${term.ownerComponent}._s`;
             selectionBase = `[${symbolSplice}]${operator}${term.field}`;
@@ -531,9 +529,9 @@ export class JavascriptTranslator implements OutputTranslator {
             .join(", ")}) => {  const _sqSym_args = [${term.parameterTypes
             .map(
                (t) =>
-                  "lazy(() => (" +
+                  "(" +
                   this.translate(t, scope.innerScopeOf(term, true)) +
-                  ")._s)"
+                  ")._s"
             )
             .join(",")}]; return ${this.translate(
             term.returnType,
@@ -638,9 +636,9 @@ export class JavascriptTranslator implements OutputTranslator {
             !term.callee.isBeingTreatedAsIdentifier
          ) {
             open =
-               ".call(" +
+               ".call((typeof _owner !== 'undefined' ? _owner : " +
                this.translate((callee as Select).owner, scope) +
-               "," +
+               ")," +
                (takesVarargs ? `Seq(${varargType})([` : "");
             if (term.callee.owner instanceof Identifier) {
             } else {
@@ -854,12 +852,12 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (type instanceof LiteralType) {
          return this.translateType(type.type, scope);
       } else if (type instanceof AppliedGenericType) {
-         return `lazy(() => ${this.translateType(
+         return `${this.translateType(
             type.callee,
             scope
          )}(${type.parameterTypes.map(
             (p) => `(${this.translateType(p, scope)})`
-         )}))`;
+         )})`;
       }
       //   else if (type instanceof RoundValueToValueLambdaType) {
       //      return `
@@ -898,10 +896,10 @@ export class JavascriptTranslator implements OutputTranslator {
             term.isTypeLevel ||
             (term.left.isTypeLevel && term.right.isTypeLevel)
          ) {
-            return `lazy(() => _U(${this.translate(
-               term.left,
+            return `_U(${this.translate(term.left, scope)}, ${this.translate(
+               term.right,
                scope
-            )}, ${this.translate(term.right, scope)}))`;
+            )})`;
          } else {
             return `(${this.translate(term.left, scope)} ?? ${this.translate(
                term.right,

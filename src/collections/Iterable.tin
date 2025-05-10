@@ -20,6 +20,8 @@ MapOps = [K, V] -> struct:
 	get: (K) -> V?
 	with: (K, V) -> Map[K, V]
 
+MapOps.at = [K, V] -> (self: MapOps[K, V], key: K) -> self.get(key)
+
 Mergeable = [T, F: Mergeable] => struct:
 	merge: (F[T]) -> F[T]
 
@@ -28,7 +30,15 @@ Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
 external "
 	function _arrToMap(K, V, arr) \{
 		//const symbol = _Q_share(Tuple2._s, [K._s, V._s])
-		return new Map(arr[Seq._s]._rawArray.map(tup => \{
+		
+		let seqSymbol;
+		for(const sym of Reflect.ownKeys(arr)) \{
+			if (typeof sym === 'symbol' && sym.description.startsWith(\"Seq\")) \{
+				seqSymbol = sym;
+				break;
+			\}
+		}
+		return new Map(arr[seqSymbol]._rawArray.map(tup => \{
 			let symbol;
 			for(const sym of Reflect.ownKeys(tup)) \{
 				if (typeof sym === 'symbol' && sym.description.startsWith(\"Tuple\")) \{
@@ -67,6 +77,8 @@ external "
 "
 
 Map.of: [K, V] -> (kvs: Seq[(K, V)]) -> Map[K, V] = external
+# Map.by = [K, V] -> (getKey: (v: V) -> K) -> (seq: Seq[V]) ->
+# 	mapd = Iterable.fromArray(seq).makeIterator()
 
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 	Iterator[X]((): X? ->

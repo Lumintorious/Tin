@@ -182,7 +182,7 @@ export class TypeChecker {
          if (node.lhs instanceof Identifier) {
             options.assignedName = node.lhs.value;
          }
-         this.typeCheck(node.lhs, scope);
+         //  this.typeCheck(node.lhs, scope);
          //  if (node.type) {
          //     this.typeCheck(node.type, scope, { isTypeLevel: true });
          //  }
@@ -340,6 +340,18 @@ export class TypeChecker {
          node.expressions.forEach((el) => this.typeCheck(el, scope));
       } else if (node instanceof AppliedKeyword) {
          this.typeCheck(node.param, scope);
+      } else if (node instanceof Identifier) {
+         const shouldError = node.isTypeIdentifier()
+            ? !scope.hasTypeSymbol(node.value)
+            : !scope.hasSymbol(node.value);
+         //  if (shouldError && !["Nothing", "Anything"].includes(node.value)) {
+         //     this.context.errors.add(
+         //        `Could not find value '${node.value}'`,
+         //        undefined,
+         //        undefined,
+         //        node.position
+         //     );
+         //  }
       } else {
       }
    }
