@@ -151,13 +151,15 @@ export class TypeTranslator {
             }
             const innerScope = scope.innerScopeOf(node, true);
             const type = new RoundValueToValueLambdaType(
-               node.params.map((p) =>
-                  this.translateRoundTypeToTypeLambdaParameter(
+               node.params.map((p) => {
+                  const result = this.translateRoundTypeToTypeLambdaParameter(
                      p,
                      innerScope,
                      {}
-                  )
-               ),
+                  );
+
+                  return result;
+               }),
                this.translate(node.block.statements[0], innerScope),
                node.isTypeLambda === true,
                node.pure,
@@ -258,11 +260,6 @@ export class TypeTranslator {
                return new Type();
             }
             const left = this.translate(node.left, scope);
-            if (node.operator === "where") {
-               const right = this.context.inferencer.infer;
-
-               return new RefinedType(left);
-            }
 
             const right = this.translate(node.right, scope);
             if (node.operator === "|") {
@@ -301,7 +298,10 @@ export class TypeTranslator {
                   scope
                );
                if (lambdaType instanceof RoundValueToValueLambdaType) {
-                  return new RefinedType(lambdaType.params[0].type);
+                  return new RefinedType(
+                     lambdaType.params[0].type,
+                     node.lambda
+                  );
                }
             }
          case "Select":

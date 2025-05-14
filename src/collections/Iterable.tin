@@ -20,7 +20,7 @@ MapOps = [K, V] -> struct:
 	get: (K) -> V?
 	with: (K, V) -> Map[K, V]
 
-MapOps.at = [K, V] -> (self: MapOps[K, V], key: K) -> self.get(key)
+# MapOps.at = [K, V] -> (self: MapOps[K, V], key: K) -> self.get(key)
 
 Mergeable = [T, F: Mergeable] => struct:
 	merge: (F[T]) -> F[T]
@@ -33,7 +33,7 @@ external "
 		
 		let seqSymbol;
 		for(const sym of Reflect.ownKeys(arr)) \{
-			if (typeof sym === 'symbol' && sym.description.startsWith(\"Seq\")) \{
+			if (typeof sym === \"symbol\" && sym.description.startsWith(\"Seq\")) \{
 				seqSymbol = sym;
 				break;
 			\}
@@ -41,7 +41,7 @@ external "
 		return new Map(arr[seqSymbol]._rawArray.map(tup => \{
 			let symbol;
 			for(const sym of Reflect.ownKeys(tup)) \{
-				if (typeof sym === 'symbol' && sym.description.startsWith(\"Tuple\")) \{
+				if (typeof sym === \"symbol\" && sym.description.startsWith(\"Tuple\")) \{
 					symbol = sym;
 					break;
 				\}
@@ -90,6 +90,8 @@ Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 Iterable.into = [T, F] -> (self: Iterable[T], factory: (Iterable[T]) -> F[T]) ->
 	factory(self)
 
+Iterable.toSeq = [T] -> (self: Iterable[T]) -> Seq.fromIterable(self)
+
 Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) -> Nothing) ->
 	iterator = self.makeIterator()
 	current = var iterator.next()
@@ -119,10 +121,11 @@ Iterable.fold = [T, S] -> (self: Iterable[T], start: S, combine: (T, S) -> S): S
 external "
 export const Seq$fromIterator = (T) => (iter) => \{
 	const arr = [];
-	let i = iter[Iterator._s].next._()
-	while(i !== undefined && (typeof i === 'object' && i._ !== undefined)) \{
+	const sym = Reflect.ownKeys(iter).filter(s => typeof s === \'symbol\' && s.description.startsWith(\'Iterator\') )[0]
+	let i = iter[sym].next._()
+	while(i !== null && i !== undefined) \{
 		arr.push(i)
-		i = iter[Iterator._s].next._()
+		i = iter[sym].next._()
 	\}
 	return Seq(T)(arr)
 
@@ -145,7 +148,7 @@ external "
 export function Json$fromString(str) \{
 	return JSON.parse(str, (key, value) => \{
 		if (_JsArr.isArray(value)) return Seq(Json)(value)
-		if (typeof value === 'object') return _mapFromJsMap(String, Json, new Map(Object.entries(value)))
+		if (typeof value === \'object\') return _mapFromJsMap(String, Json, new Map(Object.entries(value)))
 
 		return value;
 	\})	
@@ -155,17 +158,17 @@ export function Json$toString(js) \{
 	function toJsRaw(obj) \{
 		if (obj === undefined) return obj
 		if (obj === null) return obj
-		if (typeof obj === 'number') return obj
-		if (typeof obj === 'string') return obj
-		if (typeof obj === 'boolean') return obj
+		if (typeof obj === \'number\') return obj
+		if (typeof obj === \'string\') return obj
+		if (typeof obj === \'boolean\') return obj
 
 	\}
 
 	function isMap(m) \{
-		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === MapOps._s).length > 0 && Object.getOwnPropertySymbols(m).filter(o => o === Iterable._s).length > 0;
+		return typeof m === \'object\' && Object.getOwnPropertySymbols(m).filter(o => o === MapOps._s).length > 0 && Object.getOwnPropertySymbols(m).filter(o => o === Iterable._s).length > 0;
 	\}
 	function isArray(m) \{
-		return typeof m === 'object' && Object.getOwnPropertySymbols(m).filter(o => o === Seq._s).length > 0;
+		return typeof m === \'object\' && Object.getOwnPropertySymbols(m).filter(o => o === Seq._s).length > 0;
 	\}
 
 	return JSON.stringify(js, (key, value) => \{
@@ -193,12 +196,12 @@ Iterable.toString = [T] -> (iter: Iterable[T], label: String = " "): String ->
 	str = var "{label} \{"
 	
 	while current !: Nothing,
-		set str = str + toString(current)
+		set str = "{str}{toString(current)}"
 		set current = iterator.next()
 		if current !: Nothing,
-			set str = str + ", "
+			set str = "{str}, "
 
-	str + " }"
+	"{str} \}"
 
 Iterable.makeToString = [T] -> (iter: Iterable[T], label: String = " ") -> ToString { () -> Iterable.toString(iter, label) }
 
@@ -224,3 +227,17 @@ Range.new = (start: Number, end: Number, step: Number = 1) ->
 Range.from = (start: Number) -> Range.new(start, 9999999999999)
 Range.to = (self: Range, to: Number) -> Range.new(self.start, to, self.step)
 	 
+Map.by = [K, V] -> (getKey: (v: V) -> K) -> (seq: Seq[V]) ->
+	mapd = Iterable.fromArray(seq).makeIterator()
+	Map.of(Seq.fromIterator(mapd.mapped((v: V) -> (getKey(v), v))))
+
+Map.at = [K, V] -> (self: Map[K, V], k: K) -> (self.get(k)): V
+
+InterpolatedString.makeString = (self: InterpolatedString) ->
+	self.elements.stream().fold("", (elem, str) ->
+		if elem :: Interpolation,
+			"{str}{elem.value}"
+		else
+			"{str}{elem}"
+	)
+	

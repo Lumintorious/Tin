@@ -15,9 +15,9 @@ export const _JsArr = globalThis.Array;
 		._c = Constructor for Descriptor
 		._d = Descriptor of Constructor
 		._s = Type Symbol, on Constructors, Descriptors 
+		._ta = Type Arguments
 */
 export function _ss(obj) {
-	console.log(obj)
 	if (obj._s) {
 		return obj
 	}
@@ -31,7 +31,6 @@ export class Return {
 
 Object.prototype.__is_child = function (obj) {
 	const type = (typeof this === 'object' && "_" in this) ? this._ : this
-	console.log(type)
 	if (type._c && type._c.__is_child) {
 		if (typeof obj === 'object' && "_" in obj) {
 			return type._c.__is_child(obj._)
@@ -52,7 +51,6 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 	descriptor._s = symbol;
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
-		// console.log(Reflect.ownKeys(result))
 		for (let key of Reflect.ownKeys(result)) {
 			if (typeof key === "string" && key.startsWith("_")) continue;
 			if (result[key] === undefined) {
@@ -94,6 +92,7 @@ const _Q_map = new Map()
 
 export function _Q_share(calleeSym, argSyms) {
 	try {
+		return calleeSym
 		if (argSyms === undefined || argSyms.length === 0) {
 			return calleeSym
 		}
@@ -115,11 +114,42 @@ export function _Q_share(calleeSym, argSyms) {
 }
 
 export function _Q(symbol, func, descriptor) {
-	func._s = symbol;
-	func.__is_child = (obj) => {
-		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol);
+	const newFunc = (...args) => {
+		const callReturn = func(...args)
+		let result = callReturn;
+		if (typeof callReturn === 'function') {
+			const subFunc = (...oArgs) => {
+				const subResult = callReturn(...oArgs);
+				// Object.assign(subResult, callReturn)
+				subResult[symbol]._ta = args
+				return subResult
+			}
+			subFunc._s = callReturn._s;
+			subFunc.__is_child = (obj) => {
+				if (callReturn._isRefinement) {
+					return callReturn.__is_child(obj);
+				}
+				if ((typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol)) {
+					for (let i = 0; i < args.length; i++) {
+						if (args[i] !== obj[symbol]._ta[i]) {
+							return false;
+						}
+					}
+					return callReturn.__is_child(obj);
+				} else {
+					return false;
+				}
+			}
+			result = subFunc;
+		}
+		return result;
 	}
-	return func;
+	Object.assign(newFunc, func)
+	newFunc._s = symbol;
+	newFunc.__is_child = (obj) => {
+		return false;//(typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol);
+	}
+	return newFunc;
 }
 
 export function Type$of(obj) {
@@ -305,7 +335,17 @@ export const _N = function (type) {
 	}
 }
 
-export const _U = function (obj1, obj2) {
+const shared_syms = new Map();
+
+function _sym_share(name) {
+	if (!shared_syms.has(name)) {
+		shared_syms.set(name, Symbol(name))
+	}
+	return shared_syms.get(name)
+}
+
+export const _U = function (obj1, obj2, name) {
+
 	if ((!obj1._s || !obj2._s) && (typeof obj1 !== "number" && typeof obj2 !== "number")) {
 		throw new Error("Unioning objects is not possible.");
 	}
@@ -324,10 +364,9 @@ export const _U = function (obj1, obj2) {
 	function check(obj) {
 		return obj1.__is_child(obj) || obj2.__is_child(obj);
 	}
-
-	const result = Type("Union", check)._and(Union(obj1, obj2));
+	const result = Type(name, check)._and(Union(obj1, obj2));
+	result._s = name ? _sym_share(name) : Symbol("Union")
 	result.__is_child = check
-	result._s = Symbol("Union")
 
 	return result
 }
@@ -365,7 +404,7 @@ function set(newValue) {
 }
 
 function notify() {
-	this.set(fn())
+	this.set(this.fn())
 }
 
 export function _var(deps, fn, doVar, clojureName) {
@@ -420,7 +459,7 @@ export var Seq = (function () {
 	const _sqSym = Symbol("Seq")
 	const result = _Q(_sqSym, (T) => {
 		const _sqSym_args = [T._s]
-		// console.log(Object.ownKeys(T))
+
 		return _S(_Q_share(_sqSym, _sqSym_args), (args) => args[__tin_varargs_marker] ? args : ({
 			_rawArray: args,
 			length: {
@@ -831,28 +870,29 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 }
 
 export function makeStr(obj, useToString, firstLayer = false) {
+	const useFieldNames = Console$useFieldNames._;
 
-	if (obj === null) return green('nothing');
-	if (typeof obj === 'undefined') return green('nothing');
+	if (obj === null) return firstLayer ? 'nothing' : green('nothing');
+	if (typeof obj === 'undefined') return firstLayer ? 'nothing' : green('nothing');
 	if (typeof obj === 'object' && "_" in obj) {
 		obj = obj._
 	}
-	if (obj === null) return green('nothing');
-	if (typeof obj === 'undefined') return green('nothing');
+	if (obj === null) return firstLayer ? 'nothing' : green('nothing');
+	if (typeof obj === 'undefined') return firstLayer ? 'nothing' : green('nothing');
 
-	if (typeof obj === 'boolean') return green(obj ? 'true' : 'false');
-	if (typeof obj === 'number') return green("" + obj);
-	if (typeof obj === 'string') return !firstLayer ? green(`"${obj}"`) : green(obj);
+	if (typeof obj === 'boolean') return firstLayer ? (obj ? 'true' : 'false') : green(obj ? 'true' : 'false');
+	if (typeof obj === 'number') return firstLayer ? ("" + obj) : green("" + obj);
+	if (typeof obj === 'string') return !firstLayer ? green(`"${obj}"`) : obj;
 	if (typeof obj === 'symbol') return obj.description;
 
 	if (typeof obj === 'function') {
 		return blue('λ')
 	}
-
-	if (Reflect.ownKeys(obj).includes(Seq._s)) {
+	const seqSym = Reflect.ownKeys(obj).filter(s => typeof s === 'symbol' && s.description.startsWith("Seq"))[0];
+	if (seqSym) {
 		let result = yellow("Seq") + white(' { ');
-		for (let i = 0; i < obj[Seq._s].length._(); i++) {
-			result += makeStr(obj[Seq._s].at._(i)) + (i === obj[Seq._s].length._() - 1 ? "" : white(", "))
+		for (let i = 0; i < obj[seqSym].length._(); i++) {
+			result += makeStr(obj[seqSym].at._(i)) + (i === obj[seqSym].length._() - 1 ? "" : white(", "))
 		}
 
 		return result + white(" }")
@@ -892,7 +932,7 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		if (typeof componentKey === 'string') continue;
 		const component = obj[componentKey]
 		const componentName = (componentKey.description.startsWith("Tuple2") || componentKey.description.startsWith("Tuple3")) ? "" : componentKey.description + " "
-		results.push(colorSymbolName(componentName) + white("{ ") + Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_")).map(k => `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ${makeStr(component[k])}`).join(white(", ")) + white(" }"))
+		results.push(colorSymbolName(componentName) + white("{ ") + Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_")).map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ` : ""}${makeStr(component[k])}`).join(white(", ")) + white(" }"))
 	}
 
 	return results.join(white(" & "))
@@ -1048,6 +1088,18 @@ export function Struct$createDynamically(args) {
 		}
 	}
 	return constructor.call(this, ...arr)
+}
+
+export function _interpolation(elems) {
+	const _arr = elems.map(e => {
+		if (typeof e === 'string') {
+			return e
+		} else {
+			return Interpolation({ _: e[0] }, { _: e[1] })
+		}
+	});
+	const arr = Seq(_U(String, Interpolation))(_arr)
+	return InterpolatedString({ _: arr })
 }
 
 // COMPILED TIN

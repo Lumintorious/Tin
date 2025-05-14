@@ -342,9 +342,16 @@ async function compile(
          context.fileScope,
          { isTopLevel: true }
       );
+      const formattedInputFile = (
+         inputFile +
+         ".out." +
+         OUTPUT_TRANSLATOR.extension
+      )
+         .replaceAll("\\", "/")
+         .substring(SRC_PATH.length);
       await files.writeFile(
          fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension),
-         translatedString
+         `console.time('${formattedInputFile}');\n ${translatedString}; console.timeEnd('${formattedInputFile}')\n`
       );
 
       console.log("\x1b[32mCompiled " + inputFile + "\x1b[0m");

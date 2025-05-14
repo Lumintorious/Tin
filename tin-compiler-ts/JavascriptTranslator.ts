@@ -21,6 +21,7 @@ import {
    INVAR_RETURNING_FUNC_IN_VAR_PLACE,
    IN_RETURN_BRANCH,
    ARTIFICIAL,
+   WHERE_INTERPOLATION_EXPECTED,
 } from "./Parser";
 import {
    WhileLoop,
@@ -212,7 +213,7 @@ export class JavascriptTranslator implements OutputTranslator {
                const symbol = scope.lookup(term.value);
                clojureName = this.makeClojureIdent(symbol);
             }
-            result = `_var([], () => ${result},false, '${clojureName}')`;
+            result = `_var(/*44*/[], () => ${result},false, '${clojureName}')`;
          } else if (
             term.invarTypeInVarPlace &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
@@ -226,7 +227,9 @@ export class JavascriptTranslator implements OutputTranslator {
             result = `_makeClojure({${term.clojure
                .filter(
                   (s) =>
-                     (s.isUsedInClojures && s.isSentToConstructors) ||
+                     (s.isUsedInClojures &&
+                        s.isSentToConstructors &&
+                        s.name.startsWith("@")) ||
                      s.typeSymbol instanceof MutableType
                )
                .map(
@@ -428,10 +431,11 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof Literal) {
          let rawDisplay = "";
          if (term.type === "String") {
-            rawDisplay = `"${String(term.value).replaceAll(
-               /[\r\n]+/g,
-               "\\n"
-            )}"`;
+            const strValue = String(term.value).replaceAll(/[\r\n]+/g, "\\n");
+            rawDisplay = `"${strValue}"`;
+            if (term.is(WHERE_INTERPOLATION_EXPECTED)) {
+               rawDisplay = `_interpolation([${rawDisplay}])`;
+            }
          } else if (term.type === "Number" || term.type === "Boolean") {
             rawDisplay = `${term.value}`;
          } else {
@@ -482,8 +486,9 @@ export class JavascriptTranslator implements OutputTranslator {
          if (term.isFromSelfClojure && !args.isLhs) {
             const symbol = scope.lookup(term.value);
             if (
-               (symbol.isUsedInClojures && symbol.isSentToConstructors) ||
-               symbol.typeSymbol instanceof MutableType
+               ((symbol.isUsedInClojures && symbol.isSentToConstructors) ||
+                  symbol.typeSymbol instanceof MutableType) &&
+               symbol.name.startsWith("@")
             ) {
                value = `this._clojure["${this.makeClojureIdent(symbol)}"]`;
             }
@@ -501,6 +506,9 @@ export class JavascriptTranslator implements OutputTranslator {
          // RoundValueToValueLambda
       } else if (term instanceof RoundValueToValueLambda) {
          scope = scope.innerScopeOf(term, true);
+         if (term.isTypeLambda) {
+            return "'CompileTime LambdaType'";
+         }
          const params = term.isFirstParamThis()
             ? term.params.slice(1, term.params.length)
             : term.params;
@@ -521,7 +529,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // SquareTypeToTypeLambda
       } else if (term instanceof SquareTypeToTypeLambda) {
-         scope = scope.innerScopeOf(term);
+         //  scope = scope.innerScopeOf(term);
          return `/* [] */(function(){ const _sqSym = Symbol("${
             term.name
          }"); return _Q(_sqSym, (${term.parameterTypes
@@ -697,8 +705,9 @@ export class JavascriptTranslator implements OutputTranslator {
                openWrapper +
                this.translate(callee, scope) +
                (term.autoFilledSquareTypeParams
-                  ? `.call('Type', ${term.autoFilledSquareTypeParams.order
-                       .map(([name, type]) => this.translateType(type, scope))
+                  ? `.call('Type', ${term.autoFilledSquareTypeParams
+                       .inExpectedOrder()
+                       .map((type) => this.translateType(type, scope))
                        .join(",")})`
                   : "") +
                ammortization +
@@ -759,14 +768,19 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof RefinedDef) {
          const termType = term.translatedType as RefinedType;
          return `(() => {
-				const _tpe = {__is_child: (_obj) => { return ${
-               termType.inputType.name
-            }.__is_child(_obj) && (${this.translate(
+		 const __is_childRef = (_obj) => { return ${
+          termType.inputType.name
+       }.__is_child(_obj) && (${this.translate(
             term.lambda,
             scope
-         )}).call(_obj)}}; _tpe._s = Symbol("${
+         )}).call(_obj)};
+				const _tpe = (...args) => {const _res = ${
+               (term.translatedType as RefinedType).inputType.name
+            }(...args); if (__is_childRef(_res)) { return _res } else { print(_res); return undefined }};
+				
+			_tpe.__is_child = __is_childRef;_tpe._s = Symbol("${
             term.translatedType?.name
-         }"); return _tpe})()`;
+         }"); _tpe._isRefinement = true;return _tpe})()`;
 
          // Optional
       } else if (term instanceof Optional) {
@@ -899,7 +913,11 @@ export class JavascriptTranslator implements OutputTranslator {
             return `_U(${this.translate(term.left, scope)}, ${this.translate(
                term.right,
                scope
-            )})`;
+            )}${
+               term.translatedType?.name
+                  ? ",'" + term.translatedType.name + "'"
+                  : ""
+            })`;
          } else {
             return `(${this.translate(term.left, scope)} ?? ${this.translate(
                term.right,
@@ -935,6 +953,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
       if (
          ![
+            "+string+",
             "+",
             "-",
             "*",
@@ -962,12 +981,40 @@ export class JavascriptTranslator implements OutputTranslator {
             ")"
          );
       }
-      return (
+
+      let result =
          this.translate(term.left, scope) +
          " " +
          term.operator +
          " " +
-         this.translate(term.right, scope)
-      );
+         this.translate(term.right, scope);
+
+      const translator = this;
+      function allPlusParts(expr: Term): string[] {
+         if (expr instanceof BinaryExpression && expr.operator === "+string+") {
+            return [...allPlusParts(expr.left), ...allPlusParts(expr.right)];
+         } else if (expr instanceof Literal && expr.type === "String") {
+            return [translator.translate(expr, scope)];
+         } else {
+            return [
+               `["${expr.show()}", (${translator.translate(expr, scope)})]`,
+            ];
+         }
+
+         return [];
+      }
+
+      if (term.is(WHERE_INTERPOLATION_EXPECTED)) {
+         return `_interpolation([${allPlusParts(term).join(",")}])`;
+      }
+
+      if (term.operator === "+string+") {
+         return `(${this.translate(term.left, scope)} + ${this.translate(
+            term.right,
+            scope
+         )})`;
+      }
+
+      return result;
    }
 }

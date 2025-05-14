@@ -6,7 +6,7 @@
          "match": "#.*?#|#.*?$"
       },
       {
-         "name": "keyword.control.tin",
+         "name": "keyword.tin",
          "match": "\\b(type|info|not|or|and|if|where|var|else|while|copy|refined|return|external|struct|set|import|this|self|unchecked|link|private)\\b"
       },
       {
@@ -15,10 +15,10 @@
       },
       {
          "match": "\\.*([\\@a-z][a-zA-Z0-9_]*)[ ]*(=|:)[ ]*(\\(|\\[)",
-         "name": "function.declaration.tin",
+         "name": "entity.name.function.tin",
          "captures": {
             "1": {
-               "name": "function.tin"
+               "name": "entity.name.function.tin"
             },
             "2": {
                "name": "operator.tin"
@@ -30,10 +30,10 @@
       },
       {
          "match": "([\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
-         "name": "function.call.tin",
+         "name": "entity.name.function.tin",
          "captures": {
             "1": {
-               "name": "function.tin"
+               "name": "entity.name.function.tin"
             },
             "2": {
                "name": "operator.tin"
@@ -42,13 +42,13 @@
       },
       {
          "match": "(\\.)([\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
-         "name": "field.tin",
+         "name": "variable.other.property.tin",
          "captures": {
             "1": {
                "name": "operator.tin"
             },
             "2": {
-               "name": "function.tin"
+               "name": "entity.name.function.tin"
             },
             "3": {
                "name": "operator.tin"
@@ -56,14 +56,14 @@
          }
       },
       {
-         "match": "(\\.)([\\@a-z][a-zA-Z0-9_]*)",
-         "name": "field.tin",
+         "match": "(\\.)([\\@A-Za-z][a-zA-Z0-9_]*)",
+         "name": "variable.other.property.tin",
          "captures": {
             "1": {
                "name": "operator.tin"
             },
             "2": {
-               "name": "field.tin"
+               "name": "variable.other.property.tin"
             }
          }
       },
@@ -72,54 +72,98 @@
          "match": "([\\@a-z][a-zA-Z0-9_]*)"
       },
       {
-         "name": "type.tin",
-         "match": "([A-Z][a-zA-Z0-9]*)"
+         "name": "constant.numeric.tin",
+         "match": "\\b\\d+\\b"
       },
       {
-         "name": "string.quoted.double.tin",
+         "name": "string.tin",
          "begin": "(?<!\\\\)\"",
          "end": "(?<!\\\\)\"",
          "beginCaptures": {
-            "0": { "name": "punctuation.definition.string.begin.tin" }
+            "0": { "name": "string.tin" }
          },
          "endCaptures": {
-            "0": { "name": "punctuation.definition.string.end.tin" }
+            "0": { "name": "string.tin" }
          },
          "patterns": [
             {
-               "name": "string.interpolation.tin",
+               "name": "string.tin",
                "begin": "\\{",
                "end": "\\}",
                "beginCaptures": {
                   "0": {
-                     "name": "punctuation.definition.interpolation.begin.tin"
+                     "name": "punctuation.tin"
                   }
                },
                "endCaptures": {
                   "0": {
-                     "name": "punctuation.definition.interpolation.end.tin"
+                     "name": "punctuation.tin"
                   }
                },
                "patterns": [
                   {
-                     "name": "variable.other.tin",
+                     "match": "(\\.*[\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
+                     "name": "entity.name.function.tin",
+                     "captures": {
+                        "1": {
+                           "name": "entity.name.function.tin"
+                        },
+                        "2": {
+                           "name": "operator.tin"
+                        }
+                     }
+                  },
+                  {
+                     "match": "(\\.)([\\@A-Za-z][a-zA-Z0-9_]*)",
+                     "name": "variable.other.property.tin",
+                     "captures": {
+                        "1": {
+                           "name": "operator.tin"
+                        },
+                        "2": {
+                           "name": "variable.other.property.tin"
+                        }
+                     }
+                  },
+                  {
+                     "name": "entity.name.type.tin",
+                     "match": "([A-Z][a-zA-Z0-9]*)"
+                  },
+                  {
+                     "name": "keyword.tin",
+                     "match": "\\b(type|info|not|or|and|if|where|var|else|while|copy|refined|return|external|struct|set|import|this|self|unchecked|link|private)\\b"
+                  },
+                  {
+                     "name": "constant.tin",
+                     "match": "\\b(true|false|nothing|this)\\b"
+                  },
+                  {
+                     "name": "operator.tin",
+                     "match": "[+\\-*/=<>!&:]+"
+                  },
+                  {
+                     "name": "punctuation.tin",
+                     "match": "[{}()\\[\\];,]"
+                  },
+                  {
+                     "name": "constant.numeric.tin",
+                     "match": "\\b\\d+\\b"
+                  },
+                  {
+                     "name": "variable.parameter.tin",
                      "match": "[\\@a-zA-Z_][a-zA-Z0-9_]*"
                   }
                ]
             },
             {
                "name": "constant.character.escape.tin",
-               "match": "\\\\."
+               "match": "\\\\"
             },
             {
-               "name": "string.content.tin",
+               "name": "string.tin",
                "match": "(?:[^\\\\{}\"\\n]|\\\\[^{}\\n])*"
             }
          ]
-      },
-      {
-         "name": "constant.numeric.tin",
-         "match": "\\b\\d+\\b"
       },
       {
          "name": "operator.tin",
@@ -128,6 +172,10 @@
       {
          "name": "punctuation.tin",
          "match": "[{}()\\[\\];,]"
+      },
+      {
+         "name": "entity.name.type.tin",
+         "match": "([A-Z][a-zA-Z0-9]*)"
       }
    ],
    "repository": {}

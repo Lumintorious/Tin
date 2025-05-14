@@ -370,13 +370,14 @@ export class TypeInferencer {
       let calleeType;
       //   this.handleSquareExtensionSearch(node, scope);
       try {
-         calleeType =
+         calleeType = scope.resolveNamedType(
             node.callee instanceof Identifier && node.callee.isTypeIdentifier()
                ? this.context.translator.translate(node.callee, scope)
-               : this.infer(node.callee, scope);
+               : this.infer(node.callee, scope)
+         );
          const constructor = scope
             .resolveNamedType(calleeType)
-            .buildConstructor();
+            .buildConstructor(scope, this.context);
          if (constructor instanceof SquareTypeToValueLambdaType) {
             calleeType = constructor;
          }
@@ -403,7 +404,7 @@ export class TypeInferencer {
             if (constr) {
                return constr;
             } else {
-               throw new Error("What");
+               return calleeAsType;
             }
          }
       } else if (calleeType instanceof SquareTypeToValueLambdaType) {
@@ -447,8 +448,12 @@ export class TypeInferencer {
       // Handle extension method search
       if (node.callee instanceof Select) {
          try {
+            const selectOwnerTypeBeforeResolve = this.infer(
+               node.callee.owner,
+               scope
+            );
             const selectOwnerType = scope.resolveGenericTypes(
-               this.infer(node.callee.owner, scope),
+               selectOwnerTypeBeforeResolve,
                new GenericTypeMap() // ??
             );
             const symbol = scope.lookupExtension(
@@ -476,7 +481,7 @@ export class TypeInferencer {
                symbol.typeSymbol.returnType.params[0]?.name === "self"
             ) {
                const mappedParams = new GenericTypeMap();
-
+               mappedParams.expectedTypes = symbol.typeSymbol.paramTypes;
                const ownerType = this.infer(node.callee.owner, scope);
                const expectedOwnerType =
                   symbol.typeSymbol.returnType.params[0].type;
@@ -487,19 +492,19 @@ export class TypeInferencer {
                      expectedOwnerType
                   )
                );
-               for (
-                  let i = 0;
-                  i < symbol.typeSymbol.returnType.params.length;
-                  i++
+               if (
+                  selectOwnerType instanceof AppliedGenericType &&
+                  selectOwnerTypeBeforeResolve instanceof AppliedGenericType
                ) {
                   mappedParams.absorb(
                      this.context.builder.matchParamToGenericParam(
                         symbol.typeSymbol.paramTypes,
-                        selectOwnerType,
-                        symbol.typeSymbol.returnType.params[i].type
+                        selectOwnerType.parameterTypes[0],
+                        symbol.typeSymbol.returnType.params[0].type
                      )
                   );
                }
+               //    }
                const resolvedOwnerType = scope.resolveGenericTypes(
                   selectOwnerType,
                   mappedParams
@@ -516,6 +521,7 @@ export class TypeInferencer {
                   node.bakedInThis = owner;
                   node.id = ++Term.currentNumber;
                   node.callee.id = ++Term.currentNumber;
+                  node.autoFilledSquareTypeParams = mappedParams;
                   this.context.builder.build(node.callee, scope);
                   this.context.builder.build(node, scope);
                }
@@ -605,7 +611,7 @@ export class TypeInferencer {
       if (node.callee instanceof Identifier && node.callee.isTypeIdentifier()) {
          calleeType = scope.lookupType(node.callee.value).typeSymbol;
       }
-      let constructor = calleeType.buildConstructor();
+      let constructor = calleeType.buildConstructor(scope, this.context);
       let isStructConstructor = false;
       if (node.kind === "CURLY") {
          if (constructor instanceof RoundValueToValueLambdaType) {
@@ -656,12 +662,15 @@ export class TypeInferencer {
          calleeType instanceof SquareTypeToValueLambdaType &&
          calleeType.returnType instanceof RoundValueToValueLambdaType
       ) {
+         //  if (!node.getTypeArgs()) {
          this.context.builder.buildSquareArgsInRoundApply(
             node,
             calleeType,
             scope,
+            node.getTypeArgs(),
             options
          );
+         //  }
          const squareArgs = node.getTypeArgs();
          if (squareArgs) {
             const expectedArgs = calleeType.paramTypes;
@@ -680,6 +689,9 @@ export class TypeInferencer {
          throw new Error(
             "Square lambda called with round parens, but types could not be automatically resolved."
          );
+      }
+      if (calleeType instanceof UncheckedType) {
+         return calleeType;
       }
       // return Any;
       throw new Error(
@@ -748,9 +760,6 @@ export class TypeInferencer {
       let isOwnerMutable = false;
       let ownerType: Type;
       ownerType = this.infer(node.owner, scope);
-      //   console.log(node.owner.show());
-      //   console.log(ownerType.toString());
-      //   console.log([...scope.symbols.keys()]);
       // }
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
@@ -787,26 +796,28 @@ export class TypeInferencer {
       }
       const found = findField(node.field, fields);
       if (!found) {
-         this.context.errors.add(
-            `Field '${node.field}' could not be found on '` +
-               ownerType.toString() +
-               "'",
-            options.typeExpectedInPlace,
-            undefined,
-            node.position,
-            "Found: " +
-               [...fields.values()]
-                  .map((arr) => `${arr.map((p) => p.name)}`)
-                  .flat()
-                  .join(", ") +
-               ""
-         );
-         throw new Error(
-            `Field '${node.field}' could not be found on '` +
-               ownerType.toString() +
-               "'"
-         );
-         //  return Never;
+         //  this.context.errors.add(
+         //     `Field '${node.field}' could not be found on '` +
+         //        ownerType.toString() +
+         //        "'",
+         //     options.typeExpectedInPlace,
+         //     undefined,
+         //     node.position,
+         //     "Found: " +
+         //        [...fields.values()]
+         //           .map((arr) => `${arr.map((p) => p.name)}`)
+         //           .flat()
+         //           .join(", ") +
+         //        ""
+         //  );
+         if (scope.iteration === "RESOLUTION") {
+            throw new Error(
+               `Field '${node.field}' could not be found on '` +
+                  ownerType.toString() +
+                  "'"
+            );
+         }
+         return new UncheckedType();
       }
 
       found[1].parentComponent = found[0];
@@ -892,15 +903,6 @@ export class TypeInferencer {
          }
       } else if (type instanceof OptionalType) {
          return new Map();
-         // const originalFields = this.getAllKnownFields(type.type, scope);
-         // return originalFields.map((f) => {
-         //    return new Symbol(
-         //       f.name,
-         //       f.typeSymbol instanceof OptionalType
-         //          ? f.typeSymbol
-         //          : new OptionalType(f.typeSymbol)
-         //    );
-         // });
       } else if (type instanceof AppliedGenericType) {
          return this.getAllKnownFields(
             scope.resolveAppliedGenericTypes(type),
@@ -919,16 +921,13 @@ export class TypeInferencer {
          return this.getAllKnownFields(type.type, scope);
       } else if (type instanceof RefinedType) {
          let result = this.getAllKnownFields(type.inputType, scope);
-         if (
-            type.ast instanceof RefinedDef &&
-            type.ast.lambda.block.statements.length === 1
-         ) {
+         if (type.lambda.block.statements.length === 1) {
             const trueSymbols: (Symbol | [Type, ParamType])[] = [];
             const falseSymbols: (Symbol | [Type, ParamType])[] = [];
 
-            const innerScope = scope.innerScopeOf(type.ast.lambda);
+            const innerScope = scope.innerScopeOf(type.lambda);
             this.context.builder.deduceCheckedTypes(
-               type.ast.lambda.block.statements[0],
+               type.lambda.block.statements[0],
                trueSymbols,
                falseSymbols,
                innerScope
@@ -1078,9 +1077,14 @@ export class TypeInferencer {
          const allFoundReturnsInside: [Term, Type][] = [];
          node.modify(IN_RETURN_BRANCH);
          this.findReturns(node, scope, allFoundReturnsInside);
-         const allFoundReturnTypesInside = allFoundReturnsInside.map(
-            (r) => r[1]
-         );
+         const allFoundReturnTypesInside = allFoundReturnsInside.map((r) => {
+            if (r[1] instanceof MutableType) {
+               r[0].varTypeInInvarPlace = true;
+               return r[1].type;
+            } else {
+               return r[1];
+            }
+         });
          for (const [term, type] of allFoundReturnsInside) {
             if (options.typeExpectedInPlace) {
                this.context.builder.buildVarTransformations(
@@ -1216,7 +1220,7 @@ export class TypeInferencer {
    DEFINED_OPERATIONS = {
       NumberNumberNumber: ["+", "-", "*", "/", "**", "%"],
       NumberNumberBoolean: [">", "<", "<=", ">="],
-      StringAnyString: ["+"],
+      //   StringAnyString: ["+string+"],
       AnyAnyBoolean: ["==", "!="],
       BooleanBooleanBoolean: ["&&", "||"],
    };
@@ -1256,11 +1260,14 @@ export class TypeInferencer {
          }
       }
 
-      if (leftType.isAssignableTo(PrimitiveType.String, scope)) {
-         const entry = this.DEFINED_OPERATIONS.StringAnyString;
-         if (entry.includes(node.operator)) {
-            return make(PrimitiveType.String);
-         }
+      if (
+         leftType.isAssignableTo(PrimitiveType.String, scope) &&
+         node.operator === "+string+"
+      ) {
+         //  const entry = this.DEFINED_OPERATIONS.StringAnyString;
+         //  if (entry.includes(node.operator)) {
+         return make(PrimitiveType.String);
+         //  }
       }
       if (node.operator === "?:") {
          const realLeftType =
@@ -1273,10 +1280,10 @@ export class TypeInferencer {
       }
 
       if (
-         (leftType.isAssignableTo(PrimitiveType.Number, scope) &&
-            rightType.isAssignableTo(PrimitiveType.Number, scope),
-         scope)
+         leftType.isAssignableTo(PrimitiveType.Number, scope) &&
+         rightType.isAssignableTo(PrimitiveType.Number, scope)
       ) {
+         console.log(leftType + " - " + rightType);
          if (
             this.DEFINED_OPERATIONS.NumberNumberNumber.includes(node.operator)
          ) {

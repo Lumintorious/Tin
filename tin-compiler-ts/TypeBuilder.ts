@@ -16,6 +16,7 @@ import {
    IN_RETURN_BRANCH,
    BAKED_TYPE,
    LINK_VAL,
+   WHERE_INTERPOLATION_EXPECTED,
 } from "./Parser";
 import {
    Scope,
@@ -28,6 +29,7 @@ import {
    SquareTypeToTypeLambdaType,
    RoundValueToValueLambdaType,
    ParamType,
+   RefinedType,
 } from "./Types";
 import {
    SquareTypeToTypeLambda,
@@ -66,6 +68,7 @@ import {
    AppliedGenericType,
 } from "./Types";
 import { UnaryOperator, VAR_RETURNING_FUNC_IN_INVAR_PLACE } from "./Parser";
+import { PrimitiveType } from "./Types";
 
 export class TypeBuilder {
    context: TypePhaseContext;
@@ -239,7 +242,7 @@ export class TypeBuilder {
                node.callee.isInValueContext = false;
                calleeType = scope.lookupType(node.callee.value).typeSymbol;
             }
-            let constructor = calleeType.buildConstructor();
+            let constructor = calleeType.buildConstructor(scope, this.context);
             let isStructConstructor = false;
             if (constructor instanceof RoundValueToValueLambdaType) {
                calleeType = constructor;
@@ -261,6 +264,10 @@ export class TypeBuilder {
          if (scope.iteration === "RESOLUTION") {
             this.context.inferencer.inferIdentifier(node, scope, options);
          }
+         try {
+            const pointedTo = scope.lookup(node.value);
+            node.pointsTo = pointedTo.ast;
+         } catch (e) {}
       } else if (node instanceof Literal) {
          if (options.isTypeLevel) {
             node.isTypeLiteral = true;
@@ -501,6 +508,9 @@ export class TypeBuilder {
       ) {
          const map = new GenericTypeMap();
          for (let i = 0; i < expectedType.params.length; i++) {
+            if (!gottenType.params[i]) {
+               continue;
+            }
             map.absorb(
                this.matchParamToGenericParam(
                   expectedTypeParams,
@@ -599,7 +609,8 @@ export class TypeBuilder {
       node: Call,
       calleeType: Type,
       scope: Scope,
-      options: RecursiveResolutionOptions
+      initialTypeMap?: GenericTypeMap,
+      options?: RecursiveResolutionOptions
    ) {
       if (
          calleeType instanceof SquareTypeToValueLambdaType &&
@@ -609,8 +620,9 @@ export class TypeBuilder {
          if (node.bakedInThis) {
             selfType = this.context.inferencer.infer(node.bakedInThis, scope);
          }
-         const genericTypeArgs = new GenericTypeMap();
+         const genericTypeArgs = initialTypeMap ?? new GenericTypeMap();
          node.initTypeArgs(genericTypeArgs);
+         genericTypeArgs.expectedTypes = calleeType.paramTypes;
          const expectedTypeParams = calleeType.paramTypes;
          const expectedParams = calleeType.returnType.params;
          const appliedParams = node.args;
@@ -700,6 +712,7 @@ export class TypeBuilder {
             let i = 0;
             let hasThisIncrement = node.bakedInThis ? 1 : 0;
             const mappings = new GenericTypeMap();
+            mappings.expectedTypes = expectedTypeParams;
             if (
                node.bakedInThis &&
                expectedParams.filter((p) => p.name === "self").length > 0
@@ -775,9 +788,10 @@ export class TypeBuilder {
          ) {
             calleeType = scope.lookupType(node.callee.value).typeSymbol;
          }
-         let constructor = calleeType.buildConstructor();
+         let constructor = calleeType.buildConstructor(scope, this.context);
          if (constructor) {
             node.isCallingAConstructor = true;
+            isStructConstructor = true;
          }
          if (
             calleeType instanceof RoundValueToValueLambdaType &&
@@ -809,7 +823,15 @@ export class TypeBuilder {
       }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
          // will be hanlded in TypeChecker
-         this.buildSquareArgsInRoundApply(node, calleeType, scope, options);
+         //  if (!node.autoFilledSquareTypeParams) {
+         this.buildSquareArgsInRoundApply(
+            node,
+            calleeType,
+            scope,
+            node.getTypeArgs(),
+            options
+         );
+         //  }
          if (
             calleeType instanceof SquareTypeToValueLambdaType &&
             calleeType.returnType instanceof RoundValueToValueLambdaType &&
@@ -838,9 +860,20 @@ export class TypeBuilder {
             typeExpectedInPlace: expectedType,
          });
          let captureName = undefined;
-         if (isStructConstructor) {
+         if (node.isCallingAConstructor) {
             captureName =
                statement[1] instanceof Identifier ? statement[1].value : "";
+         }
+         if (
+            gottenType.isAssignableTo(PrimitiveType.String, scope) &&
+            expectedType &&
+            expectedType !== PrimitiveType.String &&
+            expectedType.isAssignableTo(
+               new NamedType("InterpolatedString"),
+               scope
+            )
+         ) {
+            statement[1].modify(WHERE_INTERPOLATION_EXPECTED);
          }
          if (scope.iteration === "RESOLUTION") {
             this.buildVarTransformations(
@@ -1415,6 +1448,13 @@ export class TypeBuilder {
             if (
                symbolToDeclare instanceof SquareTypeToTypeLambdaType &&
                symbolToDeclare.returnType instanceof StructType
+            ) {
+               symbolToDeclare.name = node.lhs.value;
+               symbolToDeclare.returnType.name = node.lhs.value;
+            }
+            if (
+               symbolToDeclare instanceof SquareTypeToTypeLambdaType &&
+               symbolToDeclare.returnType instanceof RefinedType
             ) {
                symbolToDeclare.name = node.lhs.value;
                symbolToDeclare.returnType.name = node.lhs.value;

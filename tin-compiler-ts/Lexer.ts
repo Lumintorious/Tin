@@ -43,10 +43,17 @@ export class Token {
    tag: string;
    value: string;
    position: TokenPos;
-   constructor(tag: TokenTag, value: string, position: TokenPos) {
+   artificial: boolean = false;
+   constructor(
+      tag: TokenTag,
+      value: string,
+      position: TokenPos,
+      artificial: boolean = false
+   ) {
       this.tag = tag;
       this.value = value;
       this.position = position;
+      this.artificial = artificial;
    }
 }
 
@@ -91,6 +98,7 @@ export class Lexer {
          "link",
       ];
       this.operators = [
+         "+string+",
          "...",
          "var",
          "copy",
@@ -233,13 +241,32 @@ export class Lexer {
          if (indentToken) return indentToken;
       }
 
-      if (char === '"' && this.peek() === '"' && this.peek(1) === '"') {
+      if (char === '"' && this.peek(1) === '"' && this.peek(2) === '"') {
          this.position++;
          this.position++;
          this.column++;
          this.column++;
          return this.lexString(true);
       } else if (char === '"') {
+         if (
+            this.peek() === '"' &&
+            this.peek(1) === '"' &&
+            this.peek(2) !== '"'
+         ) {
+            this.position++;
+            this.column++;
+
+            this.position++;
+            this.column++;
+            return new Token(
+               TokenTag.STRING,
+               "",
+               new TokenPos(
+                  new CodePoint(this.line, this.column, this.position),
+                  new CodePoint(this.line, this.column, this.position)
+               )
+            );
+         }
          return this.lexString();
       }
       // Skip whitespaces but track line and column numbers
@@ -276,7 +303,9 @@ export class Lexer {
       }
 
       throw new Error(
-         `Unknown character at ${this.line}:${this.column}: '${char}'`
+         `Unknown character at ${this.line}:${
+            this.column
+         }: '${char} - ${char.charCodeAt(0)}'`
       );
    }
 
@@ -381,19 +410,34 @@ export class Lexer {
    }
 
    lexString(tripleQuote: boolean = false) {
-      const startChar = this.peek(); // Either ' or "
+      const startChar = this.peek();
       let start = this.position;
       let startColumn = this.column;
 
       // Move past the opening quote
       this.position++;
       this.column++;
+      if (this.peek(-2) === '"') {
+         return new Token(
+            TokenTag.STRING,
+            "",
+            new TokenPos(
+               new CodePoint(this.line, startColumn, this.position),
+               new CodePoint(this.line, this.column, this.position)
+            )
+         );
+      }
 
       let stringLiteral = "";
       let parts: Token[] = [];
 
       while (this.position < this.input.length) {
-         const char = this.peek();
+         let char = this.peek();
+         if (!tripleQuote && char === startChar) {
+            this.position++;
+            this.column++;
+            break;
+         }
 
          // Break on closing quote or escape sequence
          if (
@@ -406,11 +450,6 @@ export class Lexer {
             this.column++;
             this.position++;
             this.column++;
-            this.position++;
-            this.column++;
-            break;
-         }
-         if (!tripleQuote && char === startChar) {
             this.position++;
             this.column++;
             break;
@@ -430,19 +469,22 @@ export class Lexer {
             parts.push(
                new Token(
                   TokenTag.OPERATOR,
-                  "+",
+                  "+string+",
                   new TokenPos(
                      new CodePoint(this.line, startColumn, this.position),
                      new CodePoint(this.line, this.column, this.position)
-                  )
+                  ),
+                  true
                )
             );
+            // hello
             stringLiteral = "";
             this.position++;
             this.column++;
             let innerChar = this.peek();
             while (innerChar !== "}") {
                let innerToken = this.nextToken();
+               this.handleWhitespace();
                if (innerToken != null) {
                   parts.push(innerToken);
                } else {
@@ -450,14 +492,16 @@ export class Lexer {
                }
                innerChar = this.peek();
             }
+
             parts.push(
                new Token(
                   TokenTag.OPERATOR,
-                  "+",
+                  "+string+",
                   new TokenPos(
                      new CodePoint(this.line, startColumn, this.position),
                      new CodePoint(this.line, this.column, this.position)
-                  )
+                  ),
+                  true
                )
             );
             this.position++;
@@ -472,6 +516,9 @@ export class Lexer {
             const nextChar = this.peek();
             if (nextChar === "n") {
                stringLiteral += "\n";
+            }
+            if (nextChar === "x") {
+               stringLiteral += "\\x";
             } else if (nextChar === "t") {
                stringLiteral += "\t";
             } else if (!tripleQuote && nextChar === '"') {
@@ -481,6 +528,13 @@ export class Lexer {
             } else {
                stringLiteral += nextChar; // Add the character as is
             }
+            this.position++;
+            this.column++;
+            continue;
+         }
+
+         if (char === "'") {
+            stringLiteral += "\\'";
             this.position++;
             this.column++;
             continue;

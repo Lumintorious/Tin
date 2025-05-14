@@ -30,7 +30,6 @@ import { Identifier, TypeCheck } from "./Parser";
 import {
    AppliedGenericType,
    GenericNamedType,
-   LiteralType,
    MarkerType,
    NamedType,
    OptionalType,
@@ -130,24 +129,29 @@ export class TypeChecker {
             );
          }
       } else if (node.lhs instanceof Select) {
-         let ownerType = scope.resolveNamedType(
-            this.context.inferencer.infer(node.lhs.owner, scope)
-         ) as StructType;
-         let fieldType = this.context.inferencer.findField(
-            ownerType,
-            node.lhs.field,
-            scope
-         );
-         if (!fieldType?.mutable && !(fieldType?.type instanceof MutableType)) {
-            this.context.errors.add(
-               `Setting an immutable field '${node.lhs.show()}'`,
-               undefined,
-               undefined,
-               node.position,
-               `Either declare '${
-                  fieldType?.name
-               }' as a variable type '~${fieldType?.toString()}', or don't mutate it here.`
+         if (!node.lhs.isBeingTreatedAsIdentifier) {
+            let ownerType = scope.resolveNamedType(
+               this.context.inferencer.infer(node.lhs.owner, scope)
+            ) as StructType;
+            let fieldType = this.context.inferencer.findField(
+               ownerType,
+               node.lhs.field,
+               scope
             );
+            if (
+               !fieldType?.mutable &&
+               !(fieldType?.type instanceof MutableType)
+            ) {
+               this.context.errors.add(
+                  `Setting an immutable field '${node.lhs.show()}'`,
+                  undefined,
+                  undefined,
+                  node.position,
+                  `Either declare '${
+                     fieldType?.name
+                  }' as a variable type '~${fieldType?.toString()}', or don't mutate it here.`
+               );
+            }
          }
       }
       if (!rightType.isAssignableTo(leftType, scope)) {
@@ -365,6 +369,28 @@ export class TypeChecker {
       const returnType =
          node.block.at(BAKED_TYPE) ??
          this.context.inferencer.infer(node.block, innerScope);
+
+      if (
+         node.isTypeLevel ||
+         (this.context.inferencer.isCapitalized(node.name ?? "c") &&
+            node.translatedType)
+      ) {
+         let i = 0;
+         for (const param of (
+            node.translatedType as RoundValueToValueLambdaType
+         ).params) {
+            if (param.defaultValue) {
+               this.context.errors.add(
+                  `Param ${
+                     param.name ?? i++
+                  } of type ${node.show()} cannot have a default value`,
+                  undefined,
+                  undefined,
+                  node.position
+               );
+            }
+         }
+      }
 
       if (node.specifiedType) {
          const explicitType = this.context.translator.translate(
@@ -613,19 +639,21 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       this.typeCheck(apply.callee, scope);
-      let typeSymbol = this.context.inferencer.infer(apply.callee, scope);
+      let typeSymbol = scope.resolveNamedType(
+         this.context.inferencer.infer(apply.callee, scope)
+      );
       let mappings: { [_: string]: Type } = {};
       if (
          apply.callee instanceof Identifier &&
          apply.callee.isTypeIdentifier()
       ) {
-         typeSymbol = scope.lookupType(apply.callee.value).typeSymbol;
-      }
-      let constructor = typeSymbol.buildConstructor();
-      let isStructConstructor = false;
-      if (constructor instanceof RoundValueToValueLambdaType) {
-         typeSymbol = constructor;
-         isStructConstructor = true;
+         typeSymbol = scope.resolveNamedType(
+            scope.lookupType(apply.callee.value).typeSymbol
+         );
+         let constructor = typeSymbol.buildConstructor(scope, this.context);
+         if (constructor instanceof RoundValueToValueLambdaType) {
+            typeSymbol = constructor;
+         }
       }
 
       if (
@@ -868,6 +896,9 @@ export class TypeChecker {
                nearestFunctionScope
             ),
          ];
+         if (scope.hasSymbol(node.nameAsSelectOfIdentifiers() ?? "")) {
+            return result;
+         }
          const field = this.context.inferencer.findField(
             this.context.inferencer.infer(node.owner, scope),
             node.field,
@@ -1011,14 +1042,17 @@ export class TypeChecker {
          if (!options.firstPartOfIntersection) {
             if (!term.bakedInThis) {
                this.context.errors.add(
-                  "Previous part of intersection (&), parameter 'this' of '" +
+                  "Expected left-side of intersection (&) '" +
                      (term.callee instanceof Identifier
                         ? term.callee.value
                         : "Anonymous function") +
                      "'",
                   thisParam.type,
                   undefined,
-                  term.position
+                  term.position,
+                  `You must apply it like ${
+                     thisParam.type
+                  } { ... } & ${term.callee.show()} { ... }`
                );
             }
          } else {
@@ -1030,14 +1064,17 @@ export class TypeChecker {
                !term.bakedInThis
             ) {
                this.context.errors.add(
-                  "Previous part of intersection (&), parameter 'this' of '" +
+                  "Expected left-side of intersection (&) '" +
                      (term.callee instanceof Identifier
                         ? term.callee.value
                         : "Anonymous function") +
                      "'",
                   thisParam.type,
                   options.firstPartOfIntersection,
-                  term.position
+                  term.position,
+                  `You must apply it like ${
+                     thisParam.type
+                  } { ... } & ${term.callee.show()} { ... }`
                );
             } else {
             }
@@ -1070,14 +1107,14 @@ export class TypeChecker {
                term.callee.owner,
                scope
             );
-            // if (!calleeType.isAssignableTo(expectedThisType, scope)) {
-            //    this.context.errors.add(
-            //       `Call target ('this') of lambda ${term.callee.field}`,
-            //       expectedThisType,
-            //       calleeType,
-            //       term.position
-            //    );
-            // }
+            if (!calleeType.isAssignableTo(expectedThisType, scope)) {
+               this.context.errors.add(
+                  `Call target ('self') of lambda ${term.callee.field}`,
+                  expectedThisType,
+                  calleeType,
+                  term.position
+               );
+            }
          }
          term.isFirstParamThis = true;
       }

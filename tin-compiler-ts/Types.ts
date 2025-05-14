@@ -1,6 +1,14 @@
 import { TokenPos } from "./Lexer";
-import { AstNode, Term, TypeDef, PotentialTypeArgs } from "./Parser";
-import { GenericTypeMap, Scope, Symbol } from "./Scope";
+import {
+   AstNode,
+   Term,
+   TypeDef,
+   PotentialTypeArgs,
+   RoundValueToValueLambda,
+   BinaryExpression,
+} from "./Parser";
+import { GenericTypeMap, Scope, Symbol, TypePhaseContext } from "./Scope";
+import { Identifier, Literal } from "./Parser";
 
 export class Type {
    tag: string;
@@ -10,6 +18,7 @@ export class Type {
    isForwardReferenceable: boolean = false;
    run?: number;
    index?: number;
+   appliedTypeArgs: Type[] = [];
    constructor(tag: string = "Unknown") {
       this.tag = tag;
       if (tag === "Unknown") {
@@ -21,7 +30,10 @@ export class Type {
       return false;
    }
 
-   buildConstructor(): Type | undefined {
+   buildConstructor(
+      scope?: Scope,
+      context?: TypePhaseContext
+   ): Type | undefined {
       return undefined;
    }
 
@@ -123,7 +135,10 @@ export class PrimitiveType extends Type {
    }
 
    extends(other: Type): boolean {
-      return this === other;
+      return (
+         this === other ||
+         (this === PrimitiveType.String && other.name === "InterpolatedString")
+      );
    }
 
    isExtendedBy(other: Type): boolean {
@@ -269,8 +284,7 @@ export class LiteralType extends Type {
       if (other instanceof AnyType) {
          return true;
       }
-
-      return super.isAssignableTo(other, scope);
+      return this.extends(other, scope) || other.isExtendedBy(this, scope);
    }
 
    extends(other: Type, scope: Scope) {
@@ -496,6 +510,15 @@ export class RoundValueToValueLambdaType extends Type {
       const paramCheck =
          this.params.length === other.params.length &&
          this.params.every((param, index) => {
+            if (
+               param.defaultValue &&
+               other.params[index].type instanceof OptionalType
+            ) {
+               return other.params[index].type.type.isAssignableTo(
+                  param.type,
+                  scope
+               );
+            }
             return other.params[index].type.isAssignableTo(param.type, scope);
          });
 
@@ -744,7 +767,7 @@ export class AppliedGenericType extends Type implements PotentialTypeArgs {
          }
          return areAllParamsEqual;
       } else if (this.resolved) {
-         return other.extends(this.resolved, scope);
+         return other.isAssignableTo(this.resolved, scope);
       } else {
          return false;
       }
@@ -846,7 +869,7 @@ export class UnionType extends Type {
    }
 
    toString(): string {
-      return `${this.left.toString()} | ${this.right.toString()}`;
+      return `(${this.left.toString()} | ${this.right.toString()})`;
    }
 }
 
@@ -949,8 +972,15 @@ export class IntersectionType extends Type {
       return type || this;
    }
 
+   isExtendedBy(other: Type, scope: Scope): boolean {
+      return (
+         other.isAssignableTo(this.left, scope) &&
+         other.isAssignableTo(this.right, scope)
+      );
+   }
+
    toString(): string {
-      return `${this.left.toString()} & ${this.right.toString()}`;
+      return `(${this.left.toString()} & ${this.right.toString()})`;
    }
 }
 
@@ -974,9 +1004,42 @@ export class MarkerType extends Type {
 
 export class RefinedType extends Type {
    inputType: Type;
-   constructor(inputType: Type) {
+   lambda: RoundValueToValueLambda;
+   constructor(inputType: Type, lambda: RoundValueToValueLambda) {
       super("RefinedType");
       this.inputType = inputType;
+      this.lambda = lambda;
+   }
+
+   buildConstructor(
+      scope?: Scope,
+      context?: TypePhaseContext
+   ): Type | undefined {
+      let tpe = this.inputType;
+      if (scope && context) {
+         tpe = scope.resolveNamedType(tpe);
+         const fieldsByType = context.inferencer.getAllKnownFields(this, scope);
+         let params: ParamType[] = [];
+         if (fieldsByType.size === 1) {
+            [...fieldsByType.values()][0].forEach((param) => {
+               params.push(param);
+            });
+         }
+         let constructor = tpe.buildConstructor(scope, context);
+         if (
+            constructor instanceof RoundValueToValueLambdaType &&
+            this.inputType.isAssignableTo(constructor.returnType, scope)
+         ) {
+            constructor = new RoundValueToValueLambdaType(
+               params,
+               this,
+               false,
+               true,
+               false
+            );
+         }
+         return constructor;
+      }
    }
 
    extends(other: Type, scope: Scope): boolean {
@@ -987,7 +1050,71 @@ export class RefinedType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
+      if (
+         other instanceof LiteralType &&
+         other.type == PrimitiveType.String &&
+         this.appliedTypeArgs[0] instanceof LiteralType &&
+         this.appliedTypeArgs[0].type === PrimitiveType.String
+      ) {
+         return (
+            String(other.value).match(`^${this.appliedTypeArgs[0].value}$`) !==
+            null
+         );
+      }
+      if (
+         other instanceof LiteralType &&
+         other.type == PrimitiveType.Number &&
+         this.lambda.block.statements.length === 1
+      ) {
+         return this.doesLiteralMatch(
+            Number(other.value),
+            this.lambda.block.statements[0]
+         );
+      }
       return other instanceof Type && this.name === other.name;
+   }
+
+   doesLiteralMatch(self: number, condition: Term): boolean {
+      if (
+         condition instanceof BinaryExpression &&
+         condition.left instanceof Identifier &&
+         condition.left.value === "self" &&
+         condition.right instanceof Literal &&
+         condition.right.type === "Number"
+      ) {
+         const right = Number(condition.right.value);
+         switch (condition.operator) {
+            case ">":
+               return self > right;
+            case ">=":
+               return self >= right;
+            case "<":
+               return self < right;
+            case "<=":
+               return self <= right;
+            case "==":
+               return self == right;
+         }
+         return false;
+      }
+      if (
+         condition instanceof BinaryExpression &&
+         condition.operator === "||"
+      ) {
+         return (
+            this.doesLiteralMatch(self, condition.left) ||
+            this.doesLiteralMatch(self, condition.right)
+         );
+      } else if (
+         condition instanceof BinaryExpression &&
+         condition.operator === "&&"
+      ) {
+         return (
+            this.doesLiteralMatch(self, condition.left) &&
+            this.doesLiteralMatch(self, condition.right)
+         );
+      }
+      return false;
    }
 
    toString(): string {

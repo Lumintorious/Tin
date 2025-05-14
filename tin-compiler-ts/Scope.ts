@@ -341,7 +341,6 @@ export class Scope {
             //    continue;
             // }
          }
-         //  console.log(`'${symName}' vs '${name}' => ${symName === name}`);
          if (symName === name) {
             foundSymbol = sym;
             break;
@@ -467,6 +466,7 @@ export class Scope {
       } else if (typeCallee.name && !type.resolved.name) {
          type.resolved.name = typeCallee.name;
       }
+      type.resolved.appliedTypeArgs = type.parameterTypes;
       return type.resolved;
    }
 
@@ -481,6 +481,14 @@ export class Scope {
    }
 
    resolveGenericTypes(type: Type, paramMap: GenericTypeMap): Type {
+      const result = this.resolveGenericTypesRaw(type, paramMap);
+      if (type instanceof AppliedGenericType) {
+         result.appliedTypeArgs = [...type.parameterTypes];
+      }
+      return result;
+   }
+
+   resolveGenericTypesRaw(type: Type, paramMap: GenericTypeMap): Type {
       switch (type.tag) {
          case "NamedType":
             const typeName = type.name ? paramMap.get(type.name) : undefined;
@@ -606,7 +614,8 @@ export class Scope {
                this.resolveGenericTypes(
                   (type as RefinedType).inputType,
                   paramMap
-               )
+               ),
+               (type as RefinedType).lambda
             );
          case "SquareTypeToValueLambdaType":
             return type;
@@ -649,6 +658,7 @@ export class GenericTypeMap {
 
    map: Map<string, Type> = new Map();
    order: [string, Type][] = [];
+   expectedTypes?: GenericNamedType[];
 
    set(key: string, value: Type) {
       this.map.set(key, value);
@@ -664,8 +674,24 @@ export class GenericTypeMap {
    }
 
    absorb(map: GenericTypeMap) {
-      this.map = new Map([...this.map, ...map.map]);
-      this.order = [...this.order, ...map.order];
+      for (const [k, v] of map.map.entries()) {
+         if (!this.map.has(k)) {
+            this.map.set(k, v);
+            this.order.push([k, v]);
+         } else {
+            console.log(`Skipping existing mapping ${k}: ${v}`);
+         }
+      }
+
+      //   this.map = new Map([...this.map, ...map.map]);
+      //   this.order = [...this.order, ...map.order];
+   }
+
+   inExpectedOrder(): Type[] {
+      if (!this.expectedTypes) {
+         throw new Error("Expected types uninitialized");
+      }
+      return this.expectedTypes.map((t) => this.get(t.name)!);
    }
 
    toString() {

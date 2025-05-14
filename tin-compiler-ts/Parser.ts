@@ -33,6 +33,7 @@ export const VAR_RETURNING_FUNC_IN_INVAR_PLACE = new Modifier();
 export const INVAR_RETURNING_FUNC_IN_VAR_PLACE = new Modifier();
 export const ARTIFICIAL = new Modifier();
 export const BAKED_TYPE = new Modifier<Type>();
+export const WHERE_INTERPOLATION_EXPECTED = new Modifier();
 
 export class AstNode {
    static toCheckForPosition: AstNode[] = [];
@@ -332,6 +333,12 @@ export class Literal extends Term {
       this.type = type;
       this.value = value; // Value of the literal (number, string, etc.)
    }
+
+   show(): string {
+      return this.type === "String"
+         ? '"' + this.value + '"'
+         : String(this.value);
+   }
 }
 
 export interface PotentialTypeArgs {
@@ -383,7 +390,9 @@ export class Call extends Term implements PotentialTypeArgs {
    }
 
    initTypeArgs(map: GenericTypeMap): void {
+      //   if (this.autoFilledSquareTypeParams === undefined) {
       this.autoFilledSquareTypeParams = map;
+      //   }
    }
 }
 
@@ -411,6 +420,7 @@ export class UnaryOperator extends Term {
 export class Identifier extends Term {
    value: string;
    isFromSelfClojure?: boolean;
+   pointsTo?: Term;
    constructor(value: string) {
       super("Identifier"); // tag of the AST node
       this.value = value; // Value of the literal (number, string, etc.)
@@ -552,6 +562,7 @@ const PRECEDENCE: { [_: string]: number } = {
    "?:": 110, // Walrus
    ".": 100, // Field access
    "?.": 100, // Field access
+   "+string+": 75, // Hidden operator for string interpolation, must always be the tightest precedence after dots
    "**": 50, // Exponentiation
    "*": 40, // Multiplication
    "/": 40, // Division
@@ -824,6 +835,7 @@ export class Parser {
          // this.peek(1).tag === "DEDENT")
       ) {
          const operator = this.peek().value;
+         const isArtificial = this.peek().artificial;
          if (this.peek().tag !== "OPERATOR") {
             break;
          }
@@ -994,6 +1006,9 @@ export class Parser {
                   new RoundValueToValueLambda([param], right)
                );
             } else {
+               if (operator === "+string+" && !isArtificial) {
+                  throw new Error("Unrecognized operator +str+");
+               }
                left = new BinaryExpression(left, operator, right);
             }
          }
