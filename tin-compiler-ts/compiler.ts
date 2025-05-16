@@ -310,7 +310,16 @@ async function compile(
          console.error(uncheckedSymbol[1].name + " @ " + uncheckedSymbol[0]);
       }
       context.checker.typeCheck(ast, context.fileScope);
-      const errors = context.errors.getErrors();
+      const warnings = context.logs.getWarnings();
+      const errors = context.logs.getErrors();
+      if (warnings) {
+         if (isTesting) {
+            return Promise.reject(new Error(warnings));
+         } else {
+            console.error("\x1b[93m" + warnings + "\x1b[0m");
+            process.exit(-1);
+         }
+      }
       if (errors) {
          if (isTesting) {
             return Promise.reject(new Error(errors));
@@ -351,7 +360,7 @@ async function compile(
          .substring(SRC_PATH.length);
       await files.writeFile(
          fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension),
-         `console.time('${formattedInputFile}');\n ${translatedString}; console.timeEnd('${formattedInputFile}')\n`
+         `console.time('${formattedInputFile}');\n ${translatedString}; if (typeof main === 'function') await main();console.timeEnd('${formattedInputFile}')\n`
       );
 
       console.log("\x1b[32mCompiled " + inputFile + "\x1b[0m");

@@ -1,8 +1,8 @@
 import collections/Iterable
 
 HttpMethod = "GET" | "POST" | "PUT" | "DELETE"
-UrlParams = Array[(String, String)]
-Headers = Array[(String, String)]
+UrlParams = Seq[(String, String)]
+Headers = Seq[(String, String)]
 
 UrlString = String where:
 	self.matches("^(https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]\{2,\}(?:\/[a-zA-Z0-9\-\.]*)*\/?$")
@@ -16,7 +16,7 @@ Byte = Number where:
 Status = Number where:
 	self > 100 && self < 600
 
-ByteBuffer = Array[Byte]
+ByteBuffer = Seq[Byte]
 
 Url = struct:
 	baseUrl: UrlString
@@ -34,45 +34,42 @@ Response = struct:
 	headers: Headers
 	body: String
 
-Url.make = (url: String, port: Number = 80, params: UrlParams = Array.empty[(String, String)]) ->
-	if url !: UrlString, return Error("Url was wrong")
-	if port !: Port, return Error("Port was wrong")
+Url.new = (url: String, port: Number = 80, params: UrlParams = Array.empty[(String, String)]) ->
+	if url !: UrlString, return Error { "Invalid URL: '{url}'" }
+	if port !: Port, return Error { "Invalid Port: '{port}'" }
 	
-	Url(url, port, params)
+	Url { url, port, params }
 
 Url.fromString: (String) -> Url | Error = external
 
-Request.make = (method: HttpMethod, urlTry: Url | Error, headers: Headers = Array.empty[(String, String)], body: ByteBuffer = Array.empty[Byte]) ->
-	Request(method, urlTry?, headers, body)
-
+Request.new = (method: HttpMethod, urlTry: Url | Error, headers: Headers = Array.empty[(String, String)], body: ByteBuffer = Array.empty[Byte]) ->
+	Request { method, urlTry?, headers, body }
 
 external "
 export function Url$fromString(str) \{
 	const url = new URL(str);
-
-	console.log(url.hostname);  // 'example.com'
-	console.log(url.port);      // '8080'
-	console.log(url.searchParams.get('foo')); // 'bar'
 \}
 
 export async function Http$send(request) \{
+	if (request === undefined || TinErr_.__is_child(request)) \{
+		return request;
+	}
 	const url = request[Request._s].url._
 	const params = \{\};
 	params.method = request[Request._s].method._
 	params.headers = \{\}
-	for(let i = 0; i < request[Request._s].headers._[Array._s].length._(); i++) \{
-		const elem = request[Request._s].headers._[Array._s].at._(i)
+	for(let i = 0; i < request[Request._s].headers._[Seq._s].length._(); i++) \{
+		const elem = request[Request._s].headers._[Seq._s].at._(i)
 		params.headers[elem[Tuple2._s].left._] = elem[Tuple2._s].right._
 	\}
 
 	const urlParams = new URLSearchParams();
-	for(let i = 0; i < url[Url._s].params._[Array._s].length._(); i++) \{
-		const elem = url[Url._s].params._[Array._s].at._(i)
+	for(let i = 0; i < url[Url._s].params._[Seq._s].length._(); i++) \{
+		const elem = url[Url._s].params._[Seq._s].at._(i)
 		urlParams.set(elem[Tuple2._s].left._, elem[Tuple2._s].right._)
 	\}
 	
-	const urlString = url[Url._s].baseUrl._ + '?' + urlParams.toString()
-	console.log(urlString)
+	const urlString = url[Url._s].baseUrl._ + (urlParams.length > 0 ? ('?' + urlParams.toString()): \"\")
 
 	const responseRaw = await fetch(urlString, params);
 
@@ -81,7 +78,7 @@ export async function Http$send(request) \{
 	for(const [k, v] of responseRaw.headers) \{
 		headers.push(Tuple2(String, String)(\{_:k\},\{_:v\}))
 	\}
-	const tinHeaders = Array(String)(headers)
+	const tinHeaders = Seq(String)(headers)
 	const response = Response(\{_:responseRaw.status\},\{_:tinHeaders\}, \{_:jsonRes\})
 	return response;
 \}

@@ -1,0 +1,118 @@
+import collections/Iterable
+
+File = struct:
+	path: String
+	birthTime: Number
+
+RegularFile = struct:
+	size: Number
+
+Directory = struct:
+	children: (includeAccess: Boolean?) ~> Seq[File] | Error
+
+FilePermissions = struct:
+	canRead: Boolean
+	canWrite: Boolean
+	canExecute: Boolean
+
+# FileHandle = struct:
+# 	read: (bytes: Number, encoding: String) -> String | Error
+# 	write: (string: String) -> Nothing | Error 
+
+FileNotFound = Error & struct
+PermissionDenied = Error & struct
+FileAlreadyExists = Error & struct
+FileCreateError = Error & (FileNotFound | PermissionDenied)
+FileGetError = Error & (FileAlreadyExists | PermissionDenied)
+
+File.get: (path: String, includeAccess = false) ~> File & FilePermissions | FileGetError = external
+external "
+	import fsA from 'fs/promises';
+	import pth from 'path';
+	
+	export async function _getAccess(file) \{
+		const result = \{ read: false, write: false, execute: false };
+
+		try \{
+			await fsA.access(file, fs.constants.R_OK);
+			result.read = true;
+		} catch (e)\{
+			console.log(e)
+		}
+
+		try \{
+			await fsA.access(file, fs.constants.W_OK);
+			result.write = true;
+		} catch (e)\{}
+
+		try \{
+			await fsA.access(file, fs.constants.X_OK);
+			result.execute = true;
+		} catch (e)\{}
+
+		return FilePermissions(\{_: result.read},\{_: result.write},\{_: result.execute},);
+	}
+
+
+	export async function File$get(path, includeAccess) \{
+		try \{
+			const realPath = pth.resolve(path)
+			const file = await fsA.stat(realPath)
+			let appendage;
+			if (file.isDirectory()) \{
+				appendage = Directory(
+					(\{_: async (includeAccessC) => \{
+						const arr = [];
+						for (let childPath of (await fsA.readdir(realPath))) \{
+							arr.push(await File$get(pth.resolve(realPath, childPath), includeAccessC))
+						}
+						return Seq(File)(arr)
+				}})
+				)
+			} else \{
+				appendage = RegularFile(\{_: file.size})
+			}
+			let result = File(\{_:realPath}, \{_:file.birthtime.getTime()});
+			if (includeAccess) \{
+				const permissions = await _getAccess(realPath);
+				result = result._and(permissions)
+			}
+			return result._and(appendage);
+		} catch (e) \{
+			return TinErr_(\{_:e.message})._and(e.message.startsWith('ENOENT') ? FileNotFound() : PermissionDenied());
+		}
+	}
+"
+
+File.create: (path: String, kind: FileKind) ~> File | FileCreateError = external
+external "
+	export async function File$create(path, kind) \{
+		try \{
+			if (kind === 'DIRECTORY') \{
+				await fsA.mkdir(path)
+			} else \{
+				await fsA.writeFile(path, '', \{flag: 'wx'})
+			}
+			return File$get(path)
+		} catch (e) \{
+			return TinErr_(\{_:e.message})._and(e.message.startsWith('EEXIST') ? FileAlreadyExists() : PermissionDenied());
+		}
+	}
+"
+
+File.lineIterator: (self: File) ~> AsyncIterator[String] = external
+external "
+	import fs from 'fs';
+	import readline from 'readline';
+	export async function File$lineIterator() \{
+		const rl = readline.createInterface(\{ input: fs.createReadStream(this[File._s].path._) });
+		const iter = rl[Symbol.asyncIterator]();
+		return AsyncIterator(String)(\{_:(async function() \{
+			const \{ value, done } = await iter.next();
+			if (done) \{
+				rl.close();
+			}
+			return value;
+		})});
+	}
+"

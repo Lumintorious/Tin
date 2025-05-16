@@ -287,12 +287,10 @@ export class TypeBuilder {
             node.expression instanceof UnaryOperator &&
             node.expression.operator === "var"
          ) {
-            this.context.errors.add(
-               "Chill with the var vars",
-               undefined,
-               undefined,
-               node.position
-            );
+            this.context.logs.error({
+               message: "Chill with the var vars",
+               position: node.position,
+            });
          }
          const deps: Identifier[] = [];
          walkTerms(node.expression, scope, (node, scope) => {
@@ -1108,7 +1106,7 @@ export class TypeBuilder {
       if (options.assignedName) {
          node.name = options.assignedName;
       }
-      const innerScope = scope.innerScopeOf(node, true);
+      const innerScope = scope.innerScopeOf(node, true).setAsync(!node.pure);
       node.params.forEach((p, i) => {
          if (p instanceof Assignment && p.lhs instanceof Identifier) {
             const hasSymbol = innerScope.hasSymbol(p.lhs.value);
@@ -1395,16 +1393,14 @@ export class TypeBuilder {
             scope.resolveAppliedGenericTypes(nodeType);
          }
          if (!rhsType.isAssignableTo(scope.resolveNamedType(nodeType), scope)) {
-            this.context.errors.add(
-               `Declaration of ${
+            this.context.logs.error({
+               message: `Declaration of ${
                   node.lhs instanceof Identifier ? node.lhs.value : "term"
                }`,
-               nodeType,
-               rhsType,
-               node.position,
-               undefined,
-               new Error()
-            );
+               expectedType: nodeType,
+               insertedType: rhsType,
+               position: node.position,
+            });
          } else {
             rhsType = nodeTypeRaw;
          }

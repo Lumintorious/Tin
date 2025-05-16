@@ -1270,6 +1270,9 @@ export class Parser {
 
    parseAppliedKeyword() {
       const keyword = this.consume("KEYWORD");
+      if (keyword.value === "return" && this.peek().tag === "NEWLINE") {
+         return new AppliedKeyword("return", new Identifier("nothing"));
+      }
       const expression = this.parseExpression();
       if (
          expression instanceof Assignment &&
@@ -1558,6 +1561,9 @@ export function parseObject(parser: Parser): DataDef {
    //    }
    // Expect INDENT (start of type block)
    parser.consume("KEYWORD", "struct");
+   if (parser.peek().tag !== "OPERATOR" || parser.peek().value !== ":") {
+      return new DataDef([]);
+   }
    parser.omit(":");
    parser.omit("NEWLINE");
    parser.omit("INDENT");

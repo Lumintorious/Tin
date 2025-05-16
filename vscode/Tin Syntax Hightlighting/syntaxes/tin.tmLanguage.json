@@ -11,7 +11,7 @@
       },
       {
          "name": "constant.tin",
-         "match": "\\b(true|false|nothing|this)\\b"
+         "match": "\\b(true|false|nothing|this|ok)\\b"
       },
       {
          "match": "\\.*([\\@a-z][a-zA-Z0-9_]*)[ ]*(=|:)[ ]*(\\(|\\[)",
@@ -135,7 +135,7 @@
                   },
                   {
                      "name": "constant.tin",
-                     "match": "\\b(true|false|nothing|this)\\b"
+                     "match": "\\b(true|false|nothing|this|ok)\\b"
                   },
                   {
                      "name": "operator.tin",

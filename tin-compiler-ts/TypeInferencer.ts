@@ -647,9 +647,11 @@ export class TypeInferencer {
             if (node.callee instanceof Select) {
                return this.infer(node.callee.owner, scope);
             } else if (!isStructConstructor) {
-               this.context.errors.add(
-                  "Lambda returning 'this' was not called on an object."
-               );
+               this.context.logs.error({
+                  message:
+                     "Lambda returning 'this' was not called on an object.",
+                  position: node.position,
+               });
                return calleeType.returnType;
             }
          }
@@ -811,11 +813,13 @@ export class TypeInferencer {
          //        ""
          //  );
          if (scope.iteration === "RESOLUTION") {
-            throw new Error(
-               `Field '${node.field}' could not be found on '` +
+            this.context.logs.error({
+               message:
+                  `Field '${node.field}' could not be found on '` +
                   ownerType.toString() +
-                  "'"
-            );
+                  "'",
+               position: node.position,
+            });
          }
          return new UncheckedType();
       }
@@ -1195,15 +1199,14 @@ export class TypeInferencer {
             return this.getTypeType(type, scope);
          }
          if (scope.iteration === "RESOLUTION") {
-            this.context.errors.add(
-               `Value '${node.value}' is not defined - ` +
+            this.context.logs.error({
+               message:
+                  `Value '${node.value}' is not defined - ` +
                   scope.toPath() +
                   " -- " +
                   scope.iteration,
-               undefined,
-               undefined,
-               node.position
-            );
+               position: node.position,
+            });
          }
          //  this.context.errors.;
          return new UncheckedType();
@@ -1325,14 +1328,13 @@ export class TypeInferencer {
       }
 
       // Return a BinaryOpType if types are not directly inferrable
-      this.context.errors.add(
-         "Operation " +
+      this.context.logs.error({
+         message:
+            "Operation " +
             node.operator +
             ` not supported between ${leftType.toString()} and ${rightType.toString()}`,
-         undefined,
-         undefined,
-         node.position
-      );
+         position: node.position,
+      });
       return Any;
    }
 
@@ -1359,12 +1361,10 @@ export class TypeInferencer {
             });
             let i = 0;
             if (inferredParams.length !== expected.params.length) {
-               this.context.errors.add(
-                  `Expected parameter amount lambda parameter of call `,
-                  undefined,
-                  undefined,
-                  node.position
-               );
+               this.context.logs.error({
+                  message: `Expected parameter amount lambda parameter of call `,
+                  position: node.position,
+               });
             } else {
                for (let param of inferredParams) {
                   if (
@@ -1373,13 +1373,14 @@ export class TypeInferencer {
                         innerScope
                      )
                   ) {
-                     this.context.errors.add(
-                        `Expected parameter ${
+                     this.context.logs.error({
+                        message: `Expected parameter ${
                            param.name || i
                         } of lambda parameter of call`,
-                        expected.params[i].type,
-                        param.type
-                     );
+                        expectedType: expected.params[i].type,
+                        insertedType: param.type,
+                        position: node.position,
+                     });
                   }
                   i++;
                }

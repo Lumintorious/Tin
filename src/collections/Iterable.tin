@@ -1,6 +1,9 @@
 Iterator = [T] => struct:
 	next: () -> T?
 
+AsyncIterator = [T] => struct:
+	next: () ~> T?
+
 Iterable = [T] => struct:
 	makeIterator: () -> Iterator[T]
 
@@ -89,6 +92,14 @@ Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 
 Iterable.into = [T, F] -> (self: Iterable[T], factory: (Iterable[T]) -> F[T]) ->
 	factory(self)
+
+Iterator.consumeEach = [T] -> (self: Iterator[T], fn: (T) -> Nothing) ->
+	iterator = self
+	current = var iterator.next()
+	
+	while current !: Nothing,
+		fn(current)
+		set current = iterator.next()
 
 Iterable.toSeq = [T] -> (self: Iterable[T]) -> Seq.fromIterable(self)
 

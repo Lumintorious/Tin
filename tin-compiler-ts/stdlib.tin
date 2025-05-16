@@ -60,6 +60,8 @@ export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(Type(\"Never\",
 export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", \{_:(n) => typeof n === \"number\"\}, \{_:(n) => typeof n === \"number\"})));
 export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})));
 export const Boolean = _S(Symbol(\"Boolean\"), (s) => !!s, lazy(Type(\"Boolean\", \{_: (n) => typeof n === \"boolean\"}, \{_:(n) => typeof n === \"boolean\"})));
+export const ok = Symbol(\"ok\")
+export const Ok = _S(Symbol(\"Ok\"), () => ok, lazy(Type(\"Ok\", \{_: (n) => n === ok}, \{_:(n) => n === ok})));
 "
 
 Literal = Type & struct:
@@ -71,9 +73,11 @@ dejsonify: (json: String) -> Anything = external
 assert: (condition: Boolean, message: String?) -> Nothing = external
 print: (Anything) -> Nothing = external
 printRaw: (Anything) -> Nothing = external
+printTable: (Anything) -> Nothing = external
 debug: (Anything) -> Nothing = external
 clojure: (Anything) -> Nothing = external
 nothing: Nothing = external
+ok: Ok = external
 panic: (message: String) -> Never = external
 Array.of: [T] -> (Seq[T]) -> Seq[T] = external
 Array.empty: [T] -> Seq[T] = external

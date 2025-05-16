@@ -533,12 +533,12 @@ export class Lexer {
             continue;
          }
 
-         if (char === "'") {
-            stringLiteral += "\\'";
-            this.position++;
-            this.column++;
-            continue;
-         }
+         //  if (char === "'") {
+         //     stringLiteral += "\\'";
+         //     this.position++;
+         //     this.column++;
+         //     continue;
+         //  }
 
          stringLiteral += char;
          this.position++;

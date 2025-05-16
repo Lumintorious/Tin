@@ -129,9 +129,9 @@ export class JavascriptTranslator implements OutputTranslator {
       scope: Scope,
       isReflectionType = false
    ): string {
-      if (typeDef.fieldDefs.length === 0) {
-         return "() => undefined";
-      }
+      //   if (typeDef.fieldDefs.length === 0) {
+      //      return "() => undefined";
+      //   }
 
       const parameters =
          "(" +
@@ -362,7 +362,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch(e) { if(e instanceof Error || e && typeof e === 'object' && TinErr_._s in e ) {throw e} else { return e} } })`;
+         )}\n} catch(e) { if(e instanceof Error) {throw e} else { return e} } })`;
 
          // Change
       } else if (term instanceof Change) {
@@ -523,7 +523,7 @@ export class JavascriptTranslator implements OutputTranslator {
             {
                returnLast: true,
             }
-         )}\n} catch (e) { if (e instanceof Error || e && typeof e === 'object' && TinErr_._s in e ) { _addStack(e, '${
+         )}\n} catch (e) { if (e instanceof Error) { _addStack(e, '${
             scope.name + ":" + scope.position.start
          }'); throw e } else { return e } }}`;
 
@@ -558,30 +558,47 @@ export class JavascriptTranslator implements OutputTranslator {
             term.falseBranch !== undefined
                ? innerScope.innerScopeOf(term.falseBranch)
                : innerScope;
-         let trueBranch = `(function(){${this.translate(
-            term.trueBranch,
-            trueScope,
-            {
-               returnLast: !isTrueBranchIf,
-               normalReturn: !term.falseBranch?.is(IN_RETURN_BRANCH),
+         function wrapWithIIFE(doWrap: boolean, doAsync: boolean, str: string) {
+            if (doWrap) {
+               return `${
+                  doAsync ? "await (async " : "("
+               }function(){${str}}).call(this)`;
+            } else {
+               return str;
             }
-         )}}).call(this)`;
+         }
+         const isTrueBranchSingleExpression =
+            term.trueBranch instanceof Block &&
+            term.trueBranch.statements.length !== 1;
+         const isFalseBranchSingleExpression =
+            term.falseBranch instanceof Block &&
+            term.falseBranch.statements.length !== 1;
+         let trueBranch = wrapWithIIFE(
+            true,
+            scope.isUnderAsync(),
+            this.translate(term.trueBranch, trueScope, {
+               returnLast: !isTrueBranchIf,
+               normalReturn:
+                  scope.isUnderAsync() ||
+                  !term.falseBranch?.is(IN_RETURN_BRANCH),
+            })
+         );
          const isFalseBranchIf =
             term.falseBranch instanceof IfStatement ||
             (term.falseBranch instanceof Block &&
                term.falseBranch.statements[0] instanceof IfStatement);
-         let falseBranch = `(function(){${this.translate(
-            term.falseBranch,
-            falseScope,
-            {
+         let falseBranch = wrapWithIIFE(
+            true,
+            scope.isUnderAsync(),
+            this.translate(term.falseBranch, falseScope, {
                returnLast: !isFalseBranchIf,
                normalReturn: !term.falseBranch?.is(IN_RETURN_BRANCH),
-            }
-         )}}).call(this)`;
+            })
+         );
          return `((${this.translate(
             term.condition,
             innerScope
-         )}) ? ${trueBranch} : ${falseBranch}) `;
+         )}) ? (${trueBranch}) : (${falseBranch})) `;
 
          // BinaryExpression
       } else if (term instanceof WhileLoop) {

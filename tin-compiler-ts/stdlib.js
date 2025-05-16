@@ -2,6 +2,7 @@ export const __tin_varargs_marker = Symbol();
 
 export const TIN_TYPE_CACHE = new Map()
 export const _JsArr = globalThis.Array;
+process.chdir('../');
 
 /** LEGEND
 	Type Constructors:
@@ -27,6 +28,10 @@ export class Return {
 	constructor(value) {
 		this.value = value;
 	}
+}
+
+Object.prototype.toString = function () {
+	return makeStr(this, true, true)
 }
 
 Object.prototype.__is_child = function (obj) {
@@ -131,7 +136,7 @@ export function _Q(symbol, func, descriptor) {
 				}
 				if ((typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol)) {
 					for (let i = 0; i < args.length; i++) {
-						if (args[i] !== obj[symbol]._ta[i]) {
+						if (args[i]._s !== obj[symbol]._ta[i]._s) {
 							return false;
 						}
 					}
@@ -147,7 +152,7 @@ export function _Q(symbol, func, descriptor) {
 	Object.assign(newFunc, func)
 	newFunc._s = symbol;
 	newFunc.__is_child = (obj) => {
-		return false;//(typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol);
+		return (typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol);
 	}
 	return newFunc;
 }
@@ -408,6 +413,7 @@ function notify() {
 }
 
 export function _var(deps, fn, doVar, clojureName) {
+	// fn = (typeof fn === 'function') ? fn : () => fn
 	const obj = fn();
 	const subscribers = [];
 	let result = {};
@@ -751,9 +757,9 @@ export function _cast(obj, type) {
 	if (type.__is_child !== undefined && type.__is_child(objToTest)) {
 		return obj
 	} else {
-		console.log(type._s)
-		console.log(objToTest)
-		console.log(type.__is_child(objToTest))
+		console.error(type._s)
+		console.error(objToTest)
+		console.error(type.__is_child(objToTest))
 		throw new Error(`'${makeStr(objToTest, true, true)}' was not of type ${(type?._d ?? type)?._s?.description}`)
 	}
 }
@@ -932,12 +938,172 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		if (typeof componentKey === 'string') continue;
 		const component = obj[componentKey]
 		const componentName = (componentKey.description.startsWith("Tuple2") || componentKey.description.startsWith("Tuple3")) ? "" : componentKey.description + " "
-		results.push(colorSymbolName(componentName) + white("{ ") + Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_")).map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ` : ""}${makeStr(component[k])}`).join(white(", ")) + white(" }"))
+		const innerFields = Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_"));
+		results.push(colorSymbolName(componentName) + (innerFields.length === 0 ? "" : (white("{ ") + innerFields.map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ` : ""}${makeStr(component[k])}`).join(white(", ")) + white(" }"))))
 	}
 
 	return results.join(white(" & "))
 }
 
+export function printTable(objs /* [] */) {
+	// console.log(obj)
+	let arr = objs[Seq._s]._rawArray;
+	let symbolsSet = [];
+	const symbols = [];
+
+	function findSym(sym) {
+		return symbols.filter(o => o.symbol === sym)[0]
+	}
+
+	arr.forEach(obj => {
+		Reflect.ownKeys(obj).filter(s => typeof s === 'symbol').forEach(s => {
+			if (!findSym(s)) {
+				symbols.push({ symbol: s, fields: [], width: 0 })
+			}
+		})
+	});
+
+	function findField(sym, fieldName) {
+		return (findSym(sym) ?? { fields: [] }).fields.filter(o => o.name === fieldName)[0]
+	}
+
+
+	arr.forEach(obj => {
+		symbols.forEach(sym => {
+			if (obj[sym.symbol]) {
+				const fields = Reflect.ownKeys(obj[sym.symbol]).filter(s => typeof s === 'string' && !s.startsWith("_"))
+				fields.forEach(fieldName => {
+					if (!findField(sym.symbol, fieldName)) {
+						findSym(sym.symbol).fields.push({
+							name: fieldName,
+							width: Math.max(fieldName.length, sym.symbol.description.length)
+						})
+					}
+				})
+			}
+		})
+	})
+
+	arr.forEach(obj => {
+		symbols.filter(s => s.symbol in obj).forEach(sym => {
+			sym.fields.filter(field => field.name in obj[sym.symbol]).forEach(field => {
+				const fieldString = makeStr(obj[sym.symbol][field.name], true, true)
+				const unformattedFieldString = fieldString.replaceAll(/\x1b\[[0-9]+m/g, "")
+				if (unformattedFieldString.length > field.width) {
+					field.width = unformattedFieldString.length
+				} else if (sym.width > field.width) {
+					field.width = sym.width;
+				}
+			})
+		})
+	})
+
+	symbols.forEach(sym => {
+		let widthFromFields = sym.fields.reduce((acc, field) => {
+			return acc + field.width;
+		}, 0);
+		widthFromFields += (sym.fields.length - 1) * 4;
+		sym.width = sym.symbol.description.length + 1;
+		if (widthFromFields > sym.width) {
+			sym.width = widthFromFields
+		} else {
+			const difference = sym.width - widthFromFields;
+			if (sym.fields.length > 0) {
+				sym.fields[sym.fields.length - 1].width += difference;
+			}
+		}
+	})
+
+	let header = "\x1b[1m|"
+	symbols.forEach(sym => {
+		header += " " + (sym.symbol.description).padEnd(sym.width + 2) + "|"
+	})
+	header += "\x1b[0m"
+
+	console.log(header)
+
+	let subHeader = "\x1b[1m|"
+	symbols.forEach(sym => {
+		sym.fields.forEach(field => {
+			subHeader += " " + (field.name).padEnd(field.width + 2) + "|"
+		})
+	})
+	subHeader += "\x1b[0m"
+
+	console.log(subHeader)
+
+	arr.forEach((obj, i) => {
+		let row = ((i % 2 === 0) ? "\x1b[90m" : "") + "|"
+		symbols.forEach(sym => {
+			sym.fields.forEach(field => {
+				if (sym.symbol in obj && field.name in obj[sym.symbol]) {
+					row += " " + (makeStr(obj[sym.symbol][field.name], true, true).replaceAll(/\x1b\[[0-9]+m/g, "")).padEnd(field.width + 2) + "|"
+				} else {
+					row += " " + ("").padEnd(field.width + 2) + "|"
+				}
+			})
+		})
+		row += "\x1b[0m"
+		console.log(row)
+	})
+
+	// Get keys per component
+	// const keysList = columns.map(col => Object.keys(obj[col]));
+
+	// const fieldWidths = new Map([[Symbol(), new Map([["__", 0]])]]);
+	// columns.forEach(s => fieldWidths.set(s, new Map()))
+
+	// columns.forEach(sym => {
+	// 	Object.keys(obj[sym]).forEach(field => {
+
+	// 	})
+	// })
+
+	// // Calculate column widths
+	// const colWidths = keysList.map(keys => {
+	// 	const maxKeyLen = Math.max(...keys.map(k => k.length));
+	// 	const maxValLen = Math.max(...keys.map(k => {
+	// 		const val = obj[columns[keysList.indexOf(keys)]][k];
+	// 		return val === undefined ? 0 : ("" + val).length;
+	// 	}));
+	// 	return Math.max(maxKeyLen, maxValLen, columns[keysList.indexOf(keys)].length) + 2;
+	// });
+
+	// // Print top header (components spanning their fields)
+	// let header = '|';
+	// keysList.forEach((keys, i) => {
+	// 	const w = colWidths[i] * keys.length + (keys.length - 1) * 3; // 3 = " | "
+	// 	header += ' ' + columns[i].description.padEnd(w) + ' |';
+	// });
+	// console.log(header);
+
+	// // Print second header (field keys)
+	// let subHeader = '|';
+	// keysList.forEach((keys, i) => {
+	// 	keys.forEach(k => {
+	// 		subHeader += ' ' + k.padEnd(colWidths[i]) + ' |';
+	// 	});
+	// });
+	// console.log(subHeader);
+
+	// // Calculate max rows
+	// const maxRows = Math.max(...keysList.map(k => k.length));
+
+	// // Print data rows
+	// for (let r = 0; r < maxRows; r++) {
+	// 	let row = '|';
+	// 	keysList.forEach((keys, i) => {
+	// 		if (r < keys.length) {
+	// 			const key = keys[r];
+	// 			const val = obj[columns[i]][key];
+	// 			row += ' ' + (val === undefined ? ''.padEnd(colWidths[i]) : ("" + val).padEnd(colWidths[i])) + ' |';
+	// 		} else {
+	// 			row += ' '.repeat(colWidths[i] + 2) + '|';
+	// 		}
+	// 	});
+	// 	console.log(row);
+	// }
+}
 export function String$matches(regex) {
 	return this.match(regex) !== null
 }

@@ -126,6 +126,7 @@ export class PrimitiveType extends Type {
    static Number = new PrimitiveType("Number");
    static String = new PrimitiveType("String");
    static Boolean = new PrimitiveType("Boolean");
+   static Ok = new PrimitiveType("Ok");
    static Type = new PrimitiveType("Type");
 
    name: string;

@@ -88,6 +88,9 @@ export class TypeTranslator {
             if ((node as Identifier).value === "Number") {
                return PrimitiveType.Number;
             }
+            if ((node as Identifier).value === "Ok") {
+               return PrimitiveType.Ok;
+            }
 
             return new NamedType((node as Identifier).value);
          case "Literal":
@@ -223,9 +226,9 @@ export class TypeTranslator {
             if (!(node instanceof TypeDef)) {
                return new Type();
             }
-            if (node.fieldDefs.length === 0) {
-               return new MarkerType();
-            }
+            // if (node.fieldDefs.length === 0) {
+            //    return new MarkerType();
+            // }
             const veryInnerScope = scope.innerScopeOf(node, true);
             const fieldTypes = node.fieldDefs.map((f) => {
                let fieldType: Type;
@@ -267,12 +270,10 @@ export class TypeTranslator {
             } else if (node.operator === "&") {
                return new IntersectionType(left, right);
             }
-            this.context.errors.add(
-               `Type operation '${node.operator}' not supported`,
-               undefined,
-               undefined,
-               node.position
-            );
+            this.context.logs.error({
+               message: `Type operation '${node.operator}' not supported`,
+               position: node.position,
+            });
             return Any;
          case "Optional":
             if (!(node instanceof Optional)) {
@@ -364,16 +365,14 @@ export class TypeTranslator {
          if (explicitType && inferredType) {
             // Check if inferred extends explicit
             if (!inferredType.isAssignableTo(explicitType, scope)) {
-               this.context.errors.add(
-                  `Default value of parameter ${
+               this.context.logs.error({
+                  message: `Default value of parameter ${
                      node.lhs instanceof Identifier ? node.lhs.value : "term"
                   }`,
-                  explicitType,
-                  inferredType,
-                  node.position,
-                  undefined,
-                  new Error()
-               );
+                  expectedType: explicitType,
+                  insertedType: inferredType,
+                  position: node.position,
+               });
             }
             type = explicitType;
          } else if (explicitType) {

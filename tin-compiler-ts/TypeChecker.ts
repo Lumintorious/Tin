@@ -25,7 +25,7 @@ import {
 import { Scope, TypePhaseContext, GenericTypeMap } from "./Scope";
 import { RoundValueToValueLambda, TypeDef, RefinedDef, Tuple } from "./Parser";
 import { RecursiveResolutionOptions } from "./Scope";
-import { UncheckedType, MutableType } from "./Types";
+import { UncheckedType, MutableType, PrimitiveType } from "./Types";
 import { Identifier, TypeCheck } from "./Parser";
 import {
    AppliedGenericType,
@@ -118,15 +118,13 @@ export class TypeChecker {
             scope.remove(symbol.name);
          }
          if (!symbol.isMutable && !(symbol.typeSymbol instanceof MutableType)) {
-            this.context.errors.add(
-               `Setting an immutable value '${node.lhs.value}'`,
-               undefined,
-               undefined,
-               node.position,
-               `Either declare '${
+            this.context.logs.error({
+               message: `Setting an immutable value '${node.lhs.value}'`,
+               position: node.position,
+               hint: `Either declare '${
                   node.lhs.value
-               }' as a variable type '~${symbol.typeSymbol.toString()}', or don't mutate it here.`
-            );
+               }' as a variable type '~${symbol.typeSymbol.toString()}', or don't mutate it here.`,
+            });
          }
       } else if (node.lhs instanceof Select) {
          if (!node.lhs.isBeingTreatedAsIdentifier) {
@@ -142,15 +140,13 @@ export class TypeChecker {
                !fieldType?.mutable &&
                !(fieldType?.type instanceof MutableType)
             ) {
-               this.context.errors.add(
-                  `Setting an immutable field '${node.lhs.show()}'`,
-                  undefined,
-                  undefined,
-                  node.position,
-                  `Either declare '${
+               this.context.logs.error({
+                  message: `Setting an immutable field '${node.lhs.show()}'`,
+                  position: node.position,
+                  hint: `Either declare '${
                      fieldType?.name
-                  }' as a variable type '~${fieldType?.toString()}', or don't mutate it here.`
-               );
+                  }' as a variable type '~${fieldType?.toString()}', or don't mutate it here.`,
+               });
             }
          }
       }
@@ -164,12 +160,12 @@ export class TypeChecker {
             }
          }
 
-         this.context.errors.add(
-            `Setting of variable ${node.lhs.show()}`,
-            leftType,
-            rightType,
-            node.position
-         );
+         this.context.logs.error({
+            message: `Setting of variable ${node.lhs.show()}`,
+            expectedType: leftType,
+            insertedType: rightType,
+            position: node.position,
+         });
       }
    }
 
@@ -216,6 +212,18 @@ export class TypeChecker {
          if (node.falseBranch) {
             this.typeCheck(node.falseBranch, falseScope);
          }
+         const conditionType = this.context.inferencer.infer(
+            node.condition,
+            innerScope
+         );
+         if (!conditionType.isAssignableTo(PrimitiveType.Boolean, innerScope)) {
+            this.context.logs.error({
+               message: "Condition of if statement: " + node.condition.show(),
+               expectedType: PrimitiveType.Boolean,
+               insertedType: conditionType,
+               position: node.condition.position,
+            });
+         }
       } else if (node instanceof WhileLoop) {
          const innerScope = scope.innerScopeOf(node);
          this.typeCheck(node.condition, innerScope);
@@ -239,12 +247,12 @@ export class TypeChecker {
                      innerScope
                   );
                   if (!inferredType.isAssignableTo(expectedType, innerScope)) {
-                     this.context.errors.add(
-                        "Default value of field " + fd.name,
+                     this.context.logs.error({
+                        message: "Default value of field " + fd.name,
                         expectedType,
-                        inferredType,
-                        fd.position
-                     );
+                        insertedType: inferredType,
+                        position: fd.position,
+                     });
                   }
                   const commonType = this.context.inferencer.deduceCommonType(
                      expectedType,
@@ -266,19 +274,19 @@ export class TypeChecker {
             if (!fd.mutable && finalType instanceof StructType) {
                const mutableSubFields = finalType.getMutableFields();
                if (mutableSubFields.length > 0) {
-                  this.context.errors.add(
-                     `Invariable field '${fd.name}' of '${
-                        node.name
-                     }' cannot hold a variable value '${finalType.toString()}' with variable fields ${mutableSubFields
-                        .map((f) => "'" + f.name + "'")
-                        .join(", ")}`,
-                     undefined,
-                     finalType,
-                     fd.position,
-                     "Either declare the variability by specifying the field's type as '~" +
-                        finalType.toString() +
-                        "' or don't use a variable type in this field"
-                  );
+                  //   this.context.logs.warn({
+                  //      message: `Invariable field '${fd.name}' of '${
+                  //         node.name
+                  //      }' shouldn't hold a variable value '${finalType.toString()}' with variable fields ${mutableSubFields
+                  //         .map((f) => "'" + f.name + "'")
+                  //         .join(", ")}`,
+                  //      insertedType: finalType,
+                  //      position: fd.position,
+                  //      hint:
+                  //         "Either declare the variability by specifying the field's type as '~" +
+                  //         finalType.toString() +
+                  //         "' or don't use a variable type in this field",
+                  //   });
                }
             }
             if (
@@ -326,20 +334,17 @@ export class TypeChecker {
          this.typeCheck(node.lambda, scope);
       } else if (node instanceof Tuple) {
          if (node.isTypeLevel && options.assignedName !== undefined) {
-            this.context.errors.add(
-               "Cmon man... just declare a custom struct instead of naming a tuple",
-               undefined,
-               undefined,
-               node.position
-            );
+            this.context.logs.error({
+               message:
+                  "Cmon man... just declare a custom struct instead of naming a tuple",
+               position: node.position,
+            });
          }
          if (node.expressions.length > 3) {
-            this.context.errors.add(
-               "Tuples can only have 2 or 3 elements",
-               undefined,
-               undefined,
-               node.position
-            );
+            this.context.logs.error({
+               message: "Tuples can only have 2 or 3 elements",
+               position: node.position,
+            });
          }
          node.expressions.forEach((el) => this.typeCheck(el, scope));
       } else if (node instanceof AppliedKeyword) {
@@ -380,14 +385,12 @@ export class TypeChecker {
             node.translatedType as RoundValueToValueLambdaType
          ).params) {
             if (param.defaultValue) {
-               this.context.errors.add(
-                  `Param ${
+               this.context.logs.error({
+                  message: `Param ${
                      param.name ?? i++
                   } of type ${node.show()} cannot have a default value`,
-                  undefined,
-                  undefined,
-                  node.position
-               );
+                  position: node.position,
+               });
             }
          }
       }
@@ -398,25 +401,21 @@ export class TypeChecker {
             innerScope
          );
          if (!returnType.isAssignableTo(explicitType, scope)) {
-            this.context.errors.add(
-               `Return type of lambda`,
-               explicitType,
-               returnType,
-               node.position,
-               undefined,
-               new Error()
-            );
+            this.context.logs.error({
+               message: `Return type of lambda`,
+               expectedType: explicitType,
+               insertedType: returnType,
+               position: node.position,
+            });
          }
       }
       if (returnType instanceof UncheckedType) {
-         this.context.errors.add(
-            `Could not infer return type of recursive lambda ${node.show()}`,
-            undefined,
-            returnType,
-            node.position,
-            "Specify the return type explicitly '(...): <Type> -> ...'",
-            new Error()
-         );
+         this.context.logs.error({
+            message: `Could not infer return type of recursive lambda ${node.show()}`,
+            insertedType: returnType,
+            position: node.position,
+            hint: "Specify the return type explicitly '(...): <Type> -> ...'",
+         });
       }
 
       node.params.forEach((p) => this.typeCheck(p, innerScope));
@@ -514,14 +513,15 @@ export class TypeChecker {
             hitDefault = true;
          }
          if (hitNamed && !param.name) {
-            this.context.errors.add(
-               "Cannot define nameless parameters after named ones "
-            );
+            this.context.logs.error({
+               message: "Cannot define nameless parameters after named ones ",
+            });
          }
          if (hitDefault && !param.defaultValue) {
-            this.context.errors.add(
-               "Cannot define parameter without default value, after ones with default values"
-            );
+            this.context.logs.error({
+               message:
+                  "Cannot define parameter without default value, after ones with default values",
+            });
          }
       }
    }
@@ -623,12 +623,12 @@ export class TypeChecker {
             paramType.extendedType &&
             !gottenParamType.isAssignableTo(paramType.extendedType, scope)
          ) {
-            this.context.errors.add(
-               `Parameter Type ${paramType.name} of Apply`,
-               paramType.extendedType,
-               gottenParamType,
-               position
-            );
+            this.context.logs.error({
+               message: `Parameter Type ${paramType.name} of Apply`,
+               expectedType: paramType.extendedType,
+               insertedType: gottenParamType,
+               position,
+            });
          }
       }
    }
@@ -662,7 +662,7 @@ export class TypeChecker {
       ) {
          const applyArgs = apply.getTypeArgs();
          if (!applyArgs) {
-            this.context.errors.add("Unchecked square apply");
+            this.context.logs.error({ message: "Unchecked square apply" });
             return;
          }
 
@@ -717,18 +717,16 @@ export class TypeChecker {
                apply.args.forEach((p, i) => {
                   const gottenType = this.context.inferencer.infer(p[1], scope);
                   if (!gottenType.isAssignableTo(expectedType, scope)) {
-                     this.context.errors.add(
-                        `Parameter ${i} of varargs ${
+                     this.context.logs.error({
+                        message: `Parameter ${i} of varargs ${
                            apply.callee instanceof Identifier
                               ? apply.callee.value
                               : "Anonymous function"
                         }`,
                         expectedType,
-                        gottenType,
-                        apply.position,
-                        undefined,
-                        new Error()
-                     );
+                        insertedType: gottenType,
+                        position: apply.position,
+                     });
                   }
                });
                apply.takesVarargs = true;
@@ -1041,19 +1039,20 @@ export class TypeChecker {
          checkedThis = true;
          if (!options.firstPartOfIntersection) {
             if (!term.bakedInThis) {
-               this.context.errors.add(
-                  "Expected left-side of intersection (&) '" +
+               this.context.logs.error({
+                  message:
+                     "Expected left-side of intersection (&) '" +
                      (term.callee instanceof Identifier
                         ? term.callee.value
                         : "Anonymous function") +
                      "'",
-                  thisParam.type,
-                  undefined,
-                  term.position,
-                  `You must apply it like ${
+                  expectedType: thisParam.type,
+                  insertedType: options.firstPartOfIntersection,
+                  position: term.position,
+                  hint: `You must apply it like ${
                      thisParam.type
-                  } { ... } & ${term.callee.show()} { ... }`
-               );
+                  } { ... } & ${term.callee.show()} { ... }`,
+               });
             }
          } else {
             if (
@@ -1063,19 +1062,20 @@ export class TypeChecker {
                ) &&
                !term.bakedInThis
             ) {
-               this.context.errors.add(
-                  "Expected left-side of intersection (&) '" +
+               this.context.logs.error({
+                  message:
+                     "Expected left-side of intersection (&) '" +
                      (term.callee instanceof Identifier
                         ? term.callee.value
                         : "Anonymous function") +
                      "'",
-                  thisParam.type,
-                  options.firstPartOfIntersection,
-                  term.position,
-                  `You must apply it like ${
+                  expectedType: thisParam.type,
+                  insertedType: options.firstPartOfIntersection,
+                  position: term.position,
+                  hint: `You must apply it like ${
                      thisParam.type
-                  } { ... } & ${term.callee.show()} { ... }`
-               );
+                  } { ... } & ${term.callee.show()} { ... }`,
+               });
             } else {
             }
          }
@@ -1098,22 +1098,24 @@ export class TypeChecker {
       if (hasThisParamIncrement === 1 && !checkedThis) {
          const expectedThisType = expectedParams[0].type;
          if (!(term.callee instanceof Select)) {
-            this.context.errors.add(
-               "Method with 'this' as a parameter must be called on the field of a struct",
-               expectedThisType
-            );
+            this.context.logs.error({
+               message:
+                  "Method with 'this' as a parameter must be called on the field of a struct",
+               expectedType: expectedThisType,
+               position: term.position,
+            });
          } else {
             const calleeType = this.context.inferencer.infer(
                term.callee.owner,
                scope
             );
             if (!calleeType.isAssignableTo(expectedThisType, scope)) {
-               this.context.errors.add(
-                  `Call target ('self') of lambda ${term.callee.field}`,
-                  expectedThisType,
-                  calleeType,
-                  term.position
-               );
+               this.context.logs.error({
+                  message: `Call target ('self') of lambda ${term.callee.field}`,
+                  expectedType: expectedThisType,
+                  insertedType: calleeType,
+                  position: term.position,
+               });
             }
          }
          term.isFirstParamThis = true;
@@ -1127,20 +1129,18 @@ export class TypeChecker {
             namedPhase = true; // Streak of unnamed parameter ended
          }
          if (namedPhase && !applyArgName) {
-            this.context.errors.add(
-               "Cannot use unnamed parameters after named ones at " + termName,
-               undefined,
-               undefined,
-               applyArg[1].position
-            );
+            this.context.logs.error({
+               message:
+                  "Cannot use unnamed parameters after named ones at " +
+                  termName,
+               position: applyArg[1].position,
+            });
          }
          if (applyArgName && fulfilledNamedParams.has(applyArgName)) {
-            this.context.errors.add(
-               `Parameter ${applyArgName} of ${termName} was already fulfilled perviously, without an explicit name`,
-               undefined,
-               undefined,
-               applyArg[1].position
-            );
+            this.context.logs.error({
+               message: `Parameter ${applyArgName} of ${termName} was already fulfilled perviously, without an explicit name`,
+               position: applyArg[1].position,
+            });
             continue;
          }
 
@@ -1148,15 +1148,13 @@ export class TypeChecker {
             ? expectedParams.find((p) => p.name === applyArgName)
             : expectedParams[i + hasThisParamIncrement];
          if (!expectedParam) {
-            this.context.errors.add(
-               "Applying too many parameters to lambda " + termName,
-               undefined,
-               undefined,
-               term.position,
-               `Expected ${expectedParams.length} params, got ${
+            this.context.logs.error({
+               message: "Applying too many parameters to lambda " + termName,
+               position: term.position,
+               hint: `Expected ${expectedParams.length} params, got ${
                   i + hasThisParamIncrement
-               }.`
-            );
+               }.`,
+            });
             return [];
          }
          let appliedType;
@@ -1173,12 +1171,14 @@ export class TypeChecker {
          }
          const expectedType = expectedParam.type;
          if (!appliedType.isAssignableTo(expectedType, scope)) {
-            this.context.errors.add(
-               `Parameter '${expectedParam.name || `[${i}]`}' of '${termName}'`,
+            this.context.logs.error({
+               message: `Parameter '${
+                  expectedParam.name || `[${i}]`
+               }' of '${termName}'`,
                expectedType,
-               appliedType,
-               applyArg[1].position
-            );
+               insertedType: appliedType,
+               position: applyArg[1].position,
+            });
             continue;
          }
          // Else it's ok
@@ -1212,84 +1212,89 @@ export class TypeChecker {
       }
 
       if (unfulfilledExpectedParams.length > 0 && !areAllOptional) {
-         this.context.errors.add(
-            `Lambda ${termName} didn't have all of its non-optional parameters fulfilled, ${unfulfilledExpectedParams.length} params unfulfilled`,
-            undefined,
-            undefined,
-            term.position
-         );
+         this.context.logs.error({
+            message: `Lambda ${termName} didn't have all of its non-optional parameters fulfilled, ${unfulfilledExpectedParams.length} params unfulfilled`,
+            position: term.position,
+         });
       }
 
       return paramOrder;
    }
 }
 
-export class TypeErrorList {
-   errors: {
-      message: string;
-      expectedType?: Type;
-      insertedType?: Type;
-      position?: TokenPos;
-      hint?: string;
-      errorForStack?: Error;
-   }[];
+type CompilerMessage = {
+   message: string;
+   expectedType?: Type;
+   insertedType?: Type;
+   position?: TokenPos;
+   hint?: string;
+   errorForStack?: Error;
+};
+
+export class CompilerLogs {
+   errors: CompilerMessage[];
+   warnings: CompilerMessage[];
    context: TypePhaseContext;
    constructor(context: TypePhaseContext) {
       this.context = context;
       this.errors = [];
+      this.warnings = [];
    }
 
-   add(
-      message: string,
-      expectedType?: Type,
-      insertedType?: Type,
-      position?: TokenPos,
-      hint?: string,
-      errorForStack?: Error
-   ) {
-      for (let error of this.errors) {
+   private add(list: CompilerMessage[], inputMessage: CompilerMessage) {
+      for (let message of list) {
          if (
-            error.message === message &&
-            error.hint === hint &&
-            (expectedType === undefined ||
-               expectedType.toString() === error.expectedType?.toString()) &&
-            (insertedType === undefined ||
-               insertedType.toString() === error.insertedType?.toString()) &&
-            (position === undefined ||
-               position.start.toString() === error.position?.start.toString())
+            message.message === inputMessage.message &&
+            message.hint === inputMessage.hint &&
+            (inputMessage.expectedType === undefined ||
+               inputMessage.expectedType.toString() ===
+                  message.expectedType?.toString()) &&
+            (inputMessage.insertedType === undefined ||
+               inputMessage.insertedType.toString() ===
+                  message.insertedType?.toString()) &&
+            (inputMessage.position === undefined ||
+               inputMessage.position.start.toString() ===
+                  message.position?.start.toString())
          ) {
             return;
          }
       }
-      this.errors.push({
-         message,
-         expectedType,
-         insertedType,
-         position,
-         hint,
-         errorForStack,
-      });
+      list.push(inputMessage);
+   }
+
+   error(message: CompilerMessage) {
+      this.add(this.errors, message);
+   }
+
+   warn(message: CompilerMessage) {
+      this.add(this.warnings, message);
+   }
+
+   getMessages(label: string, list: CompilerMessage[]) {
+      if (list.length > 0) {
+         const message = list
+            .map(
+               (e) =>
+                  `[${label}] ${e.message} @ ${this.context.fileName}:${
+                     e.position?.start.line
+                  }:${e.position?.start.column}${
+                     e.expectedType
+                        ? `\n       > Expected '${e.expectedType?.toString()}'`
+                        : ""
+                  }${
+                     e.insertedType ? `\n       > Got '${e.insertedType}'` : ""
+                  }${e.hint ? `\n       > ${e.hint}` : ""}`
+            )
+            .join("\n");
+         return message;
+      }
    }
 
    getErrors(showStack = true) {
-      if (this.errors.length > 0) {
-         const message =
-            "There are type errors:\n" +
-            this.errors
-               .map(
-                  (e) =>
-                     `- ${e.message} @ ${this.context.fileName}:${
-                        e.position?.start.line
-                     }:${e.position?.start.column}${
-                        e.expectedType
-                           ? `\n  > Expected '${e.expectedType?.toString()}'`
-                           : ""
-                     }${e.insertedType ? `\n  > Got '${e.insertedType}'` : ""}${
-                        e.hint ? `\n  > ${e.hint}` : ""
-                     }`
-               )
-               .join("\n");
-         return message;
-      }
+      return this.getMessages("ERROR", this.errors);
+   }
+
+   getWarnings(showStack = true) {
+      return this.getMessages("WARN", this.warnings);
    }
 }

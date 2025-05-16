@@ -1,9 +1,10 @@
 import collections/Iterable
+# import Http
+import lib/File
 
-Address = struct:
-	street: var String
-	number: Number
+newFile = File.get("RULES.md")
 
-Person = struct:
-	name: String
-	address: Address
+main = () ~>
+	if newFile :: RegularFile,
+		print(ok)
+

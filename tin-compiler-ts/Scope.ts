@@ -9,7 +9,7 @@ import {
    Term,
 } from "./Parser";
 import { TypeBuilder } from "./TypeBuilder";
-import { TypeChecker, TypeErrorList } from "./TypeChecker";
+import { TypeChecker, CompilerLogs } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
 import { LiteralType } from "./Types";
@@ -106,6 +106,7 @@ export class Scope {
       new CodePoint(0, 0, 0),
       new CodePoint(0, 0, 0)
    );
+   async: boolean = false;
    constructor(name: string, parent?: Scope) {
       this.name = name;
       this.parent = parent;
@@ -149,6 +150,15 @@ export class Scope {
       this.childrenByAst.forEach((v) => {
          v.setIteration(iteration);
       });
+   }
+
+   setAsync(async: boolean) {
+      this.async = async;
+      return this;
+   }
+
+   isUnderAsync(): boolean {
+      return this.async || this.parent?.isUnderAsync() === true;
    }
 
    innerScopeOf(astNode: AstNode, canCreate: boolean = false): Scope {
@@ -738,7 +748,7 @@ export class TypePhaseContext {
    inferencer: TypeInferencer;
    translator: TypeTranslator;
    checker: TypeChecker;
-   errors: TypeErrorList;
+   logs: CompilerLogs;
    flags: CompilerFlags;
    run: number;
    constructor(
@@ -755,7 +765,7 @@ export class TypePhaseContext {
       this.inferencer = new TypeInferencer(this);
       this.translator = new TypeTranslator(this);
       this.checker = new TypeChecker(this);
-      this.errors = new TypeErrorList(this);
+      this.logs = new CompilerLogs(this);
       this.flags = new CompilerFlags();
       this.run = 0;
       existingFileScopes.forEach((s) => {
