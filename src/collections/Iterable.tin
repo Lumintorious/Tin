@@ -1,12 +1,3 @@
-Iterator = [T] => struct:
-	next: () -> T?
-
-AsyncIterator = [T] => struct:
-	next: () ~> T?
-
-Iterable = [T] => struct:
-	makeIterator: () -> Iterator[T]
-
 Accessible = [T] => struct:
 	at: (index: Number) -> T?
 
@@ -88,6 +79,12 @@ Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 			fn(prev)
 		else
 			nothing
+	)
+
+Iterable.map = [T, X] -> (self: Iterable[T], fn: (T) -> X): Iterable[X] ->
+	Iterable[X](() ->
+		oldIterator = self.makeIterator()
+		return oldIterator.mapped(fn)
 	)
 
 Iterable.into = [T, F] -> (self: Iterable[T], factory: (Iterable[T]) -> F[T]) ->
@@ -252,3 +249,7 @@ InterpolatedString.makeString = (self: InterpolatedString) ->
 			"{str}{elem}"
 	)
 	
+Iterable.printAll = [T] -> (self: Iterable[T]) ->
+	self.forEach((elem: T) ->
+		print(elem)
+	)

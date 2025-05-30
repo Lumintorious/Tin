@@ -8,7 +8,7 @@ RegularFile = struct:
 	size: Number
 
 Directory = struct:
-	children: (includeAccess: Boolean?) ~> Seq[File] | Error
+	children: () ~> Seq[File] | Error
 
 FilePermissions = struct:
 	canRead: Boolean
@@ -25,7 +25,7 @@ FileAlreadyExists = Error & struct
 FileCreateError = Error & (FileNotFound | PermissionDenied)
 FileGetError = Error & (FileAlreadyExists | PermissionDenied)
 
-File.get: (path: String, includeAccess = false) ~> File & FilePermissions | FileGetError = external
+File.get: (path: String) ~> File & FilePermissions | FileGetError = external
 external "
 	import fsA from 'fs/promises';
 	import pth from 'path';
@@ -54,17 +54,17 @@ external "
 	}
 
 
-	export async function File$get(path, includeAccess) \{
+	export async function File$get(path) \{
 		try \{
 			const realPath = pth.resolve(path)
 			const file = await fsA.stat(realPath)
 			let appendage;
 			if (file.isDirectory()) \{
 				appendage = Directory(
-					(\{_: async (includeAccessC) => \{
+					(\{_: async () => \{
 						const arr = [];
 						for (let childPath of (await fsA.readdir(realPath))) \{
-							arr.push(await File$get(pth.resolve(realPath, childPath), includeAccessC))
+							arr.push(await File$get(pth.resolve(realPath, childPath)))
 						}
 						return Seq(File)(arr)
 				}})
@@ -73,10 +73,8 @@ external "
 				appendage = RegularFile(\{_: file.size})
 			}
 			let result = File(\{_:realPath}, \{_:file.birthtime.getTime()});
-			if (includeAccess) \{
-				const permissions = await _getAccess(realPath);
-				result = result._and(permissions)
-			}
+			const permissions = await _getAccess(realPath);
+			result = result._and(permissions)
 			return result._and(appendage);
 		} catch (e) \{
 			return TinErr_(\{_:e.message})._and(e.message.startsWith('ENOENT') ? FileNotFound() : PermissionDenied());
@@ -114,5 +112,15 @@ external "
 			}
 			return value;
 		})});
+	}
+"
+
+File.renamed: (self: File, newName: String) ~> File = external
+external "
+	export async function File$renamed(newName) \{
+		const oldPath = this[File._s].path._;
+		const path = pth.join(pth.dirname(oldPath), newName)
+		await fsA.rename(oldPath, path)
+		return _copy(this, \{path: path})
 	}
 "

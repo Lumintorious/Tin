@@ -27,7 +27,7 @@ Request = struct:
 	method: HttpMethod
 	url: Url
 	headers: Headers
-	body: ByteBuffer
+	body: String
 
 Response = struct:
 	status: Number
@@ -42,7 +42,7 @@ Url.new = (url: String, port: Number = 80, params: UrlParams = Array.empty[(Stri
 
 Url.fromString: (String) -> Url | Error = external
 
-Request.new = (method: HttpMethod, urlTry: Url | Error, headers: Headers = Array.empty[(String, String)], body: ByteBuffer = Array.empty[Byte]) ->
+Request.new = (method: HttpMethod, urlTry: Url | Error, headers: Headers = Array.empty[(String, String)], body: String = " ") ->
 	Request { method, urlTry?, headers, body }
 
 external "
@@ -87,3 +87,47 @@ export async function Http$send(request) \{
 Http.send: (request: Request | Error) ~> Response | Error = external
 
 Response.isOk = (self: Response) -> self.status == 200
+
+HttpServer = struct:
+	port: Port
+	listen: () -> Ok | Error
+
+HttpServer.live: (port: Port, handle: (Request) -> Response | Error) -> HttpServer = external
+external "
+import http from 'http';
+
+async function _readBody(req) \{
+  return await new Promise((resolve, reject) => \{
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
+  });
+}
+
+export function HttpServer$live(port, handle) \{
+	
+	const server = http.createServer(async (req, res) => \{
+		const tinReq = Request(
+			\{_: req.method},
+			\{_: req.url},
+			\{_: Seq(Tuple2(String, String))(Object.entries(req.headers).map(([k, v]) => Tuple2(String, String)(\{_: k\}, \{_: v\})))},
+			\{_: await _readBody(req)}
+		);
+		const tinRes = handle(tinReq)
+		tinRes[Response._s].headers._[Seq._s]._rawArray.forEach(elem => \{
+			res.setHeader(elem[Tuple2._s].left._, elem[Tuple2._s].right._)
+		});
+		res.statusCode = tinRes[Response._s].status._;
+		res.end(tinRes[Response._s].body._);
+	});
+
+	function listen() \{
+		server.listen(port, () => \{
+			console.log('Server running at http://localhost:' + port);
+		});
+		return ok;
+	}
+	return HttpServer(\{_: port}, \{_: listen\});
+}
+"

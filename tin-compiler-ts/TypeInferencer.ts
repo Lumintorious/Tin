@@ -14,7 +14,7 @@ import {
    Tuple,
 } from "./Parser";
 import { UnionType } from "./Types";
-import { GenericTypeMap } from "./Scope";
+import { GenericTypeMap, walkTerms } from "./Scope";
 import {
    AppliedKeyword,
    Assignment,
@@ -522,8 +522,11 @@ export class TypeInferencer {
                   node.id = ++Term.currentNumber;
                   node.callee.id = ++Term.currentNumber;
                   node.autoFilledSquareTypeParams = mappedParams;
-                  this.context.builder.build(node.callee, scope);
+                  walkTerms(node, scope, (node, scope) => {
+                     node.id = ++Term.currentNumber;
+                  });
                   this.context.builder.build(node, scope);
+                  this.context.builder.build(node.callee, scope);
                }
             }
          } catch (e) {}
@@ -569,6 +572,7 @@ export class TypeInferencer {
                   node.bakedInThis = owner;
                   this.context.builder.build(node.callee, scope);
                   this.context.builder.build(node, scope);
+                  this.context.builder.build(node.bakedInThis, scope);
                }
             }
          } catch (e) {}
@@ -762,6 +766,10 @@ export class TypeInferencer {
       let isOwnerMutable = false;
       let ownerType: Type;
       ownerType = this.infer(node.owner, scope);
+
+      if (node.field === "Type") {
+         return this.getTypeType(ownerType, scope);
+      }
       // }
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
@@ -1157,7 +1165,17 @@ export class TypeInferencer {
       return new LiteralType(String(node.value), type);
    }
 
-   getTypeType(type: Type, scope: Scope): NamedType {
+   getTypeType(type: Type, scope: Scope): Type {
+      const types = this.getTypeTypeRaw(type, scope);
+
+      return new IntersectionType(
+         new NamedType("Type"),
+         types,
+         true
+      ).simplified();
+   }
+
+   getTypeTypeRaw(type: Type, scope: Scope): Type {
       if (!scope.hasTypeSymbol("Struct")) {
          return new NamedType("Type");
       }
@@ -1169,6 +1187,8 @@ export class TypeInferencer {
          return new NamedType("Union");
       } else if (type instanceof IntersectionType) {
          return new NamedType("Intersection");
+      } else if (type instanceof RoundValueToValueLambdaType) {
+         return new NamedType("Lambda");
       }
       if (type instanceof RefinedType) {
          return new NamedType("Refinement");
@@ -1286,7 +1306,6 @@ export class TypeInferencer {
          leftType.isAssignableTo(PrimitiveType.Number, scope) &&
          rightType.isAssignableTo(PrimitiveType.Number, scope)
       ) {
-         console.log(leftType + " - " + rightType);
          if (
             this.DEFINED_OPERATIONS.NumberNumberNumber.includes(node.operator)
          ) {

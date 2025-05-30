@@ -2,7 +2,9 @@ export const __tin_varargs_marker = Symbol();
 
 export const TIN_TYPE_CACHE = new Map()
 export const _JsArr = globalThis.Array;
-process.chdir('../');
+if (!globalThis.window) {
+	process.chdir('../');
+}
 
 /** LEGEND
 	Type Constructors:
@@ -56,6 +58,7 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 	descriptor._s = symbol;
 	const constructor = (...args) => {
 		const result = constructorRaw(...args)
+		const _clojure = result._clojure ? { ...result._clojure } : {};
 		for (let key of Reflect.ownKeys(result)) {
 			if (typeof key === "string" && key.startsWith("_")) continue;
 			if (result[key] === undefined) {
@@ -63,9 +66,11 @@ export function _S(symbol, constructorRaw, descriptor, proto) {
 			} else if (typeof result[key] === 'object' && !("_" in result[key])) {
 				result[key] = { _: result[key] }
 			}
+			// if (result[key]?._ && typeof result[key]._ === 'function' && "_clojure" in result[key]._) {
+			// 	_clojure[result[key]._cl] = result[key]._;
+			// }
 		}
 		Object.setPrototypeOf(result, proto)
-		const _clojure = result._clojure ? { ...result._clojure } : {};
 		delete result._clojure
 		return {
 			_clojure,
@@ -192,10 +197,27 @@ export function Type$get(obj) {
 	return result;
 }
 
-export function _F(typeId, lambda, type) {
+export function _F_old(typeId, lambda, type) {
 	lambda._type = type;
 	lambda._typeId = typeId;
 	lambda._d = type
+	return lambda;
+}
+
+export function _F(types, lambda) {
+	lambda._ta = types.map(t => t._s ? t._s : t);
+	const paramTypes = types.map(([name, type]) => {
+		return Field({ _: name }, { _: type._d ?? type })
+	});
+	const returnType = types[types.length - 1][1];
+	const __is_child = (obj) => {
+		if (typeof obj !== "function") {
+			return false;
+		}
+
+		return true;
+	}
+	lambda._type = Type({ _: "Lambda" }, { _: __is_child }, { _: __is_child })._and(Lambda({ _: Seq(Type)(paramTypes) }, { _: returnType._d ?? returnType }))
 	return lambda;
 }
 
@@ -248,9 +270,13 @@ export const _A = function (obj1, obj2, isReflection = false) {
 					_: (obj) => {
 						return obj1Descriptor[Type._s].check._(obj) && obj2Descriptor[Type._s].check._(obj)
 					}
-				})._and(
-					lazy(() => Intersection({ _: obj1Descriptor }, { _: obj2Descriptor }))
+				})
+
+			if (!isReflection) {
+				descriptor = descriptor._and(
+					Intersection({ _: obj1Descriptor }, { _: obj2Descriptor })
 				)
+			}
 		}
 
 		const intersection = (...args) => {
@@ -275,8 +301,8 @@ export const _A = function (obj1, obj2, isReflection = false) {
 			return obj1.__is_child(obj) && obj2.__is_child(obj)
 		}
 
-		const inner1IntersectionMap = new WeakMap();
-		const inner2IntersectionMap = new WeakMap();
+		const inner1IntersectionMap = new Map();
+		const inner2IntersectionMap = new Map();
 		inner1IntersectionMap.set(obj2._s, intersection)
 		inner2IntersectionMap.set(obj1._s, intersection)
 		_INTERSECTION_MAP.set(obj1._s, inner1IntersectionMap)
@@ -329,7 +355,9 @@ export const _A = function (obj1, obj2, isReflection = false) {
 		newClojure = { ...newClojure, ...obj2._clojure }
 	}
 	newObj._clojure = newClojure;
-	newObj._type = _A(obj1._type, obj2._type)
+	if (!isReflection && !obj1.isReflectiveType && !obj2.isReflectiveType && !obj2[Intersection._s]) {
+		newObj._type = _A(obj1._type, obj2._type)
+	}
 	return newObj
 }
 
@@ -466,7 +494,7 @@ export var Seq = (function () {
 	const result = _Q(_sqSym, (T) => {
 		const _sqSym_args = [T._s]
 
-		return _S(_Q_share(_sqSym, _sqSym_args), (args) => args[__tin_varargs_marker] ? args : ({
+		const tpe = _S(_Q_share(_sqSym, _sqSym_args), (args) => args[__tin_varargs_marker] ? args : ({
 			_rawArray: args,
 			length: {
 				_: function () {
@@ -483,18 +511,34 @@ export var Seq = (function () {
 			},
 			and: {
 				_: function (arr) {
-					return Seq(T)([...args, ...arr[Array._s]._rawArray])
+					return Seq$createProperly(T)([...args, ...arr[Seq._s]._rawArray])
 				}
 			},
 			[__tin_varargs_marker]: true
 		}), {}, {})
+
+		return tpe;
 	})
 	return result;
 })()
 
+export var Seq$createProperly = (T) => (args) => {
+	const seq = Seq(T)(args)
+	return seq._and(Iterable(T)({
+		_: () => {
+			let i = 0;
+			return Iterator(T)({
+				_: () => {
+					return seq[Seq._s].at._(i++);
+				}
+			})
+		}
+	}))
+}
+
 export const Array$of = (t) => (args) => args
 export const Array$empty = (t) => Seq(t)([])
-export const Array$and = function (t) { return (function (arr) { return this[Array._s].and._(arr) }) }
+export const Seq$and = function (t) { return (function (arr) { return this[Seq._s].and._(arr) }) }
 Seq._typeId = "Seq"
 
 
@@ -1138,7 +1182,11 @@ export const printRaw = (arg) => {
 }
 
 export const print = (arg) => {
-	console.log(makeStr(arg, true, true))
+	let out = [makeStr(arg, true, true)];
+	if ("document" in globalThis) {
+		out = ansiToConsoleLogArgs(out[0])
+	}
+	console.log(...out)
 }
 
 export const debug = (...args) => {
@@ -1153,6 +1201,64 @@ export const debug = (...args) => {
 				return arg;
 			}
 	}), { depth: null })
+}
+
+function ansiToConsoleLogArgs(ansi) {
+	const ANSI_REGEX = /\x1b\[(\d+)(;\d+)*m/g;
+
+	const stylesMap/* : Record<string, string> */ = {
+		'30': 'color: black',
+		'31': 'color: #FF8888',
+		'32': 'color: #88FF88',
+		'33': 'color: yellow',
+		'34': 'color: #8888FF',
+		'35': 'color: magenta',
+		'36': 'color: cyan',
+		'37': 'color: white',
+		'93': 'color: #FFFF88',
+		'1': 'font-weight: bold',
+		'0': '', // reset
+	};
+
+	let styleStack = [];
+	let parts = [];
+	let styles = [];
+
+	let lastIndex = 0;
+	let match;
+
+	while ((match = ANSI_REGEX.exec(ansi))) {
+		const matchStart = match.index;
+		const matchEnd = ANSI_REGEX.lastIndex;
+		const rawCodes = match[0];
+		const codes = rawCodes.slice(2, -1).split(';');
+
+		// Text before this ANSI code
+		if (matchStart > lastIndex) {
+			parts.push('%c' + ansi.slice(lastIndex, matchStart));
+			styles.push(styleStack.join('; '));
+		}
+
+		// Apply codes
+		if (codes.includes('0')) {
+			styleStack = [];
+		} else {
+			for (const code of codes) {
+				const style = stylesMap[code];
+				if (style) styleStack.push(style);
+			}
+		}
+
+		lastIndex = matchEnd;
+	}
+
+	// Remaining text after last ANSI code
+	if (lastIndex < ansi.length) {
+		parts.push('%c' + ansi.slice(lastIndex));
+		styles.push(styleStack.join('; '));
+	}
+
+	return [parts.join(''), ...styles];
 }
 
 export function clojure(obj) {

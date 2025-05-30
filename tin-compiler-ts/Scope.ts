@@ -3,9 +3,13 @@ import {
    Assignment,
    AstNode,
    BinaryExpression,
+   Block,
    Call,
    Identifier,
+   IfStatement,
+   RoundValueToValueLambda,
    Select,
+   SquareTypeToValueLambda,
    Term,
 } from "./Parser";
 import { TypeBuilder } from "./TypeBuilder";
@@ -200,7 +204,7 @@ export class Scope {
       let str = "";
       let now: Scope | undefined = this;
       while (now !== undefined) {
-         str = now.name + "." + str;
+         str = now.name + "(" + now.id + ")." + str;
          now = now.parent;
       }
       return str.substring(0, str.length - 1);
@@ -689,7 +693,7 @@ export class GenericTypeMap {
             this.map.set(k, v);
             this.order.push([k, v]);
          } else {
-            console.log(`Skipping existing mapping ${k}: ${v}`);
+            // console.error(`Skipping existing mapping ${k}: ${v}`);
          }
       }
 
@@ -712,9 +716,12 @@ export class GenericTypeMap {
 export function walkTerms(
    root: AstNode,
    scope: Scope,
-   fn: (node: AstNode, scope: Scope) => void
+   fn: (node: AstNode, scope: Scope) => void | true
 ) {
-   fn(root, scope);
+   const stopIteration = fn(root, scope);
+   if (stopIteration === true) {
+      return;
+   }
    if (root instanceof BinaryExpression) {
       walkTerms(root.left, scope, fn);
       walkTerms(root.right, scope, fn);
@@ -723,6 +730,30 @@ export function walkTerms(
       root.args.forEach((arg) => walkTerms(arg[1], scope, fn));
    } else if (root instanceof Select) {
       walkTerms(root.owner, scope, fn);
+   } else if (root instanceof Block) {
+      root.statements.forEach((stmt) =>
+         walkTerms(stmt, scope.innerScopeOf(root), fn)
+      );
+   } else if (root instanceof RoundValueToValueLambda) {
+      const innerScope = scope.innerScopeOf(root);
+      walkTerms(root.block, innerScope, fn);
+      root.params.forEach((stmt) => walkTerms(stmt, innerScope, fn));
+   } else if (root instanceof SquareTypeToValueLambda) {
+      const innerScope = scope.innerScopeOf(root);
+      walkTerms(root.block, innerScope, fn);
+      // root.params.forEach((stmt) => walkTerms(stmt, innerScope, fn));
+   } else if (root instanceof IfStatement) {
+      const innerScope = scope.innerScopeOf(root);
+      const trueBranch = innerScope.innerScopeOf(root.trueBranch);
+      walkTerms(root.condition, innerScope, fn);
+      walkTerms(root.trueBranch, trueBranch, fn);
+      if (root.falseBranch) {
+         walkTerms(
+            root.falseBranch,
+            innerScope.innerScopeOf(root.falseBranch),
+            fn
+         );
+      }
    }
 }
 

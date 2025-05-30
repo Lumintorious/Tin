@@ -7,7 +7,7 @@
       },
       {
          "name": "keyword.tin",
-         "match": "\\b(type|info|not|or|and|if|where|var|else|while|copy|refined|return|external|struct|set|import|this|self|unchecked|link|private)\\b"
+         "match": "\\b(if|where|var|else|while|copy|return|external|struct|set|import|self|unchecked|link|private)\\b"
       },
       {
          "name": "constant.tin",
@@ -29,7 +29,7 @@
          }
       },
       {
-         "match": "([\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
+         "match": "([\\@a-z][a-zA-Z0-9_]*)[ ]*(\\?\\(|\\(|\\[|\\?\\[)",
          "name": "entity.name.function.tin",
          "captures": {
             "1": {
@@ -41,7 +41,7 @@
          }
       },
       {
-         "match": "(\\.)([\\@a-z][a-zA-Z0-9_]*)(\\?\\(|\\(|\\[|\\?\\[)",
+         "match": "(\\.)([\\@a-z][a-zA-Z0-9_]*)[ ]*(\\?\\(|\\(|\\[|\\?\\[)",
          "name": "variable.other.property.tin",
          "captures": {
             "1": {

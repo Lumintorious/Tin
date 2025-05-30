@@ -9,7 +9,9 @@ Type = struct:
 	checkIntegrity = (obj: Anything) -> false: Boolean
 	is = (parent: Type) -> false: Boolean
 
-Type@of: (obj: Anything) -> Type = external
+Type.of: (obj: Anything) -> Type = external
+
+Primitive = Type & struct
 
 Field = struct:
 	name: String
@@ -29,11 +31,20 @@ Union = Type & struct:
 	left: Type
 	right: Type
 
-Seq = [T] -> struct:
+Iterator = [T] => struct:
+	next: () -> T?
+
+AsyncIterator = [T] => struct:
+	next: () ~> T?
+
+Iterable = [T] => struct:
+	makeIterator: () -> Iterator[T]
+
+Seq = [T] => Iterable[T] & struct:
 	at: (Number) -> T?
 	length: () -> Number
 
-VSeq = [T] -> struct:
+VSeq = [T] => struct:
 	at: (Number) -> T?
 	put: (Number, T) -> Nothing | Error
 	length: () -> Number
@@ -55,13 +66,13 @@ Refinement = Type & struct:
 	test: (any: Anything) -> Boolean
 
 external "
-export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\"Nothing\", \{_:(n) => n === null || n === undefined\}, \{_:(n) => n === null || n === undefined})));
-export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(Type(\"Never\", \{_:(n) => n === undefined}, \{_:(n) => n === undefined})));
-export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", \{_:(n) => typeof n === \"number\"\}, \{_:(n) => typeof n === \"number\"})));
-export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})));
-export const Boolean = _S(Symbol(\"Boolean\"), (s) => !!s, lazy(Type(\"Boolean\", \{_: (n) => typeof n === \"boolean\"}, \{_:(n) => typeof n === \"boolean\"})));
+export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\"Nothing\", \{_:(n) => n === null || n === undefined\}, \{_:(n) => n === null || n === undefined})))._and(Primitive());
+export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(Type(\"Never\", \{_:(n) => n === undefined}, \{_:(n) => n === undefined})))._and(Primitive());
+export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\"Number\", \{_:(n) => typeof n === \"number\"\}, \{_:(n) => typeof n === \"number\"})))._and(Primitive());
+export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\"String\", \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})))._and(Primitive());
+export const Boolean = _S(Symbol(\"Boolean\"), (s) => !!s, lazy(Type(\"Boolean\", \{_: (n) => typeof n === \"boolean\"}, \{_:(n) => typeof n === \"boolean\"})))._and(Primitive());
 export const ok = Symbol(\"ok\")
-export const Ok = _S(Symbol(\"Ok\"), () => ok, lazy(Type(\"Ok\", \{_: (n) => n === ok}, \{_:(n) => n === ok})));
+export const Ok = _S(Symbol(\"Ok\"), () => ok, lazy(Type(\"Ok\", \{_: (n) => n === ok}, \{_:(n) => n === ok})))._and(Primitive());
 "
 
 Literal = Type & struct:
@@ -75,24 +86,42 @@ print: (Anything) -> Nothing = external
 printRaw: (Anything) -> Nothing = external
 printTable: (Anything) -> Nothing = external
 debug: (Anything) -> Nothing = external
+debugThis: () -> Nothing = external
 clojure: (Anything) -> Nothing = external
 nothing: Nothing = external
 ok: Ok = external
 panic: (message: String) -> Never = external
 Array.of: [T] -> (Seq[T]) -> Seq[T] = external
 Array.empty: [T] -> Seq[T] = external
-Array.and: [T] -> (self: Seq[T], other: Seq[T]) -> Seq[T] = external
+Seq.and: [T] -> (self: Seq[T], other: Seq[T]) -> Seq[T] = external
 toString: (obj: Anything) -> String = external
 listen: [T] -> (v: var T, onChange: (T) -> Nothing) -> Nothing = external
 id = [T] -> (t: T) -> t
 delay: (ms: Number, fn: () -> Nothing) -> Nothing = external
 Console.useFieldNames = var true
 
+Seq.mapSeq: [T, R] -> (self: Seq[T], fn: (T) -> R) -> Seq[R] = external
+external "
+	export function Seq$mapSeq(T, R) \{
+		return function(fn) \{
+			const self = this;
+			const arr = _JsArr(self[Seq._s].length._())
+			for (let i = 0; i < arr.length; i++) \{
+				arr[i] = fn(self[Seq._s].at._(i))
+			\}
+			return Seq$createProperly(R)(
+				arr
+			)
+		\}
+	}
+"
+
+
 Like = [Str] => String where:
 	if Str :: Literal,
 		v = Str.value
 		if v :: String,
-			return self.matches("^'v'$")
+			return self.matches("^{v}$")
 		
 	false
 

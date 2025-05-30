@@ -294,6 +294,12 @@ export class TypeBuilder {
          }
          const deps: Identifier[] = [];
          walkTerms(node.expression, scope, (node, scope) => {
+            if (
+               node instanceof RoundValueToValueLambda ||
+               node instanceof SquareTypeToValueLambda
+            ) {
+               return true;
+            }
             if (node instanceof Identifier && !node.isTypeIdentifier()) {
                const symbol = scope.lookup(node.value);
                if (symbol.typeSymbol instanceof MutableType) {
@@ -816,7 +822,7 @@ export class TypeBuilder {
          }
       }
       let paramTypes: ParamType[] = [];
-      if (!(calleeType as any).pure) {
+      if ((calleeType as any).pure === false) {
          node.callsPure = false;
       }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
@@ -1063,39 +1069,40 @@ export class TypeBuilder {
          shouldConvert = true;
          break;
       }
-
+      return node;
       if (!shouldConvert || !options.assignedName) {
          return node;
       }
-      const block = this.convertToTailrec(
-         node.block,
-         innerScope,
-         options.assignedName,
-         node.params.map((s) =>
-            this.context.translator.translateRoundTypeToTypeLambdaParameter(
-               s,
-               innerScope,
-               {}
-            )
-         ),
-         {}
-      );
-      const newInnerBlock = new Block([
-         new WhileLoop(
-            undefined,
-            new Literal("true", "Boolean"),
-            undefined,
-            block
-         ),
-      ]);
-      this.build(newInnerBlock, innerScope);
-      //   const prevId = node.block.id;
-      const prevType = this.context.inferencer.infer(node.block, innerScope);
-      //   newInnerBlock.id = prevId;
-      newInnerBlock.modify(BAKED_TYPE.as(prevType));
-      node.block = newInnerBlock;
+      //   const block = this.convertToTailrec(
+      //      node.block,
+      //      innerScope,
+      //      options.assignedName,
+      //      node.params.map((s) =>
+      //         this.context.translator.translateRoundTypeToTypeLambdaParameter(
+      //            s,
+      //            innerScope,
+      //            {}
+      //         )
+      //      ),
+      //      {}
+      //   );
+      //   const newInnerBlock = new Block([
+      //      new WhileLoop(
+      //         undefined,
+      //         new Literal("true", "Boolean"),
+      //         undefined,
+      //         block
+      //      ),
+      //   ]);
+      //   this.build(newInnerBlock, innerScope);
+      //   this.build(block, innerScope);
+      //   //   const prevId = node.block.id;
+      //   const prevType = this.context.inferencer.infer(node.block, innerScope);
+      //   //   newInnerBlock.id = prevId;
+      //   newInnerBlock.modify(BAKED_TYPE.as(prevType));
+      //   node.block = newInnerBlock;
 
-      return node;
+      //   return node;
    }
 
    buildRoundValueToValueLambda(
@@ -1447,6 +1454,15 @@ export class TypeBuilder {
             ) {
                symbolToDeclare.name = node.lhs.value;
                symbolToDeclare.returnType.name = node.lhs.value;
+            }
+            if (
+               symbolToDeclare instanceof SquareTypeToTypeLambdaType &&
+               symbolToDeclare.returnType instanceof IntersectionType &&
+               symbolToDeclare.returnType.right instanceof StructType
+            ) {
+               symbolToDeclare.name = node.lhs.value;
+               symbolToDeclare.returnType.name = node.lhs.value;
+               symbolToDeclare.returnType.right.name = node.lhs.value;
             }
             if (
                symbolToDeclare instanceof SquareTypeToTypeLambdaType &&

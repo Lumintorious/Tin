@@ -1,0 +1,56 @@
+id: 877
+modifiers:
+tag: Block
+varTypeInInvarPlace: false
+invarTypeInVarPlace: false
+skipReturn: false
+statements:
+  - id: 876
+    modifiers:
+    tag: Call
+    varTypeInInvarPlace: false
+    invarTypeInVarPlace: false
+    calledInsteadOfSquare: false
+    paramOrder:
+    isFirstParamThis: false
+    isAnObjectCopy: false
+    isCallingAConstructor: false
+    callsPure: true
+    kind: ROUND
+    callee:
+      id: 874
+      modifiers:
+      tag: Identifier
+      varTypeInInvarPlace: false
+      invarTypeInVarPlace: false
+      value: print
+    args:
+      0:
+        - 
+        - id: 875
+          modifiers:
+          tag: Literal
+          varTypeInInvarPlace: false
+          invarTypeInVarPlace: false
+          isTypeLiteral: false
+          type: String
+          value: Hello World!
+          position:
+            start:
+              line: 1
+              column: 7
+              absolute: 20
+            end:
+              line: 1
+              column: 22
+              absolute: 21
+    ammortized: false
+    position:
+      start:
+        line: 1
+        column: 1
+        absolute: 5
+      end:
+        line: 1
+        column: 22
+        absolute: 21

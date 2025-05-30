@@ -639,6 +639,9 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       this.typeCheck(apply.callee, scope);
+      if (apply.bakedInThis) {
+         this.typeCheck(apply.bakedInThis, scope);
+      }
       let typeSymbol = scope.resolveNamedType(
          this.context.inferencer.infer(apply.callee, scope)
       );
@@ -690,9 +693,17 @@ export class TypeChecker {
 
          if (
             params[0] &&
+            apply.args[0] &&
             params[0].type instanceof AppliedGenericType &&
             params[0].type.callee.name === "Seq"
          ) {
+            const firstAppliedParamType = this.context.inferencer.infer(
+               apply.args[0][1],
+               scope
+            );
+            if (firstAppliedParamType.name !== "Seq") {
+               return;
+            }
             const expectedType = scope.resolveNamedType(
                params[0].type.parameterTypes[0]
             );

@@ -1,0 +1,101 @@
+Pose = struct:
+	push: () -> Ok
+	pop: () -> Ok
+	translate: (x: Number, y: Number) -> Ok
+	scale: (width: Number, y: Number) -> Ok
+	rotate: (degrees: Number) -> Ok
+
+BasicRenderer = struct:
+	drawRect: (x: Number, y: Number, width: Number, height: Number) -> Ok
+	drawImage: (url: String) -> Nothing
+
+Drawing = struct:
+	drawRaw: (pose: Pose & BasicRenderer) -> Nothing
+	selfOffset: (Number, Number) = (0, 0)
+	selfScale: (Number, Number) = (1, 1)
+
+Drawing.new = (draw: (pose: Pose & BasicRenderer) -> Nothing) ->
+	@offset = (0, 0)
+	@scale = (1, 1)
+	drawRaw = (pose: Pose & BasicRenderer) ->
+		pose.push()
+		pose.translate(@offset.left, @offset.right)
+		pose.push()
+		pose.scale(@scale.left, @scale.right)
+		pose.push()
+		draw(pose)
+		pose.pop()
+		pose.pop()
+		pose.pop()
+
+	Drawing { drawRaw, @offset, @scale }
+
+Drawing.rectangle = (width: Number, height: Number) ->
+	Drawing { (pose) -> pose.drawRect(0, 0, width, height) }
+
+Drawing.image = (url: String) ->
+	Drawing.new((pose) -> pose.drawImage(url))
+
+Drawing.group = (drawings: Seq[Drawing]) ->
+	Drawing { (pose) -> drawings.stream().forEach((drawing) -> drawing.drawRaw(pose)) }
+
+Drawing.size = (self: Drawing, widthMultiplier: Number, heightMultiplier: Number) ->
+	self { selfScale = (widthMultiplier, heightMultiplier) }
+
+Drawing.offset = (self: Drawing, x: Number, y: Number) ->
+	self { selfOffset = (x, y) }
+
+# Drawing.offset = (self: Drawing, x: Number, y: Number) ->
+# 	Drawing { (pose) ->
+# 		pose.push()
+# 		pose.translate(x, y)
+# 		self.drawRaw(pose)
+# 		pose.pop()
+# 	}
+
+# Drawing.scaled = (self: Drawing, widthMultiplier: Number, heightMultiplier: Number) ->
+# 	Drawing { (pose) ->
+# 		pose.push()
+# 		pose.scale(widthMultiplier, heightMultiplier)
+# 		self.drawRaw(pose)
+# 		pose.pop()
+# 	}
+
+Pose.registerRenderer: (canvasId: String, draw: () -> Drawing) -> Ok = external
+external "
+export function Pose$registerRenderer(canvasId, makeDrawing) \{
+	if (typeof document === 'undefined') return null;
+	const canvas = document.getElementById(canvasId)
+	if (!canvas || !canvas.getContext) return null;
+	const context = canvas.getContext('2d');
+	if (!context) return null;
+	const scale = window.devicePixelRatio || 1;
+	canvas.width = canvas.clientWidth * scale;
+	canvas.height = canvas.clientHeight * scale;
+	context.scale(scale, scale);
+	context.save();
+	const pose = Pose(
+		\{_: () => context.save()},
+		\{_: () => context.restore()},
+		\{_: (...args) => context.translate(...args)},
+		\{_: (...args) => context.scale(...args)},
+		\{_: (...args) => context.rotate(...args)}
+	)._and(BasicRenderer(
+		\{_: (...args) => context.fillRect(...args)},
+		\{_: (url) => \{
+			const img = new Image();
+			img.src = url;
+			if (img.complete) context.drawImage(img, 0, 0);
+		}}
+
+	))
+	function loop() \{
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		const drawing = makeDrawing()
+		drawing[Drawing._s].drawRaw._(pose)
+		requestAnimationFrame(loop);
+	}
+	loop();
+}
+"
+

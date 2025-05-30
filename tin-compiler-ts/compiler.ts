@@ -6,27 +6,28 @@ import files from "node:fs/promises";
 import path from "node:path";
 import { Scope, TypePhaseContext } from "./Scope";
 import { Type, ParamType } from "./Types";
-import * as TypesExports from "./Types";
+import { JavaTranslator } from "./JavaTranslator";
 
 export type CompilerItem = AstNode | Type | ParamType | undefined;
 
 const SETTINGS = JSON.parse(fs.readFileSync("./tin.settings.json", "utf-8"));
-// console.log(SETTINGS);
 
 export interface OutputTranslator {
    extension: string;
    run(path: string): void;
    translate(term: CompilerItem, scope: Scope, options: any): string;
+
+   getOutputFileName(inputFileName: string): string;
 }
 
 Error.stackTraceLimit = 10;
 const isTesting = process.argv.includes("--test");
-const isCompilingToGo = process.argv.includes("--targetLanguage:go");
+const isCompilingToJava = process.argv.includes("--targetLanguage:java");
 const SRC_PATH = path.resolve(process.cwd(), isTesting ? "tests" : "src");
 const COMPILER_PATH = path.resolve(process.cwd(), "tin-compiler-ts");
 const OUT_PATH = path.resolve(
    process.cwd(),
-   isTesting ? "tin-out-tests" : "tin-out"
+   isCompilingToJava ? "tin-out-java" : isTesting ? "tin-out-tests" : "tin-out"
 );
 if (!process.argv.includes("--verbose")) {
    const log = console.log;
@@ -335,13 +336,12 @@ async function compile(
          symbolsToJson(fileScope.innerScopeOf(ast))
       );
 
-      const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToGo
-         ? new JavascriptTranslator(inputFile, importsCache.size === 0)
+      const OUTPUT_TRANSLATOR: OutputTranslator = isCompilingToJava
+         ? new JavaTranslator(inputFile)
          : new JavascriptTranslator(
-              inputFile
-                 .slice(SRC_PATH.length)
-                 .replaceAll("/", "$")
-                 .replaceAll("\\", "$"),
+              inputFile.slice(SRC_PATH.length),
+              //  .replaceAll("/", "$")
+              //  .replaceAll("\\", "$"),
               importsCache.size === 0
            );
 
@@ -358,9 +358,14 @@ async function compile(
       )
          .replaceAll("\\", "/")
          .substring(SRC_PATH.length);
+      console.log(
+         "Writing out file " + inputFile + ".out." + OUTPUT_TRANSLATOR.extension
+      );
       await files.writeFile(
-         fromSrcToOut(inputFile + ".out." + OUTPUT_TRANSLATOR.extension),
-         `console.time('${formattedInputFile}');\n ${translatedString}; if (typeof main === 'function') await main();console.timeEnd('${formattedInputFile}')\n`
+         fromSrcToOut(OUTPUT_TRANSLATOR.getOutputFileName(inputFile)),
+         isCompilingToJava
+            ? translatedString
+            : `console.time('${formattedInputFile}');\n ${translatedString}; if (typeof main === 'function') main();console.timeEnd('${formattedInputFile}')\n`
       );
 
       console.log("\x1b[32mCompiled " + inputFile + "\x1b[0m");

@@ -1,0 +1,6 @@
+IDENTIFIER   | print        |   1, 1    
+PARENS       | (            |   1, 6    
+STRING       | Hello World! |   1, 7    
+PARENS       | )            |   1, 21   
+NEWLINE      |              |   1, 1    
+--undefined--

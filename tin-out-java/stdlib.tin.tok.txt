@@ -1,0 +1,1006 @@
+NEWLINE      |              |   2, 1    
+KEYWORD      | external     |   2, 1    
+STRING       | export const Anything = _S(Symbol("Anything"), () => undefined, lazy(() => Type({_:"Anything"}, {_:(n) => true}, {_:(n) => true})));
+ |   4, 10   
+NEWLINE      |              |   6, 1    
+IDENTIFIER   | Type         |   6, 1    
+OPERATOR     | =            |   6, 6    
+IDENTIFIER   | struct       |   6, 8    
+OPERATOR     | :            |   6, 14   
+NEWLINE      |              |   7, 1    
+INDENT       | 4            |   7, 1    
+IDENTIFIER   | name         |   7, 2    
+OPERATOR     | :            |   7, 6    
+IDENTIFIER   | String       |   7, 8    
+NEWLINE      |              |   8, 1    
+IDENTIFIER   | check        |   8, 2    
+OPERATOR     | =            |   8, 8    
+PARENS       | (            |   8, 10   
+IDENTIFIER   | obj          |   8, 11   
+OPERATOR     | :            |   8, 14   
+IDENTIFIER   | Anything     |   8, 16   
+PARENS       | )            |   8, 24   
+OPERATOR     | ->           |   8, 26   
+KEYWORD      | false        |   8, 29   
+OPERATOR     | :            |   8, 34   
+IDENTIFIER   | Boolean      |   8, 36   
+NEWLINE      |              |   9, 1    
+IDENTIFIER   | checkIntegrity |   9, 2    
+OPERATOR     | =            |   9, 17   
+PARENS       | (            |   9, 19   
+IDENTIFIER   | obj          |   9, 20   
+OPERATOR     | :            |   9, 23   
+IDENTIFIER   | Anything     |   9, 25   
+PARENS       | )            |   9, 33   
+OPERATOR     | ->           |   9, 35   
+KEYWORD      | false        |   9, 38   
+OPERATOR     | :            |   9, 43   
+IDENTIFIER   | Boolean      |   9, 45   
+NEWLINE      |              |  10, 1    
+IDENTIFIER   | is           |  10, 2    
+OPERATOR     | =            |  10, 5    
+PARENS       | (            |  10, 7    
+IDENTIFIER   | parent       |  10, 8    
+OPERATOR     | :            |  10, 14   
+IDENTIFIER   | Type         |  10, 16   
+PARENS       | )            |  10, 20   
+OPERATOR     | ->           |  10, 22   
+KEYWORD      | false        |  10, 25   
+OPERATOR     | :            |  10, 30   
+IDENTIFIER   | Boolean      |  10, 32   
+NEWLINE      |              |  12, 1    
+DEDENT       | 4            |  12, 1    
+IDENTIFIER   | Type@of      |  12, 1    
+OPERATOR     | :            |  12, 8    
+PARENS       | (            |  12, 10   
+IDENTIFIER   | obj          |  12, 11   
+OPERATOR     | :            |  12, 14   
+IDENTIFIER   | Anything     |  12, 16   
+PARENS       | )            |  12, 24   
+OPERATOR     | ->           |  12, 26   
+IDENTIFIER   | Type         |  12, 29   
+OPERATOR     | =            |  12, 34   
+KEYWORD      | external     |  12, 36   
+NEWLINE      |              |  14, 1    
+IDENTIFIER   | Field        |  14, 1    
+OPERATOR     | =            |  14, 7    
+IDENTIFIER   | struct       |  14, 9    
+OPERATOR     | :            |  14, 15   
+NEWLINE      |              |  15, 1    
+INDENT       | 4            |  15, 1    
+IDENTIFIER   | name         |  15, 2    
+OPERATOR     | :            |  15, 6    
+IDENTIFIER   | String       |  15, 8    
+NEWLINE      |              |  16, 1    
+IDENTIFIER   | type         |  16, 2    
+OPERATOR     | :            |  16, 6    
+IDENTIFIER   | Type         |  16, 8    
+NEWLINE      |              |  17, 1    
+IDENTIFIER   | defaultValue |  17, 2    
+OPERATOR     | :            |  17, 14   
+PARENS       | (            |  17, 16   
+PARENS       | (            |  17, 17   
+PARENS       | )            |  17, 18   
+OPERATOR     | ->           |  17, 20   
+IDENTIFIER   | Anything     |  17, 23   
+PARENS       | )            |  17, 31   
+OPERATOR     | ?            |  17, 32   
+NEWLINE      |              |  19, 1    
+DEDENT       | 4            |  19, 1    
+IDENTIFIER   | Parameter    |  19, 1    
+OPERATOR     | =            |  19, 11   
+IDENTIFIER   | struct       |  19, 13   
+OPERATOR     | :            |  19, 19   
+NEWLINE      |              |  20, 1    
+INDENT       | 4            |  20, 1    
+IDENTIFIER   | name         |  20, 2    
+OPERATOR     | :            |  20, 6    
+IDENTIFIER   | String       |  20, 8    
+OPERATOR     | ?            |  20, 14   
+NEWLINE      |              |  21, 1    
+IDENTIFIER   | type         |  21, 2    
+OPERATOR     | :            |  21, 6    
+IDENTIFIER   | Type         |  21, 8    
+NEWLINE      |              |  22, 1    
+IDENTIFIER   | defaultValue |  22, 2    
+OPERATOR     | :            |  22, 14   
+PARENS       | (            |  22, 16   
+PARENS       | (            |  22, 17   
+PARENS       | )            |  22, 18   
+OPERATOR     | ->           |  22, 20   
+IDENTIFIER   | Anything     |  22, 23   
+PARENS       | )            |  22, 31   
+OPERATOR     | ?            |  22, 32   
+NEWLINE      |              |  24, 1    
+DEDENT       | 4            |  24, 1    
+IDENTIFIER   | Intersection |  24, 1    
+OPERATOR     | =            |  24, 14   
+IDENTIFIER   | Type         |  24, 16   
+OPERATOR     | &            |  24, 21   
+IDENTIFIER   | struct       |  24, 23   
+OPERATOR     | :            |  24, 29   
+NEWLINE      |              |  25, 1    
+INDENT       | 4            |  25, 1    
+IDENTIFIER   | left         |  25, 2    
+OPERATOR     | :            |  25, 6    
+IDENTIFIER   | Type         |  25, 8    
+NEWLINE      |              |  26, 1    
+IDENTIFIER   | right        |  26, 2    
+OPERATOR     | :            |  26, 7    
+IDENTIFIER   | Type         |  26, 9    
+NEWLINE      |              |  28, 1    
+DEDENT       | 4            |  28, 1    
+IDENTIFIER   | Union        |  28, 1    
+OPERATOR     | =            |  28, 7    
+IDENTIFIER   | Type         |  28, 9    
+OPERATOR     | &            |  28, 14   
+IDENTIFIER   | struct       |  28, 16   
+OPERATOR     | :            |  28, 22   
+NEWLINE      |              |  29, 1    
+INDENT       | 4            |  29, 1    
+IDENTIFIER   | left         |  29, 2    
+OPERATOR     | :            |  29, 6    
+IDENTIFIER   | Type         |  29, 8    
+NEWLINE      |              |  30, 1    
+IDENTIFIER   | right        |  30, 2    
+OPERATOR     | :            |  30, 7    
+IDENTIFIER   | Type         |  30, 9    
+NEWLINE      |              |  32, 1    
+DEDENT       | 4            |  32, 1    
+IDENTIFIER   | Seq          |  32, 1    
+OPERATOR     | =            |  32, 5    
+PARENS       | [            |  32, 7    
+IDENTIFIER   | T            |  32, 8    
+PARENS       | ]            |  32, 9    
+OPERATOR     | ->           |  32, 11   
+IDENTIFIER   | struct       |  32, 14   
+OPERATOR     | :            |  32, 20   
+NEWLINE      |              |  33, 1    
+INDENT       | 4            |  33, 1    
+IDENTIFIER   | at           |  33, 2    
+OPERATOR     | :            |  33, 4    
+PARENS       | (            |  33, 6    
+IDENTIFIER   | Number       |  33, 7    
+PARENS       | )            |  33, 13   
+OPERATOR     | ->           |  33, 15   
+IDENTIFIER   | T            |  33, 18   
+OPERATOR     | ?            |  33, 19   
+NEWLINE      |              |  34, 1    
+IDENTIFIER   | length       |  34, 2    
+OPERATOR     | :            |  34, 8    
+PARENS       | (            |  34, 10   
+PARENS       | )            |  34, 11   
+OPERATOR     | ->           |  34, 13   
+IDENTIFIER   | Number       |  34, 16   
+NEWLINE      |              |  36, 1    
+DEDENT       | 4            |  36, 1    
+IDENTIFIER   | VSeq         |  36, 1    
+OPERATOR     | =            |  36, 6    
+PARENS       | [            |  36, 8    
+IDENTIFIER   | T            |  36, 9    
+PARENS       | ]            |  36, 10   
+OPERATOR     | ->           |  36, 12   
+IDENTIFIER   | struct       |  36, 15   
+OPERATOR     | :            |  36, 21   
+NEWLINE      |              |  37, 1    
+INDENT       | 4            |  37, 1    
+IDENTIFIER   | at           |  37, 2    
+OPERATOR     | :            |  37, 4    
+PARENS       | (            |  37, 6    
+IDENTIFIER   | Number       |  37, 7    
+PARENS       | )            |  37, 13   
+OPERATOR     | ->           |  37, 15   
+IDENTIFIER   | T            |  37, 18   
+OPERATOR     | ?            |  37, 19   
+NEWLINE      |              |  38, 1    
+IDENTIFIER   | put          |  38, 2    
+OPERATOR     | :            |  38, 5    
+PARENS       | (            |  38, 7    
+IDENTIFIER   | Number       |  38, 8    
+NEWLINE      | ,            |  38, 1    
+IDENTIFIER   | T            |  38, 16   
+PARENS       | )            |  38, 17   
+OPERATOR     | ->           |  38, 19   
+IDENTIFIER   | Nothing      |  38, 22   
+OPERATOR     | |            |  38, 30   
+IDENTIFIER   | Error        |  38, 32   
+NEWLINE      |              |  39, 1    
+IDENTIFIER   | length       |  39, 2    
+OPERATOR     | :            |  39, 8    
+PARENS       | (            |  39, 10   
+PARENS       | )            |  39, 11   
+OPERATOR     | ->           |  39, 13   
+IDENTIFIER   | Number       |  39, 16   
+NEWLINE      |              |  41, 1    
+DEDENT       | 4            |  41, 1    
+IDENTIFIER   | Struct       |  41, 1    
+OPERATOR     | =            |  41, 8    
+IDENTIFIER   | Type         |  41, 10   
+OPERATOR     | &            |  41, 15   
+IDENTIFIER   | struct       |  41, 17   
+OPERATOR     | :            |  41, 23   
+NEWLINE      |              |  42, 1    
+INDENT       | 4            |  42, 1    
+IDENTIFIER   | fields       |  42, 2    
+OPERATOR     | :            |  42, 8    
+IDENTIFIER   | Seq          |  42, 10   
+PARENS       | [            |  42, 13   
+IDENTIFIER   | Field        |  42, 14   
+PARENS       | ]            |  42, 19   
+NEWLINE      |              |  44, 1    
+DEDENT       | 4            |  44, 1    
+IDENTIFIER   | Struct       |  44, 1    
+OPERATOR     | .            |  44, 7    
+IDENTIFIER   | accessDynamically |  44, 8    
+OPERATOR     | :            |  44, 25   
+PARENS       | (            |  44, 27   
+IDENTIFIER   | self         |  44, 28   
+OPERATOR     | :            |  44, 32   
+IDENTIFIER   | Struct       |  44, 34   
+NEWLINE      | ,            |  44, 1    
+IDENTIFIER   | obj          |  44, 42   
+OPERATOR     | :            |  44, 45   
+IDENTIFIER   | Anything     |  44, 47   
+NEWLINE      | ,            |  44, 1    
+IDENTIFIER   | field        |  44, 57   
+OPERATOR     | :            |  44, 62   
+IDENTIFIER   | Field        |  44, 64   
+PARENS       | )            |  44, 69   
+OPERATOR     | ->           |  44, 71   
+IDENTIFIER   | Anything     |  44, 74   
+OPERATOR     | |            |  44, 83   
+IDENTIFIER   | Nothing      |  44, 85   
+OPERATOR     | =            |  44, 93   
+KEYWORD      | external     |  44, 95   
+NEWLINE      |              |  45, 1    
+IDENTIFIER   | Struct       |  45, 1    
+OPERATOR     | .            |  45, 7    
+IDENTIFIER   | createDynamically |  45, 8    
+OPERATOR     | :            |  45, 25   
+PARENS       | (            |  45, 27   
+IDENTIFIER   | self         |  45, 28   
+OPERATOR     | :            |  45, 32   
+IDENTIFIER   | Struct       |  45, 34   
+NEWLINE      | ,            |  45, 1    
+IDENTIFIER   | fields       |  45, 42   
+OPERATOR     | :            |  45, 48   
+IDENTIFIER   | Seq          |  45, 50   
+PARENS       | [            |  45, 53   
+IDENTIFIER   | Anything     |  45, 54   
+PARENS       | ]            |  45, 62   
+PARENS       | )            |  45, 63   
+OPERATOR     | ->           |  45, 65   
+IDENTIFIER   | Anything     |  45, 68   
+OPERATOR     | |            |  45, 77   
+IDENTIFIER   | Nothing      |  45, 79   
+OPERATOR     | =            |  45, 87   
+KEYWORD      | external     |  45, 89   
+NEWLINE      |              |  47, 1    
+IDENTIFIER   | Lambda       |  47, 1    
+OPERATOR     | =            |  47, 8    
+IDENTIFIER   | Type         |  47, 10   
+OPERATOR     | &            |  47, 15   
+IDENTIFIER   | struct       |  47, 17   
+OPERATOR     | :            |  47, 23   
+NEWLINE      |              |  48, 1    
+INDENT       | 4            |  48, 1    
+IDENTIFIER   | params       |  48, 2    
+OPERATOR     | :            |  48, 8    
+IDENTIFIER   | Seq          |  48, 10   
+PARENS       | [            |  48, 13   
+IDENTIFIER   | Parameter    |  48, 14   
+PARENS       | ]            |  48, 23   
+NEWLINE      |              |  49, 1    
+IDENTIFIER   | resultType   |  49, 2    
+OPERATOR     | :            |  49, 12   
+IDENTIFIER   | Type         |  49, 14   
+NEWLINE      |              |  51, 1    
+DEDENT       | 4            |  51, 1    
+IDENTIFIER   | RefType      |  51, 1    
+OPERATOR     | =            |  51, 9    
+IDENTIFIER   | Type         |  51, 11   
+OPERATOR     | &            |  51, 16   
+IDENTIFIER   | struct       |  51, 18   
+OPERATOR     | :            |  51, 24   
+NEWLINE      |              |  52, 1    
+INDENT       | 4            |  52, 1    
+IDENTIFIER   | get          |  52, 2    
+OPERATOR     | :            |  52, 5    
+PARENS       | (            |  52, 7    
+PARENS       | )            |  52, 8    
+OPERATOR     | ->           |  52, 10   
+IDENTIFIER   | Type         |  52, 13   
+NEWLINE      |              |  54, 1    
+DEDENT       | 4            |  54, 1    
+IDENTIFIER   | Refinement   |  54, 1    
+OPERATOR     | =            |  54, 12   
+IDENTIFIER   | Type         |  54, 14   
+OPERATOR     | &            |  54, 19   
+IDENTIFIER   | struct       |  54, 21   
+OPERATOR     | :            |  54, 27   
+NEWLINE      |              |  55, 1    
+INDENT       | 4            |  55, 1    
+IDENTIFIER   | test         |  55, 2    
+OPERATOR     | :            |  55, 6    
+PARENS       | (            |  55, 8    
+IDENTIFIER   | any          |  55, 9    
+OPERATOR     | :            |  55, 12   
+IDENTIFIER   | Anything     |  55, 14   
+PARENS       | )            |  55, 22   
+OPERATOR     | ->           |  55, 24   
+IDENTIFIER   | Boolean      |  55, 27   
+NEWLINE      |              |  57, 1    
+DEDENT       | 4            |  57, 1    
+KEYWORD      | external     |  57, 1    
+STRING       | export const Nothing = _S(Symbol("Nothing"), () => undefined, lazy(Type("Nothing", {_:(n) => n === null || n === undefined}, {_:(n) => n === null || n === undefined})));
+export const Never = _S(Symbol("Never"), () => undefined, lazy(Type("Never", {_:(n) => n === undefined}, {_:(n) => n === undefined})));
+export const Number = _S(Symbol("Number"), (i) => Number(i), lazy(Type("Number", {_:(n) => typeof n === "number"}, {_:(n) => typeof n === "number"})));
+export const String = _S(Symbol("String"), (s) => String(s), lazy(Type("String", {_:(n) => typeof n === "string"}, {_:(n) => typeof n === "string"})));
+export const Boolean = _S(Symbol("Boolean"), (s) => !!s, lazy(Type("Boolean", {_: (n) => typeof n === "boolean"}, {_:(n) => typeof n === "boolean"})));
+export const ok = Symbol("ok")
+export const Ok = _S(Symbol("Ok"), () => ok, lazy(Type("Ok", {_: (n) => n === ok}, {_:(n) => n === ok})));
+ |  65, 10   
+NEWLINE      |              |  67, 1    
+IDENTIFIER   | Literal      |  67, 1    
+OPERATOR     | =            |  67, 9    
+IDENTIFIER   | Type         |  67, 11   
+OPERATOR     | &            |  67, 16   
+IDENTIFIER   | struct       |  67, 18   
+OPERATOR     | :            |  67, 24   
+NEWLINE      |              |  68, 1    
+INDENT       | 4            |  68, 1    
+IDENTIFIER   | value        |  68, 2    
+OPERATOR     | :            |  68, 7    
+IDENTIFIER   | String       |  68, 9    
+OPERATOR     | |            |  68, 16   
+IDENTIFIER   | Number       |  68, 18   
+OPERATOR     | |            |  68, 25   
+IDENTIFIER   | Boolean      |  68, 27   
+OPERATOR     | |            |  68, 35   
+IDENTIFIER   | Nothing      |  68, 37   
+NEWLINE      |              |  69, 1    
+IDENTIFIER   | type         |  69, 2    
+OPERATOR     | :            |  69, 6    
+IDENTIFIER   | Type         |  69, 8    
+NEWLINE      |              |  71, 1    
+DEDENT       | 4            |  71, 1    
+IDENTIFIER   | jsonify      |  71, 1    
+OPERATOR     | :            |  71, 8    
+PARENS       | (            |  71, 10   
+IDENTIFIER   | obj          |  71, 11   
+OPERATOR     | :            |  71, 14   
+IDENTIFIER   | Anything     |  71, 16   
+PARENS       | )            |  71, 24   
+OPERATOR     | ->           |  71, 26   
+IDENTIFIER   | String       |  71, 29   
+OPERATOR     | =            |  71, 36   
+KEYWORD      | external     |  71, 38   
+NEWLINE      |              |  72, 1    
+IDENTIFIER   | dejsonify    |  72, 1    
+OPERATOR     | :            |  72, 10   
+PARENS       | (            |  72, 12   
+IDENTIFIER   | json         |  72, 13   
+OPERATOR     | :            |  72, 17   
+IDENTIFIER   | String       |  72, 19   
+PARENS       | )            |  72, 25   
+OPERATOR     | ->           |  72, 27   
+IDENTIFIER   | Anything     |  72, 30   
+OPERATOR     | =            |  72, 39   
+KEYWORD      | external     |  72, 41   
+NEWLINE      |              |  73, 1    
+IDENTIFIER   | assert       |  73, 1    
+OPERATOR     | :            |  73, 7    
+PARENS       | (            |  73, 9    
+IDENTIFIER   | condition    |  73, 10   
+OPERATOR     | :            |  73, 19   
+IDENTIFIER   | Boolean      |  73, 21   
+NEWLINE      | ,            |  73, 1    
+IDENTIFIER   | message      |  73, 30   
+OPERATOR     | :            |  73, 37   
+IDENTIFIER   | String       |  73, 39   
+OPERATOR     | ?            |  73, 45   
+PARENS       | )            |  73, 46   
+OPERATOR     | ->           |  73, 48   
+IDENTIFIER   | Nothing      |  73, 51   
+OPERATOR     | =            |  73, 59   
+KEYWORD      | external     |  73, 61   
+NEWLINE      |              |  74, 1    
+IDENTIFIER   | print        |  74, 1    
+OPERATOR     | :            |  74, 6    
+PARENS       | (            |  74, 8    
+IDENTIFIER   | Anything     |  74, 9    
+PARENS       | )            |  74, 17   
+OPERATOR     | ->           |  74, 19   
+IDENTIFIER   | Nothing      |  74, 22   
+OPERATOR     | =            |  74, 30   
+KEYWORD      | external     |  74, 32   
+NEWLINE      |              |  75, 1    
+IDENTIFIER   | printRaw     |  75, 1    
+OPERATOR     | :            |  75, 9    
+PARENS       | (            |  75, 11   
+IDENTIFIER   | Anything     |  75, 12   
+PARENS       | )            |  75, 20   
+OPERATOR     | ->           |  75, 22   
+IDENTIFIER   | Nothing      |  75, 25   
+OPERATOR     | =            |  75, 33   
+KEYWORD      | external     |  75, 35   
+NEWLINE      |              |  76, 1    
+IDENTIFIER   | printTable   |  76, 1    
+OPERATOR     | :            |  76, 11   
+PARENS       | (            |  76, 13   
+IDENTIFIER   | Anything     |  76, 14   
+PARENS       | )            |  76, 22   
+OPERATOR     | ->           |  76, 24   
+IDENTIFIER   | Nothing      |  76, 27   
+OPERATOR     | =            |  76, 35   
+KEYWORD      | external     |  76, 37   
+NEWLINE      |              |  77, 1    
+IDENTIFIER   | debug        |  77, 1    
+OPERATOR     | :            |  77, 6    
+PARENS       | (            |  77, 8    
+IDENTIFIER   | Anything     |  77, 9    
+PARENS       | )            |  77, 17   
+OPERATOR     | ->           |  77, 19   
+IDENTIFIER   | Nothing      |  77, 22   
+OPERATOR     | =            |  77, 30   
+KEYWORD      | external     |  77, 32   
+NEWLINE      |              |  78, 1    
+IDENTIFIER   | clojure      |  78, 1    
+OPERATOR     | :            |  78, 8    
+PARENS       | (            |  78, 10   
+IDENTIFIER   | Anything     |  78, 11   
+PARENS       | )            |  78, 19   
+OPERATOR     | ->           |  78, 21   
+IDENTIFIER   | Nothing      |  78, 24   
+OPERATOR     | =            |  78, 32   
+KEYWORD      | external     |  78, 34   
+NEWLINE      |              |  79, 1    
+IDENTIFIER   | nothing      |  79, 1    
+OPERATOR     | :            |  79, 8    
+IDENTIFIER   | Nothing      |  79, 10   
+OPERATOR     | =            |  79, 18   
+KEYWORD      | external     |  79, 20   
+NEWLINE      |              |  80, 1    
+IDENTIFIER   | ok           |  80, 1    
+OPERATOR     | :            |  80, 3    
+IDENTIFIER   | Ok           |  80, 5    
+OPERATOR     | =            |  80, 8    
+KEYWORD      | external     |  80, 10   
+NEWLINE      |              |  81, 1    
+IDENTIFIER   | panic        |  81, 1    
+OPERATOR     | :            |  81, 6    
+PARENS       | (            |  81, 8    
+IDENTIFIER   | message      |  81, 9    
+OPERATOR     | :            |  81, 16   
+IDENTIFIER   | String       |  81, 18   
+PARENS       | )            |  81, 24   
+OPERATOR     | ->           |  81, 26   
+IDENTIFIER   | Never        |  81, 29   
+OPERATOR     | =            |  81, 35   
+KEYWORD      | external     |  81, 37   
+NEWLINE      |              |  82, 1    
+IDENTIFIER   | Array        |  82, 1    
+OPERATOR     | .            |  82, 6    
+IDENTIFIER   | of           |  82, 7    
+OPERATOR     | :            |  82, 9    
+PARENS       | [            |  82, 11   
+IDENTIFIER   | T            |  82, 12   
+PARENS       | ]            |  82, 13   
+OPERATOR     | ->           |  82, 15   
+PARENS       | (            |  82, 18   
+IDENTIFIER   | Seq          |  82, 19   
+PARENS       | [            |  82, 22   
+IDENTIFIER   | T            |  82, 23   
+PARENS       | ]            |  82, 24   
+PARENS       | )            |  82, 25   
+OPERATOR     | ->           |  82, 27   
+IDENTIFIER   | Seq          |  82, 30   
+PARENS       | [            |  82, 33   
+IDENTIFIER   | T            |  82, 34   
+PARENS       | ]            |  82, 35   
+OPERATOR     | =            |  82, 37   
+KEYWORD      | external     |  82, 39   
+NEWLINE      |              |  83, 1    
+IDENTIFIER   | Array        |  83, 1    
+OPERATOR     | .            |  83, 6    
+IDENTIFIER   | empty        |  83, 7    
+OPERATOR     | :            |  83, 12   
+PARENS       | [            |  83, 14   
+IDENTIFIER   | T            |  83, 15   
+PARENS       | ]            |  83, 16   
+OPERATOR     | ->           |  83, 18   
+IDENTIFIER   | Seq          |  83, 21   
+PARENS       | [            |  83, 24   
+IDENTIFIER   | T            |  83, 25   
+PARENS       | ]            |  83, 26   
+OPERATOR     | =            |  83, 28   
+KEYWORD      | external     |  83, 30   
+NEWLINE      |              |  84, 1    
+IDENTIFIER   | Array        |  84, 1    
+OPERATOR     | .            |  84, 6    
+IDENTIFIER   | and          |  84, 7    
+OPERATOR     | :            |  84, 10   
+PARENS       | [            |  84, 12   
+IDENTIFIER   | T            |  84, 13   
+PARENS       | ]            |  84, 14   
+OPERATOR     | ->           |  84, 16   
+PARENS       | (            |  84, 19   
+IDENTIFIER   | self         |  84, 20   
+OPERATOR     | :            |  84, 24   
+IDENTIFIER   | Seq          |  84, 26   
+PARENS       | [            |  84, 29   
+IDENTIFIER   | T            |  84, 30   
+PARENS       | ]            |  84, 31   
+NEWLINE      | ,            |  84, 1    
+IDENTIFIER   | other        |  84, 34   
+OPERATOR     | :            |  84, 39   
+IDENTIFIER   | Seq          |  84, 41   
+PARENS       | [            |  84, 44   
+IDENTIFIER   | T            |  84, 45   
+PARENS       | ]            |  84, 46   
+PARENS       | )            |  84, 47   
+OPERATOR     | ->           |  84, 49   
+IDENTIFIER   | Seq          |  84, 52   
+PARENS       | [            |  84, 55   
+IDENTIFIER   | T            |  84, 56   
+PARENS       | ]            |  84, 57   
+OPERATOR     | =            |  84, 59   
+KEYWORD      | external     |  84, 61   
+NEWLINE      |              |  85, 1    
+IDENTIFIER   | toString     |  85, 1    
+OPERATOR     | :            |  85, 9    
+PARENS       | (            |  85, 11   
+IDENTIFIER   | obj          |  85, 12   
+OPERATOR     | :            |  85, 15   
+IDENTIFIER   | Anything     |  85, 17   
+PARENS       | )            |  85, 25   
+OPERATOR     | ->           |  85, 27   
+IDENTIFIER   | String       |  85, 30   
+OPERATOR     | =            |  85, 37   
+KEYWORD      | external     |  85, 39   
+NEWLINE      |              |  86, 1    
+IDENTIFIER   | listen       |  86, 1    
+OPERATOR     | :            |  86, 7    
+PARENS       | [            |  86, 9    
+IDENTIFIER   | T            |  86, 10   
+PARENS       | ]            |  86, 11   
+OPERATOR     | ->           |  86, 13   
+PARENS       | (            |  86, 16   
+IDENTIFIER   | v            |  86, 17   
+OPERATOR     | :            |  86, 18   
+IDENTIFIER   | var          |  86, 20   
+IDENTIFIER   | T            |  86, 24   
+NEWLINE      | ,            |  86, 1    
+IDENTIFIER   | onChange     |  86, 27   
+OPERATOR     | :            |  86, 35   
+PARENS       | (            |  86, 37   
+IDENTIFIER   | T            |  86, 38   
+PARENS       | )            |  86, 39   
+OPERATOR     | ->           |  86, 41   
+IDENTIFIER   | Nothing      |  86, 44   
+PARENS       | )            |  86, 51   
+OPERATOR     | ->           |  86, 53   
+IDENTIFIER   | Nothing      |  86, 56   
+OPERATOR     | =            |  86, 64   
+KEYWORD      | external     |  86, 66   
+NEWLINE      |              |  87, 1    
+IDENTIFIER   | id           |  87, 1    
+OPERATOR     | =            |  87, 4    
+PARENS       | [            |  87, 6    
+IDENTIFIER   | T            |  87, 7    
+PARENS       | ]            |  87, 8    
+OPERATOR     | ->           |  87, 10   
+PARENS       | (            |  87, 13   
+IDENTIFIER   | t            |  87, 14   
+OPERATOR     | :            |  87, 15   
+IDENTIFIER   | T            |  87, 17   
+PARENS       | )            |  87, 18   
+OPERATOR     | ->           |  87, 20   
+IDENTIFIER   | t            |  87, 23   
+NEWLINE      |              |  88, 1    
+IDENTIFIER   | delay        |  88, 1    
+OPERATOR     | :            |  88, 6    
+PARENS       | (            |  88, 8    
+IDENTIFIER   | ms           |  88, 9    
+OPERATOR     | :            |  88, 11   
+IDENTIFIER   | Number       |  88, 13   
+NEWLINE      | ,            |  88, 1    
+IDENTIFIER   | fn           |  88, 21   
+OPERATOR     | :            |  88, 23   
+PARENS       | (            |  88, 25   
+PARENS       | )            |  88, 26   
+OPERATOR     | ->           |  88, 28   
+IDENTIFIER   | Nothing      |  88, 31   
+PARENS       | )            |  88, 38   
+OPERATOR     | ->           |  88, 40   
+IDENTIFIER   | Nothing      |  88, 43   
+OPERATOR     | =            |  88, 51   
+KEYWORD      | external     |  88, 53   
+NEWLINE      |              |  89, 1    
+IDENTIFIER   | Console      |  89, 1    
+OPERATOR     | .            |  89, 8    
+IDENTIFIER   | useFieldNames |  89, 9    
+OPERATOR     | =            |  89, 23   
+IDENTIFIER   | var          |  89, 25   
+KEYWORD      | true         |  89, 29   
+NEWLINE      |              |  91, 1    
+IDENTIFIER   | Like         |  91, 1    
+OPERATOR     | =            |  91, 6    
+PARENS       | [            |  91, 8    
+IDENTIFIER   | Str          |  91, 9    
+PARENS       | ]            |  91, 12   
+OPERATOR     | =>           |  91, 14   
+IDENTIFIER   | String       |  91, 17   
+OPERATOR     | where        |  91, 24   
+OPERATOR     | :            |  91, 29   
+NEWLINE      |              |  92, 1    
+INDENT       | 4            |  92, 1    
+KEYWORD      | if           |  92, 2    
+IDENTIFIER   | Str          |  92, 5    
+OPERATOR     | ::           |  92, 9    
+IDENTIFIER   | Literal      |  92, 12   
+NEWLINE      | ,            |  92, 1    
+NEWLINE      |              |  93, 1    
+INDENT       | 8            |  93, 1    
+IDENTIFIER   | v            |  93, 3    
+OPERATOR     | =            |  93, 5    
+IDENTIFIER   | Str          |  93, 7    
+OPERATOR     | .            |  93, 10   
+IDENTIFIER   | value        |  93, 11   
+NEWLINE      |              |  94, 1    
+KEYWORD      | if           |  94, 3    
+IDENTIFIER   | v            |  94, 6    
+OPERATOR     | ::           |  94, 8    
+IDENTIFIER   | String       |  94, 11   
+NEWLINE      | ,            |  94, 1    
+NEWLINE      |              |  95, 1    
+INDENT       | 12           |  95, 1    
+KEYWORD      | return       |  95, 4    
+IDENTIFIER   | self         |  95, 11   
+OPERATOR     | .            |  95, 15   
+IDENTIFIER   | matches      |  95, 16   
+PARENS       | (            |  95, 23   
+STRING       | ^'v'$        |  95, 24   
+PARENS       | )            |  95, 31   
+NEWLINE      |              |  97, 1    
+DEDENT       | 12           |  97, 1    
+DEDENT       | 8            |  97, 1    
+KEYWORD      | false        |  97, 2    
+NEWLINE      |              |  99, 1    
+DEDENT       | 4            |  99, 1    
+IDENTIFIER   | Interpolation |  99, 1    
+OPERATOR     | =            |  99, 15   
+IDENTIFIER   | struct       |  99, 17   
+OPERATOR     | :            |  99, 23   
+NEWLINE      |              | 100, 1    
+INDENT       | 4            | 100, 1    
+IDENTIFIER   | codeDisplay  | 100, 2    
+OPERATOR     | :            | 100, 13   
+IDENTIFIER   | String       | 100, 15   
+NEWLINE      |              | 101, 1    
+IDENTIFIER   | value        | 101, 2    
+OPERATOR     | :            | 101, 7    
+IDENTIFIER   | Anything     | 101, 9    
+NEWLINE      |              | 103, 1    
+DEDENT       | 4            | 103, 1    
+IDENTIFIER   | InterpolatedString | 103, 1    
+OPERATOR     | =            | 103, 20   
+IDENTIFIER   | struct       | 103, 22   
+OPERATOR     | :            | 103, 28   
+NEWLINE      |              | 104, 1    
+INDENT       | 4            | 104, 1    
+IDENTIFIER   | elements     | 104, 2    
+OPERATOR     | :            | 104, 10   
+IDENTIFIER   | Seq          | 104, 12   
+PARENS       | [            | 104, 15   
+IDENTIFIER   | String       | 104, 16   
+OPERATOR     | |            | 104, 23   
+IDENTIFIER   | Interpolation | 104, 25   
+PARENS       | ]            | 104, 38   
+NEWLINE      |              | 106, 1    
+DEDENT       | 4            | 106, 1    
+IDENTIFIER   | Intersection | 106, 1    
+OPERATOR     | .            | 106, 13   
+IDENTIFIER   | of           | 106, 14   
+OPERATOR     | =            | 106, 17   
+PARENS       | (            | 106, 19   
+IDENTIFIER   | left         | 106, 20   
+OPERATOR     | :            | 106, 24   
+IDENTIFIER   | Type         | 106, 26   
+NEWLINE      | ,            | 106, 1    
+IDENTIFIER   | right        | 106, 32   
+OPERATOR     | :            | 106, 37   
+IDENTIFIER   | Type         | 106, 39   
+PARENS       | )            | 106, 43   
+OPERATOR     | ->           | 106, 45   
+NEWLINE      |              | 107, 1    
+INDENT       | 4            | 107, 1    
+IDENTIFIER   | check        | 107, 2    
+OPERATOR     | =            | 107, 8    
+PARENS       | (            | 107, 10   
+IDENTIFIER   | obj          | 107, 11   
+OPERATOR     | :            | 107, 14   
+IDENTIFIER   | Anything     | 107, 16   
+PARENS       | )            | 107, 24   
+OPERATOR     | ->           | 107, 26   
+NEWLINE      |              | 108, 1    
+INDENT       | 8            | 108, 1    
+IDENTIFIER   | left         | 108, 3    
+OPERATOR     | .            | 108, 7    
+IDENTIFIER   | check        | 108, 8    
+PARENS       | (            | 108, 13   
+IDENTIFIER   | obj          | 108, 14   
+PARENS       | )            | 108, 17   
+OPERATOR     | &&           | 108, 19   
+IDENTIFIER   | right        | 108, 22   
+OPERATOR     | .            | 108, 27   
+IDENTIFIER   | check        | 108, 28   
+PARENS       | (            | 108, 33   
+IDENTIFIER   | obj          | 108, 34   
+PARENS       | )            | 108, 37   
+NEWLINE      |              | 110, 1    
+DEDENT       | 8            | 110, 1    
+IDENTIFIER   | checkIntegrity | 110, 2    
+OPERATOR     | =            | 110, 17   
+PARENS       | (            | 110, 19   
+IDENTIFIER   | obj          | 110, 20   
+OPERATOR     | :            | 110, 23   
+IDENTIFIER   | Anything     | 110, 25   
+PARENS       | )            | 110, 33   
+OPERATOR     | ->           | 110, 35   
+NEWLINE      |              | 111, 1    
+INDENT       | 8            | 111, 1    
+IDENTIFIER   | left         | 111, 3    
+OPERATOR     | .            | 111, 7    
+IDENTIFIER   | checkIntegrity | 111, 8    
+PARENS       | (            | 111, 22   
+IDENTIFIER   | obj          | 111, 23   
+PARENS       | )            | 111, 26   
+OPERATOR     | &&           | 111, 28   
+IDENTIFIER   | right        | 111, 31   
+OPERATOR     | .            | 111, 36   
+IDENTIFIER   | checkIntegrity | 111, 37   
+PARENS       | (            | 111, 51   
+IDENTIFIER   | obj          | 111, 52   
+PARENS       | )            | 111, 55   
+NEWLINE      |              | 113, 1    
+DEDENT       | 8            | 113, 1    
+IDENTIFIER   | Type         | 113, 2    
+PARENS       | {            | 113, 7    
+STRING       | Intersection | 113, 9    
+NEWLINE      | ,            | 113, 1    
+IDENTIFIER   | check        | 113, 25   
+NEWLINE      | ,            | 113, 1    
+IDENTIFIER   | checkIntegrity | 113, 32   
+PARENS       | }            | 113, 47   
+OPERATOR     | &            | 113, 49   
+IDENTIFIER   | Intersection | 113, 51   
+PARENS       | {            | 113, 64   
+IDENTIFIER   | left         | 113, 66   
+NEWLINE      | ,            | 113, 1    
+IDENTIFIER   | right        | 113, 72   
+PARENS       | }            | 113, 78   
+NEWLINE      |              | 115, 1    
+DEDENT       | 4            | 115, 1    
+IDENTIFIER   | Digit        | 115, 1    
+OPERATOR     | =            | 115, 7    
+NUMBER       | 0            | 115, 9    
+OPERATOR     | |            | 115, 11   
+NUMBER       | 1            | 115, 13   
+OPERATOR     | |            | 115, 15   
+NUMBER       | 2            | 115, 17   
+OPERATOR     | |            | 115, 19   
+NUMBER       | 3            | 115, 21   
+OPERATOR     | |            | 115, 23   
+NUMBER       | 4            | 115, 25   
+OPERATOR     | |            | 115, 27   
+NUMBER       | 5            | 115, 29   
+OPERATOR     | |            | 115, 31   
+NUMBER       | 6            | 115, 33   
+OPERATOR     | |            | 115, 35   
+NUMBER       | 7            | 115, 37   
+OPERATOR     | |            | 115, 39   
+NUMBER       | 8            | 115, 41   
+OPERATOR     | |            | 115, 43   
+NUMBER       | 9            | 115, 45   
+NEWLINE      |              | 116, 1    
+IDENTIFIER   | One          | 116, 1    
+OPERATOR     | =            | 116, 5    
+NUMBER       | 1            | 116, 7    
+NEWLINE      |              | 118, 1    
+IDENTIFIER   | Error        | 118, 1    
+OPERATOR     | =            | 118, 7    
+IDENTIFIER   | struct       | 118, 9    
+OPERATOR     | :            | 118, 15   
+NEWLINE      |              | 119, 1    
+INDENT       | 4            | 119, 1    
+IDENTIFIER   | message      | 119, 2    
+OPERATOR     | :            | 119, 9    
+IDENTIFIER   | String       | 119, 11   
+NEWLINE      |              | 120, 1    
+IDENTIFIER   | object       | 120, 2    
+OPERATOR     | :            | 120, 8    
+IDENTIFIER   | Anything     | 120, 10   
+OPERATOR     | ?            | 120, 18   
+NEWLINE      |              | 122, 1    
+DEDENT       | 4            | 122, 1    
+IDENTIFIER   | StackInfo    | 122, 1    
+OPERATOR     | =            | 122, 11   
+IDENTIFIER   | struct       | 122, 13   
+OPERATOR     | :            | 122, 19   
+NEWLINE      |              | 123, 1    
+INDENT       | 4            | 123, 1    
+IDENTIFIER   | stack        | 123, 2    
+OPERATOR     | :            | 123, 7    
+IDENTIFIER   | Seq          | 123, 9    
+PARENS       | [            | 123, 12   
+IDENTIFIER   | String       | 123, 13   
+PARENS       | ]            | 123, 19   
+NEWLINE      |              | 125, 1    
+DEDENT       | 4            | 125, 1    
+IDENTIFIER   | ToString     | 125, 1    
+OPERATOR     | =            | 125, 10   
+IDENTIFIER   | struct       | 125, 12   
+OPERATOR     | :            | 125, 18   
+NEWLINE      |              | 126, 1    
+INDENT       | 4            | 126, 1    
+IDENTIFIER   | toString     | 126, 2    
+OPERATOR     | :            | 126, 10   
+PARENS       | (            | 126, 12   
+PARENS       | )            | 126, 13   
+OPERATOR     | ->           | 126, 15   
+IDENTIFIER   | String       | 126, 18   
+NEWLINE      |              | 128, 1    
+DEDENT       | 4            | 128, 1    
+IDENTIFIER   | Tuple2       | 128, 1    
+OPERATOR     | =            | 128, 8    
+PARENS       | [            | 128, 10   
+IDENTIFIER   | A            | 128, 11   
+NEWLINE      | ,            | 128, 1    
+IDENTIFIER   | B            | 128, 14   
+PARENS       | ]            | 128, 15   
+OPERATOR     | =>           | 128, 17   
+IDENTIFIER   | struct       | 128, 20   
+OPERATOR     | :            | 128, 26   
+NEWLINE      |              | 129, 1    
+INDENT       | 4            | 129, 1    
+IDENTIFIER   | left         | 129, 2    
+OPERATOR     | :            | 129, 6    
+IDENTIFIER   | A            | 129, 8    
+NEWLINE      |              | 130, 1    
+IDENTIFIER   | right        | 130, 2    
+OPERATOR     | :            | 130, 7    
+IDENTIFIER   | B            | 130, 9    
+NEWLINE      |              | 132, 1    
+DEDENT       | 4            | 132, 1    
+IDENTIFIER   | Tuple3       | 132, 1    
+OPERATOR     | =            | 132, 8    
+PARENS       | [            | 132, 10   
+IDENTIFIER   | A            | 132, 11   
+NEWLINE      | ,            | 132, 1    
+IDENTIFIER   | B            | 132, 14   
+NEWLINE      | ,            | 132, 1    
+IDENTIFIER   | C            | 132, 17   
+PARENS       | ]            | 132, 18   
+OPERATOR     | =>           | 132, 20   
+IDENTIFIER   | struct       | 132, 23   
+OPERATOR     | :            | 132, 29   
+NEWLINE      |              | 133, 1    
+INDENT       | 4            | 133, 1    
+IDENTIFIER   | left         | 133, 2    
+OPERATOR     | :            | 133, 6    
+IDENTIFIER   | A            | 133, 8    
+NEWLINE      |              | 134, 1    
+IDENTIFIER   | middle       | 134, 2    
+OPERATOR     | :            | 134, 8    
+IDENTIFIER   | B            | 134, 10   
+NEWLINE      |              | 135, 1    
+IDENTIFIER   | right        | 135, 2    
+OPERATOR     | :            | 135, 7    
+IDENTIFIER   | C            | 135, 9    
+NEWLINE      |              | 137, 1    
+DEDENT       | 4            | 137, 1    
+IDENTIFIER   | String       | 137, 1    
+OPERATOR     | .            | 137, 7    
+IDENTIFIER   | matches      | 137, 8    
+OPERATOR     | :            | 137, 15   
+PARENS       | (            | 137, 17   
+IDENTIFIER   | self         | 137, 18   
+OPERATOR     | :            | 137, 22   
+IDENTIFIER   | String       | 137, 24   
+NEWLINE      | ,            | 137, 1    
+IDENTIFIER   | regex        | 137, 32   
+OPERATOR     | :            | 137, 37   
+IDENTIFIER   | String       | 137, 39   
+PARENS       | )            | 137, 45   
+OPERATOR     | ->           | 137, 47   
+IDENTIFIER   | Boolean      | 137, 50   
+OPERATOR     | =            | 137, 58   
+KEYWORD      | external     | 137, 60   
+NEWLINE      |              | 138, 1    
+IDENTIFIER   | String       | 138, 1    
+OPERATOR     | .            | 138, 7    
+IDENTIFIER   | length       | 138, 8    
+OPERATOR     | :            | 138, 14   
+PARENS       | (            | 138, 16   
+IDENTIFIER   | self         | 138, 17   
+OPERATOR     | :            | 138, 21   
+IDENTIFIER   | String       | 138, 23   
+PARENS       | )            | 138, 29   
+OPERATOR     | ->           | 138, 31   
+IDENTIFIER   | Number       | 138, 34   
+OPERATOR     | =            | 138, 41   
+KEYWORD      | external     | 138, 43   
+NEWLINE      |              | 139, 1    
+IDENTIFIER   | String       | 139, 1    
+OPERATOR     | .            | 139, 7    
+IDENTIFIER   | isBlank      | 139, 8    
+OPERATOR     | =            | 139, 16   
+PARENS       | (            | 139, 18   
+IDENTIFIER   | self         | 139, 19   
+OPERATOR     | :            | 139, 23   
+IDENTIFIER   | String       | 139, 25   
+PARENS       | )            | 139, 31   
+OPERATOR     | ->           | 139, 33   
+IDENTIFIER   | self         | 139, 36   
+OPERATOR     | .            | 139, 40   
+IDENTIFIER   | length       | 139, 41   
+PARENS       | (            | 139, 47   
+PARENS       | )            | 139, 48   
+OPERATOR     | ==           | 139, 50   
+NUMBER       | 0            | 139, 53   
+NEWLINE      |              | 141, 1    
+KEYWORD      | external     | 141, 1    
+STRING       | export function String$length() {
+	return this.length
+}
+ | 145, 10   
+NEWLINE      |              | 147, 1    
+NEWLINE      |              | 148, 1    
+NEWLINE      |              | 149, 1    
+NEWLINE      |              | 150, 1    
+NEWLINE      |              | 151, 1    
+NEWLINE      |              | 152, 1    
+NEWLINE      |              | 153, 1    
+NEWLINE      |              | 154, 1    
+NEWLINE      |              | 155, 1    
+NEWLINE      |              | 157, 1    
+NEWLINE      |              | 159, 1    
+IDENTIFIER   | Varray       | 159, 1    
+OPERATOR     | .            | 159, 7    
+IDENTIFIER   | of           | 159, 8    
+OPERATOR     | :            | 159, 10   
+PARENS       | [            | 159, 12   
+IDENTIFIER   | T            | 159, 13   
+PARENS       | ]            | 159, 14   
+OPERATOR     | ->           | 159, 16   
+PARENS       | (            | 159, 19   
+IDENTIFIER   | length       | 159, 20   
+OPERATOR     | :            | 159, 26   
+IDENTIFIER   | Number       | 159, 28   
+NEWLINE      | ,            | 159, 1    
+IDENTIFIER   | filler       | 159, 36   
+OPERATOR     | :            | 159, 42   
+IDENTIFIER   | T            | 159, 44   
+PARENS       | )            | 159, 45   
+OPERATOR     | ->           | 159, 47   
+IDENTIFIER   | VSeq         | 159, 50   
+PARENS       | [            | 159, 54   
+IDENTIFIER   | T            | 159, 55   
+PARENS       | ]            | 159, 56   
+OPERATOR     | =            | 159, 58   
+KEYWORD      | external     | 159, 60   
+NEWLINE      |              | 161, 1    
+KEYWORD      | external     | 161, 1    
+STRING       | export const Varray$of = (T) => (len, obj) => {
+	const jarr = _JsArr(len).fill(obj)
+	return VSeq(T)(
+		{_: (i) => jarr[i]},
+		{_: (i, obj) => jarr[i] = obj},
+		{_: () => jarr.length}
+	)
+}
+ | 170, 10   
+NEWLINE      |              | 172, 1    
+NEWLINE      |              | 172, 1    
+--undefined--
