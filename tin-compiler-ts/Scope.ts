@@ -16,7 +16,7 @@ import { TypeBuilder } from "./TypeBuilder";
 import { TypeChecker, CompilerLogs } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
-import { LiteralType } from "./Types";
+import { SingletonType } from "./Types";
 import {
    Any,
    AppliedGenericType,
@@ -581,7 +581,7 @@ export class Scope {
             });
             const structResult = new StructType(type.name, mappedFields);
             structResult.squareParamsApplied = paramMap.order.map((p) =>
-               p[1] instanceof LiteralType ? p[1].type : p[1]
+               p[1] instanceof SingletonType ? p[1].type : p[1]
             );
             return structResult;
          case "OptionalType":
@@ -591,7 +591,7 @@ export class Scope {
                paramMap
             );
             return new OptionalType(newInnerType);
-         case "LiteralType":
+         case "SingletonType":
             return type;
          case "UnionType":
             const uType = type as UnionType;
@@ -765,6 +765,7 @@ export type RecursiveResolutionOptions = {
    isTypeLevel?: boolean;
    isWithinCopyStructure?: boolean;
    expectsBroadenedType?: boolean;
+   allowsSingletonType?: boolean;
 };
 
 export class CompilerFlags {

@@ -272,11 +272,11 @@ export class ModuleType extends Type {
    }
 }
 
-export class LiteralType extends Type {
-   value: string;
+export class SingletonType extends Type {
+   value: string | Symbol;
    type: Type;
-   constructor(value: string, type: Type) {
-      super("LiteralType");
+   constructor(value: string | Symbol, type: Type) {
+      super("SingletonType");
       this.value = value;
       this.type = type;
    }
@@ -292,27 +292,34 @@ export class LiteralType extends Type {
       if (other instanceof AnyType) {
          return true;
       }
+
       if (
-         other instanceof LiteralType &&
+         other instanceof SingletonType &&
          this.type.extends(other.type, scope) &&
          this.value === other.value
       ) {
          return true;
       }
-      return (
-         this.type.extends(other, scope) || other.isExtendedBy(this.type, scope)
-      );
+
+      return this.type.isAssignableTo(other, scope);
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
+      console.log(
+         "Checking isExtendedBy for SingletonType: " + this + " - " + other
+      );
       return (
-         other instanceof LiteralType &&
+         other instanceof SingletonType &&
          other.type.isExtendedBy(this.type, scope) &&
          other.value === this.value
       );
    }
 
    toString() {
+      if (this.value instanceof Symbol) {
+         return this.name ?? this.value.name;
+      }
+
       if (this.type.name === "String") {
          return `"${this.value}"`;
       } else {
@@ -1052,9 +1059,9 @@ export class RefinedType extends Type {
 
    isExtendedBy(other: Type, scope: Scope): boolean {
       if (
-         other instanceof LiteralType &&
+         other instanceof SingletonType &&
          other.type == PrimitiveType.String &&
-         this.appliedTypeArgs[0] instanceof LiteralType &&
+         this.appliedTypeArgs[0] instanceof SingletonType &&
          this.appliedTypeArgs[0].type === PrimitiveType.String
       ) {
          return (
@@ -1063,7 +1070,7 @@ export class RefinedType extends Type {
          );
       }
       if (
-         other instanceof LiteralType &&
+         other instanceof SingletonType &&
          other.type == PrimitiveType.Number &&
          this.lambda.block.statements.length === 1
       ) {

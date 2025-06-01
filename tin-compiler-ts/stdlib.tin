@@ -75,9 +75,10 @@ export const ok = Symbol(\"ok\")
 export const Ok = _S(Symbol(\"Ok\"), () => ok, lazy(Type(\"Ok\", \{_: (n) => n === ok}, \{_:(n) => n === ok})))._and(Primitive());
 "
 
-Literal = Type & struct:
-	value: String | Number | Boolean | Nothing
+Singleton = Type & struct:
+	value: Anything
 	type: Type
+	declaration: String?
 
 jsonify: (obj: Anything) -> String = external
 dejsonify: (json: String) -> Anything = external
@@ -118,7 +119,7 @@ external "
 
 
 Like = [Str] => String where:
-	if Str :: Literal,
+	if Str :: Singleton,
 		v = Str.value
 		if v :: String,
 			return self.matches("^{v}$")
@@ -173,17 +174,22 @@ export function String$length() \{
 \}
 "
 
-# Union@values = [T] ->
-# 	go = (type: Type): Seq[T] ->
-# 		if type :: Literal,
-# 			Seq@of[T]((type.value): T)
-# 		else if type :: Union,
-# 			go(type.left).and(go(type.right))
-# 		else
-# 			Seq@of[T]()
-# 	go(T)
+Type.allFields = (self: Type): Seq[(Struct, Field)] ->
+	if self :: Struct,
+		mapper = (field: Field) -> (self, field: Field)
+		self.fields.mapSeq(mapper)
+	else if self :: Intersection,
+		(self.left.allFields()) .and (self.right.allFields())
+	else
+		Array.empty[(Struct, Field)]
 
-# external "
+Type.allPossibilities = (self: Type): Seq[Anything] ->
+	if self :: Singleton,
+		Array.of(self.value)
+	else if self :: Union,
+		(self.left.allPossibilities()) .and (self.right.allPossibilities())
+	else
+		Array.empty[Anything]
 
 Varray.of: [T] -> (length: Number, filler: T) -> VSeq[T] = external
 	

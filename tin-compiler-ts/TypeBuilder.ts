@@ -63,7 +63,7 @@ import {
 import {
    OptionalType,
    GenericNamedType,
-   LiteralType,
+   SingletonType,
    Type,
    AppliedGenericType,
 } from "./Types";
@@ -311,7 +311,6 @@ export class TypeBuilder {
          this.build(node.expression, scope);
       } else if (node instanceof Tuple) {
          node.expressions.forEach((e) => this.build(e, scope));
-      } else {
       }
    }
 
@@ -480,7 +479,7 @@ export class TypeBuilder {
          if (!(matchedGenericParam instanceof GenericNamedType)) {
             return GenericTypeMap.empty();
          }
-         if (gottenType instanceof LiteralType) {
+         if (gottenType instanceof SingletonType) {
             gottenType = gottenType.type;
          }
          return GenericTypeMap.with(matchedGenericParam.name, gottenType);
@@ -677,7 +676,7 @@ export class TypeBuilder {
                appliedParams[0][1],
                scope
             );
-            if (firstAppliedParamType instanceof LiteralType) {
+            if (firstAppliedParamType instanceof SingletonType) {
                firstAppliedParamType = firstAppliedParamType.type;
             }
             // If array passed raw, not as varargs 'func(Array@of(1, 2, 3))'
@@ -725,7 +724,7 @@ export class TypeBuilder {
                   node.bakedInThis,
                   scope
                );
-               if (appliedType instanceof LiteralType) {
+               if (appliedType instanceof SingletonType) {
                   appliedType = appliedType.type;
                }
                const expectedType = expectedParams[0];
@@ -745,7 +744,7 @@ export class TypeBuilder {
                   appliedTerm,
                   scope
                );
-               if (appliedType instanceof LiteralType) {
+               if (appliedType instanceof SingletonType) {
                   appliedType = appliedType.type;
                }
                const expectedType = appliedName
@@ -784,6 +783,7 @@ export class TypeBuilder {
                node.args[0]?.[0] === "self"
                   ? this.context.inferencer.infer(node.args[0][1], scope)
                   : undefined,
+            expectsBroadenedType: true,
          });
 
          if (
@@ -826,8 +826,6 @@ export class TypeBuilder {
          node.callsPure = false;
       }
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
-         // will be hanlded in TypeChecker
-         //  if (!node.autoFilledSquareTypeParams) {
          this.buildSquareArgsInRoundApply(
             node,
             calleeType,
@@ -835,7 +833,6 @@ export class TypeBuilder {
             node.getTypeArgs(),
             options
          );
-         //  }
          if (
             calleeType instanceof SquareTypeToValueLambdaType &&
             calleeType.returnType instanceof RoundValueToValueLambdaType &&
@@ -1376,10 +1373,11 @@ export class TypeBuilder {
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
          expectsBroadenedType: !node.type,
+         allowsSingletonType: !!node.type,
       });
       let isMutable = rhsType instanceof MutableType;
       if (!node.type) {
-         if (rhsType instanceof LiteralType) {
+         if (rhsType instanceof SingletonType) {
             rhsType = rhsType.type;
          }
          //  scope.mapAst(

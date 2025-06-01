@@ -15,6 +15,7 @@ import {
    Block,
    Tuple,
    Select,
+   IN_TYPE_CONTEXT,
 } from "./Parser";
 import {
    TypePhaseContext,
@@ -37,7 +38,7 @@ import { Any, MutableType, UnionType, IntersectionType } from "./Types";
 import {
    Type,
    NamedType,
-   LiteralType,
+   SingletonType,
    GenericNamedType,
    VarargsType,
    RoundValueToValueLambdaType,
@@ -91,6 +92,11 @@ export class TypeTranslator {
             if ((node as Identifier).value === "Ok") {
                return PrimitiveType.Ok;
             }
+            if (!(node as Identifier).isTypeIdentifier()) {
+               const symbol = scope.lookup((node as Identifier).value);
+               node.modify(IN_TYPE_CONTEXT);
+               return new SingletonType(symbol, symbol.typeSymbol);
+            }
 
             return new NamedType((node as Identifier).value);
          case "Literal":
@@ -111,7 +117,7 @@ export class TypeTranslator {
             if (literal.type === "Boolean") {
                resultType = PrimitiveType.Boolean;
             }
-            return new LiteralType(String(literal.value), resultType);
+            return new SingletonType(String(literal.value), resultType);
          case "Assignment":
             if (
                node instanceof Assignment &&
@@ -309,6 +315,13 @@ export class TypeTranslator {
             if (node instanceof Select) {
                const asName = node.nameAsSelectOfIdentifiers();
                if (asName !== undefined) {
+                  if (this.context.inferencer.isCapitalized(asName)) {
+                     const symbol = scope.lookup(asName);
+                     node.isBeingTreatedAsIdentifier = true;
+                     node.isTypeLevel = true;
+                     node.modify(IN_TYPE_CONTEXT);
+                     return new SingletonType(symbol, symbol.typeSymbol);
+                  }
                   return scope.lookupType(asName).typeSymbol;
                }
             }
@@ -379,7 +392,7 @@ export class TypeTranslator {
             type = explicitType;
          } else if (inferredType) {
             type = inferredType;
-            if (type instanceof LiteralType) {
+            if (type instanceof SingletonType) {
                type = type.type;
             }
          }

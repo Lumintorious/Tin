@@ -22,6 +22,7 @@ import {
    IN_RETURN_BRANCH,
    ARTIFICIAL,
    WHERE_INTERPOLATION_EXPECTED,
+   IN_TYPE_CONTEXT,
 } from "./Parser";
 import pth from "path";
 import {
@@ -49,7 +50,7 @@ import {
    RoundValueToValueLambdaType,
    SquareTypeToValueLambdaType,
    MutableType,
-   LiteralType,
+   SingletonType,
    RefinedType,
    PrimitiveType,
    IntersectionType,
@@ -203,6 +204,10 @@ export class JavascriptTranslator implements OutputTranslator {
       let result = this.translateRaw(term, scope, args);
 
       if (term instanceof Term) {
+         if (term instanceof Identifier && term.is(IN_TYPE_CONTEXT)) {
+            result = `_L(${result}, "${term.value}")`;
+         }
+
          if (term.is(INVAR_RETURNING_FUNC_IN_VAR_PLACE)) {
             result = `(function(...args) {
 			   const _res = (${result}).call(this, ...args);
@@ -314,7 +319,8 @@ export class JavascriptTranslator implements OutputTranslator {
          if (
             !term.ownerComponent &&
             !term.unionOwnerComponents &&
-            !term.isDeclaration
+            !term.isDeclaration &&
+            !term.isBeingTreatedAsIdentifier
          ) {
             console.error(term);
             throw new Error(
@@ -345,19 +351,19 @@ export class JavascriptTranslator implements OutputTranslator {
                .map((c) => `${c}._s`)
                .join(",")}], "${term.field}")`;
          }
-         const termType = term.inferredType;
          if (
-            !(
-               term.owner instanceof Identifier &&
-               term.owner.value.startsWith("_")
-            )
+            !term.varTypeInInvarPlace &&
+            !term.isDeclaration &&
+            !term.isTypeLevel
          ) {
-         }
-         if (!term.varTypeInInvarPlace && !term.isDeclaration) {
             selectionBase += this.accessMutable;
          }
-         return `${ownerName}${selectionBase}`;
 
+         let result = `${ownerName}${selectionBase}`;
+         if (term.is(IN_TYPE_CONTEXT)) {
+            result = `_L(${result}, "${term.nameAsSelectOfIdentifiers()}")`;
+         }
+         return result;
          // Make
       } else if (term instanceof Make) {
          if (term.type instanceof Identifier) {
@@ -457,7 +463,7 @@ export class JavascriptTranslator implements OutputTranslator {
             rawDisplay = "null";
          }
          if (term?.isTypeLevel) {
-            return "_L(" + rawDisplay + ")";
+            return `_L(${rawDisplay})`;
          } else {
             return rawDisplay;
          }
@@ -921,7 +927,7 @@ export class JavascriptTranslator implements OutputTranslator {
             type.left,
             scope
          )}._and(${this.translateType(type.right, scope)})`;
-      } else if (type instanceof LiteralType) {
+      } else if (type instanceof SingletonType) {
          return this.translateType(type.type, scope);
       } else if (type instanceof GenericNamedType) {
          return type.name;

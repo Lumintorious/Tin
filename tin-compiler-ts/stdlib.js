@@ -46,6 +46,8 @@ Object.prototype.__is_child = function (obj) {
 		}
 	} else if (Type._s in type) {
 		return type[Type._s].check._(obj)
+	} else {
+		return _L(this).__is_child(obj)
 	}
 	throw new Error("Unhandled")
 }
@@ -406,7 +408,7 @@ export const _U = function (obj1, obj2, name) {
 
 const _L_cache = new Map()
 
-export function _L(value) {
+export function _L(value, explicitName) {
 	function check(obj) {
 		return obj === value;
 	}
@@ -415,9 +417,11 @@ export function _L(value) {
 		broaderType = Number;
 	} else if (typeof value === "string") {
 		broaderType = String
+	} else if (typeof value === "object" && "_type" in value) {
+		broaderType = value._type._d ?? value._type;
 	}
 
-	const result = Type({ _: "" + value }, { _: check }, { _: check })._and(Literal({ _: value }, { _: broaderType }))
+	const result = Type({ _: explicitName ?? ("" + value) }, { _: check }, { _: check })._and(Singleton({ _: value }, { _: broaderType }))
 	result.__is_child = check
 	result._s = _L_cache.get(value) ?? Symbol("" + value)
 	if (!_L_cache.has(value)) {

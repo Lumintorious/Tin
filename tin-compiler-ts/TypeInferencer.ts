@@ -48,7 +48,7 @@ import {
    AnyType,
    AppliedGenericType,
    GenericNamedType,
-   LiteralType,
+   SingletonType,
    MutableType,
    OptionalType,
    ParamType,
@@ -373,7 +373,7 @@ export class TypeInferencer {
          calleeType = scope.resolveNamedType(
             node.callee instanceof Identifier && node.callee.isTypeIdentifier()
                ? this.context.translator.translate(node.callee, scope)
-               : this.infer(node.callee, scope)
+               : this.infer(node.callee, scope, { expectsBroadenedType: true })
          );
          const constructor = scope
             .resolveNamedType(calleeType)
@@ -584,7 +584,9 @@ export class TypeInferencer {
       scope: Scope,
       options: RecursiveResolutionOptions
    ): Type {
-      const calleeType = this.infer(node.callee, scope);
+      const calleeType = this.infer(node.callee, scope, {
+         expectsBroadenedType: true,
+      });
       const fields = this.getAllKnownFields(calleeType, scope);
       if (
          (fields.size === 0 && node.args.length > 0) ||
@@ -609,7 +611,9 @@ export class TypeInferencer {
       this.handleExtensionSearch(node, scope);
 
       if (!calleeType) {
-         calleeType = scope.resolveNamedType(this.infer(node.callee, scope));
+         calleeType = scope.resolveNamedType(
+            this.infer(node.callee, scope, { expectsBroadenedType: true })
+         );
       }
 
       if (node.callee instanceof Identifier && node.callee.isTypeIdentifier()) {
@@ -649,7 +653,9 @@ export class TypeInferencer {
       if (calleeType instanceof RoundValueToValueLambdaType) {
          if (calleeType.returnType instanceof ThisType) {
             if (node.callee instanceof Select) {
-               return this.infer(node.callee.owner, scope);
+               return this.infer(node.callee.owner, scope, {
+                  expectsBroadenedType: true,
+               });
             } else if (!isStructConstructor) {
                this.context.logs.error({
                   message:
@@ -1162,7 +1168,7 @@ export class TypeInferencer {
       if (options.expectsBroadenedType) {
          return type;
       }
-      return new LiteralType(String(node.value), type);
+      return new SingletonType(String(node.value), type);
    }
 
    getTypeType(type: Type, scope: Scope): Type {
@@ -1204,9 +1210,11 @@ export class TypeInferencer {
    ) {
       try {
          const symbol = scope.lookup(node.value); // ?? scope.lookupType(node.value);
-
          if (!symbol) {
             throw new Error(`Undefined identifier: ${node.value}`);
+         }
+         if (options.allowsSingletonType) {
+            return new SingletonType(symbol, symbol.typeSymbol);
          }
          return symbol.typeSymbol;
       } catch (e) {

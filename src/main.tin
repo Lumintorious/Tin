@@ -1,5 +1,5 @@
-import lib/Http
 import collections/Iterable
+import lib/Http
 
 handleRequest = (request: Request) ->
 	seq = Array.of(("Content-Type", "text"))
@@ -11,27 +11,30 @@ Cat = struct:
 	name: String
 	age: Number
 
+cat = Cat { age = 3, name = "Whiskers" }
+print(cat)
+
 Mech = struct:
 	material: String
 	version: Number
-
+	
 set Console.useFieldNames = false
 mechaCat = Mech { material = "Ironium", version = 3 } & Cat { name = "Whiskers", age = 3 }
-
-# server.listen()
-
-Type.allFields = (self: Type): Seq[(String, Field)] ->
-	if self :: Struct,
-		mapper = (field: Field) -> (self.name, field: Field)
-		self.fields.mapSeq(mapper)
-	else if self :: Intersection,
-		return (self.left.allFields()) .and (self.right.allFields())
-	else
-		Array.empty[(String, Field)]
 	
 MechaCat = Cat & Mech
 ggg = MechaCat.allFields()
-ggg.mapSeq((pair) -> pair.right).printAll()
+# ggg.mapSeq((pair) -> pair.right).printAll()
+Right = struct:
+	canAddEmployee: Boolean
 
+Rights.ADMIN = Right { canAddEmployee = true }
+Rights.USER = Right { canAddEmployee = false }
+Rights = Rights.ADMIN | Rights.USER
 
-print(ggg.makeIterator().next())
+Whiskers = mechaCat
+
+xy: mechaCat = mechaCat
+
+# print(Rights.allPossibilities())
+# print(ggg.makeIterator().next())
+print(mechaCat :: mechaCat)

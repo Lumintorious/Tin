@@ -416,6 +416,8 @@ export class UnaryOperator extends Term {
    }
 }
 
+export const IN_TYPE_CONTEXT = new Modifier();
+
 // Named values. Assigned beforehand in Assignment
 export class Identifier extends Term {
    value: string;
