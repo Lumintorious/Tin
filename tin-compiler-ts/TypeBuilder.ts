@@ -17,6 +17,7 @@ import {
    BAKED_TYPE,
    LINK_VAL,
    WHERE_INTERPOLATION_EXPECTED,
+   IN_TYPE_CONTEXT,
 } from "./Parser";
 import {
    Scope,
@@ -220,7 +221,7 @@ export class TypeBuilder {
             this.build(node.falseBranch, falseScope);
          }
       } else if (node instanceof Select) {
-         this.buildSelect(node, scope);
+         this.buildSelect(node, scope, options);
       } else if (node instanceof TypeDef) {
          this.buildTypeDef(node, scope, options);
       } else if (node instanceof RefinedDef) {
@@ -249,9 +250,13 @@ export class TypeBuilder {
                isStructConstructor = true;
                node.isCallingAConstructor = true;
             }
-            node.args.forEach(([n, t]) =>
-               this.build(t, scope, { isTypeLevel: options.isTypeLevel })
-            );
+            node.args.forEach(([n, t]) => {
+               this.build(t, scope, {
+                  isTypeLevel: true,
+                  allowsSingletonType: true,
+               });
+               t.modify(IN_TYPE_CONTEXT);
+            });
          } catch (e) {
             if (scope.iteration === "DECLARATION") {
                return;
@@ -275,7 +280,8 @@ export class TypeBuilder {
          }
       } else if (node instanceof Cast) {
          this.build(node.expression, scope);
-         this.build(node.type, scope);
+         node.type.modify(IN_TYPE_CONTEXT);
+         this.build(node.type, scope, { isTypeLevel: true });
          const castType = this.context.translator.translate(node.type, scope);
          const termType = this.context.inferencer.infer(node.expression, scope);
          this.buildVarTransformations(node, castType, termType);
@@ -905,13 +911,17 @@ export class TypeBuilder {
          }
          if (param.type)
             this.build(param.type, innerScope, {
-               assignedName: "ISTYPE",
+               assignedName: "IsType",
                isTypeLevel: true,
             });
       }
    }
 
-   buildSelect(node: Select, scope: Scope) {
+   buildSelect(
+      node: Select,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       // if (scope.iteration === "DECLARATION") return;
       const asName = node.nameAsSelectOfIdentifiers();
       try {
@@ -923,9 +933,13 @@ export class TypeBuilder {
             }
          }
       } catch (e) {}
-      this.context.inferencer.infer(node, scope); // To assign ownerComponent
-      this.build(node.owner, scope);
-      let parentType = this.context.inferencer.infer(node.owner, scope);
+      this.context.inferencer.infer(node, scope, options); // To assign ownerComponent
+      this.build(node.owner, scope, options);
+      let parentType = this.context.inferencer.infer(
+         node.owner,
+         scope,
+         options
+      );
       if (parentType instanceof MutableType) {
          node.owner.varTypeInInvarPlace = true;
       }
@@ -1366,6 +1380,7 @@ export class TypeBuilder {
          assignedName: node.lhs.show(),
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
+         allowsSingletonType: node.type !== undefined,
       });
       let rhsType = this.context.inferencer.infer(node.value, scope, {
          assignedName:
@@ -1373,8 +1388,11 @@ export class TypeBuilder {
          isTypeLevel:
             node.lhs instanceof Identifier && node.lhs.isTypeIdentifier(),
          expectsBroadenedType: !node.type,
-         allowsSingletonType: !!node.type,
+         allowsSingletonType: node.type !== undefined,
       });
+      console.log(
+         `Type of ${lhs.show()} is ${rhsType} from ${node.value.show()}`
+      );
       let isMutable = rhsType instanceof MutableType;
       if (!node.type) {
          if (rhsType instanceof SingletonType) {

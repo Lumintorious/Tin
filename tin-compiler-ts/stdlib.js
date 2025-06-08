@@ -32,9 +32,9 @@ export class Return {
 	}
 }
 
-Object.prototype.toString = function () {
-	return makeStr(this, true, true)
-}
+// Object.prototype.toString = function () {
+// 	return makeStr(this, true, true, new Set())
+// }
 
 Object.prototype.__is_child = function (obj) {
 	const type = (typeof this === 'object' && "_" in this) ? this._ : this
@@ -52,8 +52,12 @@ Object.prototype.__is_child = function (obj) {
 	throw new Error("Unhandled")
 }
 
-Object.prototype.toString = function () {
-	return makeStr(this, true, true)
+// Object.prototype.toString = function () {
+// 	return makeStr(this, true, true, new Set())
+// }
+
+export function toString(o) {
+	return makeStr(o, true, true, new Set())
 }
 
 export function _S(symbol, constructorRaw, descriptor, proto) {
@@ -143,7 +147,7 @@ export function _Q(symbol, func, descriptor) {
 				}
 				if ((typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol)) {
 					for (let i = 0; i < args.length; i++) {
-						if (args[i]._s !== obj[symbol]._ta[i]._s) {
+						if (args[i]._s !== obj[symbol]._ta[i]._s && args[i] !== Anything) {
 							return false;
 						}
 					}
@@ -164,9 +168,13 @@ export function _Q(symbol, func, descriptor) {
 	return newFunc;
 }
 
-export function Type$of(obj) {
+export function Type$of(obj, isAmmortized) {
+	if (isAmmortized && TinErr_.__is_child(obj)) {
+		return obj;
+	}
+
 	if (obj === undefined) {
-		return undefined;
+		return Ok;
 	}
 	if (typeof obj === "number") {
 		return Number._d;
@@ -185,8 +193,8 @@ export function Type$of(obj) {
 }
 
 export function Type$get(obj) {
-	if (obj === undefined || obj === null) {
-		return Nothing;
+	if (obj === undefined) {
+		return Ok;
 	}
 	let result = obj
 
@@ -208,8 +216,8 @@ export function _F_old(typeId, lambda, type) {
 
 export function _F(types, lambda) {
 	lambda._ta = types.map(t => t._s ? t._s : t);
-	const paramTypes = types.map(([name, type]) => {
-		return Field({ _: name }, { _: type._d ?? type })
+	const paramTypes = types.slice(0, -1).map(([name, type]) => {
+		return Parameter({ _: name }, { _: type._d ?? type })
 	});
 	const returnType = types[types.length - 1][1];
 	const __is_child = (obj) => {
@@ -219,7 +227,7 @@ export function _F(types, lambda) {
 
 		return true;
 	}
-	lambda._type = Type({ _: "Lambda" }, { _: __is_child }, { _: __is_child })._and(Lambda({ _: Seq(Type)(paramTypes) }, { _: returnType._d ?? returnType }))
+	lambda._type = Type({ _: "Lambda" }, { _: __is_child }, { _: __is_child })._and(Lambda({ _: Seq$createProperly(Type)(paramTypes) }, { _: returnType._d ?? returnType }))
 	return lambda;
 }
 
@@ -412,7 +420,7 @@ export function _L(value, explicitName) {
 	function check(obj) {
 		return obj === value;
 	}
-	let broaderType = Nothing;
+	let broaderType = Never;
 	if (typeof value === "number") {
 		broaderType = Number;
 	} else if (typeof value === "string") {
@@ -432,6 +440,7 @@ export function _L(value, explicitName) {
 }
 
 export const nothing = null;
+export const ok = undefined;
 
 function set(newValue) {
 	this._ = newValue;
@@ -507,10 +516,7 @@ export var Seq = (function () {
 			},
 			at: {
 				_: function (index) {
-					if (typeof index !== "number") {
-						throw new Error("Index was not number")
-					}
-					return args[index]
+					return args[index] ?? Error$NOTFOUND
 				}
 			},
 			and: {
@@ -688,10 +694,15 @@ export function _replaceComponentFields2(obj, replacer) {
 			continue;
 		}
 		for (const fieldKey of Reflect.ownKeys(obj[componentKey])) {
+			if (!Reflect.ownKeys(replacer).includes(fieldKey)) {
+				// skip copying from prototypes
+				continue;
+			}
 			let replacerField = replacer[fieldKey]
 			const objField = obj?.[componentKey]?.[fieldKey]
 			if (objField !== undefined && replacerField !== undefined) {
 				replacerField = replacerField._ ?? replacerField;
+
 				if (typeof replacerField === 'object' && !("_type" in replacerField)) {
 					const copied = copy(objField._)
 					replacerField = _replaceComponentFields2(copied, replacerField)
@@ -808,7 +819,7 @@ export function _cast(obj, type) {
 		console.error(type._s)
 		console.error(objToTest)
 		console.error(type.__is_child(objToTest))
-		throw new Error(`'${makeStr(objToTest, true, true)}' was not of type ${(type?._d ?? type)?._s?.description}`)
+		throw new Error(`'${makeStr(objToTest, true, true, new Set([{}]))}' was not of type ${(type?._d ?? type)?._s?.description}`)
 	}
 }
 
@@ -923,16 +934,25 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 	return ''; // For other types like functions, symbols, etc.
 }
 
-export function makeStr(obj, useToString, firstLayer = false) {
+export function makeStr(obj, useToString, firstLayer = false, existingCache) {
 	const useFieldNames = Console$useFieldNames._;
+	if (typeof obj._ === 'object' && existingCache.has(obj)) {
+		return "<recursive>";
+	}
+	if (existingCache.size === 0) {
+		throw new Error();
+	}
+	if (typeof obj === 'object') {
+		existingCache.add(obj)
+	}
 
 	if (obj === null) return firstLayer ? 'nothing' : green('nothing');
-	if (typeof obj === 'undefined') return firstLayer ? 'nothing' : green('nothing');
+	if (typeof obj === 'undefined') return firstLayer ? 'ok' : green('ok');
 	if (typeof obj === 'object' && "_" in obj) {
 		obj = obj._
 	}
 	if (obj === null) return firstLayer ? 'nothing' : green('nothing');
-	if (typeof obj === 'undefined') return firstLayer ? 'nothing' : green('nothing');
+	if (typeof obj === 'undefined') return firstLayer ? 'ok' : green('ok');
 
 	if (typeof obj === 'boolean') return firstLayer ? (obj ? 'true' : 'false') : green(obj ? 'true' : 'false');
 	if (typeof obj === 'number') return firstLayer ? ("" + obj) : green("" + obj);
@@ -946,13 +966,13 @@ export function makeStr(obj, useToString, firstLayer = false) {
 	if (seqSym) {
 		let result = yellow("Seq") + white(' { ');
 		for (let i = 0; i < obj[seqSym].length._(); i++) {
-			result += makeStr(obj[seqSym].at._(i)) + (i === obj[seqSym].length._() - 1 ? "" : white(", "))
+			result += makeStr(obj[seqSym].at._(i), useToString, false, existingCache) + (i === obj[seqSym].length._() - 1 ? "" : white(", "))
 		}
 
 		return result + white(" }")
 	}
 
-	if (useToString && obj[ToString._s]?.toString?._) {
+	if (useToString && typeof obj === 'object' && obj[ToString._s]) {
 		return obj[ToString._s]?.toString?._.call(obj)
 	}
 
@@ -987,14 +1007,13 @@ export function makeStr(obj, useToString, firstLayer = false) {
 		const component = obj[componentKey]
 		const componentName = (componentKey.description.startsWith("Tuple2") || componentKey.description.startsWith("Tuple3")) ? "" : componentKey.description + " "
 		const innerFields = Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_"));
-		results.push(colorSymbolName(componentName) + (innerFields.length === 0 ? "" : (white("{ ") + innerFields.map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ` : ""}${makeStr(component[k])}`).join(white(", ")) + white(" }"))))
+		results.push(colorSymbolName(componentName) + (innerFields.length === 0 ? "" : (white("{ ") + innerFields.map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ` : ""}${makeStr(component[k], useToString, false, existingCache)}`).join(white(", ")) + white(" }"))))
 	}
 
 	return results.join(white(" & "))
 }
 
 export function printTable(objs /* [] */) {
-	// console.log(obj)
 	let arr = objs[Seq._s]._rawArray;
 	let symbolsSet = [];
 	const symbols = [];
@@ -1035,7 +1054,7 @@ export function printTable(objs /* [] */) {
 	arr.forEach(obj => {
 		symbols.filter(s => s.symbol in obj).forEach(sym => {
 			sym.fields.filter(field => field.name in obj[sym.symbol]).forEach(field => {
-				const fieldString = makeStr(obj[sym.symbol][field.name], true, true)
+				const fieldString = makeStr(obj[sym.symbol][field.name], true, true, new Set([{}]))
 				const unformattedFieldString = fieldString.replaceAll(/\x1b\[[0-9]+m/g, "")
 				if (unformattedFieldString.length > field.width) {
 					field.width = unformattedFieldString.length
@@ -1181,12 +1200,20 @@ export function _addStack(tinErr, line) {
 
 // })
 
+export function _set(varObj, newValue) {
+	if ("set" in varObj) {
+		varObj.set(newValue)
+	} else {
+		varObj._ = newValue
+	}
+}
+
 export const printRaw = (arg) => {
-	console.log(makeStr(arg, false, true))
+	console.log(makeStr(arg, false, true, new Set([{}])))
 }
 
 export const print = (arg) => {
-	let out = [makeStr(arg, true, true)];
+	let out = [makeStr(arg, true, true, new Set([{ x: 55 }]))];
 	if ("document" in globalThis) {
 		out = ansiToConsoleLogArgs(out[0])
 	}
@@ -1267,8 +1294,29 @@ function ansiToConsoleLogArgs(ansi) {
 
 export function clojure(obj) {
 	Object.entries(obj._clojure).forEach(([k, v]) => {
-		debug(k)
-		debug(v)
+		let presentInFields = ""
+		let usedInLambdas = ""
+		for (const componentKey of Reflect.ownKeys(obj)) {
+			if (typeof componentKey !== 'symbol') {
+				continue;
+			}
+			const component = obj[componentKey]
+			for (const fieldKey of Reflect.ownKeys(component)) {
+				if (typeof fieldKey !== 'string' || fieldKey.startsWith("_")) {
+					continue
+				}
+				const field = component[fieldKey]
+				if (field === v || field._ === v || field._cl === k) {
+					presentInFields += `${yellow(componentKey.description)}.${red(fieldKey)}, `
+				}
+				if (typeof field._ === 'function' && Object.hasOwn(field._._clojure, k)) {
+					usedInLambdas += `${yellow(componentKey.description)}.${blue(fieldKey)}, `
+				}
+			}
+		}
+		if (presentInFields.endsWith(", ")) presentInFields = presentInFields.substring(0, presentInFields.length - 2)
+		if (usedInLambdas.endsWith(", ")) usedInLambdas = usedInLambdas.substring(0, usedInLambdas.length - 2)
+		console.log((presentInFields.length === 0 ? red("external") : presentInFields) + white(" @ ") + (usedInLambdas.length === 0 ? "unused" : `${usedInLambdas}`) + " = " + makeStr(v, true, false, new Set([{}])))
 	})
 }
 
@@ -1324,7 +1372,7 @@ export function lazy(make) {
 			if (prop === "_d" && value) {
 				return value;
 			}
-			return target[prop];
+			return value[prop];
 		},
 		set(target, prop, v) {
 			if (value) {
@@ -1360,7 +1408,7 @@ export function Struct$createDynamically(args) {
 	for (let i = 0; i < arr.length; i++) {
 		const fieldType = fieldArr[i][Field._s].type._;
 		if (!fieldType[Type._s].check._(arr[i])) {
-			throw new Error("Could not coerce " + makeStr(arr[i]) + " to " + fieldType._s.description)
+			throw new Error("Could not coerce " + makeStr(arr[i], true, true, new Set()) + " to " + fieldType._s.description)
 		}
 	}
 	return constructor.call(this, ...arr)
@@ -1374,7 +1422,7 @@ export function _interpolation(elems) {
 			return Interpolation({ _: e[0] }, { _: e[1] })
 		}
 	});
-	const arr = Seq(_U(String, Interpolation))(_arr)
+	const arr = Seq$createProperly(_U(String, Interpolation))(_arr)
 	return InterpolatedString({ _: arr })
 }
 

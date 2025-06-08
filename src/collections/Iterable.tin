@@ -75,10 +75,10 @@ Map.of: [K, V] -> (kvs: Seq[(K, V)]) -> Map[K, V] = external
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 	Iterator[X]((): X? ->
 		prev = self.next()
-		if prev !: Nothing,
+		if prev !: Error,
 			fn(prev)
 		else
-			nothing
+			Error { message = "End of iterator reached" }
 	)
 
 Iterable.map = [T, X] -> (self: Iterable[T], fn: (T) -> X): Iterable[X] ->
@@ -94,7 +94,7 @@ Iterator.consumeEach = [T] -> (self: Iterator[T], fn: (T) -> Nothing) ->
 	iterator = self
 	current = var iterator.next()
 	
-	while current !: Nothing,
+	while current !: Error,
 		fn(current)
 		set current = iterator.next()
 
@@ -104,9 +104,17 @@ Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) -> Nothing) ->
 	iterator = self.makeIterator()
 	current = var iterator.next()
 	
-	while current !: Nothing,
+	while current !: Error,
 		fn(current)
 		set current = iterator.next()
+
+Iterable.contains = [T] -> (self: Iterable[T], value: T): Boolean ->
+	found = var false
+	self.forEach((elem: T) ->
+		if elem == value,
+			set found = true
+	)
+	found
 
 Iterable.fromArray = [T] -> (arr: Seq[T]) ->
 	Iterable[T](() ->
@@ -131,11 +139,11 @@ export const Seq$fromIterator = (T) => (iter) => \{
 	const arr = [];
 	const sym = Reflect.ownKeys(iter).filter(s => typeof s === \'symbol\' && s.description.startsWith(\'Iterator\') )[0]
 	let i = iter[sym].next._()
-	while(i !== null && i !== undefined) \{
+	while(i !== null && i !== undefined && !TinErr_.__is_child(i)) \{
 		arr.push(i)
 		i = iter[sym].next._()
 	\}
-	return Seq(T)(arr)
+	return Seq$createProperly(T)(arr)
 
 \}
 
@@ -155,7 +163,7 @@ Seq.stream = [T] -> (self: Seq[T]) -> Iterable.fromArray(self)
 external "
 export function Json$fromString(str) \{
 	return JSON.parse(str, (key, value) => \{
-		if (_JsArr.isArray(value)) return Seq(Json)(value)
+		if (_JsArr.isArray(value)) return Seq$createProperly(Json)(value)
 		if (typeof value === \'object\') return _mapFromJsMap(String, Json, new Map(Object.entries(value)))
 
 		return value;
@@ -201,12 +209,12 @@ export function Json$toString(js) \{
 Iterable.toString = [T] -> (iter: Iterable[T], label: String = " "): String ->
 	iterator = iter.makeIterator()
 	current = var iterator.next()
-	str = var "{label} \{"
+	str = var "{label} \{ "
 	
-	while current !: Nothing,
+	while current !: Error,
 		set str = "{str}{toString(current)}"
 		set current = iterator.next()
-		if current !: Nothing,
+		if current !: Error,
 			set str = "{str}, "
 
 	"{str} \}"

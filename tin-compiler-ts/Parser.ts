@@ -416,7 +416,18 @@ export class UnaryOperator extends Term {
    }
 }
 
+// Marks that a term is used where a type is expected, requiring some conversion from literals/identifiers/static selects
 export const IN_TYPE_CONTEXT = new Modifier();
+
+export function isTypeName(str: string) {
+   const parts = str.split(/(@|\.)/g);
+   const lastPart = parts[parts.length - 1];
+
+   return (
+      lastPart.charAt(0) === lastPart.charAt(0).toUpperCase() &&
+      lastPart.charAt(1) === lastPart.charAt(1).toLowerCase()
+   );
+}
 
 // Named values. Assigned beforehand in Assignment
 export class Identifier extends Term {
@@ -434,10 +445,7 @@ export class Identifier extends Term {
    }
 
    isTypeIdentifier() {
-      const parts = this.value.split(/(@|\.)/g);
-      const lastPart = parts[parts.length - 1];
-
-      return lastPart.charAt(0) === lastPart.charAt(0).toUpperCase();
+      return isTypeName(this.value);
    }
 }
 
@@ -505,6 +513,14 @@ export class Select extends Term {
       }
 
       return path;
+   }
+
+   getRootMostOwner(): Term {
+      if (this.owner instanceof Select) {
+         return this.owner.getRootMostOwner();
+      } else {
+         return this.owner;
+      }
    }
 
    show() {
@@ -774,6 +790,9 @@ export class Parser {
       ) {
          this.consume("OPERATOR", "-");
          left = this.parsePrimary();
+         if (left instanceof Literal && left.type === Literal.NUMBER) {
+            return new Literal(-(left.value as Number), Literal.NUMBER);
+         }
          left = new UnaryOperator("-", left);
       } else if (this.peek() && this.peek().value === "var") {
          this.consume("OPERATOR", "var");
@@ -1512,6 +1531,9 @@ export class RefinedDef extends Term {
    constructor(lambda: RoundValueToValueLambda) {
       super("RefinedDef");
       this.lambda = lambda;
+      if (lambda.block.statements.length === 0) {
+         throw new Error("RefinedDef must have at least one statement");
+      }
    }
 }
 

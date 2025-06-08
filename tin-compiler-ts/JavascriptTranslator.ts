@@ -167,7 +167,7 @@ export class JavascriptTranslator implements OutputTranslator {
          parameters +
          " => _o({" +
          typeDef.fieldDefs.map((param, i) => {
-            return `${param.name}: _p${i}`;
+            return `${this.doReplacing(param.name)}: _p${i}`;
          }) +
          "})"
       );
@@ -224,11 +224,15 @@ export class JavascriptTranslator implements OutputTranslator {
             !(term instanceof AppliedKeyword && term.keyword === "return")
          ) {
             let clojureName = "";
+            let isMutable = false;
             if (term instanceof Identifier) {
                const symbol = scope.lookup(term.value);
+               isMutable = symbol.typeSymbol instanceof MutableType;
                clojureName = this.makeClojureIdent(symbol);
             }
-            result = `_var(/*44*/[], () => ${result},false, '${clojureName}')`;
+            if (!isMutable) {
+               result = `_var(/*44*/[], () => ${result},false, '${clojureName}')`;
+            }
          } else if (
             term.invarTypeInVarPlace &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
@@ -260,6 +264,23 @@ export class JavascriptTranslator implements OutputTranslator {
       return result;
    }
 
+   nameReplacers: { [_: string]: string } = {
+      // Type: "Type$",
+      this: "this_",
+      // self: "this",
+      Error: "TinErr_",
+      Map: "Map_",
+      //   toString: "tinToString_",
+   };
+
+   doReplacing(str: string): string {
+      if (Object.keys(this.nameReplacers).includes(str)) {
+         return this.nameReplacers[str];
+      } else {
+         return str;
+      }
+   }
+
    translateRaw(
       term: AstNode | Type | undefined,
       scope: Scope,
@@ -282,7 +303,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // Block
       } else if (term instanceof Block) {
-         let last = term.statements.pop();
+         let last = term.statements[term.statements.length - 1];
          scope = scope.innerScopeOf(term);
          const isTerm = last instanceof Term;
          const shouldReturn =
@@ -292,7 +313,9 @@ export class JavascriptTranslator implements OutputTranslator {
             !(last instanceof WhileLoop || last instanceof AppliedKeyword);
          const forceReturn = args.forceReturn;
          let result = [
-            ...term.statements.map((st) => this.translate(st, scope)),
+            ...term.statements
+               .slice(0, term.statements.length - 1)
+               .map((st) => this.translate(st, scope)),
             (shouldReturn ? (args.normalReturn ? "return " : "throw ") : "") +
                `${this.translate(last, scope)}` +
                (shouldReturn ? "" : ""),
@@ -314,7 +337,7 @@ export class JavascriptTranslator implements OutputTranslator {
          const operator = term.ammortized ? "?." : ".";
          let ownerName = this.translate(term.owner, scope);
          if (term.field === "Type") {
-            return `Type$of(${ownerName})`;
+            return `Type$of(${ownerName}, ${term.ammortized === true})`;
          }
          if (
             !term.ownerComponent &&
@@ -335,21 +358,14 @@ export class JavascriptTranslator implements OutputTranslator {
                ?.replaceAll(".", "$")}`;
             ownerName = "";
          } else if (term.ownerComponent) {
-            const symbolSplice =
-               // 	term.ownerComponentAppliedSquareTypes
-               //    ? `_Q_share(${
-               //         term.ownerComponent
-               //      }._s, [${term.ownerComponentAppliedSquareTypes
-               //         .map((s) => `${this.translateType(s, scope)}._s`)
-               //         .join(",")}] )`
-               //    :
-               `${term.ownerComponent}._s`;
-            selectionBase = `[${symbolSplice}]${operator}${term.field}`;
-         } else if (term.unionOwnerComponents) {
-            selectionBase = `._findComponentField([${term.unionOwnerComponents
-               .filter((c) => c)
-               .map((c) => `${c}._s`)
-               .join(",")}], "${term.field}")`;
+            let symbolSplice = `${
+               Object.keys(this.nameReplacers).includes(term.ownerComponent)
+                  ? this.nameReplacers[term.ownerComponent]
+                  : term.ownerComponent
+            }._s`;
+            selectionBase = `[${symbolSplice}]${operator}${this.doReplacing(
+               term.field
+            )}`;
          }
          if (
             !term.varTypeInInvarPlace &&
@@ -360,6 +376,9 @@ export class JavascriptTranslator implements OutputTranslator {
          }
 
          let result = `${ownerName}${selectionBase}`;
+         if (term.ammortized) {
+            result = `(function() { const _amm_owner = ${ownerName}; return TinErr_.__is_child(_amm_owner) ? (_amm_owner) : (_amm_owner${selectionBase})}).call(this)`;
+         }
          if (term.is(IN_TYPE_CONTEXT)) {
             result = `_L(${result}, "${term.nameAsSelectOfIdentifiers()}")`;
          }
@@ -404,7 +423,7 @@ export class JavascriptTranslator implements OutputTranslator {
             if (lhs.endsWith(this.accessMutable)) {
                lhs = lhs.substring(0, lhs.length - 2);
             }
-            return `${lhs}.set(${rhsIfMutable})`;
+            return `_set(${lhs}, ${rhsIfMutable})`;
          }
 
          // Assignment
@@ -462,7 +481,7 @@ export class JavascriptTranslator implements OutputTranslator {
          } else {
             rawDisplay = "null";
          }
-         if (term?.isTypeLevel) {
+         if (term.is(IN_TYPE_CONTEXT)) {
             return `_L(${rawDisplay})`;
          } else {
             return rawDisplay;
@@ -493,20 +512,14 @@ export class JavascriptTranslator implements OutputTranslator {
 
          // Identifier
       } else if (term instanceof Identifier) {
-         const replacers: { [_: string]: string } = {
-            // Type: "Type$",
-            this: "this_",
-            // self: "this",
-            Error: "TinErr_",
-            Map: "Map_",
-         };
          let value = term.value.replaceAll("@", "$").replaceAll(".", "$");
-         if (Object.keys(replacers).includes(value)) {
-            value = replacers[value];
+         if (Object.keys(this.nameReplacers).includes(value)) {
+            value = this.nameReplacers[value];
          }
          if (term.isFromSelfClojure && !args.isLhs) {
             const symbol = scope.lookup(term.value);
             if (
+               !term.varTypeInInvarPlace &&
                ((symbol.isUsedInClojures && symbol.isSentToConstructors) ||
                   symbol.typeSymbol instanceof MutableType) &&
                symbol.name.startsWith("@")

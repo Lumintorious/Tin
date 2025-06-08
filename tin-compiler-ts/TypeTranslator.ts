@@ -48,6 +48,7 @@ import {
    StructType,
    OptionalType,
 } from "./Types";
+import { SingletonTypesModule } from "./modules/SingletonTypesModule";
 
 // Handles translation of AST nodes to Types
 // This does not "infer" the type of the node,
@@ -205,6 +206,7 @@ export class TypeTranslator {
                throw new Error("Weird type");
             }
             const innerScopeX = scope.innerScopeOf(node, true);
+            const innerScopeXBlock = innerScopeX.innerScopeOf(node.block, true);
             const genericParametersX = node.parameterTypes.map((p) => {
                const param = this.translate(p, innerScopeX);
                if (param instanceof GenericNamedType) {
@@ -313,17 +315,11 @@ export class TypeTranslator {
             }
          case "Select":
             if (node instanceof Select) {
-               const asName = node.nameAsSelectOfIdentifiers();
-               if (asName !== undefined) {
-                  if (this.context.inferencer.isCapitalized(asName)) {
-                     const symbol = scope.lookup(asName);
-                     node.isBeingTreatedAsIdentifier = true;
-                     node.isTypeLevel = true;
-                     node.modify(IN_TYPE_CONTEXT);
-                     return new SingletonType(symbol, symbol.typeSymbol);
-                  }
-                  return scope.lookupType(asName).typeSymbol;
-               }
+               return SingletonTypesModule.selectToSingletonType(
+                  node,
+                  scope,
+                  this.context
+               );
             }
          default:
             throw new Error(

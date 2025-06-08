@@ -3,15 +3,13 @@ import collections/Iterable
 HttpMethod = "GET" | "POST" | "PUT" | "DELETE"
 UrlParams = Seq[(String, String)]
 Headers = Seq[(String, String)]
+Headers.empty = Array.empty[(String, String)]
 
 UrlString = String where:
 	self.matches("^(https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]\{2,\}(?:\/[a-zA-Z0-9\-\.]*)*\/?$")
 
 Port = Number where:
 	self >= 0 && self < 65536
-
-Byte = Number where:
-	self >= 0 && self < 256
 
 Status = Number where:
 	self > 100 && self < 600

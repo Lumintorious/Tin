@@ -9,6 +9,7 @@ import {
 import {
    BAKED_TYPE,
    IN_RETURN_BRANCH,
+   isTypeName,
    Optional,
    RefinedDef,
    Tuple,
@@ -61,6 +62,7 @@ import {
    TypeOfTypes,
    UncheckedType,
 } from "./Types";
+import { SingletonTypesModule } from "./modules/SingletonTypesModule";
 
 export class TypeInferencer {
    context: TypePhaseContext;
@@ -429,10 +431,7 @@ export class TypeInferencer {
    }
 
    isCapitalized(str: string) {
-      const parts = str.split("@");
-      const lastPart = parts[parts.length - 1];
-
-      return lastPart.charAt(0) === lastPart.charAt(0).toUpperCase();
+      return isTypeName(str);
    }
 
    asMutable(type: Type, node: Term, toMutable: boolean) {
@@ -666,6 +665,22 @@ export class TypeInferencer {
             }
          }
          let result = calleeType.returnType;
+
+         result = Type.walkTypes(result, (t) => {
+            if (
+               t instanceof SingletonType &&
+               t.value instanceof Symbol &&
+               node.callee.inferredType instanceof RoundValueToValueLambdaType
+            ) {
+               let i = 0;
+               for (const param of node.callee.inferredType.params) {
+                  if (t.value.name === param.name) {
+                     return node.args[i][1].inferredType;
+                  }
+                  i++;
+               }
+            }
+         });
          if (node.ammortized && !(result instanceof OptionalType)) {
             result = new OptionalType(result);
          }
@@ -762,6 +777,7 @@ export class TypeInferencer {
          try {
             const type = scope.lookup(asSelectOfIdentifiers).typeSymbol;
             node.isDeclaration = true;
+            console.log(`#Treating ${node.show()} as identifier in inferer`);
             return type;
          } catch (e) {
             // console.error(e.message);
@@ -773,9 +789,6 @@ export class TypeInferencer {
       let ownerType: Type;
       ownerType = this.infer(node.owner, scope);
 
-      if (node.field === "Type") {
-         return this.getTypeType(ownerType, scope);
-      }
       // }
       if (node.ammortized && ownerType instanceof OptionalType) {
          ownerType = ownerType.type;
@@ -798,57 +811,55 @@ export class TypeInferencer {
       if (ownerType instanceof IntersectionType) {
          ownerType = ownerType.simplified();
       }
-      let fields: Map<Type, ParamType[]>;
-      try {
-         fields = this.getAllKnownFields(ownerType, scope);
-      } catch (e) {
-         console.log(node.field);
-         throw e;
-      }
-      if (ownerType instanceof UnionType) {
-         node.unionOwnerComponents = [...fields.keys()].map(
-            (t) => t.name as string
-         );
-      }
-      const found = findField(node.field, fields);
-      if (!found) {
-         //  this.context.errors.add(
-         //     `Field '${node.field}' could not be found on '` +
-         //        ownerType.toString() +
-         //        "'",
-         //     options.typeExpectedInPlace,
-         //     undefined,
-         //     node.position,
-         //     "Found: " +
-         //        [...fields.values()]
-         //           .map((arr) => `${arr.map((p) => p.name)}`)
-         //           .flat()
-         //           .join(", ") +
-         //        ""
-         //  );
-         if (scope.iteration === "RESOLUTION") {
-            this.context.logs.error({
-               message:
-                  `Field '${node.field}' could not be found on '` +
-                  ownerType.toString() +
-                  "'",
-               position: node.position,
-            });
+      let result: Type;
+      if (node.field === "Type") {
+         result = this.getTypeType(ownerType, scope);
+      } else {
+         let fields: Map<Type, ParamType[]>;
+         try {
+            fields = this.getAllKnownFields(ownerType, scope);
+         } catch (e) {
+            console.log(node.field);
+            throw e;
          }
-         return new UncheckedType();
-      }
+         if (ownerType instanceof UnionType) {
+            node.unionOwnerComponents = [...fields.keys()].map(
+               (t) => t.name as string
+            );
+         }
+         const found = findField(node.field, fields);
+         if (!found) {
+            if (scope.iteration === "RESOLUTION") {
+               this.context.logs.error({
+                  message:
+                     `Field '${node.field}' could not be found on '` +
+                     ownerType.toString() +
+                     "'",
+                  position: node.position,
+               });
+            }
+            return new UncheckedType();
+         }
 
-      found[1].parentComponent = found[0];
-      node.ownerComponent = found[0].name;
-      if (found[0] instanceof StructType) {
-         node.ownerComponentAppliedSquareTypes = (
-            found[0].squareParamsApplied ?? []
-         ).filter((t) => t !== undefined);
+         found[1].parentComponent = found[0];
+         node.ownerComponent = found[0].name;
+         if (found[0] instanceof StructType) {
+            node.ownerComponentAppliedSquareTypes = (
+               found[0].squareParamsApplied ?? []
+            ).filter((t) => t !== undefined);
+         }
+         result = found[1].type;
       }
-      let result = found[1].type;
       //   if (isOwnerMutable && !(found[1].type instanceof MutableType)) {
       //      node.invarTypeInVarPlace = true;
       //   }
+
+      result = SingletonTypesModule.selectToSingleton(
+         node,
+         result,
+         scope,
+         options.allowsSingletonType === true
+      );
       if (node.ammortized) {
          result = new OptionalType(result);
       }
@@ -995,12 +1006,24 @@ export class TypeInferencer {
       return new Map();
    }
 
-   findReturns(node: Statement, thisScope: Scope, acc: [Term, Type][]) {
+   findReturns(
+      node: Statement,
+      thisScope: Scope,
+      acc: [Term, Type][],
+      allowSingletonType: boolean = false
+   ) {
       if (node instanceof AppliedKeyword && node.keyword === "return") {
-         acc.push([node.param, this.infer(node.param, thisScope)]);
+         acc.push([
+            node.param,
+            this.infer(node.param, thisScope, {
+               allowsSingletonType: allowSingletonType,
+            }),
+         ]);
       } else if (node instanceof Optional) {
          node.expression.modifyFrom(node, IN_RETURN_BRANCH);
-         const innerType = this.infer(node.expression, thisScope);
+         const innerType = this.infer(node.expression, thisScope, {
+            allowsSingletonType: allowSingletonType,
+         });
          if (innerType instanceof UnionType) {
             if (
                innerType.left.isAssignableTo(Nothing, thisScope) ||
@@ -1028,12 +1051,14 @@ export class TypeInferencer {
             if (node.is(IN_RETURN_BRANCH)) {
                acc.push([
                   returnStatement,
-                  this.infer(returnStatement, innerScope),
+                  this.infer(returnStatement, innerScope, {
+                     allowsSingletonType: allowSingletonType,
+                  }),
                ]);
             }
          }
          for (let statement of node.statements) {
-            this.findReturns(statement, innerScope, acc);
+            this.findReturns(statement, innerScope, acc, allowSingletonType);
          }
       } else if (node instanceof IfStatement) {
          const ifScope = thisScope.innerScopeOf(node, true);
@@ -1044,7 +1069,8 @@ export class TypeInferencer {
             node.trueBranch instanceof Block
                ? ifScope.innerScopeOf(node.trueBranch, true)
                : ifScope,
-            acc
+            acc,
+            allowSingletonType
          );
          if (node.falseBranch) {
             this.findReturns(
@@ -1052,23 +1078,29 @@ export class TypeInferencer {
                node.falseBranch instanceof Block
                   ? ifScope.innerScopeOf(node.falseBranch, true)
                   : ifScope,
-               acc
+               acc,
+               allowSingletonType
             );
          }
       } else if (node instanceof WhileLoop) {
-         this.findReturns(node.action, thisScope.innerScopeOf(node), acc);
+         this.findReturns(
+            node.action,
+            thisScope.innerScopeOf(node),
+            acc,
+            allowSingletonType
+         );
       } else if (node instanceof BinaryExpression) {
-         this.findReturns(node.left, thisScope, acc);
-         this.findReturns(node.right, thisScope, acc);
+         this.findReturns(node.left, thisScope, acc, allowSingletonType);
+         this.findReturns(node.right, thisScope, acc, allowSingletonType);
       } else if (node instanceof UnaryOperator) {
-         this.findReturns(node.expression, thisScope, acc);
+         this.findReturns(node.expression, thisScope, acc, allowSingletonType);
       } else if (node instanceof Select) {
-         this.findReturns(node.owner, thisScope, acc);
+         this.findReturns(node.owner, thisScope, acc, allowSingletonType);
       } else if (node instanceof Assignment && node.value !== undefined) {
-         this.findReturns(node.value, thisScope, acc);
+         this.findReturns(node.value, thisScope, acc, allowSingletonType);
       } else if (node instanceof Call) {
          for (const arg of node.args) {
-            this.findReturns(arg[1], thisScope, acc);
+            this.findReturns(arg[1], thisScope, acc, allowSingletonType);
          }
       }
    }
@@ -1078,9 +1110,6 @@ export class TypeInferencer {
       scope: Scope,
       options: RecursiveResolutionOptions
    ): Type {
-      // TO DO: change to find returns recursively
-      const inferencer = this;
-
       if (node.statements.length === 0) {
          return new Type();
       }
@@ -1094,7 +1123,27 @@ export class TypeInferencer {
       try {
          const allFoundReturnsInside: [Term, Type][] = [];
          node.modify(IN_RETURN_BRANCH);
-         this.findReturns(node, scope, allFoundReturnsInside);
+         this.findReturns(
+            node,
+            scope,
+            allFoundReturnsInside,
+            options.allowsSingletonType
+         );
+         allFoundReturnsInside.forEach((r) => {
+            if (
+               options.allowsSingletonType &&
+               r[0] instanceof AppliedKeyword &&
+               r[0].keyword === "return" &&
+               r[0].param instanceof Identifier
+            ) {
+               const symbol = scope.innerScopeOf(node).lookup(r[0].param.value);
+               r[1] = new SingletonType(symbol, r[1]);
+            }
+            if (options.allowsSingletonType && r[0] instanceof Identifier) {
+               const symbol = scope.innerScopeOf(node).lookup(r[0].value);
+               r[1] = new SingletonType(symbol, r[1]);
+            }
+         });
          const allFoundReturnTypesInside = allFoundReturnsInside.map((r) => {
             if (r[1] instanceof MutableType) {
                r[0].varTypeInInvarPlace = true;
@@ -1468,6 +1517,8 @@ export class TypeInferencer {
          let returnType = this.infer(node.block, innerScope, {
             isTypeLevel: options.isTypeLevel,
             typeExpectedInPlace: specifiedType,
+            allowsSingletonType: node.specifiedType !== undefined,
+            expectsBroadenedType: node.specifiedType === undefined,
          });
 
          if (specifiedType) {

@@ -1,40 +1,63 @@
-import collections/Iterable
-import lib/Http
+# import lib/Http
+# import collections/Iterable
 
-handleRequest = (request: Request) ->
-	seq = Array.of(("Content-Type", "text"))
-	Response { 200, seq, "Hello World" }
+# Box = struct:
+# 	number: var Number
+# 	ten: () -> Number
 
-server = HttpServer.live(3000: Port, handleRequest)
+# Box.new = () ->
+# 	@number = var 10
+# 	Box { @number, () -> @number * 10 }
 
-Cat = struct:
-	name: String
-	age: Number
+# box = Box.new()
+# set box.number = 12
+# print(box.ten())
 
-cat = Cat { age = 3, name = "Whiskers" }
-print(cat)
 
-Mech = struct:
-	material: String
-	version: Number
-	
-set Console.useFieldNames = false
-mechaCat = Mech { material = "Ironium", version = 3 } & Cat { name = "Whiskers", age = 3 }
-	
-MechaCat = Cat & Mech
-ggg = MechaCat.allFields()
-# ggg.mapSeq((pair) -> pair.right).printAll()
-Right = struct:
-	canAddEmployee: Boolean
+Material = Named & struct:
+	damage: Number
+	speed: Number
+	resistance: Number
 
-Rights.ADMIN = Right { canAddEmployee = true }
-Rights.USER = Right { canAddEmployee = false }
-Rights = Rights.ADMIN | Rights.USER
+Material.WOOD = Named { "Wood" } & Material { 5, 5, 100 }
+Material.STONE = Named { "Stone" } & Material { 8, 10, 200 }
+Material.IRON = Named { "Iron" } & Material { 10, 10, 500 }
+Material.GOLD = Named { "Gold" } & Material { 25, 30, 50 }
+Material.DIAMOND = Named { "Diamond" } & Material { 35, 35, 1000 }
 
-Whiskers = mechaCat
+BasicMaterial = Material.WOOD | Material.STONE | Material.IRON | Material.GOLD | Material.DIAMOND
 
-xy: mechaCat = mechaCat
+MadeOfMaterial = struct:
+	material: Material
+	amount: Number
 
-# print(Rights.allPossibilities())
-# print(ggg.makeIterator().next())
-print(mechaCat :: mechaCat)
+DealsDamage = struct:
+	dealDamage: () -> Number
+	getSpeed: () -> Number
+
+HasDurability = struct:
+	durability: var Number
+
+Broken = HasDurability where:
+	self.durability <= 0
+
+Sword = MadeOfMaterial & DealsDamage & HasDurability
+
+Sword.new = (@material: Material) ->
+	@durability = var @material.resistance
+
+	MadeOfMaterial { @material, 100 } & HasDurability { @durability } & DealsDamage { () -> @material.damage * (@durability / @material.resistance), () -> @material.speed }
+
+mySword = Sword.new(Material.IRON)
+
+print(mySword.dealDamage())
+newSword = mySword { durability = 125 }
+set mySword.durability = 0
+print(mySword.dealDamage())
+
+swords = Array.of(
+	mySword,
+	newSword
+)
+
+print(swords)

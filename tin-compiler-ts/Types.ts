@@ -6,6 +6,7 @@ import {
    PotentialTypeArgs,
    RoundValueToValueLambda,
    BinaryExpression,
+   Select,
 } from "./Parser";
 import { GenericTypeMap, Scope, Symbol, TypePhaseContext } from "./Scope";
 import { Identifier, Literal } from "./Parser";
@@ -74,6 +75,12 @@ export class Type {
    toString(): string {
       return `Unknown ${this.tag}`; // Base export class
    }
+
+   static walkTypes(root: Type, fn: (type: Type) => Type | undefined) {
+      const result = fn(root);
+      if (result instanceof Type) return result;
+      else return root;
+   }
 }
 
 export class UncheckedType extends Type {
@@ -101,6 +108,7 @@ export class UncheckedType extends Type {
 export class AnyType extends Type {
    constructor() {
       super("Anything");
+      this.name = "Anything";
    }
 
    isAssignableTo(other: Type): boolean {
@@ -275,10 +283,15 @@ export class ModuleType extends Type {
 export class SingletonType extends Type {
    value: string | Symbol;
    type: Type;
-   constructor(value: string | Symbol, type: Type) {
+   select?: Select;
+   constructor(value: string | Symbol, type: Type, select?: Select) {
       super("SingletonType");
       this.value = value;
       this.type = type;
+      if (type instanceof SingletonType) {
+         this.type = type.type;
+      }
+      this.select = select;
    }
 
    isAssignableTo(other: Type, scope: Scope): boolean {
@@ -296,7 +309,10 @@ export class SingletonType extends Type {
       if (
          other instanceof SingletonType &&
          this.type.extends(other.type, scope) &&
-         this.value === other.value
+         (other.value === this.value ||
+            (other.value instanceof Symbol &&
+               this.value instanceof Symbol &&
+               other.value.name === this.value.name))
       ) {
          return true;
       }
@@ -311,20 +327,26 @@ export class SingletonType extends Type {
       return (
          other instanceof SingletonType &&
          other.type.isExtendedBy(this.type, scope) &&
-         other.value === this.value
+         (other.value === this.value ||
+            (other.value instanceof Symbol &&
+               this.value instanceof Symbol &&
+               other.value.name === this.value.name))
       );
    }
 
    toString() {
-      if (this.value instanceof Symbol) {
-         return this.name ?? this.value.name;
+      let result = "";
+      if (this.select) {
+         result = this.select.show();
+      } else if (this.value instanceof Symbol) {
+         result = this.name ?? this.value.name;
+      } else if (this.type.name === "String") {
+         result = `"${this.value}"`;
+      } else {
+         result = this.value;
       }
 
-      if (this.type.name === "String") {
-         return `"${this.value}"`;
-      } else {
-         return this.value;
-      }
+      return `${result} (${this.type.toString()})`;
    }
 }
 
@@ -440,15 +462,26 @@ export class OptionalType extends Type {
    }
 
    extends(other: Type, scope: Scope): boolean {
-      return false;
+      if (other instanceof OptionalType && this.isSame(other, scope)) {
+         return true;
+      }
+      return (
+         this.type.isAssignableTo(other, scope) ||
+         other.isAssignableTo(new NamedType("Error"), scope)
+      );
    }
 
    isExtendedBy(other: Type, scope: Scope) {
       if (other instanceof OptionalType && this.isSame(other, scope)) {
          return true;
       }
-
-      return other.isAssignableTo(this.type, scope) || other === Nothing;
+      console.log(
+         "Checking isExtendedBy for OptionalType: " + this + " - " + other
+      );
+      return (
+         other.isAssignableTo(this.type, scope) ||
+         new NamedType("Error").isAssignableTo(other, scope)
+      );
    }
 
    toString() {
@@ -1017,6 +1050,12 @@ export class RefinedType extends Type {
       super("RefinedType");
       this.inputType = inputType;
       this.lambda = lambda;
+      if (this.lambda.block.statements.length === 0) {
+         throw new Error(
+            "RefinedType must have at least one statement in its lambda block."
+         );
+      }
+      Object.freeze(this.lambda.block.statements);
    }
 
    buildConstructor(
@@ -1058,6 +1097,7 @@ export class RefinedType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
+      other = scope.resolveNamedType(other);
       if (
          other instanceof SingletonType &&
          other.type == PrimitiveType.String &&

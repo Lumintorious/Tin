@@ -196,6 +196,8 @@ const FORBIDDEN_SYMBOL_KEYS = [
    "parent",
    "iteration",
    "position",
+   "inferredType",
+   "translatedType",
 ];
 
 function symbolsToJson(scope: Scope): string {

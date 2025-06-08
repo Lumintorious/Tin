@@ -322,6 +322,9 @@ export class Scope {
 
    // Lookup a symbol, check parent scope if not found
    lookup(name: string, scopeName: string = ""): Symbol {
+      //   if (name.startsWith("@") && this.hasSymbol(name.substring(1))) {
+      //      return this.lookup(name.substring(1));
+      //   }
       if (this.symbols.has(name)) {
          return this.symbols.get(name) as Symbol;
       } else if (this.parent) {
@@ -372,6 +375,9 @@ export class Scope {
    }
 
    hasSymbol(name: string, stopAtScope?: Scope): boolean {
+      //   if (name.startsWith("@") && this.hasSymbol(name.substring(1))) {
+      //      return this.hasSymbol(name.substring(1));
+      //   }
       return (
          this.symbols.has(name) ||
          (this.parent?.id === stopAtScope?.id

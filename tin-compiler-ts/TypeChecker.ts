@@ -24,8 +24,14 @@ import {
 } from "./Parser";
 import { Scope, TypePhaseContext, GenericTypeMap } from "./Scope";
 import { RoundValueToValueLambda, TypeDef, RefinedDef, Tuple } from "./Parser";
-import { RecursiveResolutionOptions } from "./Scope";
-import { UncheckedType, MutableType, PrimitiveType } from "./Types";
+import { RecursiveResolutionOptions, Symbol } from "./Scope";
+import {
+   UncheckedType,
+   MutableType,
+   PrimitiveType,
+   SingletonType,
+   Nothing,
+} from "./Types";
 import { Identifier, TypeCheck } from "./Parser";
 import {
    AppliedGenericType,
@@ -182,7 +188,7 @@ export class TypeChecker {
          if (node.lhs instanceof Identifier) {
             options.assignedName = node.lhs.value;
          }
-         //  this.typeCheck(node.lhs, scope);
+         this.typeCheck(node.lhs, scope);
          //  if (node.type) {
          //     this.typeCheck(node.type, scope, { isTypeLevel: true });
          //  }
@@ -194,7 +200,7 @@ export class TypeChecker {
       } else if (node instanceof Call && node.kind !== "SQUARE") {
          this.typeCheckApply(node, scope, options);
       } else if (node instanceof Call) {
-         this.typeCheckSquareApply(node, scope);
+         this.typeCheckSquareApply(node, scope, options);
       } else if (node instanceof RoundValueToValueLambda) {
          this.typeCheckRoundValueToValueLambda(node, scope, options);
       } else if (node instanceof SquareTypeToValueLambda) {
@@ -324,7 +330,12 @@ export class TypeChecker {
                options.isWithinCopyStructure || node.operator === "copy",
          });
       } else if (node instanceof Select) {
-         this.typeCheck(node.owner, scope);
+         if (
+            !node.isBeingTreatedAsIdentifier &&
+            !scope.hasSymbol(node.nameAsSelectOfIdentifiers() ?? "")
+         ) {
+            this.typeCheck(node.owner, scope);
+         }
       } else if (node instanceof TypeCheck) {
          this.typeCheck(node.term, scope);
          this.typeCheck(node.type, scope);
@@ -353,14 +364,17 @@ export class TypeChecker {
          const shouldError = node.isTypeIdentifier()
             ? !scope.hasTypeSymbol(node.value)
             : !scope.hasSymbol(node.value);
-         //  if (shouldError && !["Nothing", "Anything"].includes(node.value)) {
-         //     this.context.errors.add(
-         //        `Could not find value '${node.value}'`,
-         //        undefined,
-         //        undefined,
-         //        node.position
-         //     );
-         //  }
+         if (
+            shouldError &&
+            !["Nothing", "Anything", "String", "Boolean", "Number"].includes(
+               node.value
+            )
+         ) {
+            this.context.logs.error({
+               message: `Could not find type '${node.value}'`,
+               position: node.position,
+            });
+         }
       } else {
       }
    }
@@ -371,9 +385,11 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       const innerScope = scope.innerScopeOf(node);
-      const returnType =
+      let returnType =
          node.block.at(BAKED_TYPE) ??
-         this.context.inferencer.infer(node.block, innerScope);
+         this.context.inferencer.infer(node.block, innerScope, {
+            allowsSingletonType: node.specifiedType !== undefined,
+         });
 
       if (
          node.isTypeLevel ||
@@ -531,15 +547,27 @@ export class TypeChecker {
       scope: Scope
    ) {
       const innerScope = scope.innerScopeOf(node);
-      // node.pforEach((p) => this.typeCheck(p, innerScope));
+      node.parameterTypes.forEach((p) => this.typeCheck(p, innerScope));
       this.typeCheck(node.block, innerScope);
    }
 
-   typeCheckSquareApply(apply: Call, scope: Scope) {
+   typeCheckSquareApply(
+      apply: Call,
+      scope: Scope,
+      options: RecursiveResolutionOptions
+   ) {
       const translator = this.context.translator;
       const appliedParamTypes = apply.args.map(([n, t]) =>
          translator.translate(t, scope)
       );
+
+      apply.args.forEach(([name, term]) => {
+         console.log("Typechecking square apply term " + term.show());
+         this.typeCheck(term, scope, {
+            isTypeLevel: options.isTypeLevel,
+            allowsSingletonType: options.allowsSingletonType,
+         });
+      });
       if (
          apply.callee instanceof Identifier &&
          apply.callee.isTypeIdentifier()
@@ -690,7 +718,6 @@ export class TypeChecker {
                typeExpectedInPlace: params[i + (hasThis ? 1 : 0)]?.type,
             });
          });
-
          if (
             params[0] &&
             apply.args[0] &&
@@ -701,7 +728,10 @@ export class TypeChecker {
                apply.args[0][1],
                scope
             );
-            if (firstAppliedParamType.name !== "Seq") {
+            if (
+               params[0].name === "self" &&
+               firstAppliedParamType.name !== "Seq"
+            ) {
                return;
             }
             const expectedType = scope.resolveNamedType(
@@ -744,10 +774,7 @@ export class TypeChecker {
             }
             return;
          }
-      }
 
-      if (typeSymbol instanceof RoundValueToValueLambdaType) {
-         let params = typeSymbol.params;
          const calleeType = this.context.inferencer.infer(apply.callee, scope);
          const paramOrder = this.typeCheckLambdaCall(
             apply,
@@ -764,6 +791,25 @@ export class TypeChecker {
                apply.callee.isTypeIdentifier()
          );
          apply.paramOrder = paramOrder;
+      } else {
+         // Expecting copy 'obj { field = ... }'
+         for (const param of apply.args) {
+            const field = this.context.inferencer.findField(
+               typeSymbol,
+               param[0],
+               scope
+            );
+            const fieldType = field?.type;
+            const appliedType = this.context.inferencer.infer(param[1], scope);
+            if (!fieldType || !appliedType.isAssignableTo(fieldType, scope)) {
+               this.context.logs.error({
+                  message: `Invalid type of field in copy: '${param[0]}'`,
+                  expectedType: fieldType ?? Nothing,
+                  insertedType: appliedType,
+                  position: apply.position,
+               });
+            }
+         }
       }
    }
 
@@ -1290,10 +1336,14 @@ export class CompilerLogs {
                      e.position?.start.line
                   }:${e.position?.start.column}${
                      e.expectedType
-                        ? `\n       > Expected '${e.expectedType?.toString()}'`
+                        ? `\n       > Expected '${e.expectedType?.toString()}' - ${
+                             e.expectedType?.tag
+                          }`
                         : ""
                   }${
-                     e.insertedType ? `\n       > Got '${e.insertedType}'` : ""
+                     e.insertedType
+                        ? `\n       > Got '${e.insertedType}' - ${e.insertedType?.tag}`
+                        : ""
                   }${e.hint ? `\n       > ${e.hint}` : ""}`
             )
             .join("\n");
