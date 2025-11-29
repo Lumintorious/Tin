@@ -2,20 +2,20 @@
 [X] Generic RoundValueToValueLambdas
 [X] Auto-constructors
 [X] Simple type-checking
-[ ] Handling 'this'
-[ ] Varargs
-[ ] Varargs issues when returning
-[ ] Array type
-[ ] Enums, how?
-[ ] Ignore empty lines
+[X] Handling 'self'
+[X] Varargs
+[X] Varargs issues when returning
+[X] Array type
+[X] Enums, how? </
+[X] Ignore empty lines
 [X] Does multiple dedent work?
-[ ] Fix ending without newline
-[ ] Fix ending without dedenting
-[ ] Checking if symbol exists does not work for lambda application
+[X] Fix ending without newline
+[X] Fix ending without dedenting
+[X] Checking if symbol exists does not work for lambda application
 [X] Make lambdas work with any callee, not just identifiers
 [X] Symbol usage before declaration
-[ ] Co-dependent symbols
-[ ] Make structs work with all types, not just identifiers
+[X] Co-dependent symbols
+[X] Make structs work with all types, not just identifiers
 [ ] 
 [ ] 
 [ ] 

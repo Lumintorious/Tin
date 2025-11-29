@@ -34,7 +34,6 @@ import {
 } from "./Parser";
 import { getConstructorName } from "./TypeChecker";
 import {
-   Make,
    Identifier,
    TypeCheck,
    Import,
@@ -61,6 +60,7 @@ import {
 } from "./Types";
 import { OutputTranslator } from "./compiler";
 import { exec, spawn } from "node:child_process";
+import * as path from "path";
 
 export class JavascriptTranslator implements OutputTranslator {
    extension = "mjs";
@@ -205,7 +205,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
       if (term instanceof Term) {
          if (term instanceof Identifier && term.is(IN_TYPE_CONTEXT)) {
-            result = `_L(${result}, "${term.value}")`;
+            result = `_L(${result}, "${this.doReplacing(term.value)}")`;
          }
 
          if (term.is(INVAR_RETURNING_FUNC_IN_VAR_PLACE)) {
@@ -237,7 +237,7 @@ export class JavascriptTranslator implements OutputTranslator {
             term.invarTypeInVarPlace &&
             !(term instanceof AppliedKeyword && term.keyword === "return")
          ) {
-            result = `_var([], () => ${result}, true)`;
+            result = `_var([]/* 223 */, () => ${result}, true)`;
          } else if (term.varTypeInInvarPlace) {
             result = "(" + result + ")" + this.accessMutable;
          }
@@ -247,7 +247,7 @@ export class JavascriptTranslator implements OutputTranslator {
                .filter(
                   (s) =>
                      (s.isUsedInClojures &&
-                        s.isSentToConstructors &&
+                        // s.isSentToConstructors &&
                         s.name.startsWith("@")) ||
                      s.typeSymbol instanceof MutableType
                )
@@ -268,8 +268,13 @@ export class JavascriptTranslator implements OutputTranslator {
       // Type: "Type$",
       this: "this_",
       // self: "this",
-      Error: "TinErr_",
+      Error: "Nok",
       Map: "Map_",
+      Array: "TinArray_",
+      Number: "TinNumber_",
+      String: "TinString_",
+      Boolean: "TinBoolean_",
+      Date: "TinDate_",
       //   toString: "tinToString_",
    };
 
@@ -377,21 +382,16 @@ export class JavascriptTranslator implements OutputTranslator {
 
          let result = `${ownerName}${selectionBase}`;
          if (term.ammortized) {
-            result = `(function() { const _amm_owner = ${ownerName}; return TinErr_.__is_child(_amm_owner) ? (_amm_owner) : (_amm_owner${selectionBase})}).call(this)`;
+            result = `${
+               scope.isUnderAsync() ? "(await (async " : "(("
+            }function() { const _amm_owner = ${ownerName}; return ${
+               scope.isUnderAsync() ? "await " : ""
+            } (Nok.__is_child(_amm_owner) ? (_amm_owner) : (_amm_owner${selectionBase}))}).call(this))`;
          }
          if (term.is(IN_TYPE_CONTEXT)) {
             result = `_L(${result}, "${term.nameAsSelectOfIdentifiers()}")`;
          }
          return result;
-         // Make
-      } else if (term instanceof Make) {
-         if (term.type instanceof Identifier) {
-            return term.type.value;
-         } else {
-            throw new Error("Can only use make with a named type. eg. 'Cat'");
-         }
-
-         // SquareTypeToValueLambda
       } else if (term instanceof SquareTypeToValueLambda) {
          scope = scope.innerScopeOf(term);
          return `(function(${term.parameterTypes
@@ -443,7 +443,12 @@ export class JavascriptTranslator implements OutputTranslator {
          const lhs = this.translate(term.lhs, scope, { isLhs: true });
          const isMutable = term.type?.translatedType instanceof MutableType;
          let value = term.value
-            ? this.makeMutable(this.translate(term.value, scope), isMutable)
+            ? this.makeMutable(
+                 this.translate(term.value, scope, {
+                    assignedSymbol: term.symbol,
+                 }),
+                 isMutable
+              )
             : "";
          let type = "";
          if (!term.isTypeLevel) {
@@ -492,7 +497,7 @@ export class JavascriptTranslator implements OutputTranslator {
          return `_cast(${this.translate(
             term.expression,
             scope
-         )}, ${this.translate(term.type, scope)})`;
+         )}, ${this.translate(term.type, scope)}, ${term.ammortized})`;
 
          // Tuple
       } else if (term instanceof Tuple) {
@@ -518,13 +523,16 @@ export class JavascriptTranslator implements OutputTranslator {
          }
          if (term.isFromSelfClojure && !args.isLhs) {
             const symbol = scope.lookup(term.value);
+            console.log("Translating to clojure identifier " + term.show());
             if (
-               !term.varTypeInInvarPlace &&
-               ((symbol.isUsedInClojures && symbol.isSentToConstructors) ||
+               //    !term.varTypeInInvarPlace &&
+               (symbol.isUsedInClojures ||
                   symbol.typeSymbol instanceof MutableType) &&
                symbol.name.startsWith("@")
             ) {
-               value = `this._clojure["${this.makeClojureIdent(symbol)}"]._`;
+               value = `this._clojure["${this.makeClojureIdent(symbol)}"]${
+                  term.varTypeInInvarPlace ? "" : this.accessMutable
+               }`;
             }
             if (!term.varTypeInInvarPlace && !symbol.isUsedInClojures) {
                // Otherwise accessMutable is added in the wrapper translate() (non-raw)
@@ -603,6 +611,7 @@ export class JavascriptTranslator implements OutputTranslator {
             term.falseBranch !== undefined
                ? innerScope.innerScopeOf(term.falseBranch)
                : innerScope;
+         const outerScopeDepth = scope.toPath().split(".").length;
          function wrapWithIIFE(doWrap: boolean, doAsync: boolean, str: string) {
             if (doWrap) {
                return `${
@@ -620,7 +629,7 @@ export class JavascriptTranslator implements OutputTranslator {
             term.falseBranch.statements.length !== 1;
          let trueBranch = wrapWithIIFE(
             true,
-            scope.isUnderAsync(),
+            scope.isUnderAsync() || outerScopeDepth <= 3,
             this.translate(term.trueBranch, trueScope, {
                returnLast: !isTrueBranchIf,
                normalReturn:
@@ -634,7 +643,7 @@ export class JavascriptTranslator implements OutputTranslator {
                term.falseBranch.statements[0] instanceof IfStatement);
          let falseBranch = wrapWithIIFE(
             true,
-            scope.isUnderAsync(),
+            scope.isUnderAsync() || outerScopeDepth <= 3,
             this.translate(term.falseBranch, falseScope, {
                returnLast: !isFalseBranchIf,
                normalReturn: !term.falseBranch?.is(IN_RETURN_BRANCH),
@@ -718,11 +727,13 @@ export class JavascriptTranslator implements OutputTranslator {
                (takesVarargs ? `Seq$createProperly(${varargType})([` : "");
             if (term.callee.owner instanceof Identifier) {
             } else {
-               openWrapper =
-                  "((() => { var _owner = " +
-                  this.translate(term.callee.owner, scope) +
-                  "; return ";
-               closeWrapper = "})())";
+               openWrapper = `${
+                  scope.isUnderAsync() ? "(await (async" : "(("
+               } function() { var _owner = ${this.translate(
+                  term.callee.owner,
+                  scope
+               )}; return `;
+               closeWrapper = "}).call(this))";
                callee = new Select(
                   new Identifier("_owner"),
                   term.callee.field,
@@ -757,7 +768,6 @@ export class JavascriptTranslator implements OutputTranslator {
                [...scope.toPath()].filter((c) => c === ".").length > 1
             ) {
                return `await /* X */ ${call}`;
-               //    return `(async function() { const _awObj = ${call}; return _awObj && typeof _awObj.then === 'function' ? await _awObj : _awObj}).call(this)`;
             } else {
                return call;
             }
@@ -769,7 +779,7 @@ export class JavascriptTranslator implements OutputTranslator {
             : "";
 
          return wrapAwait(
-            "(" +
+            "(/*here await expected*/" +
                openWrapper +
                this.translate(callee, scope) +
                (term.autoFilledSquareTypeParams
@@ -836,9 +846,9 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof RefinedDef) {
          const termType = term.translatedType as RefinedType;
          return `(() => {
-		 const __is_childRef = (_obj) => { return ${
-          termType.inputType.name
-       }.__is_child(_obj) && (${this.translate(
+		 const __is_childRef = (_obj) => { return ${this.doReplacing(
+          termType.inputType.name ?? "anon"
+       )}.__is_child(_obj) && (${this.translate(
             term.lambda,
             scope
          )}).call(_obj)};
@@ -855,10 +865,10 @@ export class JavascriptTranslator implements OutputTranslator {
          if (term.expression.isTypeLevel) {
             return this.translate(term.expression, scope);
          } else {
-            return `(function(){ const _r = ${this.translate(
-               term.expression,
-               scope
-            )};if(_r === undefined || TinErr_.__is_child(_r)) {throw _r} else {return _r}}).call(this)`;
+            const inner = this.translate(term.expression, scope, args);
+            return `${inner.startsWith("await") ? "await " : ""}(${
+               inner.startsWith("await") ? "async " : ""
+            } function(){ const _r = ${inner};if(_r === undefined || Nok.__is_child(_r)) {throw _r} else {return _r}}).call(this)`;
          }
          // TypeCheck
       } else if (term instanceof TypeCheck) {
@@ -895,14 +905,22 @@ export class JavascriptTranslator implements OutputTranslator {
       } else if (term instanceof UnaryOperator) {
          if (term.operator === "var") {
             const v = term.invarTypeInVarPlace;
-            return `_var([${(term.varDependencies ?? []).map((t) =>
+            return `_var(/* 772 */[${(term.varDependencies ?? []).map((t) =>
                this.translateRaw(t, scope)
             )}],() => (${this.translate(term.expression, scope)}),${
                v ? "false" : "true"
+            }${
+               args.assignedSymbol
+                  ? `, "${this.makeClojureIdent(args.assignedSymbol)}"`
+                  : ""
             })`;
          }
          if (term.operator === "!") {
-            return `_N(${this.translate(term.expression, scope)})`;
+            if (term.isTypeLevel) {
+               return `_N(${this.translate(term.expression, scope)})`;
+            } else {
+               return `(!(${this.translate(term.expression, scope)}))`;
+            }
          }
          if (term.operator === "-") {
             return `-(${this.translate(term.expression, scope)})`;
@@ -914,14 +932,15 @@ export class JavascriptTranslator implements OutputTranslator {
    }
 
    translateType(type: Type | ParamType | undefined, scope: Scope): string {
+      const replacedName = this.doReplacing(type?.name ?? "");
       if (type instanceof NamedType) {
-         return "" + type.name;
+         return "" + replacedName;
       } else if (type instanceof MutableType) {
          return this.translateType(type.type, scope);
       } else if (type instanceof AnyType) {
          return "Anything";
       } else if (type instanceof PrimitiveType) {
-         return "" + type.name;
+         return "" + replacedName;
       } else if (type instanceof StructType) {
          return `Type({_:'${
             type.name
@@ -976,7 +995,7 @@ export class JavascriptTranslator implements OutputTranslator {
 
    translateBinaryExpression(term: BinaryExpression, scope: Scope): string {
       if (term.operator === "=" && term.left instanceof Identifier) {
-         return `var ${term.left.value} ${
+         return `var ${this.doReplacing(term.left.value)} ${
             term.left instanceof Cast
                ? term.left.type
                   ? "/*" + term.left.type + "*/"
@@ -1088,10 +1107,13 @@ export class JavascriptTranslator implements OutputTranslator {
       }
 
       if (term.operator === "+string+") {
-         return `(${this.translate(term.left, scope)} + ${this.translate(
+         return `(makeStr(${this.translate(
+            term.left,
+            scope
+         )}, true, true, new Set([\{}])) + makeStr(${this.translate(
             term.right,
             scope
-         )})`;
+         )}, true, true, new Set([\{}])))`;
       }
 
       return result;

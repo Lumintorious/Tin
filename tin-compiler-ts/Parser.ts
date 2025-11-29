@@ -35,7 +35,7 @@ export const ARTIFICIAL = new Modifier();
 export const BAKED_TYPE = new Modifier<Type>();
 export const WHERE_INTERPOLATION_EXPECTED = new Modifier();
 
-export class AstNode {
+export abstract class AstNode {
    static toCheckForPosition: AstNode[] = [];
    static currentNumber = 0;
    readonly tag: string;
@@ -81,9 +81,7 @@ export class AstNode {
       return this.tag.toLowerCase();
    }
 
-   showCode() {
-      return "";
-   }
+   abstract showCode(): string;
 
    fromTo(start?: TokenPos, end?: TokenPos) {
       if (start && end) {
@@ -97,7 +95,7 @@ export class AstNode {
 }
 
 // Independent node that can appear in blocks
-export class Statement extends AstNode {
+export abstract class Statement extends AstNode {
    constructor(tag: string) {
       super(tag);
    }
@@ -108,6 +106,10 @@ export class Import extends Statement {
    constructor(path: string) {
       super("Import");
       this.path = path;
+   }
+
+   showCode(): string {
+      return "import " + this.path;
    }
 }
 
@@ -150,7 +152,7 @@ export class Assignment extends AstNode {
 // EXPRESSIONS
 
 // Something that can be evaluated to a VALUE at runtime
-export class Term extends Statement {
+export abstract class Term extends Statement {
    inferredType?: Type;
    translatedType?: Type;
    varTypeInInvarPlace?: boolean = false;
@@ -171,10 +173,18 @@ export class Term extends Statement {
 export class Cast extends Term {
    expression: Term;
    type: any;
-   constructor(expression: Term, type: any) {
+   ammortized: boolean;
+   constructor(expression: Term, type: any, ammortized: boolean = false) {
       super("Cast");
       this.expression = expression;
       this.type = type;
+      this.ammortized = ammortized;
+   }
+
+   showCode(): string {
+      return `${this.expression.showCode()} :${this.ammortized ? "?" : ""} ${
+         this.type
+      }`;
    }
 }
 
@@ -183,6 +193,10 @@ export class Tuple extends Term {
    constructor(expressions: Term[]) {
       super("Tuple");
       this.expressions = expressions;
+   }
+
+   showCode(): string {
+      return `(${this.expressions.map((e) => e.showCode()).join(", ")})`;
    }
 }
 
@@ -202,6 +216,12 @@ export class IfStatement extends Term {
             ? new Block([falseBranch])
             : undefined;
    }
+
+   showCode(): string {
+      return `if ${this.condition.showCode()},\n${this.trueBranch.showCode()}\n${
+         this.falseBranch ? ` else\n${this.falseBranch.showCode()}\n` : ""
+      }`;
+   }
 }
 
 export class WhileLoop extends Statement {
@@ -220,6 +240,10 @@ export class WhileLoop extends Statement {
       this.condition = condition;
       this.eachLoop = eachLoop;
       this.action = action;
+   }
+
+   showCode(): string {
+      return `while ${this.condition.showCode()},\n${this.action.showCode()}\n`;
    }
 }
 
@@ -264,9 +288,9 @@ export class RoundValueToValueLambda extends Term {
    }
 
    showCode(): string {
-      return `(${this.params.map((p) => p.toString()).join(", ")}) -> \n ${
-         this.block
-      }`;
+      return `(${this.params
+         .map((p) => p.showCode())
+         .join(", ")}) -> \n ${this.block.showCode()}`;
    }
 }
 
@@ -288,6 +312,12 @@ export class SquareTypeToValueLambda extends Term {
       this.pure = pure;
       this.capturesMutableValues = capturesMutableValues;
    }
+
+   showCode(): string {
+      return `[${this.parameterTypes
+         .map((p) => p.showCode())
+         .join(", ")}] -> \n ${this.block.showCode()}`;
+   }
 }
 
 // [T] => List[T]
@@ -301,6 +331,12 @@ export class SquareTypeToTypeLambda extends Term {
       this.returnType = returnType;
       this.isTypeLevel = true;
    }
+
+   showCode(): string {
+      return `[${this.parameterTypes
+         .map((p) => p.showCode())
+         .join(", ")}] => ${this.returnType.showCode()}`;
+   }
 }
 
 export class Block extends Term {
@@ -310,6 +346,10 @@ export class Block extends Term {
       super("Block");
       this.statements = statements.filter((s) => s !== null);
       this.skipReturn = skipReturn;
+   }
+
+   showCode(): string {
+      return this.statements.map((s) => s.showCode()).join("\n");
    }
 }
 
@@ -338,6 +378,10 @@ export class Literal extends Term {
       return this.type === "String"
          ? '"' + this.value + '"'
          : String(this.value);
+   }
+
+   showCode(): string {
+      return this.show();
    }
 }
 
@@ -394,6 +438,26 @@ export class Call extends Term implements PotentialTypeArgs {
       this.autoFilledSquareTypeParams = map;
       //   }
    }
+
+   showCode(): string {
+      const extras = `${this.isAnObjectCopy ? " (object copy)" : ""}${
+         this.isCallingAConstructor ? " (constructor)" : ""
+      }${this.ammortized ? " (ammortized)" : ""}${
+         this.bakedInThis ? " (this=" + this.bakedInThis.showCode() + ")" : ""
+      }`;
+      const argsStr = this.args
+         .map(([name, term]) =>
+            name.length > 0 ? `${name} = ${term.showCode()}` : term.showCode()
+         )
+         .join(", ");
+      const lParens =
+         this.kind === "ROUND" ? "(" : this.kind === "SQUARE" ? "[" : "{";
+      const rParens =
+         this.kind === "ROUND" ? ")" : this.kind === "SQUARE" ? "]" : "}";
+      return `${
+         extras.length > 0 ? extras : ""
+      }${this.callee.showCode()}${lParens}${argsStr}${rParens}`;
+   }
 }
 
 // Parenthesis-surrounded expression. Eg. ( value + 2 )
@@ -402,6 +466,10 @@ export class Group extends Term {
    constructor(value: Term) {
       super("Group");
       this.value = value;
+   }
+
+   showCode(): string {
+      return `(${this.value.showCode()})`;
    }
 }
 
@@ -413,6 +481,10 @@ export class UnaryOperator extends Term {
       super("UnaryOperator");
       this.operator = operator;
       this.expression = expression;
+   }
+
+   showCode(): string {
+      return `${this.operator}${this.expression.showCode()}`;
    }
 }
 
@@ -447,6 +519,10 @@ export class Identifier extends Term {
    isTypeIdentifier() {
       return isTypeName(this.value);
    }
+
+   showCode(): string {
+      return this.value;
+   }
 }
 
 export class Parameter extends Term {
@@ -458,6 +534,10 @@ export class Parameter extends Term {
       this.name = name; // Name of the parameter
       this.type = type; // tag annotation of the parameter
       this.defaultValue = defaultValue;
+   }
+
+   showCode(): string {
+      return this.name + (this.type ? ": " + this.type : "");
    }
 }
 
@@ -471,6 +551,12 @@ export class BinaryExpression extends Term {
       this.operator = operator;
       this.right = right; // tag annotation of the parameter
    }
+
+   showCode(): string {
+      return `${this.left.showCode()} ${
+         this.operator
+      } ${this.right.showCode()}`;
+   }
 }
 
 export class Optional extends Term {
@@ -480,6 +566,12 @@ export class Optional extends Term {
       super("Optional");
       this.expression = expression;
       this.doubleQuestionMark = doubleQuestionMark;
+   }
+
+   showCode(): string {
+      return `${this.expression.showCode()}${
+         this.doubleQuestionMark ? "??" : "?"
+      }`;
    }
 }
 
@@ -526,6 +618,10 @@ export class Select extends Term {
    show() {
       return this.owner.show() + (this.ammortized ? "?." : ".") + this.field;
    }
+
+   showCode(): string {
+      return this.show();
+   }
 }
 
 export class TypeCheck extends Term {
@@ -538,6 +634,12 @@ export class TypeCheck extends Term {
       this.type = type;
       this.negative = negative;
    }
+
+   showCode(): string {
+      return `${this.term.showCode()} ${
+         this.negative ? "!:" : "::"
+      } ${this.type.showCode()}`;
+   }
 }
 
 export class AppliedKeyword extends Term {
@@ -547,6 +649,10 @@ export class AppliedKeyword extends Term {
       super("AppliedKeyword");
       this.keyword = keyword;
       this.param = param;
+   }
+
+   showCode(): string {
+      return `${this.keyword} ${this.param.showCode()}`;
    }
 }
 
@@ -558,13 +664,9 @@ export class Change extends Term {
       this.lhs = lhs;
       this.value = value;
    }
-}
 
-export class Make extends Term {
-   type: Term;
-   constructor(type: Term) {
-      super("Make");
-      this.type = type;
+   showCode(): string {
+      return `${this.lhs.showCode()} ~= ${this.value.showCode()}`;
    }
 }
 
@@ -574,10 +676,13 @@ export class ExternalCodeSplice extends Statement {
       super("ExternalCodeSplice");
       this.contents = contents;
    }
+
+   showCode(): string {
+      return "`" + this.contents + "`";
+   }
 }
 
 const PRECEDENCE: { [_: string]: number } = {
-   "?:": 110, // Walrus
    ".": 100, // Field access
    "?.": 100, // Field access
    "+string+": 75, // Hidden operator for string interpolation, must always be the tightest precedence after dots
@@ -599,6 +704,7 @@ const PRECEDENCE: { [_: string]: number } = {
    "!:": 18, // Type Check
    "&&": 15, // Logical AND
    "||": 14, // Logical OR
+   "?:": 5, // Checked cast
    ":": 5,
    // (right-associative)
    copy: 1,
@@ -802,11 +908,14 @@ export class Parser {
          left = this.parsePrimary();
       }
 
+      let wasCall = false;
+
       while (
          this.peek() &&
          this.peek().tag === "PARENS" &&
          this.peek().value === "["
       ) {
+         wasCall = true;
          left = this.parseApply(left, true);
       }
 
@@ -815,6 +924,7 @@ export class Parser {
          this.peek().tag === "PARENS" &&
          this.peek().value === "?("
       ) {
+         wasCall = true;
          left = this.parseApply(left, false, false, true);
       }
 
@@ -823,6 +933,7 @@ export class Parser {
          this.peek().tag === "PARENS" &&
          this.peek().value === "("
       ) {
+         wasCall = true;
          left = this.parseApply(left);
       }
 
@@ -831,15 +942,31 @@ export class Parser {
          this.peek().tag === "PARENS" &&
          this.peek().value === "{"
       ) {
+         wasCall = true;
          left = this.parseApply(left, false, true);
       }
 
       if (this.is(":")) {
+         if (wasCall) {
+            return left;
+         }
          this.consume(":");
          // const type = this.consume("IDENTIFIER");
          const type = this.parseExpression(-1, true, true);
          left = new Cast(left, type).fromTo(startPos, this.peek().position);
       }
+
+      //   if (this.is("?:")) {
+      //      this.consume("?:");
+      //      // const type = this.consume("IDENTIFIER");
+      //      const type = this.parseExpression(-1, true, true);
+      //      if (left instanceof Call && left.callee instanceof Select) {
+      //      }
+      //      left = new Cast(left, type, true).fromTo(
+      //         startPos,
+      //         this.peek().position
+      //      );
+      //   }
 
       // Continue parsing if we find a binary operator with the appropriate precedence
       const whileLoopStart = this.positionNow();
@@ -968,6 +1095,18 @@ export class Parser {
                this.positionNow()
             );
          } else if (
+            operator === "." &&
+            right instanceof Optional &&
+            right.expression instanceof Call &&
+            right.expression.callee instanceof Identifier
+         ) {
+            right.expression.callee = new Select(
+               left,
+               right.expression.callee.value,
+               false
+            ).fromTo(whileLoopStart, this.positionNow());
+            left = new Optional(right.expression);
+         } else if (
             (operator === "." || operator === "?.") &&
             right instanceof Call &&
             right.callee instanceof Identifier
@@ -1006,6 +1145,19 @@ export class Parser {
                whileLoopStart,
                this.positionNow()
             );
+         } else if (
+            operator === "?." &&
+            right instanceof Cast &&
+            right.expression instanceof Identifier
+         ) {
+            left = new Select(left, right.expression.value, true).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
+            left = new Cast(left, right.type, right.ammortized).fromTo(
+               whileLoopStart,
+               this.positionNow()
+            );
          } else if (operator === "::" && right) {
             const typeCheck = new TypeCheck(left, right);
             left = typeCheck;
@@ -1030,7 +1182,11 @@ export class Parser {
                if (operator === "+string+" && !isArtificial) {
                   throw new Error("Unrecognized operator +str+");
                }
-               left = new BinaryExpression(left, operator, right);
+               if (operator === "?:") {
+                  left = new Cast(left, right, true);
+               } else {
+                  left = new BinaryExpression(left, operator, right);
+               }
             }
          }
          left = left.fromTo(whileLoopStart, this.positionNow());
@@ -1315,8 +1471,6 @@ export class Parser {
       ) {
          expression.private = true;
          return expression;
-      } else if (keyword.value === "make") {
-         return new Make(expression);
       } else if (keyword.value === "return") {
          return new AppliedKeyword("return", expression);
       } else if (keyword.value === "unchecked") {
@@ -1390,7 +1544,7 @@ export class Parser {
    parsePrimaryRaw(): Term {
       const token = this.consume();
 
-      if (token.value === "struct") {
+      if (token.value === "trait") {
          this.current--;
          return parseNewType(this);
       }
@@ -1524,6 +1678,16 @@ export class TypeDef extends Term {
       this.fieldDefs = fieldDefs;
       this.isTypeLevel = true;
    }
+
+   showCode(): string {
+      let code = "trait:\n";
+      this.fieldDefs.forEach((field) => {
+         code += `   ${field.mutable ? "mutable " : ""}${field.name}${
+            field.type ? ": " + field.type.showCode() : ""
+         }${field.defaultValue ? " = " + field.defaultValue.showCode() : ""}\n`;
+      });
+      return code;
+   }
 }
 
 export class RefinedDef extends Term {
@@ -1535,6 +1699,12 @@ export class RefinedDef extends Term {
          throw new Error("RefinedDef must have at least one statement");
       }
    }
+
+   showCode(): string {
+      let code = "refined ";
+      code += this.lambda.showCode();
+      return code;
+   }
 }
 
 export class DataDef extends Term {
@@ -1543,6 +1713,16 @@ export class DataDef extends Term {
       super("TypeDef");
       this.fieldDefs = fieldDefs;
       this.isTypeLevel = true;
+   }
+
+   showCode(): string {
+      let code = "data:\n";
+      this.fieldDefs.forEach((field) => {
+         code += `   ${field.mutable ? "mutable " : ""}${field.name}${
+            field.type ? ": " + field.type.showCode() : ""
+         }${field.defaultValue ? " = " + field.defaultValue.showCode() : ""}\n`;
+      });
+      return code;
    }
 }
 
@@ -1564,6 +1744,12 @@ export class FieldDef extends AstNode {
       this.isTypeLevel = true;
       this.mutable = mutable;
    }
+
+   showCode(): string {
+      return `${this.mutable ? "mutable " : ""}${this.name}${
+         this.type ? ": " + this.type.showCode() : ""
+      }${this.defaultValue ? " = " + this.defaultValue.showCode() : ""}`;
+   }
 }
 
 export function parseNewType(parser: Parser): Term {
@@ -1584,7 +1770,7 @@ export function parseObject(parser: Parser): DataDef {
    //       return new DataDef([]).fromTo(start, parser.positionNow());
    //    }
    // Expect INDENT (start of type block)
-   parser.consume("KEYWORD", "struct");
+   parser.consume("KEYWORD", "trait");
    if (parser.peek().tag !== "OPERATOR" || parser.peek().value !== ":") {
       return new DataDef([]);
    }

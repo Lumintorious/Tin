@@ -118,6 +118,7 @@ export class TypeTranslator {
             if (literal.type === "Boolean") {
                resultType = PrimitiveType.Boolean;
             }
+            node.modify(IN_TYPE_CONTEXT);
             return new SingletonType(String(literal.value), resultType);
          case "Assignment":
             if (
@@ -144,6 +145,7 @@ export class TypeTranslator {
                throw Error("Not right type");
             }
             if (node.operator === "!") {
+               node.isTypeLevel = true;
                return new NotType(this.translate(node.expression, scope));
             } else if (node.operator === "var") {
                return new MutableType(this.translate(node.expression, scope));

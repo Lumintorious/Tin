@@ -33,14 +33,14 @@ Response = struct:
 	body: String
 
 Url.new = (url: String, port: Number = 80, params: UrlParams = Array.empty[(String, String)]) ->
-	if url !: UrlString, return Error { "Invalid URL: '{url}'" }
-	if port !: Port, return Error { "Invalid Port: '{port}'" }
+	if url !: UrlString, return Nok { "Invalid URL: '{url}'" }
+	if port !: Port, return Nok { "Invalid Port: '{port}'" }
 	
 	Url { url, port, params }
 
-Url.fromString: (String) -> Url | Error = external
+Url.fromString: (String) -> Url | Nok = external
 
-Request.new = (method: HttpMethod, urlTry: Url | Error, headers: Headers = Array.empty[(String, String)], body: String = " ") ->
+Request.new = (method: HttpMethod, urlTry: Url | Nok, headers: Headers = Array.empty[(String, String)], body: String = " ") ->
 	Request { method, urlTry?, headers, body }
 
 external "
@@ -82,15 +82,15 @@ export async function Http$send(request) \{
 \}
 "
 
-Http.send: (request: Request | Error) ~> Response | Error = external
+Http.send: (request: Request | Nok) ~> Response | Nok = external
 
 Response.isOk = (self: Response) -> self.status == 200
 
 HttpServer = struct:
 	port: Port
-	listen: () -> Ok | Error
+	listen: () -> Ok | Nok
 
-HttpServer.live: (port: Port, handle: (Request) -> Response | Error) -> HttpServer = external
+HttpServer.live: (port: Port, handle: (Request) -> Response | Nok) -> HttpServer = external
 external "
 import http from 'http';
 
@@ -99,7 +99,7 @@ async function _readBody(req) \{
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => resolve(body));
-    req.on('error', reject);
+    req.on('Nok', reject);
   });
 }
 

@@ -17,6 +17,7 @@ import { TypeChecker, CompilerLogs } from "./TypeChecker";
 import { TypeInferencer } from "./TypeInferencer";
 import { TypeTranslator } from "./TypeTranslator";
 import { SingletonType } from "./Types";
+import { type } from "os";
 import {
    Any,
    AppliedGenericType,
@@ -759,6 +760,14 @@ export function walkTerms(
             innerScope.innerScopeOf(root.falseBranch),
             fn
          );
+      }
+   } else if (root instanceof Assignment) {
+      walkTerms(root.lhs, scope, fn);
+      if (root.type) {
+         walkTerms(root.type, scope, fn);
+      }
+      if (root.value) {
+         walkTerms(root.value, scope, fn);
       }
    }
 }

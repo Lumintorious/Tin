@@ -1,9 +1,10 @@
 # Order in this file is important
 external "
 export const Anything = _S(Symbol(\"Anything\"), () => undefined, lazy(() => Type(\{_:\"Anything\"\}, \{_:(n) => true\}, \{_:(n) => true\})));
+export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(() => Type(\{_:\"Never\"}, \{_:(n) => n === undefined}, \{_:(n) => n === undefined})));
 "
 
-Type = struct:
+Type = trait:
 	name: String 
 	check = (obj: Anything) -> false: Boolean
 	checkIntegrity = (obj: Anything) -> false: Boolean
@@ -11,41 +12,41 @@ Type = struct:
 
 Type.of: (obj: Anything) -> Type = external
 
-Primitive = Type & struct
-
-Field = struct:
-	name: String
-	type: Type
-	defaultValue: (() -> Anything)?
-
-Parameter = struct:
-	name: String?
-	type: Type
-	defaultValue: (() -> Anything)?
-
-Intersection = Type & struct:
-	left: Type
-	right: Type
-
-Union = Type & struct:
-	left: Type
-	right: Type
-
-Singleton = Type & struct:
+Singleton = Type & trait:
 	value: Anything
 	type: Type
 	declaration: String?
 
-Iterator = [T] => struct:
+Primitive = Type & trait
+
+Field = trait:
+	name: String
+	type: Type
+	defaultValue: (() -> Anything)?
+
+Parameter = trait:
+	name: String?
+	type: Type
+	defaultValue: (() -> Anything)?
+
+Intersection = Type & trait:
+	left: Type
+	right: Type
+
+Union = Type & trait:
+	left: Type
+	right: Type
+
+Iterator = [T] => trait:
 	next: () -> T?
 
-AsyncIterator = [T] => struct:
+AsyncIterator = [T] => trait:
 	next: () ~> T?
 
-Iterable = [T] => struct:
+Iterable = [T] => trait:
 	makeIterator: () -> Iterator[T]
 
-Seq = [T] => Iterable[T] & struct:
+Seq = [T] => Iterable[T] & trait:
 	at: (Number) -> T?
 	length: () -> Number
 
@@ -57,37 +58,36 @@ Length = [N: Number] => Seq[Anything] where:
 	false
 
 # Guarantees O(1) access time
-Array = [T] => Seq[T] & struct
+Array = [T] => Seq[T] & trait
 
-VarSeq = [T] => struct:
+VarSeq = [T] => trait:
 	at: (Number) -> T?
 	put: (Number, T) -> Ok?
 	length: () -> Number
 
-Struct = Type & struct:
+Struct = Type & trait:
 	fields: Seq[Field]
 
 Struct.accessDynamically: (self: Struct, obj: Anything, field: Field) -> Anything | Nothing = external
 Struct.createDynamically: (self: Struct, fields: Seq[Anything]) -> Anything | Nothing = external
 
-Lambda = Type & struct:
+Lambda = Type & trait:
 	params: Seq[Parameter]
 	resultType: Type
 
-RefType = Type & struct:
+RefType = Type & trait:
 	get: () -> Type
 
-Refinement = Type & struct:
+Refinement = Type & trait:
 	test: (any: Anything) -> Boolean
 
 external "
 //export const Nothing = _S(Symbol(\"Nothing\"), () => undefined, lazy(Type(\{_:\"Nothing\"}, \{_:(n) => n === null || n === undefined\}, \{_:(n) => n === null || n === undefined})))._and(Primitive());
-export const Never = _S(Symbol(\"Never\"), () => undefined, lazy(Type(\{_:\"Never\"}, \{_:(n) => n === undefined}, \{_:(n) => n === undefined})))._and(Primitive());
-export const Number = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\{_:\"Number\"}, \{_:(n) => typeof n === \"number\"\}, \{_:(n) => typeof n === \"number\"})))._and(Primitive());
-export const String = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\{_:\"String\"}, \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})))._and(Primitive());
-export const Boolean = _S(Symbol(\"Boolean\"), (s) => !!s, lazy(Type(\{_:\"Boolean\"}, \{_: (n) => typeof n === \"boolean\"}, \{_:(n) => typeof n === \"boolean\"})))._and(Primitive());
+export const TinNumber_ = _S(Symbol(\"Number\"), (i) => Number(i), lazy(Type(\{_:\"Number\"}, \{_:(n) => typeof n === \"number\"\}, \{_:(n) => typeof n === \"number\"})))._and(Primitive());
+export const TinString_ = _S(Symbol(\"String\"), (s) => String(s), lazy(Type(\{_:\"String\"}, \{_:(n) => typeof n === \"string\"}, \{_:(n) => typeof n === \"string\"})))._and(Primitive());
+export const TinBoolean_ = _S(Symbol(\"Boolean\"), (s) => !!s, lazy(Type(\{_:\"Boolean\"}, \{_: (n) => typeof n === \"boolean\"}, \{_:(n) => typeof n === \"boolean\"})))._and(Primitive());
 // export const ok = Symbol(\"ok\")
-export const Ok = _S(Symbol(\"Ok\"), () => undefined, lazy(Type(\{_:\"Ok\"}, \{_: (n) => n === undefined}, \{_:(n) => n === undefined})))._and(Primitive());
+export const Ok = _S(Symbol(\"Ok\"), () => undefined, lazy(Type(\{_:\"Ok\"}, \{_: (n) => !Nok.__is_child(n)}, \{_:(n) => !Nok.__is_child(n)})))._and(Primitive());
 "
 
 jsonify: (obj: Anything) -> String = external
@@ -127,7 +127,6 @@ external "
 	}
 "
 
-
 Like = [Str] => String where:
 	if Str :: Singleton,
 		v = Str.value
@@ -136,11 +135,11 @@ Like = [Str] => String where:
 		
 	false
 
-Interpolation = struct:
+Interpolation = trait:
 	codeDisplay: String
 	value: Anything
 
-InterpolatedString = struct:
+InterpolatedString = trait:
 	elements: Seq[String | Interpolation]
 
 Intersection.of = (left: Type, right: Type) ->
@@ -158,13 +157,13 @@ One = 1
 Byte = Number where:
 	self >= 0 && self < 256
 
-ToString = struct:
+ToString = trait:
 	toString: () -> String
 
-Named = struct:
+Named = trait:
 	name: String
 
-Numbered = struct:
+Numbered = trait:
 	number: Number
 
 Integer = Number where:
@@ -177,10 +176,10 @@ Positive = Number where:
 
 Negative = Number & !Positive
 
-Uuid = ToString & struct:
+Uuid = ToString & trait:
 	bytes: Array[Byte] & Length[16]
 
-Identified = struct:
+Identified = trait:
 	id: Uuid
 
 Uuid.genBytes: () -> Array[Byte] & Length[16] = external
@@ -210,22 +209,35 @@ external "
 }
 "
 
-Error = struct:
+Nok = trait:
 	message: String
 	object: Anything?
 
-Error.NOTFOUND = Error { message = "Not found"} & ToString { () -> "Not found" }
-Error.EMPTY = Error { message = "Empty" } & ToString { () -> "Empty" }
-Empty = Error.EMPTY
+Nok.NOTFOUND = Nok { message = "Not found"} & ToString { () -> "Not found" }
+Nok.EMPTY = Nok { message = "Empty" } & ToString { () -> "Empty" }
+STOP = Nok { "Stop iteration "}
+Empty = Nok.EMPTY
 
-StackInfo = struct:
+
+Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) ~> Ok | STOP) ~>
+	iterator = self.makeIterator()
+	current = var iterator.next()
+	
+	while current !: Nok,
+		res = fn(current)
+		if res == STOP,
+			set current = Nok { "Break forEach" }
+		else
+			set current = iterator.next()
+
+StackInfo = trait:
 	stack: Seq[String]
 
-Tuple2 = [A, B] => struct:
+Tuple2 = [A, B] => trait:
 	left: A
 	right: B
 
-Tuple3 = [A, B, C] => struct:
+Tuple3 = [A, B, C] => trait:
 	left: A
 	middle: B
 	right: C
@@ -233,11 +245,31 @@ Tuple3 = [A, B, C] => struct:
 String.matches: (self: String, regex: String) -> Boolean = external
 String.length: (self: String) -> Number = external
 String.isBlank = (self: String) -> self.length() == 0
+String.split: (self: String, delimiter: String) -> Seq[String] = external
+String.join: (iterable: Iterable[String], delimiter: String) -> String = external
+String.replace: (self: String, from: String, to: String) -> String = external
+String.fromBytes: (bytes: Array[Byte]) -> String = external
 
 external "
+export function String$fromBytes(bytes) \{
+	return bytes[Seq._s]._rawArray.toString('utf8')
+}
+
 export function String$length() \{
 	return this.length
 \}
+
+export function String$split(delimiter) \{
+	return Seq$createProperly(String)(this.split(delimiter));
+}
+
+export function String$join(iterable, delimiter) \{
+	return iterable[Seq._s]._rawArray.join(delimiter)
+}
+
+export function String$replace(from, to) \{
+	return this.replace(from, to);
+}
 "
 
 Type.allFields = (self: Type): Seq[(Struct, Field)] ->

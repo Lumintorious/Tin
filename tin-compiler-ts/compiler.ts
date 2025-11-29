@@ -1,5 +1,5 @@
-import { Lexer, Token } from "./Lexer";
-import { Block, Parser, Import, AstNode } from "./Parser";
+import { Lexer, Token, TokenTag } from "./Lexer";
+import { Block, Parser, Import, AstNode, Identifier } from "./Parser";
 import fs from "node:fs";
 import { JavascriptTranslator } from "./JavascriptTranslator";
 import files from "node:fs/promises";
@@ -98,7 +98,11 @@ function lexerPhase(data: string) {
 }
 
 function parserPhase(tokens: Token[]) {
-   const parser = new Parser(tokens);
+   const parser = new Parser([
+      ...tokens,
+      new Token(TokenTag.NEWLINE, "\n", tokens[0].position, true),
+      new Token(TokenTag.IDENTIFIER, "ok", tokens[0].position, true), // Marks end of file, solves some edge cases
+   ]);
    const ast = parser.parse();
    return ast;
 }

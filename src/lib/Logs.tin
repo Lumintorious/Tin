@@ -1,0 +1,25 @@
+import collections/Iterable
+import lib/File
+
+Logs = trait:
+	log: (InterpolatedString) ~> Ok
+
+Logs.CONSOLE = Logs {
+	log = (str: InterpolatedString) ->
+		print(str.joined())
+}
+
+Logs.toFile = (file: File & RegularFile) -> Logs {
+	log = (str: InterpolatedString) ~>
+		print(str)
+		file.write("{str.joined()}\\n")
+		ok
+}
+
+Logs.composed = (logs: Seq[Logs]) -> Logs {
+	(str: InterpolatedString) ~>
+		print(str)
+		doEach = (l: Logs) ~> l.log(str)
+		logs.stream().forEach(doEach)
+		ok 
+}

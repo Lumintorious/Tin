@@ -1,0 +1,35 @@
+import collections/Iterable
+import lib/Email
+import lib/Logs
+
+logFile = File.get("logs.txt")
+if logFile !: RegularFile, return logFile
+ 
+logs = Logs.composed(
+	Logs.CONSOLE,
+	Logs.toFile(logFile)
+)
+
+TEMPLATE = Email {
+	from = "ztinik@gmail.com",
+	to = Array.of("ztinik@gmail.com"),
+	subject = "Automated email sent from the Tin language!",
+	text = "This is a test."
+}
+
+testEmailAndReply = (postal: PostalService) ~>
+	attachment = File.get("RULES.md")?
+	if attachment !: RegularFile,
+		return Nok { "Can only send regular files", attachment }
+
+	email = TEMPLATE & EmailAttachments { attachments = Array.of(attachment) }
+	response = postal.send(email)?
+
+	reply = TEMPLATE { text = "Reply!", subject = "Re: Previous" } & ReplyEmail { replyToId = response.id }
+	postal.send(reply)
+
+postal = PostalService.CONSOLE # Gmail.connect("ztinik@gmail.com", "kmkr hisi ldve zmtu")
+if postal !: Ok, return postal
+
+testEmailAndReply(postal)
+logs.log("Done")

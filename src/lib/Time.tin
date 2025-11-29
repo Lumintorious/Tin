@@ -1,0 +1,137 @@
+external "
+	var JsDate = Date;
+"
+
+Time = trait:
+	hour: Number
+	minute: Number
+	second: Number
+
+Date = trait:
+	year: Number
+	month: Number
+	day: Number
+
+Instant = trait:
+	nanoSeconds: Number
+
+DateTime = Time & Date
+InstantDateTime = DateTime & Instant
+
+Date.now = () ->
+	yr: Number = external
+	mo: Number = external
+	dy: Number = external
+	external "
+		const $date = new Date();
+		const yr = $date.getFullYear();
+		const mo = $date.getMonth() + 1;
+		const dy = $date.getDate();
+	"
+	return Date {
+		year = yr,
+		month = mo,
+		day = dy
+	}
+
+Time.now = () ->
+	hr: Number = external
+	mn: Number = external
+	sc: Number = external
+	external "
+		const $date = new Date();
+		const hr = $date.getHours();
+		const mn = $date.getMinutes();
+		const sc = $date.getSeconds();
+	"
+	return Time {
+		hour = hr,
+		minute = mn,
+		second = sc
+	}
+
+Date.addMonths = (self: Date, months: Number) ->
+	totalMonths = self.month + months
+	yearsToAdd = ((totalMonths - 1) / 12) - (((totalMonths - 1) / 12) % 1)
+	newMonth = ((totalMonths - 1) % 12) + 1
+	return self {
+		year = self.year + yearsToAdd,
+		month = newMonth,
+		day = self.day
+	}
+
+external "
+const months = [
+	'January','February','March','April','May','June','July','August','September','October','November','December'
+]
+
+const monthsShort = [
+	'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+]
+
+const dayth = (day) => \{
+    // Special case for 11, 12, 13
+    if (day > 10 && day < 20) return day + 'th';
+    
+    // General case
+    switch (day % 10) \{
+        case 1:  return day + 'st';
+        case 2:  return day + 'nd';
+        case 3:  return day + 'rd';
+        default: return day + 'th';
+    }
+}
+
+function formatDate(date, formatString) \{
+	const padZero = (number) => String(number).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    const replacements = \{
+        'YYYY': year,
+		'YY': String(year).slice(-2),
+		'MMMM': months[month - 1],
+		'MMM': monthsShort[month - 1],
+        'MM': padZero(month),
+        'DD': padZero(day),
+        'DDth': dayth(day),
+        'HH': padZero(hours),
+        'mm': padZero(minutes),
+        'ss': padZero(seconds)
+    };
+
+    let formattedDate = formatString;
+    
+    for (const token in replacements) \{
+        // We use a global RegExp to replace all instances of the token
+        const regex = new RegExp(token, 'g');
+        formattedDate = formattedDate.replace(regex, replacements[token]);
+    }
+
+    return formattedDate;
+}
+"
+
+Date.fmt = (self: Date, formatString: String) ->
+	replacements = Map.of(
+		("YYYY", self.year),
+		("MM", 0)
+	)
+	return ""
+
+Date.format = (self: Date | Time, formatString: String) ->
+	external "
+		const d = self[TinDate_._s];
+		const t = self[Time._s];
+		const jsDate = new Date(d.year._, d.month._ - 1, d.day._, t.hour._, t.minute._, t.second._);
+		return formatDate(jsDate, formatString);
+	"
+	return ""
+
+now = Date.now() & Time.now()
+print(now.format("It's the DDth of MMMM, YYYY"))
+print("Hello".replace("ll", "ww"))

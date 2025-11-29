@@ -1,0 +1,96 @@
+# !!! Depends on npm package 'nodemailer' !!!
+import lib/File
+
+Email = trait:
+	from: String
+	to: Seq[String]
+	subject: String
+	text: String
+
+EmailAttachments = trait:
+	attachments: Seq[File & RegularFile]
+
+# Marks the object as a succesfully sent email
+SentEmail = trait:
+	id: String
+	accepted: Seq[String]
+	rejected: Seq[String]
+	serverResponse: String
+
+PostalService = trait:
+	send: (Email) ~> SentEmail | Nok
+
+ReplyEmail = Email & trait:
+	replyToId: String
+
+Gmail.connect: (username: String, password: String) ~> PostalService | Nok = external
+
+PostalService.CONSOLE = PostalService { (email) ->
+	delimiter = ","
+	print("----------")
+	print("From: {email.from}")
+	if email :: ReplyEmail, print("Reply To: {email.replyToId}")
+	print("To: {String.join(email.to, delimiter)}")
+	print("'{email.subject}'")
+	print("{email.text}")
+	if email :: EmailAttachments,
+		print("Attachments: ")
+		email.attachments.stream().forEach((att) ->
+			print(att.path)
+		)
+	print("----------")
+
+	email & SentEmail { "test-id", Array.empty[String], Array.empty[String], "OK" }
+}
+
+external "
+import nodemailer from 'nodemailer';
+
+export async function Gmail$connect(username, password) \{
+	try \{
+		let transporter = await nodemailer.createTransport(\{
+			service: 'gmail',
+			auth: \{
+				user: username,
+				pass: password
+			}
+		});
+		let err;
+		await transporter.verify().catch(e => \{
+			err = e
+		});
+		if (err) \{
+			return Nok(\{_:err.message})
+		}
+
+		return PostalService(\{_: async function (email) \{
+			console.log(email?.[ReplyEmail._s]?.replyToId?._)
+			let mailOptions = \{
+			from: email[Email._s].from._,
+			to: email[Email._s].to._[Seq._s]._rawArray,
+			subject: email[Email._s].subject._,
+			text: email[Email._s].text._,
+			inReplyTo: email?.[ReplyEmail._s]?.replyToId?._,
+			references: [email?.[ReplyEmail._s]?.replyToId?._]
+			};
+			if (EmailAttachments.__is_child(email)) \{
+				mailOptions.attachments = Iterable$jsArray(email[EmailAttachments._s].attachments._).map(att => \{
+					const pathParts = att[File._s].path._.split('\\\\')
+					return \{
+						path: att[File._s].path._,
+						filename: pathParts[pathParts.length - 1]
+					}
+				})
+			}
+			try \{
+				const resp = await transporter.sendMail(mailOptions);
+				return email._and(SentEmail(\{_:resp.messageId}, \{_:Seq$createProperly(TinString_)(resp.accepted)}, \{_:Seq$createProperly(TinString_)(resp.rejected)}, \{_:resp.response}));
+			} catch (e) \{
+				return Nok(\{_: e.message})
+			}
+		}})
+	} catch (e) \{
+		return Nok(\{_:e.message})
+	}
+}
+"

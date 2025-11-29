@@ -1,22 +1,22 @@
-Accessible = [T] => struct:
+Accessible = [T] => trait:
 	at: (index: Number) -> T?
 
-VarAccessible = [T] => struct:
+VarAccessible = [T] => trait:
 	at: (index: Number) -> T?
 	place: (index: Number, value: T) -> Nothing
 
-Growable = [K, V] => struct:
+Growable = [K, V] => trait:
 	add: (value: V) -> K
 	remove: (value: V) -> K?
 	removeAt: (key: K) -> V?
 
-MapOps = [K, V] -> struct:
+MapOps = [K, V] -> trait:
 	get: (K) -> V?
 	with: (K, V) -> Map[K, V]
 
 # MapOps.at = [K, V] -> (self: MapOps[K, V], key: K) -> self.get(key)
 
-Mergeable = [T, F: Mergeable] => struct:
+Mergeable = [T, F: Mergeable] => trait:
 	merge: (F[T]) -> F[T]
 
 Map = [K, V] => MapOps[K, V] & Iterable[(K, V)]
@@ -75,10 +75,10 @@ Map.of: [K, V] -> (kvs: Seq[(K, V)]) -> Map[K, V] = external
 Iterator.mapped = [T, X] -> (self: Iterator[T], fn: (T) -> X): Iterator[X] ->
 	Iterator[X]((): X? ->
 		prev = self.next()
-		if prev !: Error,
+		if prev !: Nok,
 			fn(prev)
 		else
-			Error { message = "End of iterator reached" }
+			Nok { message = "End of iterator reached" }
 	)
 
 Iterable.map = [T, X] -> (self: Iterable[T], fn: (T) -> X): Iterable[X] ->
@@ -94,26 +94,18 @@ Iterator.consumeEach = [T] -> (self: Iterator[T], fn: (T) -> Nothing) ->
 	iterator = self
 	current = var iterator.next()
 	
-	while current !: Error,
+	while current !: Nok,
 		fn(current)
 		set current = iterator.next()
 
 Iterable.toSeq = [T] -> (self: Iterable[T]) -> Seq.fromIterable(self)
 
-Iterable.forEach = [T] -> (self: Iterable[T], fn: (T) -> Nothing) ->
-	iterator = self.makeIterator()
-	current = var iterator.next()
-	
-	while current !: Error,
-		fn(current)
-		set current = iterator.next()
-
 Iterable.contains = [T] -> (self: Iterable[T], value: T): Boolean ->
 	found = var false
-	self.forEach((elem: T) ->
+	fn = (elem: T) ->
 		if elem == value,
 			set found = true
-	)
+	self.forEach(fn)
 	found
 
 Iterable.fromArray = [T] -> (arr: Seq[T]) ->
@@ -127,10 +119,9 @@ Iterable.fromArray = [T] -> (arr: Seq[T]) ->
 
 Iterable.fold = [T, S] -> (self: Iterable[T], start: S, combine: (T, S) -> S): S ->
 	sum = var start
-	self.forEach((e: T) ->
+	fn = (e: T) ->
 		set sum = combine(e, sum)
-		nothing
-	)
+	self.forEach(fn)
 
 	sum
 
@@ -157,7 +148,7 @@ Seq.stream = [T] -> (self: Seq[T]) -> Iterable.fromArray(self)
 
 # Json = Number | String | Seq[Json] | Map[String, Json]
 
-# Json.fromString: (string: String) -> Json | Error = external
+# Json.fromString: (string: String) -> Json | Nok = external
 # Json.toString: (json: Json) -> String = external
 
 external "
@@ -211,17 +202,17 @@ Iterable.toString = [T] -> (iter: Iterable[T], label: String = " "): String ->
 	current = var iterator.next()
 	str = var "{label} \{ "
 	
-	while current !: Error,
+	while current !: Nok,
 		set str = "{str}{toString(current)}"
 		set current = iterator.next()
-		if current !: Error,
+		if current !: Nok,
 			set str = "{str}, "
 
 	"{str} \}"
 
 Iterable.makeToString = [T] -> (iter: Iterable[T], label: String = " ") -> ToString { () -> Iterable.toString(iter, label) }
 
-Range = struct:
+Range = trait:
 	start: Number
 	end: Number
 	step: Number
@@ -243,21 +234,38 @@ Range.new = (start: Number, end: Number, step: Number = 1) ->
 Range.from = (start: Number) -> Range.new(start, 9999999999999)
 Range.to = (self: Range, to: Number) -> Range.new(self.start, to, self.step)
 	 
-Map.by = [K, V] -> (getKey: (v: V) -> K) -> (seq: Seq[V]) ->
+Map.by = [K, V] -> (getKey: (V) -> K) -> (seq: Seq[V]) ->
 	mapd = Iterable.fromArray(seq).makeIterator()
-	Map.of(Seq.fromIterator(mapd.mapped((v: V) -> (getKey(v), v))))
-
-Map.at = [K, V] -> (self: Map[K, V], k: K) -> (self.get(k)): V
-
-InterpolatedString.makeString = (self: InterpolatedString) ->
-	self.elements.stream().fold("", (elem, str) ->
-		if elem :: Interpolation,
-			"{str}{elem.value}"
-		else
-			"{str}{elem}"
+	mappedd = mapd.mapped((vvvv: V) ->
+		cococo = 421
+		(getKey(vvvv), vvvv)
 	)
+	Map.of(Seq.fromIterator(mappedd))
+
+# Map.at = [K, V] -> (self: Map[K, V], k: K) -> (self.get(k)): V
+
+# InterpolatedString.makeString = (self: InterpolatedString) ->
+# 	self.elements.stream().fold("", (elem, str) ->
+# 		if elem :: Interpolation,
+# 			"{str}{elem.value}"
+# 		else
+# 			"{str}{elem}"
+# 	)
 	
-Iterable.printAll = [T] -> (self: Iterable[T]) ->
-	self.forEach((elem: T) ->
-		print(elem)
-	)
+# Iterable.printAll = [T] -> (self: Iterable[T]) ->
+# 	self.forEach((elem: T) ->
+# 		print(elem)
+# 	)
+
+InterpolatedString.joined = (self: InterpolatedString) ->
+	result = var ""
+	fn = (elem: Anything) ->
+		if elem :: String,
+			set result = "{result}{elem}"
+		else if elem :: Interpolation,
+			set result = "{result}{elem.value}"
+	
+	self.elements.stream().forEach(fn)
+	result
+
+ok

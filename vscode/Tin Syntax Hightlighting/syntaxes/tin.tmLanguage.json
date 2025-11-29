@@ -7,7 +7,7 @@
       },
       {
          "name": "keyword.tin",
-         "match": "\\b(if|where|var|else|while|copy|return|external|struct|set|import|self|unchecked|link|private)\\b"
+         "match": "\\b(if|where|var|else|while|copy|return|external|trait|set|import|self|unchecked|link|private)\\b"
       },
       {
          "name": "constant.tin",

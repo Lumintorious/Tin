@@ -137,17 +137,11 @@ export class TypeInferencer {
                } else if (inferredType.right.isAssignableTo(Nothing, scope)) {
                   inferredType = inferredType.left;
                } else if (
-                  inferredType.left.isAssignableTo(
-                     new NamedType("Error"),
-                     scope
-                  )
+                  inferredType.left.isAssignableTo(new NamedType("Nok"), scope)
                ) {
                   inferredType = inferredType.right;
                } else if (
-                  inferredType.right.isAssignableTo(
-                     new NamedType("Error"),
-                     scope
-                  )
+                  inferredType.right.isAssignableTo(new NamedType("Nok"), scope)
                ) {
                   inferredType = inferredType.left;
                }
@@ -468,9 +462,17 @@ export class TypeInferencer {
                   scope
                )
             ) {
+               console.log("==> Round");
                const owner = node.callee.owner;
                node.callee = new Identifier(symbol.name);
                node.bakedInThis = owner;
+               //    walkTerms(node, scope, (node, scope) => {
+               //       node.id = ++Term.currentNumber;
+               //       if (node instanceof Term) {
+               //          node.inferredType = undefined;
+               //          node.translatedType = undefined;
+               //       }
+               //    });
                this.context.builder.build(node.callee, scope);
                this.context.builder.build(node, scope);
             } else if (
@@ -479,6 +481,7 @@ export class TypeInferencer {
                   RoundValueToValueLambdaType &&
                symbol.typeSymbol.returnType.params[0]?.name === "self"
             ) {
+               console.log("==> Square");
                const mappedParams = new GenericTypeMap();
                mappedParams.expectedTypes = symbol.typeSymbol.paramTypes;
                const ownerType = this.infer(node.callee.owner, scope);
@@ -523,6 +526,10 @@ export class TypeInferencer {
                   node.autoFilledSquareTypeParams = mappedParams;
                   walkTerms(node, scope, (node, scope) => {
                      node.id = ++Term.currentNumber;
+                     if (node instanceof Term) {
+                        node.inferredType = undefined;
+                        node.translatedType = undefined;
+                     }
                   });
                   this.context.builder.build(node, scope);
                   this.context.builder.build(node.callee, scope);
@@ -647,6 +654,11 @@ export class TypeInferencer {
       calleeType = scope.resolveNamedType(calleeType);
       if (calleeType instanceof OptionalType && node.ammortized) {
          calleeType = scope.resolveNamedType(calleeType.type);
+      } else if (calleeType instanceof UnionType && node.ammortized) {
+         const all = calleeType.getAllSeparateUnionedTypes();
+         calleeType = UnionType.ofAll(
+            all.filter((t) => t.isAssignableTo(new NamedType("Nok"), scope))
+         );
       }
 
       if (calleeType instanceof RoundValueToValueLambdaType) {
@@ -683,6 +695,10 @@ export class TypeInferencer {
          });
          if (node.ammortized && !(result instanceof OptionalType)) {
             result = new OptionalType(result);
+         }
+
+         if (calleeType instanceof RoundValueToValueLambdaType) {
+            node.callsPure = calleeType.pure;
          }
          return this.asMutable(result, node, usesVariableParameters);
       } else if (
@@ -777,7 +793,6 @@ export class TypeInferencer {
          try {
             const type = scope.lookup(asSelectOfIdentifiers).typeSymbol;
             node.isDeclaration = true;
-            console.log(`#Treating ${node.show()} as identifier in inferer`);
             return type;
          } catch (e) {
             // console.error(e.message);
@@ -1031,13 +1046,10 @@ export class TypeInferencer {
             ) {
                acc.push([node, Nothing]);
             } else if (
-               innerType.left.isAssignableTo(
-                  new NamedType("Error"),
-                  thisScope
-               ) ||
-               innerType.right.isAssignableTo(new NamedType("Error"), thisScope)
+               innerType.left.isAssignableTo(new NamedType("Nok"), thisScope) ||
+               innerType.right.isAssignableTo(new NamedType("Nok"), thisScope)
             ) {
-               acc.push([node, new NamedType("Error")]);
+               acc.push([node, new NamedType("Nok")]);
             }
          }
          if (innerType instanceof OptionalType) {
@@ -1425,8 +1437,10 @@ export class TypeInferencer {
       }
       const innerScope = scope.innerScopeOf(node, true);
       let paramsAsTypes: ParamType[] = [];
-      const expected = options.typeExpectedInPlace;
-      if (expected !== undefined) {
+      const expected = options.typeExpectedInPlace
+         ? scope.resolveNamedType(options.typeExpectedInPlace)
+         : undefined;
+      if (expected !== undefined && expected.name !== "Anything") {
          if (expected instanceof RoundValueToValueLambdaType) {
             const inferredParams = node.params.map((param, i) => {
                return this.context.translator.translateRoundTypeToTypeLambdaParameter(
@@ -1438,7 +1452,9 @@ export class TypeInferencer {
             let i = 0;
             if (inferredParams.length !== expected.params.length) {
                this.context.logs.error({
-                  message: `Expected parameter amount lambda parameter of call `,
+                  message: `Lambda parameter ${node.show()} expects ${
+                     expected.params.length
+                  } parameters`,
                   position: node.position,
                });
             } else {

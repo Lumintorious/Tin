@@ -18,6 +18,7 @@ import {
    LINK_VAL,
    WHERE_INTERPOLATION_EXPECTED,
    IN_TYPE_CONTEXT,
+   Optional,
 } from "./Parser";
 import {
    Scope,
@@ -38,14 +39,7 @@ import {
    INVAR_RETURNING_FUNC_IN_VAR_PLACE,
 } from "./Parser";
 import { type } from "os";
-import {
-   TypeDef,
-   AppliedKeyword,
-   Literal,
-   Group,
-   RefinedDef,
-   Make,
-} from "./Parser";
+import { TypeDef, AppliedKeyword, Literal, Group, RefinedDef } from "./Parser";
 import { Symbol, GenericTypeMap } from "./Scope";
 import { Select, Tuple, Identifier } from "./Parser";
 import {
@@ -222,6 +216,8 @@ export class TypeBuilder {
          }
       } else if (node instanceof Select) {
          this.buildSelect(node, scope, options);
+      } else if (node instanceof Optional) {
+         this.build(node.expression, scope, options);
       } else if (node instanceof TypeDef) {
          this.buildTypeDef(node, scope, options);
       } else if (node instanceof RefinedDef) {
@@ -345,7 +341,7 @@ export class TypeBuilder {
             newSymbol.shadowing = shadowSymbol;
             newSymbol.typeSymbol = type;
             (inverted ? falseSymbols : trueSymbols).push(newSymbol);
-            scope.declare(newSymbol, true);
+            // scope.declare(newSymbol, true);
          } else if (term instanceof Select) {
             const ownerType = inferencer.infer(term.owner, scope);
             const field = inferencer.findField(ownerType, term.field, scope);
@@ -373,12 +369,27 @@ export class TypeBuilder {
          }
          if (checkedType instanceof UnionType) {
             let allUnionTypes = checkedType.getAllSeparateUnionedTypes();
-            allUnionTypes = allUnionTypes.filter((t) => t.name !== type.name);
+            allUnionTypes = allUnionTypes.filter((t) => {
+               if (type === PrimitiveType.Ok) {
+                  return t.name !== "Nok";
+               }
+               return t.name !== type.name;
+            });
             let negativeType = UnionType.ofAll(allUnionTypes);
             if (wasMutable) {
                negativeType = new MutableType(negativeType);
             }
-            register(condition.term, negativeType, !condition.negative);
+
+            register(
+               condition.term,
+               negativeType,
+               type === PrimitiveType.Ok
+                  ? condition.negative
+                  : !condition.negative
+            );
+         }
+         if (type === PrimitiveType.Ok) {
+            return;
          }
          if (checkedType instanceof OptionalType) {
             let negativeType = checkedType.type;
@@ -831,6 +842,7 @@ export class TypeBuilder {
       if ((calleeType as any).pure === false) {
          node.callsPure = false;
       }
+      calleeType = scope.resolveNamedType(calleeType);
       if (!(calleeType instanceof RoundValueToValueLambdaType)) {
          this.buildSquareArgsInRoundApply(
             node,
@@ -862,9 +874,11 @@ export class TypeBuilder {
          const expectedType = paramTypes[i + thisOffset]?.type;
          this.build(statement[1], scope, {
             typeExpectedInPlace: expectedType,
+            assignedName: statement[0] === "" ? undefined : statement[0],
          });
          const gottenType = this.context.inferencer.infer(statement[1], scope, {
             typeExpectedInPlace: expectedType,
+            assignedName: statement[0] === "" ? undefined : statement[0],
          });
          let captureName = undefined;
          if (node.isCallingAConstructor) {
@@ -1238,12 +1252,8 @@ export class TypeBuilder {
          ) {
             const symbol = scope.lookup(term.value);
             symbol.isUsedInClojures = true;
-            // if (symbol.isLink) {
             term.isFromSelfClojure = true;
             return [symbol];
-            // } else {
-            //    return [];
-            // }
          }
       } else if (term instanceof BinaryExpression) {
          return [
@@ -1372,6 +1382,7 @@ export class TypeBuilder {
                ),
                true
             );
+            node.symbol = symbol;
          }
          return;
       }
@@ -1390,9 +1401,7 @@ export class TypeBuilder {
          expectsBroadenedType: !node.type,
          allowsSingletonType: node.type !== undefined,
       });
-      console.log(
-         `Type of ${lhs.show()} is ${rhsType} from ${node.value.show()}`
-      );
+
       let isMutable = rhsType instanceof MutableType;
       if (!node.type) {
          if (rhsType instanceof SingletonType) {
@@ -1431,11 +1440,7 @@ export class TypeBuilder {
       if (
          node.lhs instanceof Identifier &&
          node.lhs.value &&
-         (node.isTypeLevel ||
-            node.lhs.isTypeLevel ||
-            this.context.inferencer.isCapitalized(
-               options.assignedName || "lowercase"
-            ) ||
+         (this.context.inferencer.isCapitalized(node.lhs.value) ||
             rhsType instanceof TypeOfTypes)
       ) {
          if (node.value instanceof RoundValueToValueLambda) {

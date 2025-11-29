@@ -321,9 +321,6 @@ export class SingletonType extends Type {
    }
 
    isExtendedBy(other: Type, scope: Scope): boolean {
-      console.log(
-         "Checking isExtendedBy for SingletonType: " + this + " - " + other
-      );
       return (
          other instanceof SingletonType &&
          other.type.isExtendedBy(this.type, scope) &&
@@ -467,7 +464,7 @@ export class OptionalType extends Type {
       }
       return (
          this.type.isAssignableTo(other, scope) ||
-         other.isAssignableTo(new NamedType("Error"), scope)
+         other.isAssignableTo(new NamedType("Nok"), scope)
       );
    }
 
@@ -475,12 +472,9 @@ export class OptionalType extends Type {
       if (other instanceof OptionalType && this.isSame(other, scope)) {
          return true;
       }
-      console.log(
-         "Checking isExtendedBy for OptionalType: " + this + " - " + other
-      );
       return (
          other.isAssignableTo(this.type, scope) ||
-         new NamedType("Error").isAssignableTo(other, scope)
+         new NamedType("Nok").isAssignableTo(other, scope)
       );
    }
 

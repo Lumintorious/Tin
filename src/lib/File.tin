@@ -1,34 +1,50 @@
 import collections/Iterable
 
-File = struct:
+File = trait:
 	path: String
 	birthTime: Number
 
-RegularFile = struct:
+RegularFile = trait:
 	size: Number
 
-Directory = struct:
-	children: () ~> Seq[File] | Error
+# FilePotential = (Anything | Writable | Readable | Executable)
 
-FilePermissions = struct:
+# Create log is skipped in display
+
+Directory = trait:
+	children: () ~> Seq[File] | Nok
+
+InMemoryFile = trait:
+	contents: Array[Byte]
+
+# Marks the object as a real file in the disk file system
+LiveFile = trait
+
+FilePermissions = trait:
 	canRead: Boolean
 	canWrite: Boolean
 	canExecute: Boolean
 
-# FileHandle = struct:
-# 	read: (bytes: Number, encoding: String) -> String | Error
-# 	write: (string: String) -> Nothing | Error 
+# FileHandle = trait:
+# 	read: (bytes: Number, encoding: String) -> String | Nok
+# 	write: (string: String) -> Nothing | Nok 
 
-FileNotFound = Error & struct
-PermissionDenied = Error & struct
-FileAlreadyExists = Error & struct
-FileCreateError = Error & (FileNotFound | PermissionDenied)
-FileGetError = Error & (FileAlreadyExists | PermissionDenied)
+FileNotFound = Nok & trait
+PermissionDenied = Nok & trait
+FileAlreadyExists = Nok & trait
+FileCreateNok = Nok & (FileNotFound | PermissionDenied)
+FileGetNok = Nok & (FileAlreadyExists | PermissionDenied)
 
-File.get: (path: String) ~> File & FilePermissions | FileGetError = external
+File.get: (path: String) ~> (File & FilePermissions)? = external
 external "
 	import fsA from 'fs/promises';
 	import pth from 'path';
+
+	export async function _readableFile(path) \{
+		return Readable(\{_: async function() \{
+			return await _streamToAsyncByteIterator(fs.createReadStream(path))
+		}})
+	}
 	
 	export async function _getAccess(file) \{
 		const result = \{ read: false, write: false, execute: false };
@@ -75,27 +91,28 @@ external "
 			let result = File(\{_:realPath}, \{_:file.birthtime.getTime()});
 			const permissions = await _getAccess(realPath);
 			result = result._and(permissions)
-			return result._and(appendage);
+			return result._and(appendage)//._and(await _readableFile(realPath));
 		} catch (e) \{
-			return TinErr_(\{_:e.message})._and(e.message.startsWith('ENOENT') ? FileNotFound() : PermissionDenied());
+			return Nok(\{_:e.message})._and(e.message.startsWith('ENOENT') ? FileNotFound() : PermissionDenied());
 		}
 	}
 "
 
-File.create: (path: String, kind: FileKind) ~> File | FileCreateError = external
+File.create: [Kind: Directory | RegularFile] -> (path: String) ~> (File & Kind) | FileCreateNok = external
 external "
-	export async function File$create(path, kind) \{
-		try \{
-			if (kind === 'DIRECTORY') \{
-				await fsA.mkdir(path)
-			} else \{
-				await fsA.writeFile(path, '', \{flag: 'wx'})
+	export function File$create(kind) \{
+		return async function(path, kind) \{
+			try \{
+				if (kind === Directory) \{
+					await fsA.mkdir(path)
+				} else \{
+					await fsA.writeFile(path, '', \{flag: 'wx'})
+				}
+				return File$get(path)
+			} catch (e) \{
+				return Nok(\{_:e.message})._and(e.message.startsWith('EEXIST') ? FileAlreadyExists() : PermissionDenied());
 			}
-			return File$get(path)
-		} catch (e) \{
-			return TinErr_(\{_:e.message})._and(e.message.startsWith('EEXIST') ? FileAlreadyExists() : PermissionDenied());
-		}
-	}
+	}}
 "
 
 File.lineIterator: (self: File) ~> AsyncIterator[String] = external
@@ -123,4 +140,14 @@ external "
 		await fsA.rename(oldPath, path)
 		return _copy(this, \{path: path})
 	}
+"
+
+File.write: (self: File, contents: String) ~> Ok | Nok = external
+external "
+export function File$write(str) \{
+	const fs = require('fs');
+	fs.appendFile(this[File._s].path._, str, err => \{
+		if (err) throw err;
+	});
+}
 "

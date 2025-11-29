@@ -148,6 +148,7 @@ export function _Q(symbol, func, descriptor) {
 				if ((typeof obj === "object") && Reflect.ownKeys(obj).includes(symbol)) {
 					for (let i = 0; i < args.length; i++) {
 						if (args[i]._s !== obj[symbol]._ta[i]._s && args[i] !== Anything) {
+							console.log("Mismatch " + args[i]._s.description + " - " + obj[symbol]._ta[i]._s.description)
 							return false;
 						}
 					}
@@ -169,7 +170,7 @@ export function _Q(symbol, func, descriptor) {
 }
 
 export function Type$of(obj, isAmmortized) {
-	if (isAmmortized && TinErr_.__is_child(obj)) {
+	if (isAmmortized && Nok.__is_child(obj)) {
 		return obj;
 	}
 
@@ -177,7 +178,7 @@ export function Type$of(obj, isAmmortized) {
 		return Ok;
 	}
 	if (typeof obj === "number") {
-		return Number._d;
+		return TinNumber_._d;
 	}
 	if (typeof obj === "string") {
 		return String._d;
@@ -390,6 +391,8 @@ function _sym_share(name) {
 export const _U = function (obj1, obj2, name) {
 
 	if ((!obj1._s || !obj2._s) && (typeof obj1 !== "number" && typeof obj2 !== "number")) {
+		console.dir(obj1)
+		console.dir(obj2)
 		throw new Error("Unioning objects is not possible.");
 	}
 	if (!obj1._s) {
@@ -417,12 +420,15 @@ export const _U = function (obj1, obj2, name) {
 const _L_cache = new Map()
 
 export function _L(value, explicitName) {
+	if (value._s) {
+		return value;
+	}
 	function check(obj) {
 		return obj === value;
 	}
 	let broaderType = Never;
 	if (typeof value === "number") {
-		broaderType = Number;
+		broaderType = TinNumber_;
 	} else if (typeof value === "string") {
 		broaderType = String
 	} else if (typeof value === "object" && "_type" in value) {
@@ -516,7 +522,7 @@ export var Seq = (function () {
 			},
 			at: {
 				_: function (index) {
-					return args[index] ?? Error$NOTFOUND
+					return args[index] ?? Nok$NOTFOUND
 				}
 			},
 			and: {
@@ -531,6 +537,21 @@ export var Seq = (function () {
 	})
 	return result;
 })()
+
+export function Iterable$jsArray(iterable) {
+	if (iterable[Seq._s]?._rawArray) {
+		return iterable[Seq._s]?._rawArray
+	}
+	const arr = [];
+	debug(iterable)
+	const iterator = iterable[Iterable._s].makeIterator._();
+	let now = iterator[Iterator._s].next._();
+	while (!Nok.__is_child(now)) {
+		arr.push(now);
+		now = iterator[Iterator._s].next._();
+	}
+	return arr;
+}
 
 export var Seq$createProperly = (T) => (args) => {
 	const seq = Seq(T)(args)
@@ -592,7 +613,17 @@ export const copy = (obj, replacers) => {
 	}
 
 	if (obj._clojure) {
-		newObj._clojure = { ...obj._clojure }
+		newObj._clojure = {}
+		// copy clojure
+		for (const oldClojureKey of Object.keys(obj._clojure)) {
+			const oldClojureObj = obj._clojure[oldClojureKey]
+			if (oldClojureObj.set) {
+				newObj._clojure[oldClojureKey] = { ...oldClojureObj }
+			} else {
+				newObj._clojure[oldClojureKey] = oldClojureObj
+			}
+		}
+
 		for (const clojureKey of Object.keys(obj._clojure)) {
 			const clojureCapture = obj._clojure[clojureKey]
 			for (const [key, value] of newFieldsByOldFields) {
@@ -724,17 +755,20 @@ export function _replaceComponentFields2(obj, replacer) {
 						obj._clojure[replacerField._cl] = replacerField
 					}
 				}
+				// console.log("Replacing " + fieldKey)
+				// console.log(objField)
+				// console.log(replacerField)
 				const oldObjField = objField
 				obj[componentKey][fieldKey] = replacerField;
 				for (const clojureKey of Reflect.ownKeys(obj._clojure)) {
 					const clojureField = obj._clojure[clojureKey]
-					if (clojureField === oldObjField) {
+					if (clojureField === oldObjField || clojureField._cl === oldObjField._cl) {
+						// console.log("Did clojure too")
 						obj._clojure[clojureKey] = replacerField
 					}
 				}
 			}
 		}
-
 	}
 
 	return obj;
@@ -784,10 +818,12 @@ export const _makeClojure = (clojure, objParam) => {
 	if (typeof obj === "function") {
 		const old = obj;
 		old._clojure = clojure;
-		setObj(function (...args) {
+		const newObj = function (...args) {
 			const self = !this || this === globalThis ? { _clojure: clojure } : this;
 			return old.call(self, ...args)
-		});
+		};
+		Object.assign(newObj, old)
+		setObj(newObj);
 	}
 
 	if (typeof obj !== "object" && typeof obj !== "function") {
@@ -804,7 +840,7 @@ export function _call(owner, fn, params) {
 	return fn.call(owner, ...params)
 }
 
-export function _cast(obj, type) {
+export function _cast(obj, type, ammortized) {
 	if (typeof (type) === 'object' && "_" in type) {
 		type = type._
 	}
@@ -816,6 +852,9 @@ export function _cast(obj, type) {
 	if (type.__is_child !== undefined && type.__is_child(objToTest)) {
 		return obj
 	} else {
+		if (ammortized) {
+			throw Nok({ _: (`'${makeStr(objToTest, true, true, new Set([{}]))/* .replaceAll(/\x1b\[[0-9]+m/g, "") */}' was not of type ${(type?._d ?? type)?._s?.description}`) })
+		}
 		console.error(type._s)
 		console.error(objToTest)
 		console.error(type.__is_child(objToTest))
@@ -936,6 +975,9 @@ export function makeString(obj, sprawl = false, indent = 0, currentIndent = 0) {
 
 export function makeStr(obj, useToString, firstLayer = false, existingCache) {
 	const useFieldNames = Console$useFieldNames._;
+	if (obj === null) return firstLayer ? 'nothing' : green('nothing');
+	if (typeof obj === 'undefined') return firstLayer ? 'ok' : green('ok');
+
 	if (typeof obj._ === 'object' && existingCache.has(obj)) {
 		return "<recursive>";
 	}
@@ -946,8 +988,6 @@ export function makeStr(obj, useToString, firstLayer = false, existingCache) {
 		existingCache.add(obj)
 	}
 
-	if (obj === null) return firstLayer ? 'nothing' : green('nothing');
-	if (typeof obj === 'undefined') return firstLayer ? 'ok' : green('ok');
 	if (typeof obj === 'object' && "_" in obj) {
 		obj = obj._
 	}
@@ -960,17 +1000,15 @@ export function makeStr(obj, useToString, firstLayer = false, existingCache) {
 	if (typeof obj === 'symbol') return obj.description;
 
 	if (typeof obj === 'function') {
-		return blue('λ')
+		if (obj._ta) {
+			return `${white("(")}${obj._ta.slice(0, obj._ta.length - 1).map(([name, tpe]) => {
+				return `${name ? `${red(name)}${white(": ")
+					}` : ``}${yellow(Type$get(tpe)[Type._s].name._)}`
+			})}${white(") -> ")}${yellow(Type$get(obj._ta[obj._ta.length - 1][1])[Type._s].name._)}`
+		}
+		return blue('λnativeλ')
 	}
 	const seqSym = Reflect.ownKeys(obj).filter(s => typeof s === 'symbol' && s.description.startsWith("Seq"))[0];
-	if (seqSym) {
-		let result = yellow("Seq") + white(' { ');
-		for (let i = 0; i < obj[seqSym].length._(); i++) {
-			result += makeStr(obj[seqSym].at._(i), useToString, false, existingCache) + (i === obj[seqSym].length._() - 1 ? "" : white(", "))
-		}
-
-		return result + white(" }")
-	}
 
 	if (useToString && typeof obj === 'object' && obj[ToString._s]) {
 		return obj[ToString._s]?.toString?._.call(obj)
@@ -995,10 +1033,22 @@ export function makeStr(obj, useToString, firstLayer = false, existingCache) {
 					block += symName[i]
 					i++;
 				}
+				if (block.endsWith(" ")) {
+					block = block.substring(0, block.length - 1)
+				}
 				result += yellow(block)
 			}
 		}
 		return result;
+	}
+
+	function showTypeArguments(_ta) {
+		if (!_ta) {
+			return ""
+		}
+		let argNames = _ta.map(t => yellow(t._s.description))
+
+		return white("[") + argNames.join(white(", ")) + white("]")
 	}
 
 	const results = [];
@@ -1006,8 +1056,18 @@ export function makeStr(obj, useToString, firstLayer = false, existingCache) {
 		if (typeof componentKey === 'string') continue;
 		const component = obj[componentKey]
 		const componentName = (componentKey.description.startsWith("Tuple2") || componentKey.description.startsWith("Tuple3")) ? "" : componentKey.description + " "
+		const typeArgsString = showTypeArguments(component._ta);
+		if (componentKey === Seq._s) {
+			let result = yellow("Seq") + typeArgsString + white(' { ');
+			for (let i = 0; i < obj[Seq._s].length._(); i++) {
+				result += makeStr(obj[Seq._s].at._(i), useToString, false, existingCache) + (i === obj[Seq._s].length._() - 1 ? "" : white(", "))
+			}
+
+			results.push(result + white(" }"));
+			continue;
+		}
 		const innerFields = Reflect.ownKeys(component).filter(f => f !== undefined && typeof f === 'string' && !f.startsWith("_"));
-		results.push(colorSymbolName(componentName) + (innerFields.length === 0 ? "" : (white("{ ") + innerFields.map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : red(k)} ${white("=")} ` : ""}${makeStr(component[k], useToString, false, existingCache)}`).join(white(", ")) + white(" }"))))
+		results.push(colorSymbolName(componentName) + typeArgsString + (innerFields.length === 0 ? "" : (white(" { ") + innerFields.map(k => `${useFieldNames ? `${typeof k === 'symbol' ? k.description : (typeof component[k]._ === 'function' ? blue(k) : red(k))} ${white("=")} ` : ""}${makeStr(component[k], useToString, false, existingCache)}`).join(white(", ")) + white(" }"))))
 	}
 
 	return results.join(white(" & "))
@@ -1104,7 +1164,7 @@ export function printTable(objs /* [] */) {
 		symbols.forEach(sym => {
 			sym.fields.forEach(field => {
 				if (sym.symbol in obj && field.name in obj[sym.symbol]) {
-					row += " " + (makeStr(obj[sym.symbol][field.name], true, true).replaceAll(/\x1b\[[0-9]+m/g, "")).padEnd(field.width + 2) + "|"
+					row += " " + (makeStr(obj[sym.symbol][field.name], true, true, new Set([{}])).replaceAll(/\x1b\[[0-9]+m/g, "")).padEnd(field.width + 2) + "|"
 				} else {
 					row += " " + ("").padEnd(field.width + 2) + "|"
 				}
@@ -1176,7 +1236,7 @@ export function String$matches(regex) {
 }
 
 export function panic(message) {
-	const err = TinErr_({ _: message }, { _: undefined })._and(StackInfo({ _: Array(String)([]) }));
+	const err = Nok({ _: message }, { _: undefined })._and(StackInfo({ _: Array(String)([]) }));
 	setTimeout(() => { }, 0);
 	throw err
 }
@@ -1188,17 +1248,34 @@ export function _addStack(tinErr, line) {
 	return tinErr
 }
 
-// process.on('uncaughtException', (err) => {
-// 	if (TinErr_._s in err) {
-// 		console.log("Panic! " + err[TinErr_._s].message._)
-// 	}
-// 	if (StackInfo && StackInfo._s in err) {
-// 		for (let i = 0; i < err[StackInfo._s].stack._[Array._s].length._(); i++) {
-// 			console.log("  at " + err[StackInfo._s].stack._[Array._s].at._(i))
-// 		}
-// 	}
+process.on('uncaughtException', (err) => {
+	if (typeof err === 'object' && Nok._s in err) {
+		print("Panic! " + err[Nok._s].message._)
+		if (StackInfo && StackInfo._s in err) {
+			for (let i = 0; i < err[StackInfo._s].stack._[Array._s].length._(); i++) {
+				print("  at " + err[StackInfo._s].stack._[Array._s].at._(i))
+			}
+		}
+	} else {
+		console.log(err)
+	}
 
-// })
+})
+
+process.on('unhandledRejection', (err) => {
+	if (Nok._s in err) {
+		print("Panic! " + err[Nok._s].message._)
+
+		if (StackInfo && StackInfo._s in err) {
+			for (let i = 0; i < err[StackInfo._s].stack._[Array._s].length._(); i++) {
+				print("  at " + err[StackInfo._s].stack._[Array._s].at._(i))
+			}
+		}
+	} else {
+		console.log(err)
+	}
+
+})
 
 export function _set(varObj, newValue) {
 	if ("set" in varObj) {
@@ -1316,7 +1393,7 @@ export function clojure(obj) {
 		}
 		if (presentInFields.endsWith(", ")) presentInFields = presentInFields.substring(0, presentInFields.length - 2)
 		if (usedInLambdas.endsWith(", ")) usedInLambdas = usedInLambdas.substring(0, usedInLambdas.length - 2)
-		console.log((presentInFields.length === 0 ? red("external") : presentInFields) + white(" @ ") + (usedInLambdas.length === 0 ? "unused" : `${usedInLambdas}`) + " = " + makeStr(v, true, false, new Set([{}])))
+		console.log(`[${k}] ` + (presentInFields.length === 0 ? red("external") : presentInFields) + white(" @ ") + (usedInLambdas.length === 0 ? "unused" : `${usedInLambdas}`) + " = " + makeStr(v, true, false, new Set([{}])))
 	})
 }
 
@@ -1422,7 +1499,7 @@ export function _interpolation(elems) {
 			return Interpolation({ _: e[0] }, { _: e[1] })
 		}
 	});
-	const arr = Seq$createProperly(_U(String, Interpolation))(_arr)
+	const arr = Seq$createProperly(_U(TinString_, Interpolation))(_arr)
 	return InterpolatedString({ _: arr })
 }
 

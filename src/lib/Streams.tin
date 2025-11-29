@@ -1,0 +1,55 @@
+ReaderHandle = (Array[Byte] | STOP) ~> Ok | STOP
+
+Closable = trait:
+	close: () ~> Ok?
+
+Reader = AsyncIterator[Array[Byte]] & Closable & trait
+
+Writer = trait:
+	writeBytes: (bytes: Varray[Byte]) ~> Number?
+
+Readable = trait:
+	openForReading: () ~> Reader?
+
+Writable = trait:
+	openForWriting: (append: Boolean = false) ~> Writer?
+
+Executable = trait:
+	execute: (params: Seq[String]) ~> Reader?
+
+
+external "
+export function _streamToAsyncByteIterator(stream) \{
+  const events = [];
+  let resolve, reject;
+  let ended = false;
+
+  stream.on('data', (chunk) => \{
+    if (resolve) \{
+      resolve(Seq$createProperly(Byte)(chunk));
+      resolve = null;
+    } else \{
+      events.push(Seq$createProperly(Byte)(chunk));
+    }
+  });
+
+  stream.on('end', () => \{
+    ended = true;
+    if (resolve) resolve(STOP);
+  });
+
+  stream.on('error', (err) => \{
+    if (reject) resolve(Nok(\{_: err.message}));
+  });
+
+  return AsyncIterator(Seq(Byte))(\{_: async function () \{
+      if (events.length > 0) return Promise.resolve(events.shift());
+      if (ended) return Promise.resolve(STOP);
+      return new Promise((res, rej) => \{
+        resolve = res;
+        reject = rej;
+      });
+    }
+	})._and(Closable(\{_: function() \{}}))._and(Reader());
+}
+"

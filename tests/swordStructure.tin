@@ -1,0 +1,55 @@
+
+Material = Named & struct:
+	damage: Number
+	speed: Number
+	resistance: Number
+	canBeMelted: Boolean
+
+Material.WOOD = Named { "Wood" } & Material { 5, 5, 100, false }
+Material.STONE = Named { "Stone" } & Material { 8, 10, 200, false }
+Material.IRON = Named { "Iron" } & Material { 10, 10, 500, true }
+Material.GOLD = Named { "Gold" } & Material { 25, 30, 50, true }
+Material.DIAMOND = Named { "Diamond" } & Material { 35, 35, 1000, false }
+
+BasicMaterial = Material.WOOD | Material.STONE | Material.IRON | Material.GOLD | Material.DIAMOND
+
+MadeOfMaterial = struct:
+	material: Material
+	amount: Number
+
+DealsDamage = struct:
+	dealDamage: () -> Number
+	getSpeed: () -> Number
+
+HasDurability = struct:
+	durability: () -> Number
+	setDurability: (Number) -> Ok
+	maxDurability: () -> Number
+
+HasDurability.percentage = (self: HasDurability) -> self.durability() / self.maxDurability()
+
+Sword = MadeOfMaterial & DealsDamage & HasDurability
+
+Sword.new = (@material: Material) ->
+	@durability = var @material.resistance
+
+	MadeOfMaterial {
+		material = @material,
+		amount = 100
+	} & HasDurability {
+		durability = () -> @durability,
+		setDurability = (n: Number) -> set @durability = n,
+		maxDurability = () -> @material.resistance
+	} & DealsDamage {
+		dealDamage = () -> @material.damage * (@durability / @material.resistance),
+		getSpeed = () -> @material.speed
+	}
+
+mySword = Sword.new(Material.IRON)
+print(mySword.dealDamage())
+newSword = mySword { material = Material.GOLD }
+# clojure(newSword)
+newSword.setDurability(50)
+print(mySword.maxDurability())
+print(newSword.maxDurability())
+print(newSword.percentage())

@@ -343,6 +343,21 @@ export class TypeChecker {
          this.typeCheck(node.expression, scope);
       } else if (node instanceof RefinedDef) {
          this.typeCheck(node.lambda, scope);
+         const lambdaScope = scope.innerScopeOf(node.lambda);
+         const blockScope = lambdaScope.innerScopeOf(node.lambda.block);
+         const effects = this.findEffects(
+            node.lambda.block,
+            true,
+            blockScope,
+            lambdaScope
+         );
+         for (const effect of effects) {
+            this.context.logs.error({
+               message: effect[0] + " in refinement type " + node.lambda.name,
+               position: effect[1].position,
+               hint: "Refinement types cannot rely on mutable fields or variables, since those may change and break the type contract",
+            });
+         }
       } else if (node instanceof Tuple) {
          if (node.isTypeLevel && options.assignedName !== undefined) {
             this.context.logs.error({
@@ -366,12 +381,17 @@ export class TypeChecker {
             : !scope.hasSymbol(node.value);
          if (
             shouldError &&
-            !["Nothing", "Anything", "String", "Boolean", "Number"].includes(
-               node.value
-            )
+            ![
+               "Nothing",
+               "Anything",
+               "String",
+               "Boolean",
+               "Number",
+               "Ok",
+            ].includes(node.value)
          ) {
             this.context.logs.error({
-               message: `Could not find type '${node.value}'`,
+               message: `Could not find symbol or type symbol '${node.value}'`,
                position: node.position,
             });
          }
@@ -562,7 +582,6 @@ export class TypeChecker {
       );
 
       apply.args.forEach(([name, term]) => {
-         console.log("Typechecking square apply term " + term.show());
          this.typeCheck(term, scope, {
             isTypeLevel: options.isTypeLevel,
             allowsSingletonType: options.allowsSingletonType,
@@ -667,9 +686,9 @@ export class TypeChecker {
       options: RecursiveResolutionOptions
    ) {
       this.typeCheck(apply.callee, scope);
-      if (apply.bakedInThis) {
-         this.typeCheck(apply.bakedInThis, scope);
-      }
+      //   if (apply.bakedInThis) {
+      //      this.typeCheck(apply.bakedInThis, scope);
+      //   }
       let typeSymbol = scope.resolveNamedType(
          this.context.inferencer.infer(apply.callee, scope)
       );
@@ -716,6 +735,7 @@ export class TypeChecker {
          apply.args.forEach((p, i) => {
             this.typeCheck(p[1], scope, {
                typeExpectedInPlace: params[i + (hasThis ? 1 : 0)]?.type,
+               assignedName: p[0],
             });
          });
          if (
@@ -759,11 +779,7 @@ export class TypeChecker {
                   const gottenType = this.context.inferencer.infer(p[1], scope);
                   if (!gottenType.isAssignableTo(expectedType, scope)) {
                      this.context.logs.error({
-                        message: `Parameter ${i} of varargs ${
-                           apply.callee instanceof Identifier
-                              ? apply.callee.value
-                              : "Anonymous function"
-                        }`,
+                        message: `Parameter ${i} of varargs ${apply.showCode()}`,
                         expectedType,
                         insertedType: gottenType,
                         position: apply.position,
@@ -801,14 +817,14 @@ export class TypeChecker {
             );
             const fieldType = field?.type;
             const appliedType = this.context.inferencer.infer(param[1], scope);
-            if (!fieldType || !appliedType.isAssignableTo(fieldType, scope)) {
-               this.context.logs.error({
-                  message: `Invalid type of field in copy: '${param[0]}'`,
-                  expectedType: fieldType ?? Nothing,
-                  insertedType: appliedType,
-                  position: apply.position,
-               });
-            }
+            // if (!fieldType || !appliedType.isAssignableTo(fieldType, scope)) {
+            //    this.context.logs.error({
+            //       message: `Invalid type of field in copy: '${param[0]}'`,
+            //       expectedType: fieldType ?? Nothing,
+            //       insertedType: appliedType,
+            //       position: apply.position,
+            //    });
+            // }
          }
       }
    }
@@ -961,7 +977,7 @@ export class TypeChecker {
          );
          if (
             onlyCaptures &&
-            field &&
+            field !== undefined &&
             (field.mutable || field.type instanceof MutableType)
          ) {
             result.push([
@@ -1152,6 +1168,10 @@ export class TypeChecker {
       let hasThisParamIncrement =
          expectedParams[0] && expectedParams[0].name === "self" ? 1 : 0;
 
+      if (term.bakedInThis) {
+         hasThisParamIncrement = 1;
+      }
+
       if (hasThisParamIncrement === 1 && !checkedThis) {
          const expectedThisType = expectedParams[0].type;
          if (!(term.callee instanceof Select)) {
@@ -1230,7 +1250,7 @@ export class TypeChecker {
          if (!appliedType.isAssignableTo(expectedType, scope)) {
             this.context.logs.error({
                message: `Parameter '${
-                  expectedParam.name || `[${i}]`
+                  expectedParam.name ? expectedParam.name + ` (${i})` : `[${i}]`
                }' of '${termName}'`,
                expectedType,
                insertedType: appliedType,
@@ -1251,7 +1271,10 @@ export class TypeChecker {
          if (!namedPhase) {
             paramOrder.push([i, i]);
          } else {
-            paramOrder.push([i, expectedParams.indexOf(expectedParam)]);
+            paramOrder.push([
+               i,
+               expectedParams.indexOf(expectedParam) - hasThisParamIncrement,
+            ]);
          }
       }
 
@@ -1320,6 +1343,7 @@ export class CompilerLogs {
    }
 
    error(message: CompilerMessage) {
+      message.errorForStack = new Error();
       this.add(this.errors, message);
    }
 
@@ -1344,7 +1368,11 @@ export class CompilerLogs {
                      e.insertedType
                         ? `\n       > Got '${e.insertedType}' - ${e.insertedType?.tag}`
                         : ""
-                  }${e.hint ? `\n       > ${e.hint}` : ""}`
+                  }${e.hint ? `\n       > ${e.hint}` : ""}${
+                     e.errorForStack !== undefined
+                        ? "\n" + e.errorForStack?.stack
+                        : ""
+                  }`
             )
             .join("\n");
          return message;

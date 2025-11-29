@@ -55,19 +55,19 @@ while i < 3,
 	print(i)
 
 # Data
-Cat = data:
+Cat = trait:
 	name: String
 	age: Number = 1
 
-Mech = data:
+Mech = trait:
 	name: String
 	version: Number
 
 test = 0 # Look into this bug
 
 # Constructing
-kitty = Cat("Kitty", 1)
-mech = Mech("Iodized Steel", 3.0)
+kitty = Cat { "Kitty", 1 }
+mech = Mech { "Iodized Steel", 3.0 }
 
 # Access
 kitty.name
@@ -78,7 +78,7 @@ MechaCat = Mech & Cat
 MechOrCat = Mech | Cat
 
 # Composing objects
-mechaCat = Cat("MechaCat", 10) & Mech("Oxidized Copper", 1.4)
+mechaCat = Cat { "MechaCat", 10 } & Mech { "Oxidized Copper", 1.4 }
 
 # Accessing on composed objects
 mechaCat.version # works by default

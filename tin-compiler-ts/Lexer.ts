@@ -96,6 +96,7 @@ export class Lexer {
          "external",
          "import",
          "link",
+         "trait",
       ];
       this.operators = [
          "+string+",

@@ -1,63 +1,15 @@
-# import lib/Http
-# import collections/Iterable
+import collections/Iterable
+import lib/Time
 
-# Box = struct:
-# 	number: var Number
-# 	ten: () -> Number
+arr = Array.of(1, 2, 3, 4, 5, 6)
+# arr3 = Array.of(1, 2, 3, 4, 5, 6)
+# arr4 = Array.of(1, 2, 3, 4, 5, 6)
 
-# Box.new = () ->
-# 	@number = var 10
-# 	Box { @number, () -> @number * 10 }
+arr2 = arr.and(Array.of(1, 2))
 
-# box = Box.new()
-# set box.number = 12
-# print(box.ten())
+Cat = trait:
+	name: String
 
+print(arr2)
+print((n: Number) -> 2)
 
-Material = Named & struct:
-	damage: Number
-	speed: Number
-	resistance: Number
-
-Material.WOOD = Named { "Wood" } & Material { 5, 5, 100 }
-Material.STONE = Named { "Stone" } & Material { 8, 10, 200 }
-Material.IRON = Named { "Iron" } & Material { 10, 10, 500 }
-Material.GOLD = Named { "Gold" } & Material { 25, 30, 50 }
-Material.DIAMOND = Named { "Diamond" } & Material { 35, 35, 1000 }
-
-BasicMaterial = Material.WOOD | Material.STONE | Material.IRON | Material.GOLD | Material.DIAMOND
-
-MadeOfMaterial = struct:
-	material: Material
-	amount: Number
-
-DealsDamage = struct:
-	dealDamage: () -> Number
-	getSpeed: () -> Number
-
-HasDurability = struct:
-	durability: var Number
-
-Broken = HasDurability where:
-	self.durability <= 0
-
-Sword = MadeOfMaterial & DealsDamage & HasDurability
-
-Sword.new = (@material: Material) ->
-	@durability = var @material.resistance
-
-	MadeOfMaterial { @material, 100 } & HasDurability { @durability } & DealsDamage { () -> @material.damage * (@durability / @material.resistance), () -> @material.speed }
-
-mySword = Sword.new(Material.IRON)
-
-print(mySword.dealDamage())
-newSword = mySword { durability = 125 }
-set mySword.durability = 0
-print(mySword.dealDamage())
-
-swords = Array.of(
-	mySword,
-	newSword
-)
-
-print(swords)
